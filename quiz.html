@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Take the Test - BitJourney</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white">
+      <nav class="container mx-auto px-4 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <svg class="h-8 w-8 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46L12.06 9.65A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>
+            </svg>
+            <span class="text-2xl font-bold">BitJourney</span>
+          </div>
+        </div>
+      </nav>
+
+      <section class="container mx-auto px-4 py-16 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6">
+          Discover Your <span class="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Tech Path</span>
+        </h1>
+        <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10">
+          Answer these quick questions to help us guide you to the right area in tech!
+        </p>
+
+        <form class="max-w-3xl mx-auto bg-gray-800/60 p-8 rounded-xl shadow-lg border border-blue-500/20 text-left space-y-10">
+
+          <!-- PERGUNTA 1 -->
+          <div>
+            <h2 class="text-xl font-semibold mb-4">1. What type of work excites you the most?</h2>
+            <div class="space-y-3">
+              <label class="flex items-center space-x-3 bg-gray-700/50 hover:bg-gray-600/50 p-4 rounded-lg cursor-pointer">
+                <input type="radio" name="q1" value="building websites" class="accent-cyan-500" />
+                <span>Building websites or web apps</span>
+              </label>
+              <label class="flex items-center space-x-3 bg-gray-700/50 hover:bg-gray-600/50 p-4 rounded-lg cursor-pointer">
+                <input type="radio" name="q1" value="securing systems" class="accent-cyan-500" />
+                <span>Securing systems and protecting data</span>
+              </label>
+              <label class="flex items-center space-x-3 bg-gray-700/50 hover:bg-gray-600/50 p-4 rounded-lg cursor-pointer">
+                <input type="radio" name="q1" value="analyzing data" class="accent-cyan-500" />
+                <span>Analyzing data and finding patterns</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- PERGUNTA 2 -->
+          <div>
+            <h2 class="text-xl font-semibold mb-4">2. What’s your favorite kind of challenge?</h2>
+            <div class="space-y-3">
+              <label class="flex items-center space-x-3 bg-gray-700/50 hover:bg-gray-600/50 p-4 rounded-lg cursor-pointer">
+                <input type="radio" name="q2" value="creative" class="accent-cyan-500" />
+                <span>Creative problem-solving with visuals</span>
+              </label>
+              <label class="flex items-center space-x-3 bg-gray-700/50 hover:bg-gray-600/50 p-4 rounded-lg cursor-pointer">
+                <input type="radio" name="q2" value="technical" class="accent-cyan-500" />
+                <span>Technical puzzles and systems logic</span>
+              </label>
+              <label class="flex items-center space-x-3 bg-gray-700/50 hover:bg-gray-600/50 p-4 rounded-lg cursor-pointer">
+                <input type="radio" name="q2" value="strategic" class="accent-cyan-500" />
+                <span>Making strategic decisions from data</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- PERGUNTA 3 -->
+          <div>
+            <h2 class="text-xl font-semibold mb-4">3. Which project would you enjoy more?</h2>
+            <div class="space-y-3">
+              <label class="flex items-center space-x-3 bg-gray-700/50 hover:bg-gray-600/50 p-4 rounded-lg cursor-pointer">
+                <input type="radio" name="q3" value="app" class="accent-cyan-500" />
+                <span>Creating a mobile app</span>
+              </label>
+              <label class="flex items-center space-x-3 bg-gray-700/50 hover:bg-gray-600/50 p-4 rounded-lg cursor-pointer">
+                <input type="radio" name="q3" value="ai" class="accent-cyan-500" />
+                <span>Training an AI model</span>
+              </label>
+              <label class="flex items-center space-x-3 bg-gray-700/50 hover:bg-gray-600/50 p-4 rounded-lg cursor-pointer">
+                <input type="radio" name="q3" value="dashboard" class="accent-cyan-500" />
+                <span>Building a dashboard to track trends</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- SUBMETER -->
+          <div class="text-center pt-8">
+            <button type="submit" class="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-10 py-4 rounded-md text-lg font-semibold transition-transform hover:scale-105">
+              Submit Answers
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </body>
+</html>
