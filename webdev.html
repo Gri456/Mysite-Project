@@ -3,27 +3,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Web Development</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet">
+  <title>Web Development - BitJourney</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white font-sans min-h-screen">
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white min-h-screen font-sans">
 
-  <header class="bg-gray-800 p-6 shadow-md">
-    <h1 class="text-3xl font-bold text-center text-cyan-400">Web Development</h1>
+  <!-- Navbar -->
+  <nav class="container mx-auto px-4 py-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>
+        </svg>
+        <span class="text-2xl font-bold text-white">BitJourney</span>
+      </div>
+      <div class="hidden md:flex space-x-8">
+        <a href="index.html" class="text-gray-300 hover:text-white">Home</a>
+        <a href="browse.html" class="text-gray-300 hover:text-white">Explore</a>
+        <a href="#" class="text-gray-300 hover:text-white">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Header Section -->
+  <header class="text-center py-10 px-4">
+    <h1 class="text-4xl font-bold text-cyan-300 mb-4">🌐 Web Development</h1>
+    <p class="text-lg text-gray-300 max-w-3xl mx-auto">
+      Aprende a construir websites e aplicações web modernas. Web Development é uma das áreas mais procuradas na tecnologia, com aplicações práticas em quase todos os setores.
+    </p>
   </header>
 
-  <main class="max-w-3xl mx-auto mt-10 p-6">
-    <p class="text-lg mb-4">
-      Welcome to the Web Development path! 🚀
+  <!-- Overview Section -->
+  <section class="max-w-4xl mx-auto px-6 py-8 bg-gray-800 bg-opacity-40 rounded-xl shadow-lg mb-10">
+    <h2 class="text-2xl font-semibold text-purple-300 mb-4">🔍 O que é Web Development?</h2>
+    <p class="text-gray-200 mb-4">
+      Envolve a criação de sites, plataformas online e aplicações interativas. Divide-se normalmente em três áreas principais:
     </p>
-    <p class="text-gray-300 leading-relaxed">
-      Here you’ll find resources and challenges to help you become a front-end or full-stack web developer. We’ll cover topics like HTML, CSS, JavaScript, and modern frameworks like React, Vue, and more.
-    </p>
+    <ul class="list-disc pl-6 text-gray-300 space-y-2">
+      <li><strong>Front-End:</strong> Interface visual (HTML, CSS, JavaScript, React, etc.)</li>
+      <li><strong>Back-End:</strong> Servidores, bases de dados, lógica (Node.js, Python, PHP...)</li>
+      <li><strong>Full-Stack:</strong> Combinação de ambos</li>
+    </ul>
+  </section>
 
-    <div class="mt-8">
-      <a href="index.html" class="text-blue-400 hover:underline">← Back to homepage</a>
-    </div>
-  </main>
+  <!-- Resources Section -->
+  <section class="max-w-4xl mx-auto px-6 py-8 mb-10">
+    <h2 class="text-2xl font-semibold text-cyan-300 mb-4">📚 Recursos para Estudar</h2>
+    <ul class="space-y-3">
+      <li>
+        <a href="https://developer.mozilla.org/en-US/docs/Learn" target="_blank" class="text-blue-300 hover:underline">
+          MDN Web Docs - Guia Completo de HTML, CSS e JavaScript
+        </a>
+      </li>
+      <li>
+        <a href="https://github.com/microsoft/Web-Dev-For-Beginners" target="_blank" class="text-blue-300 hover:underline">
+          Microsoft Web Dev for Beginners - Curso gratuito em GitHub
+        </a>
+      </li>
+      <li>
+        <a href="https://devdocs.io" target="_blank" class="text-blue-300 hover:underline">
+          DevDocs - Documentação Offline Rápida
+        </a>
+      </li>
+      <li>
+        <a href="https://frontendmasters.com" target="_blank" class="text-blue-300 hover:underline">
+          Frontend Masters - Cursos e Workshops (alguns gratuitos)
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Career Info Section -->
+  <section class="max-w-4xl mx-auto px-6 py-8 bg-gray-800 bg-opacity-40 rounded-xl shadow-lg mb-10">
+    <h2 class="text-2xl font-semibold text-yellow-300 mb-4">💼 Saídas Profissionais</h2>
+    <p class="text-gray-300 mb-4">Com skills em Web Development podes seguir carreiras como:</p>
+    <ul class="list-disc pl-6 text-gray-300 space-y-1">
+      <li>Desenvolvedor Front-End</li>
+      <li>Desenvolvedor Back-End</li>
+      <li>Desenvolvedor Full-Stack</li>
+      <li>UI/UX Engineer</li>
+      <li>Engenheiro de Software Web</li>
+    </ul>
+    <p class="mt-4 text-gray-400 text-sm">💰 Salário Médio: 35k€ – 65k€ / ano • 📈 Procura: Alta</p>
+  </section>
+
+  <footer class="text-center text-sm text-gray-400 pb-8">
+    <a href="browse.html" class="hover:underline text-purple-300">⬅ Voltar à Exploração</a>
+  </footer>
 
 </body>
 </html>
