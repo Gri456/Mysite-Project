@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Criar Conta - BitJourney</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function criarConta() {
+      const id = crypto.randomUUID();
+      localStorage.setItem("bitjourney_id", id);
+      document.getElementById("codigoGerado").textContent = id;
+      document.getElementById("mensagem").classList.remove("hidden");
+    }
+
+    function continuar() {
+      window.location.href = "area-privada.html";
+    }
+  </script>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 min-h-screen flex items-center justify-center text-white font-sans">
+
+  <div class="bg-gray-800 bg-opacity-40 p-8 rounded-xl shadow-xl w-full max-w-md text-center">
+    <h1 class="text-3xl font-bold text-purple-300 mb-6">🆕 Criar Conta Anónima</h1>
+    <p class="text-gray-300 mb-6">Será gerado um código único de acesso. Guarda-o com segurança — é a tua "chave" de entrada.</p>
+
+    <button onclick="criarConta()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded transition duration-200">
+      Gerar Código de Acesso
+    </button>
+
+    <div id="mensagem" class="hidden mt-6">
+      <p class="text-sm text-gray-400 mb-2">O teu código de acesso é:</p>
+      <div id="codigoGerado" class="text-lg font-mono bg-gray-700 rounded p-2 text-cyan-300 break-words"></div>
+      <button onclick="continuar()" class="mt-4 w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-2 px-4 rounded">
+        Continuar para o site
+      </button>
+    </div>
+  </div>
+
+</body>
+</html>
