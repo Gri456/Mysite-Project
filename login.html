@@ -1,39 +1,113 @@
-
 <!DOCTYPE html>
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login - BitJourney</title>
+  <title>Login — BitJourney</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    function login() {
-      const code = document.getElementById("code").value.trim();
-      if (code !== "") {
-        localStorage.setItem("bitjourney_id", code);
-        window.location.href = "area-privada.html";
-      } else {
-        alert("Por favor, insere um código válido.");
-      }
-    }
-  </script>
+  <link rel="stylesheet" href="style.css"/>
 </head>
-<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 min-h-screen flex items-center justify-center text-white font-sans">
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white">
+  <nav class="container mx-auto px-4 py-6 flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>
+      </svg>
+      <span class="text-2xl font-bold">BitJourney</span>
+    </div>
+    <a href="index.html" class="text-gray-300 hover:text-white">Voltar à página inicial</a>
+  </nav>
 
-  <div class="bg-gray-800 bg-opacity-40 p-8 rounded-xl shadow-xl w-full max-w-md">
-    <h1 class="text-3xl font-bold text-cyan-300 mb-6 text-center">🔐 Login BitJourney</h1>
+  <main class="container mx-auto px-4 py-12">
+    <div class="max-w-md mx-auto rounded-2xl border border-white/10 bg-white/5 p-8 shadow-xl backdrop-blur">
+      <h1 class="text-3xl font-bold mb-2">Iniciar sessão</h1>
+      <p class="text-gray-300 mb-8">Entra com o teu <span class="text-cyan-300 font-semibold">código de acesso</span> e a tua palavra‑passe.</p>
 
-    <label for="code" class="block text-sm text-gray-300 mb-2">Código de Acesso</label>
-    <input id="code" type="text" placeholder="Insere o teu código..." class="w-full p-2 rounded-md bg-gray-700 text-white mb-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"/>
+      <form id="loginForm" class="space-y-6">
+        <div>
+          <label for="code" class="block mb-2 text-sm text-gray-300">Código de acesso</label>
+          <input id="code" name="code" type="text" required
+                 placeholder="ex.: 9f1c2a34-8b5d-4e1a-9a77-…"
+                 class="w-full rounded-lg bg-gray-900/60 border border-gray-700 px-4 py-3 outline-none focus:border-cyan-400"/>
+        </div>
 
-    <button onclick="login()" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-2 px-4 rounded transition duration-200">
-      Entrar
-    </button>
+        <div>
+          <label for="password" class="block mb-2 text-sm text-gray-300">Palavra‑passe</label>
+          <div class="relative">
+            <input id="password" name="password" type="password" required
+                   class="w-full rounded-lg bg-gray-900/60 border border-gray-700 px-4 py-3 pr-12 outline-none focus:border-cyan-400"/>
+            <button type="button" id="togglePwd" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-300 hover:text-white">
+              Mostrar
+            </button>
+          </div>
+        </div>
 
-    <p class="mt-6 text-sm text-center text-gray-400">
-      Ainda não tens código? <a href="criar-conta.html" class="text-purple-300 hover:underline">Cria conta anónima</a>
-    </p>
-  </div>
+        <div id="msg" class="hidden text-sm"></div>
 
+        <button type="submit"
+                class="w-full h-12 rounded-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700">
+          Entrar
+        </button>
+
+        <div class="text-center text-gray-300">
+          <span>Não tens conta?</span>
+          <a href="criar-conta.html" class="text-cyan-300 hover:text-cyan-200 font-semibold">Criar conta</a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    // --- utils ---
+    const enc = new TextEncoder();
+    async function sha256Hex(text){
+      const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(text));
+      return [...new Uint8Array(hashBuf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+    function setMsg(text, ok=false){
+      const el = document.getElementById('msg');
+      el.classList.remove('hidden','text-red-300','text-green-300');
+      el.classList.add(ok?'text-green-300':'text-red-300');
+      el.textContent = text;
+    }
+
+    // Mostrar/ocultar palavra‑passe
+    document.getElementById('togglePwd').addEventListener('click', ()=>{
+      const ipt = document.getElementById('password');
+      const b = document.getElementById('togglePwd');
+      if(ipt.type === 'password'){ ipt.type='text'; b.textContent='Ocultar'; }
+      else { ipt.type='password'; b.textContent='Mostrar'; }
+    });
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const code = document.getElementById('code').value.trim();
+      const pwd = document.getElementById('password').value;
+
+      const userKey = `bj:users:${code}`;
+      const raw = localStorage.getItem(userKey);
+      if(!raw){ setMsg('Código inexistente. Cria conta primeiro.'); return; }
+
+      try{
+        const user = JSON.parse(raw);
+        const hash = await sha256Hex(pwd);
+        if(hash !== user.passwordHash){
+          setMsg('Palavra‑passe incorreta.');
+          return;
+        }
+        // criar sessão
+        localStorage.setItem('bj:session', JSON.stringify({
+          code, loginAt: new Date().toISOString()
+        }));
+        setMsg('Login com sucesso! A redirecionar…', true);
+        // Redireciona para a página principal com flag opcional
+        window.location.href = 'index.html?login=1';
+      }catch(err){
+        console.error(err);
+        setMsg('Ocorreu um erro. Tenta novamente.');
+      }
+    });
+  </script src="js/login.js" defer></script>
 </body>
 </html>

@@ -55,3 +55,106 @@
   width: 1.25rem;
   stroke: white;
 }
+
+/* ========== Animação base (reutilizada) ========== */
+@keyframes gradient-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Preparar o card para overlay animado (não altera layout/tamanho) */
+a[href$=".html"] .group {
+  position: relative;
+  overflow: hidden; /* respeita o border-radius */
+}
+a[href$=".html"] .group > * {
+  position: relative;
+  z-index: 1;
+}
+/* Overlay animado (apenas cores) */
+a[href$=".html"] .group::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity .3s ease, border-color .3s ease;
+  /* fallback caso variáveis não estejam definidas */
+  
+}
+/* No hover: ativa animação */
+a[href$=".html"]:hover .group::before {
+  opacity: .28;                 /* brilho suave, sem alterar layout */
+  animation: gradient-pan 6s ease infinite;
+}
+
+/* Ícone circular: anima somente cores do fundo */
+a[href$=".html"]:hover .group .rounded-full {
+  background-image: linear-gradient(120deg, var(--c1, #06b6d4), var(--c2, #8b5cf6), var(--c3, #3b82f6)) !important;
+  background-size: 200% 200%;
+  animation: gradient-pan 3s linear infinite;
+}
+
+/* Título: efeito de texto com gradiente animado (sem alterar tamanho) */
+a[href$=".html"]:hover .group h3 {
+  background-image: linear-gradient(90deg, var(--c1, #06b6d4), var(--c2, #8b5cf6), var(--c3, #3b82f6));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-pan 4s linear infinite;
+}
+
+/* Borda ganha leve realce no hover (cor neutra + overlay já colorido) */
+a[href$=".html"]:hover .group {
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* ========== Paletas por área (só cores) ========== */
+/* Web Development */
+a[href="webdev.html"] .group {
+  --c1: #06b6d4; /* cyan-500 */
+  --c2: #3b82f6; /* blue-500 */
+  --c3: #8b5cf6; /* violet-500 */
+}
+
+/* Cybersecurity */
+a[href="cybersecurity.html"] .group {
+  --c1: #ef4444; /* red-500 */
+  --c2: #f97316; /* orange-500 */
+  --c3: #fb923c; /* orange-300 */
+}
+
+/* Data Science */
+a[href="data-science.html"] .group {
+  --c1: #10b981; /* emerald-500 */
+  --c2: #059669; /* emerald-600 */
+  --c3: #22c55e; /* green-500 */
+}
+
+/* Artificial Intelligence */
+a[href="artificial-intelligence.html"] .group {
+  --c1: #a855f7; /* purple-500 */
+  --c2: #ec4899; /* pink-500 */
+  --c3: #f0abfc; /* fuchsia-300 */
+}
+
+/* Mobile Development */
+a[href="mobile-development.html"] .group {
+  --c1: #6366f1; /* indigo-500 */
+  --c2: #3b82f6; /* blue-500 */
+  --c3: #60a5fa; /* blue-400 */
+}
+
+/* Cloud Computing */
+a[href="cloud-computing.html"] .group {
+  --c1: #14b8a6; /* teal-500 */
+  --c2: #06b6d4; /* cyan-500 */
+  --c3: #22d3ee; /* cyan-400 */
+}
+
+
+
+
