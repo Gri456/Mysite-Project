@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mobile Development — BitJourney</title>
+  <meta name="description" content="O papel do Mobile Developer, competências essenciais, processo, responsabilidade, saídas profissionais, recursos e tendências do futuro. Página dinâmica e acessível com design premium para BitJourney." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui']
+          },
+          colors: {
+            brand: {
+              50:'#ecfeff',100:'#cffafe',200:'#a5f3fc',300:'#67e8f9',400:'#22d3ee',
+              500:'#06b6d4',600:'#0891b2',700:'#0e7490',800:'#155e75',900:'#164e63'
+            }
+          },
+          boxShadow: {
+            glow: '0 0 0 6px rgb(34 211 238 / 0.08), 0 10px 40px -10px rgb(59 130 246 / 0.45)'
+          },
+          keyframes: {
+            float: {
+              '0%,100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' }
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '0% 50%' },
+              '100%': { backgroundPosition: '200% 50%' }
+            },
+          },
+          animation: {
+            float: 'float 6s ease-in-out infinite',
+            shimmer: 'shimmer 3s linear infinite'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Decorative gradient orbs */
+    .orb {
+      filter: blur(64px);
+      opacity:.4;
+      pointer-events:none
+    }
+    .scroll-reveal {
+      opacity:0;
+      transform: translateY(12px);
+      transition: all .6s ease;
+    }
+    .scroll-reveal.revealed {
+      opacity:1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-white selection:bg-cyan-300 selection:text-slate-900">
+  <!-- Background Orbs -->
+  <div aria-hidden="true" class="fixed inset-0 overflow-hidden -z-10">
+    <div class="orb absolute -top-20 -left-10 w-96 h-96 rounded-full bg-cyan-500/40"></div>
+    <div class="orb absolute top-40 -right-20 w-[30rem] h-[30rem] rounded-full bg-fuchsia-500/30"></div>
+    <div class="orb absolute bottom-[-6rem] left-1/3 w-[28rem] h-[28rem] rounded-full bg-indigo-500/30"></div>
+  </div>
+
+  <!-- Navbar -->
+  <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-slate-950/60 border-b border-white/10">
+    <nav class="container mx-auto px-4 py-3">
+      <div class="flex items-center justify-between gap-4">
+        <a href="index.html" class="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>
+          </svg>
+          <span class="text-xl font-extrabold tracking-tight">BitJourney</span>
+        </a>
+        <div class="hidden md:flex items-center gap-6">
+          <a href="browse.html" class="text-slate-300 hover:text-white">Explorar</a>
+          <a href="contacts.html" class="text-slate-300 hover:text-white">Contactos</a>
+          <a href="quiz.html" class="inline-flex items-center gap-2 text-slate-900 bg-cyan-300 hover:bg-cyan-200 font-semibold px-3 py-1.5 rounded-xl transition-shadow shadow-glow">
+            <span>Quiz</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </a>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="login.html" class="text-slate-300 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10">Entrar</a>
+          <a href="criar-conta.html" class="bg-white/10 hover:bg-white/20 border border-white/10 px-3 py-1.5 rounded-lg">Criar Conta</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="container mx-auto px-4 pt-12 pb-10 md:pt-16 md:pb-16">
+    <div class="grid md:grid-cols-2 gap-10 items-center">
+      <div class="scroll-reveal">
+        <p class="inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-cyan-300/90 bg-cyan-300/10 ring-1 ring-cyan-300/30 px-2 py-1 rounded-full">
+          <span class="h-2 w-2 bg-cyan-300 rounded-full animate-pulse"></span>
+          Área Temática
+        </p>
+        <h1 class="mt-4 text-4xl md:text-5xl font-extrabold leading-tight">
+          Mobile Development: <span class="bg-gradient-to-r from-cyan-300 via-sky-400 to-fuchsia-400 bg-clip-text text-transparent">O Construtor do Mundo Digital em Movimento</span>
+        </h1>
+        <p class="mt-4 text-slate-300 max-w-prose">Um especialista em desenvolvimento mobile é muito mais do que um programador de aplicações. É um arquiteto da experiência digital que projeta, constrói e mantém apps que cabem no bolso de milhões de utilizadores em todo o mundo.</p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="#competencias" class="px-4 py-2 rounded-xl bg-cyan-300 text-slate-900 font-semibold hover:bg-cyan-200 focus:outline-none focus:ring-4 focus:ring-cyan-400/40">Ver Competências</a>
+          <a href="#saidas" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10">Saídas Profissionais</a>
+        </div>
+        <div class="mt-6 flex items-center gap-6 text-sm text-slate-400">
+          <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-emerald-400"></span>Alta Procura</div>
+          <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-violet-400"></span>Carreira Dinâmica</div>
+          <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-amber-300"></span>Aprendizagem Contínua</div>
+        </div>
+      </div>
+      <div class="relative scroll-reveal md:justify-self-end">
+        <div class="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 via-blue-500/10 to-fuchsia-500/20 rounded-2xl blur-2xl"></div>
+        <div class="relative bg-slate-900/60 border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2 bg-gradient-to-r from-cyan-300 via-sky-400 to-fuchsia-400 bg-[length:200%_100%] animate-shimmer text-slate-900 rounded-xl p-4">
+              <p class="text-sm font-semibold">Impacto Real</p>
+              <p class="text-2xl font-extrabold">Saúde • Finanças • Mobilidade • Educação</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4">
+              <p class="text-xs uppercase tracking-wide text-slate-400">Nativo</p>
+              <p class="mt-1 text-lg font-bold">Kotlin • Swift</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4">
+              <p class="text-xs uppercase tracking-wide text-slate-400">Cross-Platform</p>
+              <p class="mt-1 text-lg font-bold">Flutter • React Native</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4">
+              <p class="text-xs uppercase tracking-wide text-slate-400">UI/UX</p>
+              <p class="mt-1 text-lg font-bold">Material Design • HIG</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4">
+              <p class="text-xs uppercase tracking-wide text-slate-400">Tendências</p>
+              <p class="mt-1 text-lg font-bold">5G • IA • Wearables</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Impacto Invisível -->
+  <section class="container mx-auto px-4 py-12" id="impacto">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">🌍 O Impacto Invisível do Desenvolvimento Mobile no Nosso Dia a Dia</h2>
+      <p class="mt-2 text-slate-300 max-w-3xl">O desenvolvimento mobile tem um impacto profundo e omnipresente. Eis algumas áreas em que a sua influência é indispensável:</p>
+      <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+          <h3 class="font-bold text-white">Saúde</h3>
+          <p class="mt-1 text-sm text-slate-300">Apps de telemedicina, monitorização de sinais vitais e lembretes de medicação.</p>
+        </article>
+        <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+          <h3 class="font-bold text-white">Negócios e Finanças</h3>
+          <p class="mt-1 text-sm text-slate-300">Aplicações de mobile banking, carteiras digitais e gestão de investimentos.</p>
+        </article>
+        <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+          <h3 class="font-bold text-white">Mobilidade e Logística</h3>
+          <p class="mt-1 text-sm text-slate-300">Apps de transporte público, mapas, boleias partilhadas e entregas rápidas.</p>
+        </article>
+        <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+          <h3 class="font-bold text-white">Educação</h3>
+          <p class="mt-1 text-sm text-slate-300">Plataformas de e-learning, apps de línguas e sistemas de estudo gamificado.</p>
+        </article>
+        <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+          <h3 class="font-bold text-white">Entretenimento</h3>
+          <p class="mt-1 text-sm text-slate-300">Streaming de música e vídeo, jogos mobile e redes sociais.</p>
+        </article>
+        <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+          <h3 class="font-bold text-white">Produtividade</h3>
+          <p class="mt-1 text-sm text-slate-300">Aplicações de calendário, notas, organização de tarefas e colaboração em equipa.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Competências -->
+  <section class="container mx-auto px-4 py-12" id="competencias">
+    <div class="scroll-reveal">
+      <div class="flex items-end justify-between gap-4 flex-wrap">
+        <h2 class="text-3xl font-extrabold">🛠 Competências Essenciais</h2>
+        <div class="flex items-center gap-2 text-xs text-slate-300">
+          <span class="inline-block px-2 py-1 rounded bg-white/10">Hard Skills</span>
+          <span class="inline-block px-2 py-1 rounded bg-white/10">Soft Skills</span>
+        </div>
+      </div>
+      <div class="mt-6 grid lg:grid-cols-2 gap-6">
+        <!-- Hard Skills -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <h3 class="font-bold text-xl">Hard Skills</h3>
+          <ul class="mt-4 space-y-3 text-slate-300">
+            <li><span class="font-semibold text-white">Linguagens de Programação:</span> Kotlin, Java (Android), Swift (iOS), Dart (Flutter), JavaScript/TypeScript (React Native).</li>
+            <li><span class="font-semibold text-white">Frameworks & SDKs:</span> Android SDK, iOS SDK, Flutter, React Native, Xamarin.</li>
+            <li><span class="font-semibold text-white">UI/UX Design:</span> Conhecimento de guidelines (Material Design, Human Interface Guidelines).</li>
+            <li><span class="font-semibold text-white">Gestão de Dados:</span> SQLite, Realm, Core Data, integração com APIs REST e GraphQL.</li>
+            <li><span class="font-semibold text-white">Cloud & Deploy:</span> Firebase, AWS, Azure, Google Cloud, publicação na App Store e Google Play.</li>
+          </ul>
+        </div>
+        <!-- Soft Skills -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <h3 class="font-bold text-xl">Soft Skills</h3>
+          <ul class="mt-4 space-y-3 text-slate-300">
+            <li><span class="font-semibold text-white">Resolução de Problemas:</span> Criar soluções funcionais e otimizadas para dispositivos móveis.</li>
+            <li><span class="font-semibold text-white">Pensamento Crítico:</span> Avaliar desempenho, segurança e usabilidade da aplicação.</li>
+            <li><span class="font-semibold text-white">Aprendizagem Contínua:</span> Acompanhar novas versões de sistemas operativos e frameworks.</li>
+            <li><span class="font-semibold text-white">Comunicação:</span> Colaborar com designers, product managers e equipas de marketing.</li>
+            <li><span class="font-semibold text-white">Orientação ao Utilizador:</span> Pensar sempre na experiência final de quem vai usar a app.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Processo (Timeline) -->
+  <section class="container mx-auto px-4 py-12" id="processo">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">🧩 Processo de Desenvolvimento Mobile</h2>
+      <ol class="relative mt-8 border-l border-white/10 ml-2">
+        <!-- Step -->
+        <li class="mb-10 ml-6">
+          <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">1</span>
+          <h3 class="font-bold">Definição do Problema</h3>
+          <p class="text-slate-300">Identificação do objetivo da app e das necessidades do utilizador.</p>
+        </li>
+        <li class="mb-10 ml-6">
+          <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">2</span>
+          <h3 class="font-bold">Planeamento e Design</h3>
+          <p class="text-slate-300">Wireframes, protótipos e definição da experiência do utilizador (UX/UI).</p>
+        </li>
+        <li class="mb-10 ml-6">
+          <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">3</span>
+          <h3 class="font-bold">Desenvolvimento</h3>
+          <p class="text-slate-300">Implementação das funcionalidades usando a framework e linguagem escolhidas.</p>
+        </li>
+        <li class="mb-10 ml-6">
+          <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">4</span>
+          <h3 class="font-bold">Testes</h3>
+          <p class="text-slate-300">Garantir desempenho, segurança e compatibilidade em diferentes dispositivos e versões de SO.</p>
+        </li>
+        <li class="mb-10 ml-6">
+          <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">5</span>
+          <h3 class="font-bold">Lançamento</h3>
+          <p class="text-slate-300">Publicação nas lojas (App Store e Google Play).</p>
+        </li>
+        <li class="mb-2 ml-6">
+          <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">6</span>
+          <h3 class="font-bold">Monitorização e Manutenção</h3>
+          <p class="text-slate-300">Corrigir bugs, lançar atualizações e introduzir novas funcionalidades.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Responsabilidade -->
+  <section class="container mx-auto px-4 py-12" id="responsabilidade">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">⚡ Responsabilidade do Profissional de Mobile Development</h2>
+      <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+          <h3 class="font-bold">Segurança</h3>
+          <p class="text-slate-300 text-sm">Proteger dados do utilizador contra acessos não autorizados.</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+          <h3 class="font-bold">Privacidade</h3>
+          <p class="text-slate-300 text-sm">Cumprir regulamentos como o RGPD.</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+          <h3 class="font-bold">Acessibilidade</h3>
+          <p class="text-slate-300 text-sm">Garantir que a app é utilizável por pessoas com diferentes capacidades.</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+          <h3 class="font-bold">Desempenho</h3>
+          <p class="text-slate-300 text-sm">Criar aplicações rápidas e leves, mesmo em dispositivos de gama baixa.</p>
+        </div>
+      </div>
+      <p class="mt-4 text-slate-300">Qualidade Contínua: Atualizar e melhorar constantemente a experiência do utilizador.</p>
+    </div>
+  </section>
+
+  <!-- Saídas Profissionais (Tabs) -->
+  <section class="container mx-auto px-4 py-12" id="saidas">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">💼 Saídas Profissionais em Mobile Development</h2>
+      <div class="mt-6 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <!-- Tab list -->
+        <div role="tablist" aria-label="Perfis" class="flex flex-wrap">
+          <button data-tab="android" role="tab" aria-selected="true" class="tab-btn flex-1 px-4 py-3 text-left font-semibold bg-white/10 hover:bg-white/20 focus:outline-none">1) Android</button>
+          <button data-tab="ios" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">2) iOS</button>
+          <button data-tab="cross" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">3) Cross-Platform</button>
+          <button data-tab="uiux" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">4) Mobile UI/UX</button>
+          <button data-tab="architect" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">5) Mobile Architect</button>
+        </div>
+        <!-- Panels -->
+        <div class="p-6 space-y-10">
+          <!-- Android -->
+          <section data-panel="android">
+            <h3 class="text-2xl font-bold">Android Developer</h3>
+            <p class="text-slate-300">Foco na construção de apps nativas para Android.</p>
+            <div class="mt-4 grid lg:grid-cols-2 gap-6">
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                  <li>Escrever código em Kotlin/Java.</li>
+                  <li>Implementar novas funcionalidades ou corrigir problemas.</li>
+                  <li>Colaborar com designers para garantir conformidade com guidelines.</li>
+                  <li>Integrar APIs externas.</li>
+                  <li>Testar aplicações em diferentes dispositivos Android.</li>
+                </ul>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                <p class="text-slate-300">Kotlin, Java, Android Studio, Android SDK, Gradle, Firebase.</p>
+              </div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="55000" data-max="90000">
+                <p class="text-sm text-slate-400">Júnior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$55,000 – $90,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="95000" data-max="130000">
+                <p class="text-sm text-slate-400">Mid‑Level</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$95,000 – $130,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="135000" data-max="180000">
+                <p class="text-sm text-slate-400">Sénior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$135,000 – $180,000+</span>/ano</p>
+              </div>
+            </div>
+          </section>
+          <!-- iOS -->
+          <section data-panel="ios" hidden>
+            <h3 class="text-2xl font-bold">iOS Developer</h3>
+            <p class="text-slate-300">Foco na construção de apps nativas para iOS.</p>
+            <div class="mt-4 grid lg:grid-cols-2 gap-6">
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                  <li>Desenvolver aplicações em Swift/Objective-C.</li>
+                  <li>Implementar UI seguindo as Human Interface Guidelines.</li>
+                  <li>Integrar APIs RESTful e serviços Apple.</li>
+                  <li>Testar em diferentes dispositivos iOS.</li>
+                  <li>Publicar e atualizar apps na App Store.</li>
+                </ul>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                <p class="text-slate-300">Swift, Objective-C, Xcode, iOS SDK, CocoaPods, Core Data.</p>
+              </div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="60000" data-max="95000">
+                <p class="text-sm text-slate-400">Júnior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$60,000 – $95,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="100000" data-max="140000">
+                <p class="text-sm text-slate-400">Mid‑Level</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$100,000 – $140,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="145000" data-max="190000">
+                <p class="text-sm text-slate-400">Sénior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$145,000 – $190,000+</span>/ano</p>
+              </div>
+            </div>
+          </section>
+          <!-- Cross-Platform -->
+          <section data-panel="cross" hidden>
+            <h3 class="text-2xl font-bold">Cross-Platform Developer</h3>
+            <p class="text-slate-300">Foco em criar apps para Android e iOS com o mesmo código.</p>
+            <div class="mt-4 grid lg:grid-cols-2 gap-6">
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                  <li>Desenvolver aplicações multiplataforma.</li>
+                  <li>Adaptar UI para diferentes plataformas.</li>
+                  <li>Escrever código reutilizável.</li>
+                  <li>Testar em dispositivos Android e iOS.</li>
+                  <li>Publicar em ambas as app stores.</li>
+                </ul>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                <p class="text-slate-300">Flutter (Dart), React Native (JavaScript/TypeScript), Xamarin (C#), Firebase.</p>
+              </div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="50000" data-max="85000">
+                <p class="text-sm text-slate-400">Júnior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$50,000 – $85,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="90000" data-max="125000">
+                <p class="text-sm text-slate-400">Mid‑Level</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$90,000 – $125,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="130000" data-max="170000">
+                <p class="text-sm text-slate-400">Sénior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$130,000 – $170,000+</span>/ano</p>
+              </div>
+            </div>
+          </section>
+          <!-- UI/UX -->
+          <section data-panel="uiux" hidden>
+            <h3 class="text-2xl font-bold">Mobile UI/UX Designer</h3>
+            <p class="text-slate-300">Foco em criar interfaces e experiências otimizadas para mobile.</p>
+            <div class="mt-4 grid lg:grid-cols-2 gap-6">
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                  <li>Criar wireframes e protótipos.</li>
+                  <li>Definir a experiência do utilizador (UX/UI).</li>
+                  <li>Colaborar com developers para implementação.</li>
+                  <li>Testar usabilidade com utilizadores reais.</li>
+                  <li>Garantir conformidade com guidelines de cada plataforma.</li>
+                </ul>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Ferramentas</h4>
+                <p class="text-slate-300">Figma, Sketch, Adobe XD, Prototyping tools, User testing platforms.</p>
+              </div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="45000" data-max="75000">
+                <p class="text-sm text-slate-400">Júnior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$45,000 – $75,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="80000" data-max="110000">
+                <p class="text-sm text-slate-400">Mid‑Level</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$80,000 – $110,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="115000" data-max="150000">
+                <p class="text-sm text-slate-400">Sénior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$115,000 – $150,000+</span>/ano</p>
+              </div>
+            </div>
+          </section>
+          <!-- Architect -->
+          <section data-panel="architect" hidden>
+            <h3 class="text-2xl font-bold">Mobile Architect</h3>
+            <p class="text-slate-300">Foco na definição de arquitetura, escalabilidade e padrões de apps complexas.</p>
+            <div class="mt-4 grid lg:grid-cols-2 gap-6">
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                  <li>Definir arquitetura de aplicações móveis.</li>
+                  <li>Tomar decisões técnicas sobre tecnologias e frameworks.</li>
+                  <li>Otimizar performance e escalabilidade.</li>
+                  <li>Garantir boas práticas de desenvolvimento.</li>
+                  <li>Mentorar developers da equipa.</li>
+                </ul>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                <p class="text-slate-300">Kotlin Multiplatform, Swift, diversas frameworks de integração, arquitecturas (MVVM, Clean Architecture), ferramentas de análise de performance.</p>
+              </div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="80000" data-max="120000">
+                <p class="text-sm text-slate-400">Júnior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$80,000 – $120,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="125000" data-max="160000">
+                <p class="text-sm text-slate-400">Mid‑Level</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$125,000 – $160,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="165000" data-max="220000">
+                <p class="text-sm text-slate-400">Sénior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$165,000 – $220,000+</span>/ano</p>
+              </div>
+            </div>
+          </section>
+        </div>
+        <!-- Currency Toggle -->
+        <div class="flex items-center justify-between gap-4 px-6 pb-6">
+          <p class="text-xs text-slate-400">Estimativas globais (Glassdoor, Payscale, Levels.fyi). Variam por região, empresa e experiência.</p>
+          <div class="flex items-center gap-2 text-sm">
+            <span class="text-slate-300">Moeda:</span>
+            <button id="currencyUSD" class="px-2 py-1 rounded-lg bg-white/10 border border-white/10 font-semibold">USD</button>
+            <button id="currencyEUR" class="px-2 py-1 rounded-lg hover:bg-white/10 border border-white/10">EUR*</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Importância -->
+  <section class="container mx-auto px-4 py-12" id="importancia">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">📊 A Importância Crucial do Desenvolvimento Mobile</h2>
+      <p class="mt-2 text-slate-300 max-w-3xl">Vivemos na era mobile, e as aplicações já são tão essenciais quanto a web foi no início dos anos 2000. O mobile development não é apenas criar apps — é criar ecossistemas digitais que conectam pessoas e negócios em tempo real.</p>
+      <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Educação</h3><p class="text-slate-300 text-sm">Acesso ao conhecimento em qualquer lugar.</p></div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Saúde</h3><p class="text-slate-300 text-sm">Monitorização remota e cuidados personalizados.</p></div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Economia</h3><p class="text-slate-300 text-sm">Comércio eletrónico e pagamentos digitais sempre disponíveis.</p></div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Entretenimento</h3><p class="text-slate-300 text-sm">Experiências imersivas em vídeo, música e gaming.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tendências -->
+  <section class="container mx-auto px-4 py-12" id="futuro">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">🎯 Futuro do Mobile Development</h2>
+      <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+          <h3 class="font-semibold">5G e Apps Mais Rápidas</h3>
+          <p class="text-slate-300 text-sm">Conectividade quase instantânea para experiências mais ricas.</p>
+        </div>
+        <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+          <h3 class="font-semibold">Apps Multiplataforma Avançadas</h3>
+          <p class="text-slate-300 text-sm">Menos código duplicado, maior eficiência no desenvolvimento.</p>
+        </div>
+        <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+          <h3 class="font-semibold">Integração com IA</h3>
+          <p class="text-slate-300 text-sm">Apps que personalizam e antecipam necessidades do utilizador.</p>
+        </div>
+        <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+          <h3 class="font-semibold">Wearables e IoT</h3>
+          <p class="text-slate-300 text-sm">Expansão para relógios inteligentes, óculos e dispositivos conectados.</p>
+        </div>
+        <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+          <h3 class="font-semibold">Realidade Aumentada (AR) e Virtual (VR)</h3>
+          <p class="text-slate-300 text-sm">Novas experiências imersivas em mobile.</p>
+        </div>
+        <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+          <h3 class="font-semibold">Regulação e Privacidade</h3>
+          <p class="text-slate-300 text-sm">Regras mais rigorosas para proteger os dados dos utilizadores.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recursos -->
+  <section class="container mx-auto px-4 py-12" id="recursos">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">📚 O que Precisas de Saber para te Iniciares na Área</h2>
+      <ol class="mt-4 list-decimal pl-5 space-y-3 text-slate-300">
+        <li><span class="font-semibold text-white">Aprender uma Linguagem:</span> Kotlin (Android) ou Swift (iOS). Para multiplataforma, começar com Flutter ou React Native.</li>
+        <li><span class="font-semibold text-white">Conhecer Fundamentos de Programação Mobile:</span> Ciclo de vida de uma app, UI, navegação e armazenamento local.</li>
+        <li><span class="font-semibold text-white">Estudar Design Responsivo:</span> Criar interfaces adaptáveis a diferentes ecrãs e dispositivos.</li>
+        <li><span class="font-semibold text-white">Trabalhar com APIs:</span> Aprender a consumir dados externos.</li>
+        <li><span class="font-semibold text-white">Praticar com Projetos Reais:</span> Criar apps simples (lista de tarefas, calculadora, app de notas).</li>
+        <li><span class="font-semibold text-white">Publicar a Primeira App:</span> Ganhar experiência no processo de submissão às lojas.</li>
+        <li><span class="font-semibold text-white">Manter-se Atualizado:</span> Novas versões de Android, iOS e frameworks surgem todos os anos.</li>
+      </ol>
+      <div class="mt-6 text-sm text-slate-400">Quer aprender mais? Explora os nossos conteúdos gratuitos e prepara‑te para a área premium.</div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="container mx-auto px-4 pb-10 pt-6 text-sm text-slate-400">
+    <div class="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+      <p>© <span id="year"></span> BitJourney • <a class="text-cyan-300 hover:underline" href="index.html">Home</a></p>
+      <a href="browse.html" class="inline-flex items-center gap-2 text-purple-300 hover:underline">⬅ Voltar à Exploração</a>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.classList.add('revealed');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.scroll-reveal').forEach(el=>observer.observe(el));
+
+    // Tabs
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('[data-panel]');
+    tabButtons.forEach(btn => btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-tab');
+      tabButtons.forEach(b=>{
+        b.setAttribute('aria-selected', b===btn);
+        b.classList.toggle('bg-white/10', b===btn);
+      });
+      panels.forEach(p=>{
+        p.hidden = p.getAttribute('data-panel')!==id;
+      });
+    }));
+
+    // Currency toggle (simple client-side conversion, rate hint)
+    const rate = 0.9; // ~EUR conversion (aproximado)
+    const usdBtn = document.getElementById('currencyUSD');
+    const eurBtn = document.getElementById('currencyEUR');
+    const updateCurrency = (toEUR) => {
+      document.querySelectorAll('.salary-card').forEach(card => {
+        const min = Number(card.dataset.min), max = Number(card.dataset.max);
+        const val = toEUR ? [min*rate, max*rate] : [min, max];
+        const formatted = toEUR ? `€${val[0].toLocaleString(undefined,{maximumFractionDigits:0})} – €${val[1].toLocaleString(undefined,{maximumFractionDigits:0})}` : `$${val[0].toLocaleString()} – $${val[1].toLocaleString()}`;
+        card.querySelector('.salary-value').textContent = formatted;
+      });
+      usdBtn.classList.toggle('bg-white/10', !toEUR);
+      usdBtn.classList.toggle('font-semibold', !toEUR);
+      eurBtn.classList.toggle('bg-white/10', toEUR);
+      eurBtn.classList.toggle('font-semibold', toEUR);
+    }
+    usdBtn.addEventListener('click', ()=>updateCurrency(false));
+    eurBtn.addEventListener('click', ()=>updateCurrency(true));
+  </script>
+</body>
+</html>
