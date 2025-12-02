@@ -9,7 +9,7 @@
   padding: 0.75rem 1.5rem;
   font-size: 1.125rem; /* text-lg */
   border-radius: 0.375rem; /* rounded-md */
-  background: linear-gradient(to right, #ec4899, #dc2626, #f59e0b); /* pink-500 → red-600 → yellow-500 */
+  background: linear-gradient(to right, #FF64EA, #FA00D9, #BB02FA); /* pink-500 → red-600 → yellow-500 */
   color: white;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
   transition: all 0.7s ease-in-out;
@@ -17,8 +17,8 @@
 }
 
 .browse-btn:hover {
-  background: linear-gradient(to right, #facc15, #ec4899, #dc2626); /* yellow-400 → pink-600 → red-600 */
-  box-shadow: 0 0 25px rgb(255, 99, 71); /* tomate */
+  background: linear-gradient(to right, #BB02FA, #FA00D9, #FF64EA); /* yellow-400 → pink-600 → red-600 */
+  box-shadow: 0 0 25px rgb(255, 0, 179); /* tomate */
 }
 
 .browse-btn:focus {
@@ -99,7 +99,7 @@ a[href$=".html"]:hover .group .rounded-full {
 
 /* Título: efeito de texto com gradiente animado (sem alterar tamanho) */
 a[href$=".html"]:hover .group h3 {
-  background-image: linear-gradient(90deg, var(--c1, #06b6d4), var(--c2, #8b5cf6), var(--c3, #3b82f6));
+  background-image: linear-gradient(90deg, var(--c1, #00f7ff), var(--c2, #8b5cf6), var(--c3, #3b82f6));
   background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -109,50 +109,51 @@ a[href$=".html"]:hover .group h3 {
 
 /* Borda ganha leve realce no hover (cor neutra + overlay já colorido) */
 a[href$=".html"]:hover .group {
-  border-color: rgba(255, 255, 255, 0.35) !important;
+  border-color: rgba(0, 247, 255, 0.35) !important;
 }
 
 /* ========== Paletas por área (só cores) ========== */
 /* Web Development */
 a[href="webdev.html"] .group {
-  --c1: #06b6d4; /* cyan-500 */
-  --c2: #3b82f6; /* blue-500 */
-  --c3: #8b5cf6; /* violet-500 */
+  --c1: #0800FA; /* blue-500 */
+  --c2: #0047FA; /* blue-500 */
+  --c3: #0096FA; /* cyan-500 */
 }
+
 
 /* Cybersecurity */
 a[href="cybersecurity.html"] .group {
-  --c1: #ef4444; /* red-500 */
-  --c2: #f97316; /* orange-500 */
-  --c3: #fb923c; /* orange-300 */
+  --c1: #FF0B00; /* red-500 */
+  --c2: #FA3928; /* orange-500 */
+  --c3: #fa6900; /* orange-300 */
 }
 
 /* Data Science */
 a[href="data-science.html"] .group {
-  --c1: #10b981; /* emerald-500 */
-  --c2: #059669; /* emerald-600 */
-  --c3: #22c55e; /* green-500 */
+  --c1: #19FA00; /* green-500 */
+  --c2: #00FA41; /* green-600 */
+  --c3: #00FA95; /* green-500 */
 }
 
 /* Artificial Intelligence */
 a[href="artificial-intelligence.html"] .group {
-  --c1: #a855f7; /* purple-500 */
-  --c2: #ec4899; /* pink-500 */
-  --c3: #f0abfc; /* fuchsia-300 */
+  --c1: #FA0083; /* pink-500 */
+  --c2: #EA03FA; /* pink-500 */
+  --c3: #FF9ED1; /* fuchsia-300 */
 }
 
 /* Mobile Development */
 a[href="mobile-development.html"] .group {
-  --c1: #6366f1; /* indigo-500 */
-  --c2: #3b82f6; /* blue-500 */
-  --c3: #60a5fa; /* blue-400 */
+  --c1: #6302FA; /* purple-500 */
+  --c2: #B300FA; /* purple-500 */
+  --c3: #B700FF; /* purple-400 */
 }
 
 /* Cloud Computing */
 a[href="cloud-computing.html"] .group {
-  --c1: #14b8a6; /* teal-500 */
-  --c2: #06b6d4; /* cyan-500 */
-  --c3: #22d3ee; /* cyan-400 */
+  --c1: #00E1FA; /* cyan-500 */
+  --c2: #02FAC0; /* cyan-500 */
+  --c3: #78F2FF; /* teal-400 */
 }
 
 

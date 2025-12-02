@@ -1,4 +1,3 @@
-// browse.js — hover-only, JS puro, sem alterar tamanhos/layout
 (() => {
   'use strict';
 
@@ -118,8 +117,8 @@
       fill: 'none', stroke: '#ef4444', 'stroke-width': '1.8',
       'stroke-dasharray': '10 14', 'stroke-linecap': 'round', opacity: '0.95'
     });
-    const hLine = createSvgEl('line', { x1: '4', y1: '12', x2: '20', y2: '12', stroke: '#f97316', 'stroke-width': '1.2', opacity: '0' });
-    const vLine = createSvgEl('line', { x1: '12', y1: '4', x2: '12', y2: '20', stroke: '#f97316', 'stroke-width': '1.2', opacity: '0' });
+    const hLine = createSvgEl('line', { x1: '4', y1: '12', x2: '20', y2: '12', stroke: '#ff0b00', 'stroke-width': '1.2', opacity: '0' });
+    const vLine = createSvgEl('line', { x1: '12', y1: '4', x2: '12', y2: '20', stroke: '#fa3928', 'stroke-width': '1.2', opacity: '0' });
 
     svg.appendChild(ring);
     svg.appendChild(hLine);
@@ -170,7 +169,7 @@
       const p = createSvgEl('line', {
         x1: x1.toFixed(2), y1: y1.toFixed(2),
         x2: x2.toFixed(2), y2: y2.toFixed(2),
-        stroke: '#a855f7', 'stroke-width': '1.6',
+        stroke: '#ad55ffff', 'stroke-width': '1.6',
         'stroke-linecap': 'round', opacity: '1'
       });
       svg.appendChild(p);
@@ -214,8 +213,8 @@
   // 4) DATA — dois pontos a orbitar dentro do viewBox (24)
   // =========================================================
   function animData(svg) {
-    const dot1 = createSvgEl('circle', { cx: '12', cy: '12', r: '1.2', fill: '#22c55e' });
-    const dot2 = createSvgEl('circle', { cx: '12', cy: '12', r: '1.2', fill: '#10b981' });
+    const dot1 = createSvgEl('circle', { cx: '12', cy: '12', r: '1.2', fill: '#19fa00' });
+    const dot2 = createSvgEl('circle', { cx: '12', cy: '12', r: '1.2', fill: '#00fa41' });
     svg.appendChild(dot1);
     svg.appendChild(dot2);
 
@@ -279,7 +278,7 @@
       const x = 12 + dx;
       const poly = createSvgEl('polyline', {
         points: `${x},17 ${x},12  ${x-2},14  ${x},10  ${x+2},14  ${x},12`,
-        fill: 'none', stroke: '#67e8f9', 'stroke-width': '1.6', 'stroke-linejoin': 'round', 'stroke-linecap': 'round',
+        fill: 'none', stroke: '#5ddcecff', 'stroke-width': '1.6', 'stroke-linejoin': 'round', 'stroke-linecap': 'round',
         opacity: '0.9'
       });
       svg.appendChild(poly);
