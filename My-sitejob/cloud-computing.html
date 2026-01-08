@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cloud Computing — BitJourney</title>
+    <meta name="description" content="O papel do profissional de Cloud Computing, competências essenciais, processo, responsabilidade, saídas profissionais, recursos e tendências do futuro. Página dinâmica e acessível com design premium para BitJourney." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui']
+                    },
+                    colors: {
+                        brand: {
+                            50:'#ecfeff',100:'#cffafe',200:'#a5f3fc',300:'#67e8f9',400:'#22d3ee',
+                            500:'#06b6d4',600:'#0891b2',700:'#0e7490',800:'#155e75',900:'#164e63'
+                        }
+                    },
+                    boxShadow: {
+                        glow: '0 0 0 6px rgb(34 211 238 / 0.08), 0 10px 40px -10px rgb(59 130 246 / 0.45)'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%,100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' }
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '100%': { backgroundPosition: '200% 50%' }
+                        },
+                    },
+                    animation: {
+                        float: 'float 6s ease-in-out infinite',
+                        shimmer: 'shimmer 3s linear infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Decorative gradient orbs */
+        .orb {
+            filter: blur(64px);
+            opacity:.4;
+            pointer-events:none
+        }
+        .scroll-reveal {
+            opacity:0;
+            transform: translateY(12px);
+            transition: all .6s ease;
+        }
+        .scroll-reveal.revealed {
+            opacity:1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-teal-950 via-cyan-950 to-sky-950 text-white selection:bg-cyan-300 selection:text-slate-900">
+    <!-- Background Orbs -->
+    <div aria-hidden="true" class="fixed inset-0 overflow-hidden -z-10">
+        <div class="orb absolute -top-20 -left-10 w-96 h-96 rounded-full bg-cyan-700/50"></div>
+        <div class="orb absolute top-40 -right-20 w-[30rem] h-[30rem] rounded-full bg-teal-600/40"></div>
+        <div class="orb absolute bottom-[-6rem] left-1/3 w-[28rem] h-[28rem] rounded-full bg-sky-400/40"></div>
+    </div>
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-slate-950/60 border-b border-white/10">
+        <nav class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between gap-4">
+                <a href="index.html" class="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>
+                    </svg>
+                    <span class="text-xl font-extrabold tracking-tight">BitJourney</span>
+                </a>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="browse.html" class="text-slate-300 hover:text-white">Explorar</a>
+                    <a href="contacts.html" class="text-slate-300 hover:text-white">Contactos</a>
+                    <a href="quiz.html" class="inline-flex items-center gap-2 text-slate-900 bg-cyan-300 hover:bg-cyan-200 font-semibold px-3 py-1.5 rounded-xl transition-shadow shadow-glow">
+                        <span>Quiz</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </a>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="login.html" class="text-slate-300 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10">Entrar</a>
+                    <a href="criar-conta.html" class="bg-white/10 hover:bg-white/20 border border-white/10 px-3 py-1.5 rounded-lg">Criar Conta</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="container mx-auto px-4 pt-12 pb-10 md:pt-16 md:pb-16">
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+            <div class="scroll-reveal">
+                <p class="inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-cyan-300/90 bg-cyan-300/10 ring-1 ring-cyan-300/30 px-2 py-1 rounded-full">
+                    <span class="h-2 w-2 bg-cyan-300 rounded-full animate-pulse"></span>
+                    Área Temática
+                </p>
+                <h1 class="mt-4 text-4xl md:text-5xl font-extrabold leading-tight">
+                    Cloud Computing: <span class="bg-gradient-to-r from-cyan-700 via-teal-500 to-cyan-600 bg-clip-text text-transparent">O Guardião da Infraestrutura Digital</span>
+                </h1>
+                <p class="mt-4 text-slate-300 max-w-prose">Um especialista em Cloud Computing é muito mais do que um administrador de sistemas. É um arquiteto da era digital que projeta, constrói e mantém infraestruturas escaláveis, seguras e altamente disponíveis.</p>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <a href="#competencias" class="px-4 py-2 rounded-xl bg-cyan-500 text-slate-900 font-semibold hover:bg-teal-300 focus:outline-none focus:ring-4 focus:ring-cyan-400/40">Ver Competências</a>
+                    <a href="#saidas" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10">Saídas Profissionais</a>
+                </div>
+                <div class="mt-6 flex items-center gap-6 text-sm text-slate-400">
+                    <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-cyan-400"></span>Alta Procura</div>
+                    <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-teal-400"></span>Carreira Dinâmica</div>
+                    <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-sky-300"></span>Aprendizagem Contínua</div>
+                </div>
+            </div>
+            <div class="relative scroll-reveal md:justify-self-end">
+                <div class="absolute -inset-4 bg-gradient-to-r from-teal-500/20 via-teal-500/10 to-teal-500/20 rounded-2xl blur-2xl"></div>
+                <div class="relative bg-slate-900/60 border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2 bg-gradient-to-r from-sky-300 via-teal-500 to-cyan-700 bg-[length:200%_100%] animate-shimmer text-slate-900 rounded-xl p-4">
+                            <p class="text-sm font-semibold">Impacto Real</p>
+                            <p class="text-2xl font-extrabold">Saúde • Negócios • Educação • Entretenimento</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">Cloud Providers</p>
+                            <p class="mt-1 text-lg font-bold">AWS • Azure • GCP</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">IaC</p>
+                            <p class="mt-1 text-lg font-bold">Terraform • Ansible</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">Contêineres</p>
+                            <p class="mt-1 text-lg font-bold">Docker • Kubernetes</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">DevOps</p>
+                            <p class="mt-1 text-lg font-bold">CI/CD • Automação</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impacto Invisível -->
+    <section class="container mx-auto px-4 py-12" id="impacto">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">🌍 O Impacto Invisível da Cloud Computing no Nosso Dia a Dia</h2>
+            <p class="mt-2 text-slate-300 max-w-3xl">A cloud está em quase tudo o que usamos, muitas vezes sem nos apercebermos:</p>
+            <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Saúde</h3>
+                    <p class="mt-1 text-sm text-slate-300">Armazenamento seguro de dados médicos, telemedicina e processamento de imagens em larga escala.</p>
+                </article>
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Negócios</h3>
+                    <p class="mt-1 text-sm text-slate-300">Plataformas de e-commerce, CRMs e ERPs baseados em cloud.</p>
+                </article>
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Entretenimento</h3>
+                    <p class="mt-1 text-sm text-slate-300">Streaming de música, filmes e jogos suportados por servidores distribuídos globalmente.</p>
+                </article>
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Educação</h3>
+                    <p class="mt-1 text-sm text-slate-300">Plataformas de ensino online acessíveis a milhões de alunos.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Competências -->
+    <section class="container mx-auto px-4 py-12" id="competencias">
+        <div class="scroll-reveal">
+            <div class="flex items-end justify-between gap-4 flex-wrap">
+                <h2 class="text-3xl font-extrabold">🛠 Competências Essenciais para o Sucesso em Cloud Computing</h2>
+                <div class="flex items-center gap-2 text-xs text-slate-300">
+                    <span class="inline-block px-2 py-1 rounded bg-white/10">Hard Skills</span>
+                    <span class="inline-block px-2 py-1 rounded bg-white/10">Soft Skills</span>
+                </div>
+            </div>
+            <div class="mt-6 grid lg:grid-cols-2 gap-6">
+                <!-- Hard Skills -->
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                    <h3 class="font-bold text-xl">Competências Técnicas (Hard Skills)</h3>
+                    <ul class="mt-4 space-y-3 text-slate-300">
+                        <li><span class="font-semibold text-white">Plataformas de Cloud:</span> AWS, Microsoft Azure, Google Cloud Platform.</li>
+                        <li><span class="font-semibold text-white">Infraestrutura como Código (IaC):</span> Terraform, Ansible, CloudFormation.</li>
+                        <li><span class="font-semibold text-white">Contêineres e Orquestração:</span> Docker, Kubernetes.</li>
+                        <li><span class="font-semibold text-white">Segurança e Compliance:</span> Gestão de identidades (IAM), encriptação, normas como ISO, GDPR.</li>
+                        <li><span class="font-semibold text-white">DevOps & Automação:</span> CI/CD, Jenkins, GitHub Actions, GitLab CI.</li>
+                        <li><span class="font-semibold text-white">Redes e Armazenamento:</span> VPCs, load balancers, S3, Blob Storage.</li>
+                    </ul>
+                </div>
+                <!-- Soft Skills -->
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                    <h3 class="font-bold text-xl">Competências Pessoais (Soft Skills)</h3>
+                    <ul class="mt-4 space-y-3 text-slate-300">
+                        <li><span class="font-semibold text-white">Resolução de Problemas:</span> Diagnosticar falhas e garantir resiliência.</li>
+                        <li><span class="font-semibold text-white">Pensamento Crítico:</span> Avaliar custos, riscos e vantagens de diferentes arquiteturas.</li>
+                        <li><span class="font-semibold text-white">Aprendizagem Contínua:</span> O mundo cloud evolui rapidamente.</li>
+                        <li><span class="font-semibold text-white">Colaboração:</span> Trabalhar com developers, equipas de segurança e gestores de produto.</li>
+                        <li><span class="font-semibold text-white">Visão Estratégica:</span> Alinhar infraestruturas tecnológicas com objetivos de negócio.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Processo (Timeline) -->
+    <section class="container mx-auto px-4 py-12" id="processo">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">🧩 O Processo de Cloud Computing: Da Ideia à Operação</h2>
+            <ol class="relative mt-8 border-l border-white/10 ml-2">
+                <!-- Step -->
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">1</span>
+                    <h3 class="font-bold">Definição de Requisitos</h3>
+                    <p class="text-slate-300">Identificação das necessidades de performance, segurança e escalabilidade.</p>
+                </li>
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">2</span>
+                    <h3 class="font-bold">Arquitetura da Solução</h3>
+                    <p class="text-slate-300">Escolha da plataforma (AWS, Azure, GCP) e definição da infraestrutura.</p>
+                </li>
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">3</span>
+                    <h3 class="font-bold">Implementação</h3>
+                    <p class="text-slate-300">Configuração de servidores, redes, bases de dados e segurança.</p>
+                </li>
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">4</span>
+                    <h3 class="font-bold">Automação</h3>
+                    <p class="text-slate-300">Criação de scripts IaC e pipelines CI/CD.</p>
+                </li>
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">5</span>
+                    <h3 class="font-bold">Testes</h3>
+                    <p class="text-slate-300">Garantir desempenho, disponibilidade e segurança.</p>
+                </li>
+                <li class="mb-2 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300 text-slate-900 font-bold">6</span>
+                    <h3 class="font-bold">Monitorização e Manutenção</h3>
+                    <p class="text-slate-300">Acompanhar métricas, otimizar custos e atualizar serviços.</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- Responsabilidade -->
+    <section class="container mx-auto px-4 py-12" id="responsabilidade">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">⚡ A Responsabilidade do Profissional de Cloud Computing</h2>
+            <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Segurança</h3>
+                    <p class="text-slate-300 text-sm">Proteger dados e aplicações contra ataques e acessos não autorizados.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Privacidade</h3>
+                    <p class="text-slate-300 text-sm">Cumprir regulamentos de proteção de dados como o RGPD.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Disponibilidade</h3>
+                    <p class="text-slate-300 text-sm">Garantir que os serviços estão sempre ativos, sem falhas.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Custos</h3>
+                    <p class="text-slate-300 text-sm">Evitar desperdícios através da otimização de recursos.</p>
+                </div>
+            </div>
+            <p class="mt-4 text-slate-300">Gerir infraestruturas críticas na nuvem exige responsabilidade técnica e ética, incluindo a promoção de uso eficiente de recursos energéticos e infraestruturas verdes.</p>
+        </div>
+    </section>
+
+    <!-- Saídas Profissionais (Tabs) -->
+    <section class="container mx-auto px-4 py-12" id="saidas">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">💼 Saídas Profissionais em Cloud Computing</h2>
+            <div class="mt-6 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                <!-- Tab list -->
+                <div role="tablist" aria-label="Perfis" class="flex flex-wrap">
+                    <button data-tab="engineer" role="tab" aria-selected="true" class="tab-btn flex-1 px-4 py-3 text-left font-semibold bg-white/10 hover:bg-white/20 focus:outline-none">1) Cloud Engineer</button>
+                    <button data-tab="architect" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">2) Cloud Architect</button>
+                    <button data-tab="devops" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">3) DevOps Engineer</button>
+                    <button data-tab="security" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">4) Cloud Security</button>
+                    <button data-tab="sre" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">5) SRE</button>
+                </div>
+                <!-- Panels -->
+                <div class="p-6 space-y-10">
+                    <!-- Cloud Engineer -->
+                    <section data-panel="engineer">
+                        <h3 class="text-2xl font-bold">Cloud Engineer</h3>
+                        <p class="text-slate-300">Especialista na implementação e gestão de infraestruturas cloud.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Gerir e configurar instâncias, redes e serviços cloud</li>
+                                    <li>Automatizar processos com scripts IaC</li>
+                                    <li>Monitorizar sistemas e otimizar custos</li>
+                                    <li>Garantir segurança e conformidade</li>
+                                    <li>Resolver incidentes e apoiar equipas de desenvolvimento</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">AWS, Azure, GCP, Terraform, Ansible, Docker, Kubernetes, Jenkins, GitHub Actions.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="80000" data-max="100000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$80,000 – $100,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="110000" data-max="140000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$110,000 – $140,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="150000" data-max="180000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$150,000 – $180,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Cloud Architect -->
+                    <section data-panel="architect" hidden>
+                        <h3 class="text-2xl font-bold">Cloud Architect</h3>
+                        <p class="text-slate-300">Especialista no desenho de soluções complexas e escaláveis em cloud.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Desenhar arquiteturas cloud escaláveis e seguras</li>
+                                    <li>Selecionar serviços cloud adequados para cada necessidade</li>
+                                    <li>Otimizar custos e desempenho de infraestruturas</li>
+                                    <li>Planear migrações para a cloud</li>
+                                    <li>Definir políticas de segurança e governança</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">AWS, Azure, GCP, Terraform, CloudFormation, Kubernetes, ferramentas de monitorização e segurança.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="100000" data-max="130000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$100,000 – $130,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="140000" data-max="170000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$140,000 – $170,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="180000" data-max="220000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$180,000 – $220,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- DevOps Engineer -->
+                    <section data-panel="devops" hidden>
+                        <h3 class="text-2xl font-bold">DevOps Engineer</h3>
+                        <p class="text-slate-300">Especialista em automação de pipelines e integração contínua em ambientes cloud.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Implementar e manter pipelines CI/CD</li>
+                                    <li>Automatizar processos de deploy e testing</li>
+                                    <li>Gerir infraestrutura como código (IaC)</li>
+                                    <li>Monitorizar desempenho de aplicações</li>
+                                    <li>Colaborar com equipas de desenvolvimento e operações</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">Docker, Kubernetes, Jenkins, GitHub Actions, GitLab CI, Terraform, Ansible, Prometheus, Grafana.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="85000" data-max="110000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$85,000 – $110,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="120000" data-max="150000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$120,000 – $150,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="160000" data-max="200000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$160,000 – $200,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Cloud Security Specialist -->
+                    <section data-panel="security" hidden>
+                        <h3 class="text-2xl font-bold">Cloud Security Specialist</h3>
+                        <p class="text-slate-300">Especialista em proteção de dados e conformidade legal em ambientes cloud.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Implementar políticas de segurança em cloud</li>
+                                    <li>Configurar controlos de acesso e identidade (IAM)</li>
+                                    <li>Realizar auditorias de segurança</li>
+                                    <li>Garantir conformidade com regulamentos (GDPR, ISO)</li>
+                                    <li>Investigar e responder a incidentes de segurança</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">IAM, encriptação, ferramentas de auditoria, AWS Security Hub, Azure Security Center, Google Cloud Security Command Center.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="90000" data-max="120000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$90,000 – $120,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="130000" data-max="160000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$130,000 – $160,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="170000" data-max="210000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$170,000 – $210,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Site Reliability Engineer (SRE) -->
+                    <section data-panel="sre" hidden>
+                        <h3 class="text-2xl font-bold">Site Reliability Engineer (SRE)</h3>
+                        <p class="text-slate-300">Especialista em garantir disponibilidade e performance em larga escala em ambientes cloud.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Garantir disponibilidade e performance de sistemas</li>
+                                    <li>Implementar práticas de observabilidade e monitorização</li>
+                                    <li>Desenvolver automações para melhorar a confiabilidade</li>
+                                    <li>Gerir incidentes e implementar melhorias pós-incidente</li>
+                                    <li>Definir e monitorizar SLAs e SLOs</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">Kubernetes, Prometheus, Grafana, Datadog, Terraform, ferramentas de observabilidade e monitorização.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="95000" data-max="125000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$95,000 – $125,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="135000" data-max="170000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$135,000 – $170,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="180000" data-max="230000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$180,000 – $230,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <!-- Currency Toggle -->
+                <div class="flex items-center justify-between gap-4 px-6 pb-6">
+                    <p class="text-xs text-slate-400">Estimativas globais (Glassdoor, Payscale, Levels.fyi). Variam por região, empresa e experiência.</p>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-slate-300">Moeda:</span>
+                        <button id="currencyUSD" class="px-2 py-1 rounded-lg bg-white/10 border border-white/10 font-semibold">USD</button>
+                        <button id="currencyEUR" class="px-2 py-1 rounded-lg hover:bg-white/10 border border-white/10">EUR*</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Importância -->
+    <section class="container mx-auto px-4 py-12" id="importancia">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">📊 A Importância Crucial da Cloud Computing</h2>
+            <p class="mt-2 text-slate-300 max-w-3xl">Vivemos na era da nuvem, e a cloud já é tão essencial quanto a eletricidade ou a internet. A sua relevância vai muito além da hospedagem de aplicações — trata-se de criar infraestruturas ágeis, seguras e escaláveis que sustentam a economia digital.</p>
+            <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Educação</h3><p class="text-slate-300 text-sm">Plataformas online de larga escala.</p></div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Saúde</h3><p class="text-slate-300 text-sm">Processamento seguro de dados sensíveis.</p></div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Economia</h3><p class="text-slate-300 text-sm">Negócios digitais suportados por soluções cloud.</p></div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Entretenimento</h3><p class="text-slate-300 text-sm">Streaming global em tempo real.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tendências -->
+    <section class="container mx-auto px-4 py-12" id="futuro">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">🎯 O Futuro da Cloud Computing: Tendências e Evolução</h2>
+            <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">Multi-cloud e Híbrida</h3>
+                    <p class="text-slate-300 text-sm">Combinação de diferentes provedores de cloud.</p>
+                </div>
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">Edge Computing</h3>
+                    <p class="text-slate-300 text-sm">Processamento mais próximo do utilizador final.</p>
+                </div>
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">Serverless Computing</h3>
+                    <p class="text-slate-300 text-sm">Execução de código sem gestão de servidores.</p>
+                </div>
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">IA na Cloud</h3>
+                    <p class="text-slate-300 text-sm">Serviços de Machine Learning integrados em plataformas cloud.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recursos -->
+    <section class="container mx-auto px-4 py-12" id="recursos">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">📚 O que Precisas de Saber para te Iniciares na Área</h2>
+            <ul class="mt-4 space-y-3">
+                <li><span class="font-semibold text-white">Aprender Fundamentos de Cloud:</span> Entender IaaS, PaaS e SaaS.</li>
+                <li><span class="font-semibold text-white">Escolher uma Plataforma:</span> Começar com AWS, Azure ou GCP.</li>
+                <li><span class="font-semibold text-white">Dominar Redes e Armazenamento:</span> VPCs, load balancers, bases de dados cloud.</li>
+                <li><span class="font-semibold text-white">Explorar Contêineres:</span> Aprender Docker e Kubernetes.</li>
+                <li><span class="font-semibold text-white">Automatizar Infraestruturas:</span> Praticar com Terraform ou Ansible.</li>
+                <li><span class="font-semibold text-white">Praticar em Projetos Reais:</span> Criar e hospedar aplicações simples em cloud.</li>
+                <li><span class="font-semibold text-white">Obter Certificações:</span> AWS Certified, Azure Fundamentals, Google Cloud Associate.</li>
+            </ul>
+            <div class="mt-6 text-sm text-slate-400">Quer aprender mais? Explora os nossos conteúdos gratuitos e prepara‑te para a área premium.</div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="container mx-auto px-4 pb-10 pt-6 text-sm text-slate-400">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+            <p>© <span id="year"></span> BitJourney • <a class="text-cyan-300 hover:underline" href="index.html">Home</a></p>
+            <a href="browse.html" class="inline-flex items-center gap-2 text-purple-300 hover:underline">⬅ Voltar à Exploração</a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries)=>{
+            entries.forEach(e=>{
+                if(e.isIntersecting){
+                    e.target.classList.add('revealed');
+                    observer.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.12 });
+        document.querySelectorAll('.scroll-reveal').forEach(el=>observer.observe(el));
+
+        // Tabs
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const panels = document.querySelectorAll('[data-panel]');
+        tabButtons.forEach(btn => btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-tab');
+            tabButtons.forEach(b=>{
+                b.setAttribute('aria-selected', b===btn);
+                b.classList.toggle('bg-white/10', b===btn);
+            });
+            panels.forEach(p=>{
+                p.hidden = p.getAttribute('data-panel')!==id;
+            });
+        }));
+
+        // Currency toggle (simple client-side conversion, rate hint)
+        const rate = 0.9; // ~EUR conversion (aproximado)
+        const usdBtn = document.getElementById('currencyUSD');
+        const eurBtn = document.getElementById('currencyEUR');
+        const updateCurrency = (toEUR) => {
+            document.querySelectorAll('.salary-card').forEach(card => {
+                const min = Number(card.dataset.min), max = Number(card.dataset.max);
+                const val = toEUR ? [min*rate, max*rate] : [min, max];
+                const formatted = toEUR ? `€${val[0].toLocaleString(undefined,{maximumFractionDigits:0})} – €${val[1].toLocaleString(undefined,{maximumFractionDigits:0})}` : `$${val[0].toLocaleString()} – $${val[1].toLocaleString()}`;
+                card.querySelector('.salary-value').textContent = formatted;
+            });
+            usdBtn.classList.toggle('bg-white/10', !toEUR);
+            usdBtn.classList.toggle('font-semibold', !toEUR);
+            eurBtn.classList.toggle('bg-white/10', toEUR);
+            eurBtn.classList.toggle('font-semibold', toEUR);
+        }
+        usdBtn.addEventListener('click', ()=>updateCurrency(false));
+        eurBtn.addEventListener('click', ()=>updateCurrency(true));
+    </script>
+</body>
+</html>
