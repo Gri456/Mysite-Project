@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web Development — BitJourney</title>
+  <meta name="description" content="O papel do Web Developer, competências essenciais, processo, responsabilidade, saídas profissionais, recursos e tendências do futuro. Página dinâmica e acessível com design premium para BitJourney." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            brand: {
+              50:'#ecfeff',100:'#00cffafe',200:'#a5f3fc',300:'#67e8f9',400:'#22d3ee',
+              500:'#06b6d4',600:'#0891b2',700:'#0e7490',800:'#155e75',900:'#164e63'
+            }
+          },
+          boxShadow: {
+            glow: '0 0 0 6px rgb(34 211 238 / 0.08), 0 10px 40px -10px rgb(59 130 246 / 0.45)'
+          },
+          keyframes: {
+            float: { '0%,100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-8px)' } },
+            shimmer: { '0%': { backgroundPosition: '0% 50%' }, '100%': { backgroundPosition: '200% 50%' } },
+          },
+          animation: { float: 'float 6s ease-in-out infinite', shimmer: 'shimmer 3s linear infinite' }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Decorative gradient orbs */
+    .orb { filter: blur(64px); opacity:.4; pointer-events:none }
+    .scroll-reveal { opacity:0; transform: translateY(12px); transition: all .6s ease; }
+    .scroll-reveal.revealed { opacity:1; transform: translateY(0); }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-blue-950 via-indigo-950 to-sky-950 text-white selection:bg-cyan-300 selection:text-slate-900">
+  <!-- Background Orbs -->
+  <div aria-hidden="true" class="fixed inset-0 overflow-hidden -z-10">
+    <div class="orb absolute -top-20 -left-10 w-96 h-96 rounded-full bg-blue-700/50"></div>
+    <div class="orb absolute top-40 -right-20 w-[30rem] h-[30rem] rounded-full bg-blue-600/40"></div>
+    <div class="orb absolute bottom-[-6rem] left-1/3 w-[28rem] h-[28rem] rounded-full bg-indigo-400/40"></div>
+  </div>
+
+  <!-- Navbar -->
+  <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-slate-950/60 border-b border-white/10">
+    <nav class="container mx-auto px-4 py-3">
+      <div class="flex items-center justify-between gap-4">
+        <a href="index.html" class="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>
+          </svg>
+          <span class="text-xl font-extrabold tracking-tight">BitJourney</span>
+        </a>
+        <div class="hidden md:flex items-center gap-6">
+          <a href="browse.html" class="text-slate-300 hover:text-white">Explorar</a>
+          <a href="contacts.html" class="text-slate-300 hover:text-white">Contactos</a>
+          <a href="quiz.html" class="inline-flex items-center gap-2 text-slate-900 bg-cyan-300 hover:bg-cyan-200 font-semibold px-3 py-1.5 rounded-xl transition-shadow shadow-glow">
+            <span>Quiz</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </a>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="login.html" class="text-slate-300 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10">Entrar</a>
+          <a href="criar-conta.html" class="bg-white/10 hover:bg-white/20 border border-white/10 px-3 py-1.5 rounded-lg">Criar Conta</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="container mx-auto px-4 pt-12 pb-10 md:pt-16 md:pb-16">
+    <div class="grid md:grid-cols-2 gap-10 items-center">
+      <div class="scroll-reveal">
+        <p class="inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-blue-300/90 bg-blue-300/10 ring-1 ring-blue-blue/30 px-2 py-1 rounded-full">
+          <span class="h-2 w-2 bg-blue-300 rounded-full animate-pulse"></span> Área Temática
+        </p>
+        <h1 class="mt-4 text-4xl md:text-5xl font-extrabold leading-tight">
+          Web Development: <span class="bg-gradient-to-r from-blue-700 via-cyan-500 to-blue-600 bg-clip-text text-transparent">O Arquitecto do Digital</span>
+        </h1>
+        <p class="mt-4 text-slate-300 max-w-prose">Um Web Developer é mais do que um programador — traduz ideias em produtos digitais funcionais, seguros e acessíveis. É a intersecção entre <span class="font-semibold text-white">criatividade</span>, <span class="font-semibold text-white">tecnologia</span> e <span class="font-semibold text-white">lógica</span>.</p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="#competencias" class="px-4 py-2 rounded-xl bg-blue-500 text-slate-900 font-semibold hover:bg-cyan-300 focus:outline-none focus:ring-4 focus:ring-cyan-400/40">Ver Competências</a>
+          <a href="#saidas" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10">Saídas Profissionais</a>
+        </div>
+        <div class="mt-6 flex items-center gap-6 text-sm text-slate-400">
+          <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-blue-400"></span>Alta Procura</div>
+          <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-indigo-400"></span>Carreira Dinâmica</div>
+          <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-sky-300"></span>Aprendizagem Contínua</div>
+        </div>
+      </div>
+      <div class="relative scroll-reveal md:justify-self-end">
+        <div class="absolute -inset-4 bg-gradient-to-r from-blue-500/20 via-blue-500/10 to-blue-500/20 rounded-2xl blur-2xl"></div>
+        <div class="relative bg-slate-900/60 border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2 bg-gradient-to-r from-cyan-300 via-blue-500 to-blue-700 bg-[length:200%_100%] animate-shimmer text-slate-900 rounded-xl p-4">
+              <p class="text-sm font-semibold">Impacto Real</p>
+              <p class="text-2xl font-extrabold">E-commerce • Educação • Saúde • Governo</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4">
+              <p class="text-xs uppercase tracking-wide text-slate-400">Front‑End</p>
+              <p class="mt-1 text-lg font-bold">HTML • CSS • JS</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4">
+              <p class="text-xs uppercase tracking-wide text-slate-400">Back‑End</p>
+              <p class="mt-1 text-lg font-bold">Node • Python • SQL</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4">
+              <p class="text-xs uppercase tracking-wide text-slate-400">DevOps</p>
+              <p class="mt-1 text-lg font-bold">CI/CD • Cloud • IaC</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4">
+              <p class="text-xs uppercase tracking-wide text-slate-400">Tendências</p>
+              <p class="mt-1 text-lg font-bold">PWA • IA • Web3</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Impacto Invisível -->
+  <section class="container mx-auto px-4 py-12" id="impacto">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">🌍 O Impacto Invisível no Nosso Dia a Dia</h2>
+      <p class="mt-2 text-slate-300 max-w-3xl">Do e‑commerce às videochamadas, do homebanking aos serviços públicos: o Web Development sustenta silenciosamente a conveniência e a conectividade do mundo moderno.</p>
+      <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Card template repeated -->
+        <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+          <h3 class="font-bold text-white">Comércio Electrónico</h3>
+          <p class="mt-1 text-sm text-slate-300">Catálogos dinâmicos, carrinhos, pagamentos e segurança ponta‑a‑ponta.</p>
+        </article>
+        <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+          <h3 class="font-bold text-white">Comunicação Global</h3>
+          <p class="mt-1 text-sm text-slate-300">Mensagens, redes sociais e vídeo em tempo real para milhões.</p>
+        </article>
+        <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+          <h3 class="font-bold text-white">Acesso à Informação</h3>
+          <p class="mt-1 text-sm text-slate-300">Notícias, pesquisa e educação com usabilidade e performance.</p>
+        </article>
+        <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+          <h3 class="font-bold text-white">Serviços Públicos & Finanças</h3>
+          <p class="mt-1 text-sm text-slate-300">Banca online, e‑gov, agendamentos e submissões seguras.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Competências -->
+  <section class="container mx-auto px-4 py-12" id="competencias">
+    <div class="scroll-reveal">
+      <div class="flex items-end justify-between gap-4 flex-wrap">
+        <h2 class="text-3xl font-extrabold">🛠 Competências Essenciais</h2>
+        <div class="flex items-center gap-2 text-xs text-slate-300">
+          <span class="inline-block px-2 py-1 rounded bg-white/10">Hard Skills</span>
+          <span class="inline-block px-2 py-1 rounded bg-white/10">Soft Skills</span>
+        </div>
+      </div>
+
+      <div class="mt-6 grid lg:grid-cols-2 gap-6">
+        <!-- Hard Skills -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <h3 class="font-bold text-xl">Hard Skills</h3>
+          <ul class="mt-4 space-y-3 text-slate-300">
+            <li><span class="font-semibold text-white">Front‑end:</span> HTML, CSS, JavaScript, frameworks (React, Vue, Angular, Svelte).</li>
+            <li><span class="font-semibold text-white">Back‑end:</span> Python, PHP, Java, C#, Node.js; APIs e lógica de servidor.</li>
+            <li><span class="font-semibold text-white">Bases de Dados:</span> MySQL, PostgreSQL, MongoDB; modelação e gestão.</li>
+            <li><span class="font-semibold text-white">Controlo de Versão:</span> Git, GitHub; colaboração e revisão.</li>
+          </ul>
+        </div>
+        <!-- Soft Skills -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <h3 class="font-bold text-xl">Soft Skills</h3>
+          <ul class="mt-4 space-y-3 text-slate-300">
+            <li><span class="font-semibold text-white">Resolução de Problemas</span> e decomposição de desafios complexos.</li>
+            <li><span class="font-semibold text-white">Pensamento Crítico & Criatividade</span> para soluções eficazes.</li>
+            <li><span class="font-semibold text-white">Aprendizagem Contínua</span> e curiosidade por novas tecnologias.</li>
+            <li><span class="font-semibold text-white">Trabalho em Equipa & Comunicação</span> com design e produto.</li>
+            <li><span class="font-semibold text-white">Visão de Produto</span> alinhada com necessidades de negócio e utilizador.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Processo (Timeline) -->
+  <section class="container mx-auto px-4 py-12" id="processo">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">🧩 Processo de Desenvolvimento Web</h2>
+      <ol class="relative mt-8 border-l border-white/10 ml-2">
+        <!-- Step -->
+        <li class="mb-10 ml-6">
+          <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-blue-300 text-slate-900 font-bold">1</span>
+          <h3 class="font-bold">Planeamento & Análise</h3>
+          <p class="text-slate-300">Objectivos, público, funcionalidades e escolha de tecnologias.</p>
+        </li>
+        <li class="mb-10 ml-6">
+          <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-blue-300 text-slate-900 font-bold">2</span>
+          <h3 class="font-bold">Design (UI/UX)</h3>
+          <p class="text-slate-300">Protótipos e viabilidade técnica para uma experiência óptima.</p>
+        </li>
+        <li class="mb-10 ml-6">
+          <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-blue-300 text-slate-900 font-bold">3</span>
+          <h3 class="font-bold">Desenvolvimento</h3>
+          <p class="text-slate-300">Front‑end (UI) e Back‑end (servidor, BD, APIs).</p>
+        </li>
+        <li class="mb-10 ml-6">
+          <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-blue-300 text-slate-900 font-bold">4</span>
+          <h3 class="font-bold">Teste & QA</h3>
+          <p class="text-slate-300">Qualidade, acessibilidade, segurança e performance cross‑browser.</p>
+        </li>
+        <li class="mb-2 ml-6">
+          <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-blue-300 text-slate-900 font-bold">5</span>
+          <h3 class="font-bold">Deployment & Manutenção</h3>
+          <p class="text-slate-300">Publicação, monitorização e melhoria contínua.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Responsabilidade -->
+  <section class="container mx-auto px-4 py-12" id="responsabilidade">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">⚡ Responsabilidade do Web Developer</h2>
+      <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+          <h3 class="font-bold">Primeira Impressão</h3>
+          <p class="text-slate-300 text-sm">Experiências más custam confiança e negócio.</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+          <h3 class="font-bold">Acessibilidade Web</h3>
+          <p class="text-slate-300 text-sm">Semântica, contraste e suporte a leitores de ecrã.</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+          <h3 class="font-bold">Segurança & Privacidade</h3>
+          <p class="text-slate-300 text-sm">Defesa contra ataques e proteção de dados.</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+          <h3 class="font-bold">Confiabilidade & Desempenho</h3>
+          <p class="text-slate-300 text-sm">Disponibilidade, tempos de carga e SLAs.</p>
+        </div>
+      </div>
+      <p class="mt-4 text-slate-300">Inovação contínua (IA, PWAs, etc.) molda o futuro da web.</p>
+    </div>
+  </section>
+
+  <!-- Saídas Profissionais (Tabs) -->
+  <section class="container mx-auto px-4 py-12" id="saidas">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">💼 Saídas Profissionais em Web Development</h2>
+
+      <div class="mt-6 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <!-- Tab list -->
+        <div role="tablist" aria-label="Perfis" class="flex flex-wrap">
+          <button data-tab="fe" role="tab" aria-selected="true" class="tab-btn flex-1 px-4 py-3 text-left font-semibold bg-white/10 hover:bg-white/20 focus:outline-none">1) Front‑End</button>
+          <button data-tab="be" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">2) Back‑End</button>
+          <button data-tab="fs" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">3) Full‑Stack</button>
+          <button data-tab="uiux" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">4) UI/UX Designer</button>
+          <button data-tab="devops" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">5) DevOps</button>
+        </div>
+
+        <!-- Panels -->
+        <div class="p-6 space-y-10">
+          <!-- Front-End -->
+          <section data-panel="fe">
+            <h3 class="text-2xl font-bold">Front‑End Developer</h3>
+            <p class="text-slate-300">Constrói tudo o que o utilizador vê e utiliza no browser. Transforma design (Figma/Adobe XD) em interfaces responsivas e acessíveis.</p>
+            <div class="mt-4 grid lg:grid-cols-2 gap-6">
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                  <li>Converter UI/UX em código com HTML, CSS, JS.</li>
+                  <li>Responsividade e cross‑browser testing.</li>
+                  <li>Otimização de performance.</li>
+                  <li>Colaboração com UI/UX e Back‑end.</li>
+                  <li>Código testável e reutilizável; stand‑ups diários.</li>
+                </ul>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                <p class="text-slate-300">HTML5, CSS3, JS (ES6+), React/Vue/Angular/Svelte, Sass/Less, Vite/Webpack, npm/yarn, Git, GitHub/GitLab, VS Code/WebStorm.</p>
+              </div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="55000" data-max="70000">
+                <p class="text-sm text-slate-400">Júnior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$55,000 – $70,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="75000" data-max="100000">
+                <p class="text-sm text-slate-400">Mid‑Level</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$75,000 – $100,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="105000" data-max="140000">
+                <p class="text-sm text-slate-400">Sénior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$105,000 – $140,000+</span>/ano</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Back-End -->
+          <section data-panel="be" hidden>
+            <h3 class="text-2xl font-bold">Back‑End Developer</h3>
+            <p class="text-slate-300">Constrói e mantém o servidor, a BD e a lógica de negócio que alimentam o front‑end.</p>
+            <div class="mt-4 grid lg:grid-cols-2 gap-6">
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                  <li>Desenvolver e gerir APIs.</li>
+                  <li>Modelar e otimizar bases de dados.</li>
+                  <li>Autenticação/Autorização (JWT/OAuth).</li>
+                  <li>Segurança (SQLi, XSS) e boas práticas.</li>
+                  <li>Deployment e monitorização em servidores/cloud.</li>
+                </ul>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                <p class="text-slate-300">Node.js, Python (Django/Flask), Java (Spring), PHP (Laravel), C# (.NET), Ruby, Go; PostgreSQL, MySQL, MongoDB, Redis; Docker, Kubernetes; Nginx/Apache; Postman, Swagger; AWS/GCP/Azure.</p>
+              </div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="60000" data-max="80000">
+                <p class="text-sm text-slate-400">Júnior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$60,000 – $80,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="85000" data-max="110000">
+                <p class="text-sm text-slate-400">Mid‑Level</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$85,000 – $110,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="115000" data-max="150000">
+                <p class="text-sm text-slate-400">Sénior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$115,000 – $150,000+</span>/ano</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Full-Stack -->
+          <section data-panel="fs" hidden>
+            <h3 class="text-2xl font-bold">Full‑Stack Developer</h3>
+            <p class="text-slate-300">Generalista que domina front‑end e back‑end, ideal para equipas ágeis.</p>
+            <div class="mt-4 grid lg:grid-cols-2 gap-6">
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                  <li>Alternar entre componentes UI e endpoints de API.</li>
+                  <li>Diagnosticar e resolver em qualquer camada.</li>
+                  <li>Co‑criar a arquitetura global.</li>
+                </ul>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                <p class="text-slate-300">Combinação das stacks FE/BE; MERN/MEAN para prototipagem rápida.</p>
+              </div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="65000" data-max="85000">
+                <p class="text-sm text-slate-400">Júnior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$65,000 – $85,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="90000" data-max="120000">
+                <p class="text-sm text-slate-400">Mid‑Level</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$90,000 – $120,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="125000" data-max="160000">
+                <p class="text-sm text-slate-400">Sénior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$125,000 – $160,000+</span>/ano</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- UI/UX -->
+          <section data-panel="uiux" hidden>
+            <h3 class="text-2xl font-bold">UI/UX Designer</h3>
+            <p class="text-slate-300">Área complementar focada na experiência e na interface visual do utilizador.</p>
+            <div class="mt-4 grid lg:grid-cols-2 gap-6">
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                  <li>Pesquisa com utilizadores e testes de usabilidade.</li>
+                  <li>Personas, user journeys e wireframes.</li>
+                  <li>Protótipos interactivos e design systems.</li>
+                  <li>Colaboração estreita com developers.</li>
+                </ul>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Ferramentas</h4>
+                <p class="text-slate-300">Figma, Adobe XD, Sketch; Illustrator/Photoshop; Miro, Notion.</p>
+              </div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="50000" data-max="70000">
+                <p class="text-sm text-slate-400">Júnior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$50,000 – $70,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="75000" data-max="95000">
+                <p class="text-sm text-slate-400">Mid‑Level</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$75,000 – $95,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="100000" data-max="130000">
+                <p class="text-sm text-slate-400">Sénior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$100,000 – $130,000+</span>/ano</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- DevOps -->
+          <section data-panel="devops" hidden>
+            <h3 class="text-2xl font-bold">DevOps Engineer</h3>
+            <p class="text-slate-300">Unifica Dev e Ops com automação (CI/CD), cloud e monitorização.</p>
+            <div class="mt-4 grid lg:grid-cols-2 gap-6">
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                  <li>Automatizar deployments com pipelines CI/CD.</li>
+                  <li>Infraestrutura como código (Terraform, etc.).</li>
+                  <li>Gestão de cloud (AWS, Azure, GCP).</li>
+                  <li>Monitorização e segurança (SecDevOps).</li>
+                </ul>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                <p class="text-slate-300">GitHub Actions/Jenkins/GitLab CI, Docker, Kubernetes, Terraform, Ansible; AWS/Azure/GCP; Prometheus, Grafana, Datadog.</p>
+              </div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="70000" data-max="90000">
+                <p class="text-sm text-slate-400">Júnior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$70,000 – $90,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="95000" data-max="125000">
+                <p class="text-sm text-slate-400">Mid‑Level</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$95,000 – $125,000</span>/ano</p>
+              </div>
+              <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="130000" data-max="170000">
+                <p class="text-sm text-slate-400">Sénior</p>
+                <p class="text-xl font-extrabold"><span class="salary-value">$130,000 – $170,000+</span>/ano</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Currency Toggle -->
+        <div class="flex items-center justify-between gap-4 px-6 pb-6">
+          <p class="text-xs text-slate-400">Estimativas globais (Glassdoor, Payscale, Levels.fyi). Variam por região, empresa e experiência.</p>
+          <div class="flex items-center gap-2 text-sm">
+            <span class="text-slate-300">Moeda:</span>
+            <button id="currencyUSD" class="px-2 py-1 rounded-lg bg-white/10 border border-white/10 font-semibold">USD</button>
+            <button id="currencyEUR" class="px-2 py-1 rounded-lg hover:bg-white/10 border border-white/10">EUR*</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Importância -->
+  <section class="container mx-auto px-4 py-12" id="importancia">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">📊 A Importância Crucial do Web Development</h2>
+      <p class="mt-2 text-slate-300 max-w-3xl">Infraestrutura digital essencial para educação, saúde, economia, cultura e governo. Tão vital como eletricidade ou redes de transporte.</p>
+      <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Educação</h3><p class="text-slate-300 text-sm">E‑learning, LMS (Moodle), democratização do conhecimento.</p></div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Saúde</h3><p class="text-slate-300 text-sm">Telemedicina, portais de pacientes, gestão hospitalar.</p></div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Negócios</h3><p class="text-slate-300 text-sm">E‑commerce e ERPs/CRMs baseados na web.</p></div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Governo</h3><p class="text-slate-300 text-sm">Portais e‑gov para serviços e transparência.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tendências -->
+  <section class="container mx-auto px-4 py-12" id="futuro">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">🎯 Futuro do Web Development</h2>
+      <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+          <h3 class="font-semibold">PWAs</h3>
+          <p class="text-slate-300 text-sm">Apps instaláveis, offline e push, sem app store.</p>
+          <p class="mt-2 text-xs text-slate-400">Casos: Twitter, Pinterest, Starbucks.</p>
+        </div>
+        <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+          <h3 class="font-semibold">Web 3.0</h3>
+          <p class="text-slate-300 text-sm">Descentralização, smart contracts, dApps e soberania de dados.</p>
+        </div>
+        <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+          <h3 class="font-semibold">IA & ML</h3>
+          <p class="text-slate-300 text-sm">Chatbots, recomendações, acessibilidade inteligente.</p>
+        </div>
+        <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+          <h3 class="font-semibold">Low‑Code/No‑Code</h3>
+          <p class="text-slate-300 text-sm">Criação rápida com arrastar‑e‑largar; developers focam o complexo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recursos -->
+  <section class="container mx-auto px-4 py-12" id="recursos">
+    <div class="scroll-reveal">
+      <h2 class="text-3xl font-extrabold">📚 Recursos para Estudar</h2>
+      <ul class="mt-4 space-y-3">
+        <li><a class="text-cyan-300 hover:underline" target="_blank" href="https://developer.mozilla.org/en-US/docs/Learn">MDN Web Docs — Guia completo</a></li>
+        <li><a class="text-cyan-300 hover:underline" target="_blank" href="https://github.com/microsoft/Web-Dev-For-Beginners">Microsoft Web Dev for Beginners (gratuito)</a></li>
+        <li><a class="text-cyan-300 hover:underline" target="_blank" href="https://devdocs.io">DevDocs — Documentação rápida</a></li>
+        <li><a class="text-cyan-300 hover:underline" target="_blank" href="https://frontendmasters.com">Frontend Masters — Cursos/Workshops</a></li>
+      </ul>
+      <div class="mt-6 text-sm text-slate-400">Quer aprender mais? Explora os nossos conteúdos gratuitos e prepara‑te para a área premium.</div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="container mx-auto px-4 pb-10 pt-6 text-sm text-slate-400">
+    <div class="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+      <p>© <span id="year"></span> BitJourney • <a class="text-cyan-300 hover:underline" href="index.html">Home</a></p>
+      <a href="browse.html" class="inline-flex items-center gap-2 text-purple-300 hover:underline">⬅ Voltar à Exploração</a>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('revealed'); observer.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.scroll-reveal').forEach(el=>observer.observe(el));
+
+    // Tabs
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('[data-panel]');
+    tabButtons.forEach(btn => btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-tab');
+      tabButtons.forEach(b=>{ b.setAttribute('aria-selected', b===btn); b.classList.toggle('bg-white/10', b===btn); });
+      panels.forEach(p=>{ p.hidden = p.getAttribute('data-panel')!==id; });
+    }));
+
+    // Currency toggle (simple client-side conversion, rate hint)
+    const rate = 0.9; // ~EUR conversion (aproximado)
+    const usdBtn = document.getElementById('currencyUSD');
+    const eurBtn = document.getElementById('currencyEUR');
+    const updateCurrency = (toEUR) => {
+      document.querySelectorAll('.salary-card').forEach(card => {
+        const min = Number(card.dataset.min), max = Number(card.dataset.max);
+        const val = toEUR ? [min*rate, max*rate] : [min, max];
+        const formatted = toEUR
+          ? `€${val[0].toLocaleString(undefined,{maximumFractionDigits:0})} – €${val[1].toLocaleString(undefined,{maximumFractionDigits:0})}`
+          : `$${val[0].toLocaleString()} – $${val[1].toLocaleString()}`;
+        card.querySelector('.salary-value').textContent = formatted;
+      });
+      usdBtn.classList.toggle('bg-white/10', !toEUR);
+      usdBtn.classList.toggle('font-semibold', !toEUR);
+      eurBtn.classList.toggle('bg-white/10', toEUR);
+      eurBtn.classList.toggle('font-semibold', toEUR);
+    }
+    usdBtn.addEventListener('click', ()=>updateCurrency(false));
+    eurBtn.addEventListener('click', ()=>updateCurrency(true));
+
+  </script>
+</body>
+</html>
