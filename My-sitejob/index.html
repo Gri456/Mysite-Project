@@ -22,10 +22,24 @@
   </div>
 
   <nav class="flex flex-col space-y-4">
-    <a href="login.html" class="text-lg text-cyan-400 hover:text-white transition-colors font-bold flex items-center gap-2">
-      <span>Login</span>
-    </a>
-    <a href="tools.html" class="text-lg text-gray-300 hover:text-white transition-colors flex items-center gap-2">Tools</a>
+    <a href="login.html" class="text-lg text-cyan-400 hover:text-white transition-colors font-bold flex items-center gap-2">Login</a>
+    
+    <div class="flex flex-col">
+      <button id="toolsDropdownBtn" class="flex items-center justify-between text-lg text-gray-300 hover:text-white transition-colors w-full text-left">
+        <span>Tools</span>
+        <svg id="toolsArrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-300 transform rotate-180">
+          <path d="m6 9 6 6 6-6"></path>
+        </svg>
+      </button>
+      
+      <div id="toolsMenu" class="hidden flex flex-col pl-4 mt-2 space-y-3 border-l border-gray-700">
+        <a href="exercises.html" class="text-md text-gray-400 hover:text-cyan-400 transition-colors">Gerador de exs</a>
+        <a href="glossary.html" class="text-md text-gray-400 hover:text-cyan-400 transition-colors">Glossário</a>
+        <a href="ai-list.html" class="text-md text-gray-400 hover:text-cyan-400 transition-colors">Lista de AI's</a>
+        <a href="pass-gen.html" class="text-md text-gray-400 hover:text-cyan-400 transition-colors">Gerador de passwords</a>
+      </div>
+    </div>
+
     <a href="premium.html" class="text-lg text-yellow-500 hover:text-yellow-400 transition-colors font-semibold flex items-center gap-2">Premium ✨</a>
     <a href="club.html" class="text-lg text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-2">B1tJ0urney club</a>
     <a href="browse.html" class="text-lg text-gray-300 hover:text-white transition-colors">Browse fields</a>
@@ -36,14 +50,6 @@
     <a href="about.html" class="text-lg text-gray-300 hover:text-white transition-colors">About us</a>
     <a href="contacts.html" class="text-lg text-gray-300 hover:text-white transition-colors">Contact us</a>
     <a href="terms.html" class="text-sm text-gray-500 hover:text-gray-300 transition-colors italic">Termos e condições</a>
-    
-    <hr class="border-gray-800 my-2">
-    
-    <div class="text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">Recursos & Labs</div>
-    <a href="exercises.html" class="text-md text-gray-400 hover:text-cyan-400 transition-colors">Gerador de exs</a>
-    <a href="glossary.html" class="text-md text-gray-400 hover:text-cyan-400 transition-colors">Glossário</a>
-    <a href="ai-list.html" class="text-md text-gray-400 hover:text-cyan-400 transition-colors">Lista de AI's</a>
-    <a href="pass-gen.html" class="text-md text-gray-400 hover:text-cyan-400 transition-colors">Gerador de passwords</a>
   </nav>
 </div>
 
@@ -299,30 +305,56 @@ class="quiz-btn">Start Quiz</button>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Sidebar logic
+    // 1. Elementos da Sidebar Principal
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
     const openBtn = document.getElementById('openSidebar');
     const closeBtn = document.getElementById('closeSidebar');
 
+    // 2. Elementos do Dropdown de Tools
+    const toolsBtn = document.getElementById('toolsDropdownBtn');
+    const toolsMenu = document.getElementById('toolsMenu');
+    const toolsArrow = document.getElementById('toolsArrow');
+
+    // --- FUNÇÕES DA SIDEBAR ---
     function toggleSidebar() {
-      sidebar.classList.toggle('translate-x-full');
-      overlay.classList.toggle('hidden');
+        sidebar.classList.toggle('translate-x-full');
+        overlay.classList.toggle('hidden');
     }
 
     openBtn.addEventListener('click', toggleSidebar);
     closeBtn.addEventListener('click', toggleSidebar);
     overlay.addEventListener('click', toggleSidebar);
 
-    // Premium button logic original
-    const premiumBtn = Array.from(document.querySelectorAll('section .flex button'))
-      .find(b => b.textContent.trim().toLowerCase() === 'premium');
+    // --- FUNÇÃO DO DROPDOWN (TOOLS) ---
+    if (toolsBtn && toolsMenu && toolsArrow) {
+        toolsBtn.addEventListener('click', function (e) {
+            e.preventDefault(); // Evita comportamentos inesperados de navegação
+            
+            // Alterna a visibilidade do submenu
+            const isHidden = toolsMenu.classList.toggle('hidden');
+            
+            // Lógica da Seta
+            if (isHidden) {
+                toolsArrow.classList.add('rotate-180');
+                toolsArrow.classList.remove('rotate-0');
+            } else {
+                toolsArrow.classList.remove('rotate-180');
+                toolsArrow.classList.add('rotate-0');
+            }
+        });
+    }
+
+    // --- LÓGICA DO BOTÃO PREMIUM ---
+    // Procura pelo botão que contém o texto "premium" na seção principal
+    const premiumBtn = Array.from(document.querySelectorAll('section button'))
+        .find(b => b.textContent.trim().toLowerCase() === 'premium');
 
     if (premiumBtn) {
-      premiumBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        window.location.href = 'premium-page.html';
-      });
+        premiumBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            window.location.href = 'premium-page.html';
+        });
     }
   });
 </script>
