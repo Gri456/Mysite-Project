@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BitJourney — Premium</title>
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121933; --panel-2:#0f1630;
+      --text:#e6f0ff; --muted:#9fb3d8;
+      --p1:#06b6d4; --p2:#2563eb; --p3:#7c3aed;
+      --ok:#22c55e; --ring:#60a5fa;
+      --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background:radial-gradient(1000px 700px at 100% -10%,#1a2455 0%,transparent 60%),var(--bg);
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial
+    }
+    a{color:inherit;text-decoration:none}
+
+    /* Header */
+    header{
+      position:sticky;top:0;z-index:50;
+      background:linear-gradient(180deg,rgba(11,16,32,.9),rgba(11,16,32,.45));
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(96,165,250,.15)
+    }
+    .container{max-width:1100px;margin:0 auto;padding:0 1.25rem}
+    .row{display:flex;align-items:center;justify-content:space-between;padding:1rem 0}
+    .brand{display:flex;align-items:center;gap:.6rem}
+    .brand-logo{
+      width:36px;height:36px;border-radius:10px;
+      background:linear-gradient(135deg,var(--p1),var(--p2) 60%,var(--p3));
+      display:grid;place-items:center;color:#fff;font-weight:800;
+      box-shadow:0 8px 24px rgba(37,99,235,.35)
+    }
+    .chip{font-size:.8rem;padding:.25rem .6rem;border:1px solid rgba(255,255,255,.15);border-radius:999px;color:var(--muted)}
+    .btn{
+      display:inline-flex;align-items:center;gap:.5rem;
+      padding:.7rem 1.1rem;border-radius:.75rem;border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;font-weight:600;
+      box-shadow:0 10px 30px rgba(37,99,235,.25);
+      transition:transform .15s ease, box-shadow .2s ease;cursor:pointer
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 16px 36px rgba(37,99,235,.35)}
+    .btn-ghost{background:transparent;border-color:rgba(255,255,255,.15);color:var(--text)}
+    .btn-ghost:hover{background:rgba(255,255,255,.05)}
+
+    /* Hero */
+    .hero{padding:3rem 0 1.25rem;text-align:center}
+    .title{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800}
+    .subtitle{color:var(--muted);max-width:760px;margin:.75rem auto 0;font-size:1.05rem}
+
+    /* Tabs */
+    .tabs{
+      margin:1.5rem auto 0;display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center
+    }
+    .tab-btn{
+      padding:.6rem .9rem;border-radius:.65rem;border:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      color:#cfe3ff;cursor:pointer;transition:all .2s ease;font-weight:600
+    }
+    .tab-btn:hover{border-color:rgba(255,255,255,.25)}
+    .tab-btn[aria-selected="true"]{
+      color:#fff;border-color:rgba(96,165,250,.45);
+      box-shadow:0 10px 26px rgba(37,99,235,.25), inset 0 0 0 1px rgba(124,58,237,.18)
+    }
+
+    /* Panel wrapper */
+    .panel{
+      position:relative;background:linear-gradient(180deg,rgba(18,25,51,.8),rgba(13,20,48,.8));
+      border:1px solid rgba(96,165,250,.15);border-radius:18px;padding:1.1rem;
+      box-shadow:inset 0 0 0 1px rgba(124,58,237,.05),0 10px 40px rgba(2,6,23,.6);
+      margin:1rem auto 3rem;max-width:1100px
+    }
+
+    /* Tab content */
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .grid{
+      display:grid;gap:1rem;grid-template-columns:1.1fr .9fr;align-items:stretch
+    }
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+
+    .info{
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:1rem;
+      backdrop-filter:blur(6px);box-shadow:0 10px 28px rgba(2,6,23,.55)
+    }
+    .info h3{margin:.2rem 0 .4rem;font-size:1.25rem}
+    .info p{color:var(--muted);line-height:1.45}
+
+    .bullets{margin:.8rem 0 0;display:grid;gap:.4rem}
+    .bullet{
+      display:flex;gap:.55rem;align-items:flex-start;
+      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);
+      padding:.55rem .7rem;border-radius:.65rem
+    }
+    .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(90deg,var(--p1),var(--p2));margin-top:.35rem}
+
+    .price-card{
+      background:linear-gradient(180deg,rgba(18,25,51,.9),rgba(15,22,48,.9));
+      border:1px solid rgba(96,165,250,.25);border-radius:16px;padding:1.2rem;
+      display:flex;flex-direction:column;justify-content:space-between
+    }
+    .price-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+    .badge{font-size:.75rem;color:#cfe3ff;border:1px solid rgba(255,255,255,.18);padding:.2rem .5rem;border-radius:999px}
+    .price{
+      font-size:2.2rem;font-weight:800;background:linear-gradient(90deg,var(--p1),var(--p2));
+      -webkit-background-clip:text;background-clip:text;color:transparent
+    }
+    .features{margin:.8rem 0 .9rem;display:grid;gap:.45rem}
+    .feat{display:flex;gap:.5rem;align-items:flex-start}
+    .tick{
+      width:18px;height:18px;border-radius:6px;display:grid;place-items:center;
+      background:linear-gradient(135deg,rgba(34,197,94,.9),rgba(16,185,129,.9));
+      box-shadow:0 6px 18px rgba(16,185,129,.35)
+    }
+    .small{color:var(--muted);font-size:.9rem}
+    .cta{display:flex;gap:.6rem;flex-wrap:wrap}
+    .btn-ghost.small{padding:.55rem .75rem;border-radius:.6rem}
+    .btn.small{padding:.55rem .9rem;border-radius:.6rem}
+
+    /* Foot note */
+    .foot{color:var(--muted);text-align:center;margin-top:2rem;font-size:.95rem}
+
+    /* --- Header nav: pill group e botões consistentes --- */
+.nav-actions{
+  display:flex; gap:.4rem; align-items:center;
+  padding:.35rem; border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 10px 24px rgba(2,6,23,.35), inset 0 0 0 1px rgba(124,58,237,.06);
+}
+
+.btn--header{
+  height:38px; /* tamanho fixo elegante */
+  padding:.4rem .9rem; border-radius:999px;
+  line-height:1; font-weight:600;
+}
+
+/* Ghost no header: mais discreto e estável de altura */
+header .btn-ghost.btn--header{
+  background:transparent;
+  border:1px solid rgba(255,255,255,.12);
+  color:var(--text);
+}
+header .btn-ghost.btn--header:hover{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(255,255,255,.22);
+}
+
+/* Primário no header: menos “pesado” mas ainda com destaque */
+header .btn.btn--header{
+  padding:.4rem 1rem;
+  background:linear-gradient(90deg,var(--p1),var(--p2));
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 10px 26px rgba(37,99,235,.28);
+}
+header .btn.btn--header:hover{
+  transform:translateY(-1px);
+  box-shadow:0 16px 32px rgba(37,99,235,.38);
+}
+
+/* Estados de foco acessíveis e bonitos */
+.nav-actions a:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 4px rgba(96,165,250,.25);
+}
+
+/* Responsivo: quando o espaço apertar, deixa-os “respirar” */
+@media (max-width:600px){
+  .nav-actions{ gap:.3rem; padding:.3rem }
+  .btn--header{ height:36px; padding:.35rem .8rem; font-size:.95rem }
+}
+
+/* Ajuste fino do header para alinhar verticalmente */
+header .row{ padding:.75rem 0 }
+
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <div class="row">
+        <div class="brand">
+          <div class="brand-logo">BJ</div>
+          <div>
+            <strong>BitJourney</strong><br>
+            <small class="chip">Premium</small>
+          </div>
+        </div>
+        <nav class="nav-actions">
+  <a class="btn-ghost btn--header" href="index.html">Início</a>
+  <a class="btn-ghost btn--header" href="browse.html">Explorar</a>
+  <a class="btn btn--header" href="area-privada.html">Área Privada</a>
+</nav>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="container hero">
+    <h1 class="title">A tua Jornada <span style="background:linear-gradient(90deg,var(--p1),var(--p2));-webkit-background-clip:text;background-clip:text;color:transparent">Premium</span></h1>
+    <p class="subtitle">Escolhe uma área e desbloqueia um percurso guiado com conteúdos, desafios e recursos selecionados. Cada trilho premium custa <strong>100€</strong>.</p>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist" aria-label="Áreas Premium">
+      <button class="tab-btn" role="tab" aria-selected="true" aria-controls="tab-web" id="tab-web-btn">Web Dev</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-cyber" id="tab-cyber-btn">Cybersecurity</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-data" id="tab-data-btn">Data Science</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-ai" id="tab-ai-btn">Inteligência Artificial</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-mobile" id="tab-mobile-btn">Mobile Dev</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-cloud" id="tab-cloud-btn">Cloud</button>
+    </div>
+  </section>
+
+  <!-- Panels -->
+  <section class="panel container">
+    <!-- Web Dev -->
+    <div id="tab-web" class="tab-panel active" role="tabpanel" aria-labelledby="tab-web-btn">
+      <div class="grid">
+        <article class="info">
+          <h3>Web Development</h3>
+          <p>Aprende a construir aplicações web modernas do zero ao deploy. HTML/CSS, JavaScript, frameworks, Git e boas práticas de acessibilidade e performance.</p>
+          <div class="bullets">
+            <div class="bullet"><span class="dot"></span><div><strong>Front‑end:</strong> HTML, CSS (Flex/Grid), JS, React/Vue.</div></div>
+            <div class="bullet"><span class="dot"></span><div><strong>Back‑end:</strong> APIs, Node/Express, autenticação.</div></div>
+            <div class="bullet"><span class="dot"></span><div><strong>DevOps básico:</strong> CI/CD e deploy.</div></div>
+          </div>
+        </article>
+        <aside class="price-card">
+          <div>
+            <div class="price-head">
+              <span class="badge">Acesso Premium</span>
+              <span class="price">100€</span>
+            </div>
+            <div class="features">
+              <div class="feat"><span class="tick">✓</span><div>Trilha guiada por marcos</div></div>
+              <div class="feat"><span class="tick">✓</span><div>Recursos &amp; projetos práticos</div></div>
+              <div class="feat"><span class="tick">✓</span><div>Atualizações futuras incluídas</div></div>
+            </div>
+          </div>
+          <div class="cta">
+            <a class="btn small" href="#comprar-web">Comprar Web Dev</a>
+            <a class="btn-ghost small" href="premium.html">Ver conteúdos</a>
+          </div>
+          <p class="small" style="margin-top:.6rem">Pagamento único por área.</p>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Cybersecurity -->
+    <div id="tab-cyber" class="tab-panel" role="tabpanel" aria-labelledby="tab-cyber-btn">
+      <div class="grid">
+        <article class="info">
+          <h3>Cybersecurity</h3>
+          <p>Fundamentos de segurança, hardening, redes, OSINT e práticas de defesa. Percurso pensado para iniciantes que querem entrar no mundo blue team/red team.</p>
+          <div class="bullets">
+            <div class="bullet"><span class="dot"></span><div>Modelos de ameaça &amp; segurança em camadas</div></div>
+            <div class="bullet"><span class="dot"></span><div>Ferramentas essenciais (Wireshark, Nmap, Burp)</div></div>
+            <div class="bullet"><span class="dot"></span><div>Laboratórios práticos e guias</div></div>
+          </div>
+        </article>
+        <aside class="price-card">
+          <div class="price-head"><span class="badge">Acesso Premium</span><span class="price">100€</span></div>
+          <div class="features">
+            <div class="feat"><span class="tick">✓</span><div>Laboratórios guiados</div></div>
+            <div class="feat"><span class="tick">✓</span><div>Checklist de segurança</div></div>
+            <div class="feat"><span class="tick">✓</span><div>Atualizações incluídas</div></div>
+          </div>
+          <div class="cta">
+            <a class="btn small" href="#comprar-cyber">Comprar Cybersecurity</a>
+            <a class="btn-ghost small" href="cybersecurity.html">Ver conteúdos</a>
+          </div>
+          <p class="small">Pagamento único por área.</p>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Data Science -->
+    <div id="tab-data" class="tab-panel" role="tabpanel" aria-labelledby="tab-data-btn">
+      <div class="grid">
+        <article class="info">
+          <h3>Data Science</h3>
+          <p>Do Python para análise ao machine learning clássico: pipelines, visualização e avaliação de modelos com projetos de portefólio.</p>
+          <div class="bullets">
+            <div class="bullet"><span class="dot"></span><div>EDA, pandas &amp; visualização</div></div>
+            <div class="bullet"><span class="dot"></span><div>Modelos supervisionados e não supervisionados</div></div>
+            <div class="bullet"><span class="dot"></span><div>Boas práticas de validação</div></div>
+          </div>
+        </article>
+        <aside class="price-card">
+          <div class="price-head"><span class="badge">Acesso Premium</span><span class="price">100€</span></div>
+          <div class="features">
+            <div class="feat"><span class="tick">✓</span><div>Datasets e notebooks</div></div>
+            <div class="feat"><span class="tick">✓</span><div>Projetos guiados</div></div>
+            <div class="feat"><span class="tick">✓</span><div>Atualizações incluídas</div></div>
+          </div>
+          <div class="cta">
+            <a class="btn small" href="#comprar-data">Comprar Data Science</a>
+            <a class="btn-ghost small" href="data-science.html">Ver conteúdos</a>
+          </div>
+          <p class="small">Pagamento único por área.</p>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Inteligência Artificial -->
+    <div id="tab-ai" class="tab-panel" role="tabpanel" aria-labelledby="tab-ai-btn">
+      <div class="grid">
+        <article class="info">
+          <h3>Inteligência Artificial</h3>
+          <p>Fundamentos de IA aplicada: do pré‑processamento à construção de modelos, com foco em NLP, visão computacional e LLMs.</p>
+          <div class="bullets">
+            <div class="bullet"><span class="dot"></span><div> pipelines de dados &amp; ética</div></div>
+            <div class="bullet"><span class="dot"></span><div>Modelos clássicos e redes neurais</div></div>
+            <div class="bullet"><span class="dot"></span><div>Integração de LLMs em apps</div></div>
+          </div>
+        </article>
+        <aside class="price-card">
+          <div class="price-head"><span class="badge">Acesso Premium</span><span class="price">100€</span></div>
+          <div class="features">
+            <div class="feat"><span class="tick">✓</span><div>Projetos práticos</div></div>
+            <div class="feat"><span class="tick">✓</span><div>Recursos atualizados</div></div>
+            <div class="feat"><span class="tick">✓</span><div>Suporte por roadmap</div></div>
+          </div>
+          <div class="cta">
+            <a class="btn small" href="#comprar-ai">Comprar IA</a>
+            <a class="btn-ghost small" href="artificial-intelligence.html">Ver conteúdos</a>
+          </div>
+          <p class="small">Pagamento único por área.</p>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Mobile Development -->
+    <div id="tab-mobile" class="tab-panel" role="tabpanel" aria-labelledby="tab-mobile-btn">
+      <div class="grid">
+        <article class="info">
+          <h3>Mobile Development</h3>
+          <p>Cria apps Android/iOS com foco em UI/UX, consumo de APIs e publicação em loja.</p>
+          <div class="bullets">
+            <div class="bullet"><span class="dot"></span><div>Fundamentos (Kotlin/Swift/Flutter/React Native)</div></div>
+            <div class="bullet"><span class="dot"></span><div>Estados, navegação e armazenamento</div></div>
+            <div class="bullet"><span class="dot"></span><div>Build &amp; release</div></div>
+          </div>
+        </article>
+        <aside class="price-card">
+          <div class="price-head"><span class="badge">Acesso Premium</span><span class="price">100€</span></div>
+          <div class="features">
+            <div class="feat"><span class="tick">✓</span><div>Templates de app</div></div>
+            <div class="feat"><span class="tick">✓</span><div>Guias de publicação</div></div>
+            <div class="feat"><span class="tick">✓</span><div>Atualizações incluídas</div></div>
+          </div>
+          <div class="cta">
+            <a class="btn small" href="#comprar-mobile">Comprar Mobile Dev</a>
+            <a class="btn-ghost small" href="mobile-development.html">Ver conteúdos</a>
+          </div>
+          <p class="small">Pagamento único por área.</p>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Cloud -->
+    <div id="tab-cloud" class="tab-panel" role="tabpanel" aria-labelledby="tab-cloud-btn">
+      <div class="grid">
+        <article class="info">
+          <h3>Cloud Computing</h3>
+          <p>Conceitos base de cloud, serviços core (compute, storage, network), infraestrutura como código e monitorização.</p>
+          <div class="bullets">
+            <div class="bullet"><span class="dot"></span><div>AWS / Azure / GCP fundamentais</div></div>
+            <div class="bullet"><span class="dot"></span><div>Containers &amp; IaC (Docker, Terraform)</div></div>
+            <div class="bullet"><span class="dot"></span><div>Segurança e custos</div></div>
+          </div>
+        </article>
+        <aside class="price-card">
+          <div class="price-head"><span class="badge">Acesso Premium</span><span class="price">100€</span></div>
+          <div class="features">
+            <div class="feat"><span class="tick">✓</span><div>Labs práticos</div></div>
+            <div class="feat"><span class="tick">✓</span><div>Guias de arquitetura</div></div>
+            <div class="feat"><span class="tick">✓</span><div>Atualizações incluídas</div></div>
+          </div>
+          <div class="cta">
+            <a class="btn small" href="#comprar-cloud">Comprar Cloud</a>
+            <a class="btn-ghost small" href="cloud-computing.html">Ver conteúdos</a>
+          </div>
+          <p class="small">Pagamento único por área.</p>
+        </aside>
+      </div>
+    </div>
+
+    <div class="foot">
+      Queres desbloquear tudo? Podes começar por uma área e, mais tarde, adicionar as restantes.
+    </div>
+  </section>
+
+  <script>
+    // tabs
+    const btns = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    function activate(id){
+      panels.forEach(p => p.classList.toggle('active', p.id === id));
+      btns.forEach(b => b.setAttribute('aria-selected', b.id.replace('-btn','') === id));
+    }
+
+    btns.forEach(b=>{
+      b.addEventListener('click', () => activate(b.getAttribute('aria-controls')));
+      // Acessibilidade por teclado
+      b.addEventListener('keydown', (e)=>{
+        const idx = Array.from(btns).indexOf(b);
+        if(e.key === 'ArrowRight'){ (btns[idx+1] || btns[0]).focus(); }
+        if(e.key === 'ArrowLeft'){ (btns[idx-1] || btns[btns.length-1]).focus(); }
+        if(e.key === 'Enter' || e.key === ' '){ activate(b.getAttribute('aria-controls')); }
+      });
+    });
+  </script>
+</body>
+</html>
