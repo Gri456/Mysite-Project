@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - DevOps & Deploy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #5b7cff;
+            --purple: #7a4bff;
+            --cyan: #28e0ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 125, 230, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Gradient overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--blue), var(--cyan));
+            color: white;
+            box-shadow: 0 4px 15px rgba(91, 124, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(91, 124, 255, 0.4);
+        }
+        /* Main content */
+        .main-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .course-header {
+            margin-bottom: 2rem;
+        }
+
+        .course-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+
+            /* Gradiente baseado no Tailwind: from-blue-700 via-cyan-500 to-blue-600 */
+            background: linear-gradient(to right, #1d4ed8, #06b6d4, #2563eb);
+
+            /* Faz o gradiente aparecer apenas no texto */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent; /* Fallback */
+        }
+        .course-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .progress-section {
+            margin-bottom: 2rem;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Tabs */
+        .tabs-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .tab-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+        .tab-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+        .tab-button:hover {
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-button.active {
+            color: var(--text-light);
+            background: rgba(91, 124, 255, 0.1);
+        }
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+        .tab-content {
+            padding: 2rem;
+            min-height: 400px;
+        }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        
+        /* List improvement */
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Quiz Styles */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { 
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem; 
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;
+            transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+
+        /* Lab Styles */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #fff; color: #333; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Evaluation section styles */
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .evaluation-column {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .evaluation-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid;
+        }
+
+        .evaluation-title.essential {
+            color: var(--cyan);
+            border-bottom-color: var(--cyan);
+        }
+
+        .evaluation-title.important {
+            color: #ffd700;
+            border-bottom-color: #ffd700;
+        }
+
+        .evaluation-title.advanced {
+            color: #ff6b6b;
+            border-bottom-color: #ff6b6b;
+        }
+
+        .evaluation-icon { font-size: 1.1rem; }
+
+        .evaluation-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .evaluation-list li {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .evaluation-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid { grid-template-columns: 1fr; }
+        }
+
+        .quiz-question {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--blue); }
+
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); }
+
+        .option-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            font-family: 'Courier New', monospace;
+        }
+
+        .quiz-option:hover .option-text { color: var(--text-light); }
+
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91, 124, 255, 0.1), rgba(40, 224, 255, 0.05));
+            border: 1px solid rgba(91, 124, 255, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+
+        .feedback-item {
+            display: flex; align-items: flex-start; gap: 1rem; padding: 1rem;
+            border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03);
+        }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .evaluation-column {
+            background: rgba(255,255,255,0.02);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .evaluation-title { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; font-size: 1.1rem; }
+        .essential { color: var(--cyan); }
+        .important { color: var(--blue); }
+        .advanced { color: var(--purple); }
+        .evaluation-list { list-style: none; font-size: 0.9rem; color: var(--text-secondary); }
+        .evaluation-list li { margin-bottom: 0.6rem; padding-left: 1.2rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; color: inherit; }
+        .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium.html" class="btn btn-back">← Back</a>
+                <a href="browse.html" class="btn btn-primary">Browse</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: DevOps & Deploy</h1>
+            <p class="course-description">
+                In this module you will deepen fundamental DevOps and Deploy concepts, learning to automate development and deployment processes for web applications.<br>
+                The focus is on understanding how DevOps processes enable creating faster, more reliable and scalable applications.
+            <div class="course-meta">
+                <div class="meta-item">
+                    <span>⏱</span>
+                    <span>8–10h</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>• CI/CD • Docker • Kubernetes • Monitoring • Cloud Deployment</span>
+                </div>
+                <div class="meta-item">
+                    <span>📌</span>
+                    <span>Basic knowledge of Git and Terminal</span>
+                </div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'learn')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'lab')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'resources')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'evaluation')">Evaluation</button>
+            </nav>
+
+           <div id="learn" class="tab-panel active">
+
+    <!-- 7.1 What is DevOps -->
+    <div class="content-card">
+        <h2 style="color: var(--cyan); margin-bottom: 1rem;">🚀 7.1 What is DevOps?</h2>
+        <p style="line-height: 1.7;">Modern software development doesn't end when the code is written. Before DevOps existed, there was a wall between <strong>Development teams</strong> (who write code) and <strong>Operations teams</strong> (who manage servers and deployments). This created slow releases, blame-throwing when things broke, and painful manual processes.</p>
+        <br>
+        <p style="line-height: 1.7;"><strong>DevOps</strong> is a culture, a set of practices, and a toolchain that unites these two worlds. The goal is simple: <em>ship software faster, more reliably, and with less risk</em>.</p>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:1rem; margin-top:1.5rem;">
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">⚡</div>
+                <strong style="color:var(--cyan);">Speed</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Deploy multiple times per day instead of once per month</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🛡️</div>
+                <strong style="color:var(--blue);">Reliability</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Automated tests and rollbacks prevent broken releases reaching users</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.07);border:1px solid rgba(122,75,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">📈</div>
+                <strong style="color:var(--purple);">Scale</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Infrastructure scales automatically with user demand</p>
+            </div>
+            <div style="background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🤝</div>
+                <strong style="color:#ffa500;">Collaboration</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Dev and Ops share responsibility for the full lifecycle of the application</p>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border-left:4px solid var(--cyan);padding:1rem;border-radius:0 8px 8px 0;margin-top:1.5rem;">
+            <strong>🔄 The DevOps Infinity Loop:</strong>
+            <div style="font-family:monospace;font-size:0.85rem;color:var(--text-secondary);margin-top:0.8rem;text-align:center;line-height:2;">
+                <span style="color:var(--blue);">Plan</span> → <span style="color:var(--blue);">Code</span> → <span style="color:var(--blue);">Build</span> → <span style="color:var(--cyan);">Test</span> → <span style="color:var(--cyan);">Release</span> → <span style="color:var(--cyan);">Deploy</span> → <span style="color:var(--purple);">Operate</span> → <span style="color:var(--purple);">Monitor</span> → <em style="color:var(--text-secondary);">(back to Plan)</em>
+            </div>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;">This continuous loop replaces the old "waterfall" model where code was thrown over the wall to operations after months of development.</p>
+        </div>
+    </div>
+
+    <!-- 7.2 Git Deep Dive -->
+    <div class="content-card">
+        <h3>🌿 7.2 Git — Version Control in Depth</h3>
+        <p>Git is the foundation of every modern DevOps workflow. It's a <strong>distributed version control system</strong> that records the full history of your codebase, enables collaboration between teams, and makes it safe to experiment without breaking things.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">ESSENTIAL GIT COMMANDS</p>
+            <pre style="font-size:0.8rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code># Initial setup
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+
+# Start a project
+git init                    # Initialize a new repo
+git clone &lt;url&gt;             # Clone an existing repo from GitHub
+
+# Daily workflow
+git status                  # See what changed
+git add .                   # Stage all changes
+git add src/app.js          # Stage a specific file
+git commit -m "feat: add login page"   # Save a snapshot
+
+# Remote (GitHub/GitLab)
+git push origin main        # Send commits to remote
+git pull origin main        # Get latest changes from remote
+
+# Inspect history
+git log --oneline           # Compact commit history
+git diff                    # See unstaged changes</code></pre>
+        </div>
+
+        <div style="margin-top:1.5rem;">
+            <strong>🌳 Branching Strategy:</strong>
+            <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Branches let you work on features, fixes, or experiments in isolation without touching the stable <code>main</code> branch.</p>
+            <div style="background:#000;padding:1rem;border-radius:8px;margin-top:0.8rem;">
+                <pre style="font-size:0.8rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code># Create and switch to a new branch
+git checkout -b feature/user-authentication
+
+# Make changes, commit...
+git add .
+git commit -m "feat: implement JWT authentication"
+
+# Merge back into main
+git checkout main
+git merge feature/user-authentication
+
+# Delete the branch after merge
+git branch -d feature/user-authentication
+
+# See all branches
+git branch -a</code></pre>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">📝 Commit Message Convention</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Use the <strong>Conventional Commits</strong> standard for clean, readable history:</p>
+                <pre style="font-size:0.75rem;color:#0f0;background:#000;padding:0.6rem;border-radius:4px;margin-top:0.5rem;overflow-x:auto;"><code>feat: add shopping cart
+fix: resolve login redirect bug
+docs: update README setup steps
+refactor: extract auth helpers
+test: add unit tests for Cart
+chore: update dependencies</code></pre>
+            </div>
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ff6b6b;">⚠️ Git Conflicts</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">A <strong>merge conflict</strong> happens when two branches edit the same line. Git marks the conflict in the file:</p>
+                <pre style="font-size:0.75rem;color:#0f0;background:#000;padding:0.6rem;border-radius:4px;margin-top:0.5rem;overflow-x:auto;"><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+console.log("Hello Dev");
+=======
+console.log("Hello Ops");
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/ops-branch
+# Edit file to resolve, then git add + commit</code></pre>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🗺️ Popular Git Workflows:</strong>
+            <table style="width:100%;border-collapse:collapse;margin-top:0.8rem;font-size:0.83rem;">
+                <thead><tr style="border-bottom:1px solid var(--border-color);">
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Workflow</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Best For</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">How it works</th>
+                </tr></thead>
+                <tbody style="color:var(--text-secondary);">
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;"><strong>Git Flow</strong></td>
+                        <td style="padding:0.5rem;">Versioned releases</td>
+                        <td style="padding:0.5rem;">main + develop + feature/* + release/* + hotfix/*</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;"><strong>GitHub Flow</strong></td>
+                        <td style="padding:0.5rem;">Continuous delivery, web apps</td>
+                        <td style="padding:0.5rem;">main + short-lived feature branches, PR to merge</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.5rem;"><strong>Trunk-Based</strong></td>
+                        <td style="padding:0.5rem;">Large teams, CI/CD heavy</td>
+                        <td style="padding:0.5rem;">Everyone commits to main (with feature flags)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 7.3 CI/CD -->
+    <div class="content-card">
+        <h3>🔄 7.3 CI/CD — Automating the Entire Pipeline</h3>
+        <p>CI/CD is the practice of automating everything between writing code and having it running in production. The goal is to make releasing software as boring and routine as possible — eliminating the human drama and manual steps.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.3);padding:1.2rem;border-radius:8px;">
+                <h4 style="color:var(--cyan);margin-bottom:0.8rem;">🔧 CI — Continuous Integration</h4>
+                <p style="font-size:0.83rem;color:var(--text-secondary);">Every time a developer pushes code, an automated system:</p>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;line-height:2;">
+                    <li>→ Pulls the new code</li>
+                    <li>→ Installs dependencies (<code>npm install</code>)</li>
+                    <li>→ Runs linting (code quality check)</li>
+                    <li>→ Runs all unit and integration tests</li>
+                    <li>→ Builds the application</li>
+                    <li>→ Reports ✅ pass or ❌ fail to the team</li>
+                </ul>
+            </div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.3);padding:1.2rem;border-radius:8px;">
+                <h4 style="color:var(--blue);margin-bottom:0.8rem;">🚀 CD — Continuous Delivery / Deployment</h4>
+                <p style="font-size:0.83rem;color:var(--text-secondary);">After CI passes, CD takes over:</p>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;line-height:2;">
+                    <li>→ <strong>Continuous Delivery:</strong> Code is always <em>ready</em> to deploy (human triggers it)</li>
+                    <li>→ <strong>Continuous Deployment:</strong> Code is deployed <em>automatically</em> if all tests pass</li>
+                    <li>→ Sends the build to staging or production</li>
+                    <li>→ Runs smoke tests on the deployed version</li>
+                    <li>→ Notifies the team (Slack, email)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="margin-top:1.5rem;">
+            <strong>⚙️ GitHub Actions — The most popular CI/CD tool:</strong>
+            <div style="background:#000;padding:1rem;border-radius:8px;margin-top:0.8rem;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">.github/workflows/deploy.yml</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]        # Trigger on push to main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest  # Run on a fresh Linux machine
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build application
+        run: npm run build
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}</code></pre>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.8rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;text-align:center;">
+                <div style="font-size:1.2rem;">⚙️</div>
+                <strong style="color:var(--cyan);">GitHub Actions</strong>
+                <p style="color:var(--text-secondary);font-size:0.78rem;margin-top:0.3rem;">Native to GitHub, YAML-based, free tier</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;text-align:center;">
+                <div style="font-size:1.2rem;">🔵</div>
+                <strong style="color:var(--blue);">GitLab CI</strong>
+                <p style="color:var(--text-secondary);font-size:0.78rem;margin-top:0.3rem;">Built into GitLab, powerful pipelines</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;text-align:center;">
+                <div style="font-size:1.2rem;">🔴</div>
+                <strong style="color:#ff6b6b;">Jenkins</strong>
+                <p style="color:var(--text-secondary);font-size:0.78rem;margin-top:0.3rem;">Self-hosted, enterprise, highly configurable</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;text-align:center;">
+                <div style="font-size:1.2rem;">⭕</div>
+                <strong style="color:var(--purple);">CircleCI</strong>
+                <p style="color:var(--text-secondary);font-size:0.78rem;margin-top:0.3rem;">Fast, parallelism, great DX</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7.4 Docker -->
+    <div class="content-card">
+        <h3>🐳 7.4 Docker — Containerization</h3>
+        <p>The classic problem: <em>"It works on my machine!"</em>. Docker solves this by packaging your application along with <strong>everything it needs to run</strong> — the runtime, dependencies, configuration — into a portable unit called a <strong>container</strong>.</p>
+        <br>
+        <p>A container is like a lightweight, isolated virtual machine. It runs identically on your laptop, your colleague's machine, and any cloud server in the world.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ff6b6b;">😩 Without Docker</strong>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;line-height:1.9;">
+                    <li>→ "Works on my machine but not on the server"</li>
+                    <li>→ Different Node versions across developers</li>
+                    <li>→ Manual server setup for each environment</li>
+                    <li>→ Hours of debugging environment issues</li>
+                </ul>
+            </div>
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">😊 With Docker</strong>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;line-height:1.9;">
+                    <li>→ Same container runs on every machine</li>
+                    <li>→ All dependencies locked inside the image</li>
+                    <li>→ New developer onboards with one command</li>
+                    <li>→ Scales horizontally with ease</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">Dockerfile — Node.js Application</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Start from an official Node.js image
+FROM node:18-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy dependency files first (for layer caching)
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --production
+
+# Copy the rest of the application code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Expose port 3000 to the outside world
+EXPOSE 3000
+
+# Command to start the app
+CMD ["node", "dist/server.js"]</code></pre>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">ESSENTIAL DOCKER COMMANDS</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code># Build an image from Dockerfile
+docker build -t my-app:1.0 .
+
+# Run a container from the image
+docker run -p 3000:3000 my-app:1.0
+
+# Run in background (detached)
+docker run -d -p 3000:3000 --name my-container my-app:1.0
+
+# List running containers
+docker ps
+
+# Stop and remove a container
+docker stop my-container
+docker rm my-container
+
+# List local images
+docker images
+
+# Remove an image
+docker rmi my-app:1.0
+
+# View logs
+docker logs my-container</code></pre>
+        </div>
+
+        <div style="margin-top:1.2rem;">
+            <strong>🔑 Key Docker Concepts:</strong>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.8rem;margin-top:0.8rem;">
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:0.8rem;border-radius:6px;">
+                    <strong style="color:var(--cyan);font-size:0.85rem;">🖼️ Image</strong>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.3rem;">A read-only template/blueprint for creating containers. Like a class in OOP.</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:0.8rem;border-radius:6px;">
+                    <strong style="color:var(--cyan);font-size:0.85rem;">📦 Container</strong>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.3rem;">A running instance of an image. Like an object created from a class.</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:0.8rem;border-radius:6px;">
+                    <strong style="color:var(--cyan);font-size:0.85rem;">📋 Dockerfile</strong>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.3rem;">A script of instructions to build an image from scratch.</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:0.8rem;border-radius:6px;">
+                    <strong style="color:var(--cyan);font-size:0.85rem;">🏪 Docker Hub</strong>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.3rem;">A public registry of images (like npm but for Docker). Pull official images: <code>node</code>, <code>postgres</code>, <code>nginx</code>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7.5 Docker Compose -->
+    <div class="content-card">
+        <h3>🎼 7.5 Docker Compose — Multi-Container Apps</h3>
+        <p>Real applications are not just one container. They have a backend API, a database, a cache, perhaps a reverse proxy. <strong>Docker Compose</strong> lets you define and run all of them together in a single file.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">docker-compose.yml — Full Stack App (Node + PostgreSQL + Redis)</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>version: '3.8'
+
+services:
+  # Your Node.js backend API
+  api:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://user:pass@db:5432/myapp
+      REDIS_URL: redis://cache:6379
+    depends_on:
+      - db
+      - cache
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: myapp
+
+  # Redis Cache
+  cache:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:  # Persist database data between restarts</code></pre>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">DOCKER COMPOSE COMMANDS</p>
+            <pre style="font-size:0.8rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code>docker compose up -d        # Start all services in background
+docker compose down         # Stop and remove all containers
+docker compose logs -f api  # Follow logs of the 'api' service
+docker compose ps           # Status of all services
+docker compose exec api sh  # Open a shell inside the api container</code></pre>
+        </div>
+    </div>
+
+    <!-- 7.6 Cloud Hosting & Deployment -->
+    <div class="content-card">
+        <h3>☁️ 7.6 Cloud Hosting and Deployment Platforms</h3>
+        <p>Where your application lives in production matters. The right platform depends on the type of app, team size, and technical needs.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(40,224,255,0.06);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">▲ Vercel</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Optimized for frontend and Next.js. Zero-config deployments from GitHub. Built-in CDN, preview deployments per PR, Edge Functions. Free tier very generous.</p>
+                <code style="font-size:0.75rem;color:var(--blue);">Best for: React, Vue, Next.js, Nuxt</code>
+            </div>
+            <div style="background:rgba(91,124,255,0.06);border:1px solid rgba(91,124,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--blue);">◈ Netlify</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Git-connected deployments, serverless functions, form handling, identity. Similar to Vercel, slightly broader feature set for JAMstack.</p>
+                <code style="font-size:0.75rem;color:var(--blue);">Best for: Static sites, JAMstack, SPAs</code>
+            </div>
+            <div style="background:rgba(122,75,255,0.06);border:1px solid rgba(122,75,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--purple);">🚂 Render / Railway</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Full-stack platforms. Deploy Node, Python, Go, Docker, PostgreSQL, Redis. Simpler than AWS, more powerful than Vercel for backends.</p>
+                <code style="font-size:0.75rem;color:var(--purple);">Best for: Full-stack, APIs, databases</code>
+            </div>
+            <div style="background:rgba(255,165,0,0.06);border:1px solid rgba(255,165,0,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ffa500;">☁️ AWS / Azure / GCP</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Enterprise cloud providers. Hundreds of services. Complete control but high complexity. Used by Netflix, Airbnb, every large company.</p>
+                <code style="font-size:0.75rem;color:#ffa500;">Best for: Enterprise, high scale, complex infra</code>
+            </div>
+        </div>
+
+        <div style="margin-top:1.5rem;">
+            <strong>🚀 Deploying to Vercel — Step by Step:</strong>
+            <div style="background:#000;padding:1rem;border-radius:8px;margin-top:0.8rem;">
+                <pre style="font-size:0.8rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code># Option 1: Via CLI
+npm i -g vercel
+vercel login
+vercel          # Follow the prompts - deploys in 30 seconds!
+
+# Option 2: Via GitHub (recommended)
+# 1. Push your project to GitHub
+# 2. Go to vercel.com → "Add New Project"
+# 3. Import your GitHub repo
+# 4. Configure settings (build command, env vars)
+# 5. Click Deploy
+# Every future push to main = automatic deployment!</code></pre>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🌍 What is a CDN?</strong>
+            <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">A <strong>Content Delivery Network</strong> is a global network of servers. When a user in Tokyo visits your site, files are served from the nearest server (e.g., Singapore), not from your origin server in the US. This dramatically reduces latency. Vercel and Netlify have built-in CDNs. For custom setups, use <strong>Cloudflare</strong> (free tier is excellent).</p>
+        </div>
+    </div>
+
+    <!-- 7.7 Environment Variables and Secrets -->
+    <div class="content-card">
+        <h3>🔐 7.7 Environment Variables and Secrets Management</h3>
+        <p>Your application needs different configurations in different environments (development vs production). It also needs to store sensitive values like API keys, database passwords, and JWT secrets — but <strong>never in your code repository</strong>.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div>
+                <p style="color:var(--cyan);font-weight:600;margin-bottom:0.6rem;">📄 .env file (local only)</p>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># .env — NEVER commit this!
+NODE_ENV=development
+PORT=3000
+
+DATABASE_URL=postgres://localhost/mydb
+JWT_SECRET=my-super-secret-key-change-in-prod
+
+STRIPE_SECRET_KEY=sk_test_abc123...
+SMTP_PASSWORD=email-password-here
+
+# Different per environment
+API_BASE_URL=http://localhost:3000</code></pre>
+                </div>
+            </div>
+            <div>
+                <p style="color:var(--cyan);font-weight:600;margin-bottom:0.6rem;">📋 .env.example (commit this)</p>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># .env.example — Safe to commit!
+# Copy to .env and fill in real values
+NODE_ENV=
+PORT=
+
+DATABASE_URL=
+JWT_SECRET=
+
+STRIPE_SECRET_KEY=
+SMTP_PASSWORD=
+
+API_BASE_URL=</code></pre>
+                </div>
+                <div style="background:#000;padding:0.8rem;border-radius:8px;margin-top:0.8rem;">
+                    <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.4rem;">.gitignore — protect secrets</p>
+                    <pre style="font-size:0.78rem;color:#0f0;"><code>.env
+.env.local
+.env.production
+node_modules/
+dist/</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,100,100,0.08);border:1px solid rgba(255,100,100,0.3);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong style="color:#ff6b6b;">🚨 Never do this:</strong>
+            <pre style="background:#000;padding:0.6rem;border-radius:4px;font-size:0.8rem;color:#ff6b6b;margin-top:0.5rem;overflow-x:auto;"><code>// BAD — hardcoded secret in source code
+const stripe = new Stripe("sk_live_REAL_KEY_HERE"); // EXPOSED TO THE WORLD!
+
+// GOOD — use environment variable
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);</code></pre>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">GitHub scans public repos for exposed secrets and automatically alerts you — but the damage may already be done. Attackers scrape GitHub constantly for leaked keys.</p>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🔒 Production Secrets Management:</strong>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">In production, use platform-specific secret stores — never <code>.env</code> files on servers:</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.8rem;margin-top:0.8rem;font-size:0.82rem;">
+                <div style="background:rgba(255,255,255,0.04);padding:0.7rem;border-radius:6px;"><strong>Vercel/Netlify</strong><br><span style="color:var(--text-secondary);">Dashboard → Environment Variables</span></div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.7rem;border-radius:6px;"><strong>GitHub Actions</strong><br><span style="color:var(--text-secondary);">Repo → Settings → Secrets</span></div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.7rem;border-radius:6px;"><strong>AWS</strong><br><span style="color:var(--text-secondary);">Secrets Manager or Parameter Store</span></div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.7rem;border-radius:6px;"><strong>HashiCorp Vault</strong><br><span style="color:var(--text-secondary);">Enterprise-grade secrets engine</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7.8 Security (DevSecOps) -->
+    <div class="content-card">
+        <h3>🛡️ 7.8 Security — DevSecOps</h3>
+        <p><strong>DevSecOps</strong> means integrating security into every stage of the development pipeline — not bolting it on at the end. Security is everyone's responsibility, from developer to operations.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">🔒 HTTPS and TLS</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">All production apps must use HTTPS. TLS encrypts data in transit between browser and server. Modern platforms (Vercel, Netlify, Render) provide free certificates via <strong>Let's Encrypt</strong> automatically.</p>
+                <div style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.6rem;">
+                    <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code># Force HTTPS redirect in Nginx
+server {
+  listen 80;
+  return 301 https://$host$request_uri;
+}
+
+# HTTP Strict Transport Security
+Strict-Transport-Security: max-age=31536000</code></pre>
+                </div>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">🧪 Dependency Scanning</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Your <code>node_modules</code> folder contains thousands of packages, any of which could have a known vulnerability. Scan regularly:</p>
+                <div style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.6rem;">
+                    <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Built-in npm audit
+npm audit
+npm audit fix        # Auto-fix vulnerabilities
+
+# Snyk — advanced scanning
+npx snyk test
+
+# GitHub Dependabot — automatic PRs
+# for security updates (enable in repo settings)</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top:1.2rem;">
+            <strong>🚫 OWASP Top 10 — Know the Most Common Web Vulnerabilities:</strong>
+            <table style="width:100%;border-collapse:collapse;margin-top:0.8rem;font-size:0.82rem;">
+                <thead><tr style="border-bottom:1px solid var(--border-color);">
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">#</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Vulnerability</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Prevention</th>
+                </tr></thead>
+                <tbody style="color:var(--text-secondary);">
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;color:#ff6b6b;">A01</td>
+                        <td style="padding:0.5rem;">Broken Access Control</td>
+                        <td style="padding:0.5rem;">Validate permissions on every request</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;color:#ff6b6b;">A02</td>
+                        <td style="padding:0.5rem;">Cryptographic Failures</td>
+                        <td style="padding:0.5rem;">Encrypt sensitive data, use HTTPS, bcrypt passwords</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;color:#ff6b6b;">A03</td>
+                        <td style="padding:0.5rem;">Injection (SQL, XSS)</td>
+                        <td style="padding:0.5rem;">Use parameterized queries, sanitize user inputs</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;color:#ffd700;">A05</td>
+                        <td style="padding:0.5rem;">Security Misconfiguration</td>
+                        <td style="padding:0.5rem;">Disable debug mode in production, remove default credentials</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.5rem;color:#ffd700;">A07</td>
+                        <td style="padding:0.5rem;">Identification & Auth Failures</td>
+                        <td style="padding:0.5rem;">Rate limiting, MFA, secure session management</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔑 Rate Limiting</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Prevent brute-force attacks and API abuse by limiting how many requests a client can make:</p>
+                <pre style="background:#000;padding:0.5rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;"><code>// Express + express-rate-limit
+import rateLimit from 'express-rate-limit';
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 min
+  max: 100 // max 100 requests/window
+});
+app.use('/api/', limiter);</code></pre>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🧹 Input Validation and Sanitization</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Never trust user input. Always validate on the server side:</p>
+                <pre style="background:#000;padding:0.5rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;"><code>// Zod schema validation
+import { z } from 'zod';
+const UserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  age: z.number().int().min(18)
+});
+// Throws if invalid</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7.9 Monitoring and Observability -->
+    <div class="content-card">
+        <h3>📊 7.9 Monitoring and Observability</h3>
+        <p>You cannot manage what you cannot measure. Once your app is in production, you need to <em>know</em> what it's doing — is it responding fast? Are there errors? Is the server running out of memory? Monitoring tells you before users start complaining.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(40,224,255,0.06);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.5rem;">📋</div>
+                <strong style="color:var(--cyan);">Logs</strong>
+                <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem;">Chronological record of events. What happened and when? Use structured JSON logs.</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.06);border:1px solid rgba(91,124,255,0.2);padding:1.2rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.5rem;">📈</div>
+                <strong style="color:var(--blue);">Metrics</strong>
+                <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem;">Numerical measurements over time: CPU%, memory, request rate, error rate, response time.</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.06);border:1px solid rgba(122,75,255,0.2);padding:1.2rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.5rem;">🔍</div>
+                <strong style="color:var(--purple);">Traces</strong>
+                <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem;">Follow a single request through all services to find bottlenecks. Essential for microservices.</p>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🚨 Sentry</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Real-time error tracking. Captures exceptions with full stack traces, user context, and release info. Free tier available. Integrates with every major framework in minutes.</p>
+                <pre style="background:#000;padding:0.4rem;border-radius:4px;font-size:0.72rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;"><code>import * as Sentry from "@sentry/node";
+Sentry.init({ dsn: process.env.SENTRY_DSN });</code></pre>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">📊 Grafana + Prometheus</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">The industry standard for metrics. Prometheus scrapes metrics from your services; Grafana visualizes them in beautiful dashboards. Widely used in enterprise DevOps.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔍 Datadog / New Relic</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">All-in-one observability platforms (logs + metrics + traces). More turnkey than the Grafana stack but paid. Very common in mid-large companies.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">⏱️ Uptime Monitoring</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Tools like <strong>UptimeRobot</strong> or <strong>Better Uptime</strong> ping your URL every minute and alert you via SMS/email/Slack if your site goes down. Free tiers available.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7.10 Performance Optimization -->
+    <div class="content-card">
+        <h3>⚡ 7.10 Performance Optimization in Production</h3>
+        <p>A fast application improves user experience, SEO rankings, and conversion rates. Performance optimization happens at every layer — from the browser to the database to the network.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">Frontend Performance:</strong>
+                <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ <strong>Code Splitting:</strong> Split JS bundles per route</li>
+                    <li>→ <strong>Tree Shaking:</strong> Remove unused code from bundle</li>
+                    <li>→ <strong>Image Optimization:</strong> WebP format, lazy loading, correct sizes</li>
+                    <li>→ <strong>Minification:</strong> Remove whitespace/comments from JS/CSS</li>
+                    <li>→ <strong>Compression:</strong> gzip/Brotli encoding for all assets</li>
+                    <li>→ <strong>Preloading:</strong> <code>&lt;link rel="preload"&gt;</code> for critical resources</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">Backend Performance:</strong>
+                <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ <strong>Database Indexing:</strong> Speed up slow queries with indexes</li>
+                    <li>→ <strong>Redis Caching:</strong> Store frequent query results in memory</li>
+                    <li>→ <strong>Connection Pooling:</strong> Reuse database connections</li>
+                    <li>→ <strong>Async Processing:</strong> Move slow tasks to background queues</li>
+                    <li>→ <strong>Load Balancing:</strong> Distribute traffic across multiple servers</li>
+                    <li>→ <strong>Horizontal Scaling:</strong> Add more instances, not just bigger ones</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">REDIS CACHING EXAMPLE (Node.js)</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>import { createClient } from 'redis';
+const redis = createClient({ url: process.env.REDIS_URL });
+
+async function getProduct(id) {
+  const cacheKey = `product:${id}`;
+  
+  // 1. Check cache first
+  const cached = await redis.get(cacheKey);
+  if (cached) {
+    console.log('Cache HIT');
+    return JSON.parse(cached);
+  }
+  
+  // 2. Cache miss — fetch from database
+  console.log('Cache MISS');
+  const product = await db.query('SELECT * FROM products WHERE id = $1', [id]);
+  
+  // 3. Store in cache for 1 hour
+  await redis.setEx(cacheKey, 3600, JSON.stringify(product));
+  
+  return product;
+}</code></pre>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>📊 Core Web Vitals — Google's Performance Metrics:</strong>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;margin-top:0.8rem;text-align:center;font-size:0.82rem;">
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;">
+                    <strong style="color:var(--cyan);">LCP</strong><br>
+                    <span style="color:var(--text-secondary);">Largest Contentful Paint<br>Target: &lt; 2.5s</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;">
+                    <strong style="color:var(--cyan);">CLS</strong><br>
+                    <span style="color:var(--text-secondary);">Cumulative Layout Shift<br>Target: &lt; 0.1</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;">
+                    <strong style="color:var(--cyan);">INP</strong><br>
+                    <span style="color:var(--text-secondary);">Interaction to Next Paint<br>Target: &lt; 200ms</span>
+                </div>
+            </div>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.8rem;">Measure with <strong>Google Lighthouse</strong> (built into Chrome DevTools) or <strong>PageSpeed Insights</strong>. Poor Core Web Vitals affect your Google Search ranking.</p>
+        </div>
+    </div>
+
+    <!-- 7.11 Deploy Strategies -->
+    <div class="content-card">
+        <h3>🎯 7.11 Deploy Strategies — Zero Downtime</h3>
+        <p>How you deploy matters as much as what you deploy. A bad deploy strategy can take your entire application down for thousands of users. Here are the main approaches:</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ff6b6b;">🔴 Big Bang (Risky)</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Take the server down, deploy new version, bring it back up. Causes downtime. <strong>Never do this in production.</strong></p>
+            </div>
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔵🟢 Blue/Green</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Run two identical environments (Blue = current, Green = new). Switch traffic to Green once tested. Instant rollback: just switch back to Blue.</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--blue);">🐤 Canary Release</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Deploy new version to 5% of users first. Monitor for errors. If stable, gradually roll out to 25%, 50%, 100%. If issues: rollback instantly.</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.07);border:1px solid rgba(122,75,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--purple);">🔄 Rolling Update</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Replace old containers/servers one at a time while others keep serving traffic. Default strategy in Kubernetes.</p>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🔙 Rollback Strategy:</strong>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Always have a rollback plan before deploying. If something goes wrong in production, you need to be able to revert in seconds, not hours:</p>
+            <div style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.8rem;">
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Vercel — instant rollback via CLI or dashboard
+vercel rollback [deployment-url]
+
+# Docker — tag images with git commit hash
+docker build -t my-app:$(git rev-parse --short HEAD) .
+# To rollback: just run the previous image tag
+
+# Git — revert a bad commit
+git revert HEAD         # Create a new "undo" commit
+git push origin main    # Push the fix — triggers new deployment</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7.12 Infrastructure as Code -->
+    <div class="content-card">
+        <h3>🏗️ 7.12 Infrastructure as Code (IaC)</h3>
+        <p>Instead of clicking through cloud dashboards to create servers, databases, and networks, you define your entire infrastructure in code files. This makes it <strong>reproducible</strong>, <strong>version-controlled</strong>, and <strong>automated</strong>.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(122,75,255,0.07);border:1px solid rgba(122,75,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--purple);">🌍 Terraform</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">The most popular IaC tool. Works with AWS, Azure, GCP, and 1000+ providers. Declarative: you describe <em>what</em> you want, Terraform figures out <em>how</em> to build it.</p>
+                <pre style="background:#000;padding:0.6rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.6rem;overflow-x:auto;"><code># main.tf
+resource "aws_instance" "web" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+  tags = {
+    Name = "WebServer"
+  }
+}
+
+# terraform init
+# terraform plan
+# terraform apply</code></pre>
+            </div>
+            <div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;margin-bottom:1rem;">
+                    <strong style="color:var(--cyan);">🎭 Ansible</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Automates server configuration (installing software, setting up files, running commands) across many servers simultaneously using YAML playbooks.</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                    <strong style="color:var(--cyan);">☸️ Kubernetes (K8s)</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Orchestrates Docker containers at scale. Handles automatic scaling, self-healing (restarts crashed containers), load balancing, and rolling updates. The industry standard for large deployments.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7.13 Conclusion -->
+    <div class="content-card" style="background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.08)); border-color: rgba(40,224,255,0.3);">
+        <h3>🎓 7.13 Module Conclusion & Learning Path</h3>
+        <p>DevOps is not a single tool or role — it's a <strong>mindset and culture</strong> that permeates the entire software lifecycle. Mastering these practices is what separates a developer who writes code from a <strong>software engineer</strong> who ships reliable products at scale.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">✅ What you've covered:</strong>
+                <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>✔ DevOps philosophy and the infinity loop</li>
+                    <li>✔ Git in depth (branching, conflicts, workflows)</li>
+                    <li>✔ CI/CD with GitHub Actions</li>
+                    <li>✔ Docker (Dockerfile, containers, images)</li>
+                    <li>✔ Docker Compose for multi-service apps</li>
+                    <li>✔ Cloud hosting (Vercel, Render, AWS)</li>
+                    <li>✔ Environment variables and secrets management</li>
+                    <li>✔ Security (HTTPS, OWASP, rate limiting)</li>
+                    <li>✔ Monitoring (Sentry, Grafana, uptime)</li>
+                    <li>✔ Performance optimization (CDN, Redis, Core Web Vitals)</li>
+                    <li>✔ Deploy strategies (Blue/Green, Canary, Rollback)</li>
+                    <li>✔ Infrastructure as Code (Terraform, Kubernetes)</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">🗺️ Your next steps:</strong>
+                <div style="margin-top:0.6rem;font-size:0.83rem;">
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">1️⃣ Set up CI/CD for a real project</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Create a GitHub Actions workflow that runs tests and deploys on push</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">2️⃣ Dockerize your application</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Write a Dockerfile and docker-compose.yml for your full-stack project</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">3️⃣ Add Sentry to a project</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Integrate error tracking and monitor for real issues in production</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;">
+                        <strong style="color:var(--blue);">4️⃣ Learn Kubernetes basics</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Use <strong>minikube</strong> locally or try the free tier on GKE/EKS/AKS</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:1.2rem;margin-top:1.2rem;">
+            <strong>🏆 Challenge:</strong>
+            <p style="font-size:0.9rem;color:var(--text-secondary);margin-top:0.5rem;">Take any project you've built and deploy it end-to-end: push it to GitHub, set up a GitHub Actions pipeline that runs tests and deploys to Vercel or Render automatically on every push to main. Add Sentry for error tracking and UptimeRobot to alert you if it goes down. This is what real-world production workflows look like.</p>
+        </div>
+    </div>
+
+</div>
+
+            <div id="lab" class="tab-panel">
+                <h3>SQL Data Console</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Practice data extraction. Try filtering customers with high spending.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">SQL EDITOR</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT customer_name, total_spent 
+FROM sales 
+WHERE total_spent > 1500
+ORDER BY total_spent DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">QUERY RESULT</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Click "Run" to simulate the database query...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Run Query</button>
+            </div>
+
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>📊 Quiz: DevOps & Deploy</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your mastery of Git, CI/CD, security and performance optimization.</p>
+        
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What is Git?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) A programming language</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B"> B) A database system</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C" data-correct="true"> C) A version control system for tracking code changes</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) A deployment platform</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. What is a commit?</p>
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) A branch</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B"> B) A server deployment</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C" data-correct="true"> C) A saved snapshot of changes in a repository</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) A merge conflict</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. Why do developers use branches?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) To delete code</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B" data-correct="true"> B) To work on features independently without affecting main code</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C"> C) To speed up compilation</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) To store secrets</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. What does CI do?</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Deploys code to production</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Monitors server health</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C" data-correct="true"> C) Automatically builds and tests code changes</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Manages databases</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. What does CD do?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Writes code</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Compiles JavaScript</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C" data-correct="true"> C) Automatically deploys code after tests pass</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Tracks bugs</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. What is a pipeline?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A"> A) A database backup</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) A manual deployment step</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C" data-correct="true"> C) A series of automated steps for building, testing, and deploying code</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) A server location</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. Name one popular hosting platform.</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Photoshop</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B"> B) GitHub</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"> C) Netlify</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Excel</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. What is Docker used for?</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Writing code</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B"> B) Designing UI</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C" data-correct="true"> C) Packaging applications into containers</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Hosting databases only</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. Why should secrets not be committed?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) They slow down Git</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B"> B) They increase file size</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"> C) They can expose sensitive data publicly</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) They break builds</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. What is HTTPS?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) A hosting service</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B"> B) An insecure protocol</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C" data-correct="true"> C) A secure version of HTTP using encryption</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) A database standard</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What is caching?</p>
+                <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Deleting data</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Encrypting responses</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C" data-correct="true"> C) Storing data temporarily to improve performance</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Logging errors</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. What is code splitting?</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Dividing teams</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Splitting databases</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"> C) Loading code in smaller chunks when needed</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Minifying CSS</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. Why is monitoring important?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) To write code faster</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B"> B) To reduce server costs</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"> C) To detect issues and ensure system reliability</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) To replace testing</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. Name a security best practice.</p>
+                <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Hardcoding passwords</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B" data-correct="true"> B) Using strong passwords and environment variables</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Disabling HTTPS</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Sharing API keys</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. Name a performance optimization technique.</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Increasing file size</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Disabling compression</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"> C) Minification of assets</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Using inline styles only</label>
+            </div>
+        </form>
+
+        <div class="quiz-controls" style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button id="submit-quiz" class="btn btn-primary">Submit Assessment</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback" class="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+class QuizManager {
+    constructor() {
+        this.questionsData = {
+            q1: { correct: 'C', exp: 'Git is a version control system that records the history of changes in code.' },
+            q2: { correct: 'C', exp: 'A commit acts as a secure "restore point" of your work.' },
+            q3: { correct: 'B', exp: 'Branches allow developing new ideas without breaking the stable main version.' },
+            q4: { correct: 'C', exp: 'Continuous Integration focuses on automating code building and testing to prevent conflicts.' },
+            q5: { correct: 'C', exp: 'Continuous Deployment ensures tested code is automatically pushed live.' },
+            q6: { correct: 'C', exp: 'A pipeline is the automated "corridor" code travels through before reaching the user.' },
+            q7: { correct: 'C', exp: 'Netlify and Vercel are leaders in modern web hosting.' },
+            q8: { correct: 'C', exp: 'Docker isolates the application in a "container" so it runs the same on any machine.' },
+            q9: { correct: 'C', exp: 'Secrets in Git can be read by anyone who has access to the repository.' },
+            q10: { correct: 'C', exp: 'The "S" in HTTPS ensures communication between the browser and server is encrypted.' },
+            q11: { correct: 'C', exp: 'Caching prevents the server from having to redo the same heavy work multiple times.' },
+            q12: { correct: 'C', exp: 'Code Splitting loads JS files in parts, making the site much faster.' },
+            q13: { correct: 'C', exp: 'Monitoring allows you to know the site went down before customers start complaining.' },
+            q14: { correct: 'B', exp: 'Passwords must be in protected .env files and never in the source code.' },
+            q15: { correct: 'C', exp: 'Minification removes spaces and comments from code to reduce download time.' }
+        };
+        this.init();
+    }
+
+    init() {
+        document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+        document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+    }
+
+    submitQuiz() {
+        const form = document.getElementById('quiz-form');
+        const formData = new FormData(form);
+        let score = 0;
+        let feedbackHTML = '';
+
+        Object.keys(this.questionsData).forEach((key, index) => {
+            const userAnswer = formData.get(key);
+            const isCorrect = userAnswer === this.questionsData[key].correct;
+            
+            if (isCorrect) score++;
+
+            feedbackHTML += `
+    <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+        <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+        <div>
+            <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+            ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+        </div>
+    </div>
+`;
+        });
+
+        this.displayResults(score, feedbackHTML);
+    }
+
+    displayResults(score, feedbackHTML) {
+        const total = Object.keys(this.questionsData).length;
+        const percent = Math.round((score / total) * 100);
+        const resultsDiv = document.getElementById('quiz-results');
+        
+        let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+        document.getElementById('quiz-score').innerHTML = `
+            <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+            <p style="color: var(--text-secondary)">${percent >= 70 ? 'Amazing! You master modern tools.' : 'Review DevOps concepts and try again.'}</p>
+        `;
+
+        document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clearQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-results').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new QuizManager();
+});
+</script>
+
+            <div id="resources" class="tab-panel">
+                    <div class="content-card">
+                        <h3 class="content-title">Recommended Documents</h3>
+                        <p class="content-text">
+                            Here you have a curated list of essential resources to deepen your knowledge 
+                            in HTML and CSS. These documents will help you master the fundamental concepts.
+                        </p>
+                        
+                        <div class="resources-list">
+                            <div class="resource-category">
+                                <h4 class="category-title">Official Documentation</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">MDN Web Docs - HTML</a></li>
+                                    <li><a href="#" class="resource-link">MDN Web Docs - CSS</a></li>
+                                    <li><a href="#" class="resource-link">W3C HTML5 Specification</a></li>
+                                    <li><a href="#" class="resource-link">CSS Working Group Specifications</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Guides and Tutorials</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML5 Semantic Elements Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Flexbox Complete Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Grid Layout Tutorial</a></li>
+                                    <li><a href="#" class="resource-link">Web Accessibility Guidelines (WCAG)</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Tools and Validators</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">W3C HTML Validator</a></li>
+                                    <li><a href="#" class="resource-link">W3C CSS Validator</a></li>
+                                    <li><a href="#" class="resource-link">Can I Use - Browser Support</a></li>
+                                    <li><a href="#" class="resource-link">WebAIM Accessibility Checker</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Quick References</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML Elements Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Properties Cheat Sheet</a></li>
+                                    <li><a href="#" class="resource-link">HTML Entities Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Selectors Reference</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="resources-note">
+                            <p>💡 <strong>Note:</strong> You can edit this list in the future to add your own favorite resources.</p>
+                        </div>
+                    </div>
+            </div>
+
+            <div id="evaluation" class="tab-panel">
+    <div class="content-card">
+        <h3>🎯 Mastery Criteria: DevOps & Deploy</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            Here are the criteria organized by importance levels to assess your mastery in DevOps and Deploy.
+        </p>
+        
+        <div class="evaluation-grid">
+            <div class="evaluation-column">
+                <h4 class="evaluation-title essential">
+                    <span>💠</span> Essential
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>Git Flow:</strong> Basic commits, branches and merges.</li>
+                    <li><strong>Cloud Deploy:</strong> Vercel, Netlify or Render.</li>
+                    <li><strong>Docker:</strong> Create a basic application image.</li>
+                    <li><strong>Secrets:</strong> Correct management of <code>.env</code> files.</li>
+                    <li><strong>Security:</strong> HTTPS and certificate validation.</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title important">
+                    <span>⭐</span> Important
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>CI/CD:</strong> Automatic pipelines with tests and build.</li>
+                    <li><strong>Observability:</strong> Alerts and metrics (Grafana/Sentry).</li>
+                    <li><strong>Rollback:</strong> Ability to revert a failed deploy in seconds.</li>
+                    <li><strong>Performance:</strong> CDN and Redis configuration.</li>
+                    <li><strong>Strategy:</strong> Code splitting and partial deploys.</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title advanced">
+                    <span>🚀</span> Advanced
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>IaC:</strong> Infrastructure as Code (Terraform).</li>
+                    <li><strong>Orchestration:</strong> Kubernetes or advanced Docker Compose.</li>
+                    <li><strong>Zero Downtime:</strong> Blue/Green and Canary Releases.</li>
+                    <li><strong>Micro-services:</strong> Complex multi-branch pipelines.</li>
+                    <li><strong>Security:</strong> Rate limiting and protection against OWASP attacks.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-panel");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            let progressMap = { 'learn': 25, 'lab': 50, 'quiz': 75, 'resources': 90, 'evaluation': 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executed successfully.</strong><br><br>Results (Top 3):<br>-----------------------<br>1. Carlos Alberto | €4,250.00<br>2. Beatriz Ramos | €2,100.50<br>3. Ricardo Jorge | €1,880.00<br><br><em>Tip: The WHERE filter worked correctly, eliminating records below €1500.</em>";
+        }
+    </script>
+</body>
+</html>

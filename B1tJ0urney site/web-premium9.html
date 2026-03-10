@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Performance & Rendering</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #5b7cff;
+            --purple: #7a4bff;
+            --cyan: #28e0ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 125, 230, 0.1) 1px, transparent 1px); background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1; }
+        @keyframes gridMove { 0% { transform: translate(0, 0); } 100% { transform: translate(50px, 50px); } }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%); pointer-events: none; z-index: -1; }
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11, 13, 20, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91, 124, 255, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91, 124, 255, 0.4); }
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(to right, #1d4ed8, #06b6d4, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91, 124, 255, 0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #111; color: #ccc; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.85rem; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91, 124, 255, 0.1), rgba(40, 224, 255, 0.05)); border: 1px solid rgba(91, 124, 255, 0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer { color: #ef4444; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <div class="logo">BitJourney</div>
+            <span class="premium-badge">Premium</span>
+        </div>
+        <nav style="display:flex;gap:1rem;">
+            <a href="premium.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Browse</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Goal: Performance & Rendering</h1>
+        <p class="course-description">
+            In this module you will master the fundamentals of web performance and browser rendering. You'll learn how browsers paint pixels, where bottlenecks hide, and how to build applications that feel instant — from network optimisation and critical rendering path to runtime performance and modern rendering patterns.<br>
+            The goal is to go beyond writing code that <em>works</em> and write code that is <em>fast</em>.
+        </p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>8–10h</span></div>
+            <div class="meta-item"><span>🎯</span><span>• Critical Rendering Path • Core Web Vitals • Caching • Lazy Loading • Runtime Performance</span></div>
+            <div class="meta-item"><span>📌</span><span>Basic knowledge of HTML, CSS and JavaScript</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event, 'learn')">Learn</button>
+            <button class="tab-button" onclick="openTab(event, 'lab')">Lab</button>
+            <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event, 'resources')">Resources</button>
+            <button class="tab-button" onclick="openTab(event, 'evaluation')">Evaluation</button>
+        </nav>
+
+        <!-- LEARN TAB -->
+        <div id="learn" class="tab-panel active">
+
+    <!-- 1.1 Why Performance Matters -->
+    <div class="content-card">
+        <h2 style="color: var(--cyan); margin-bottom: 1rem;">⚡ 1.1 Why Performance Matters</h2>
+        <p style="line-height: 1.7;">Performance is a feature. A slow website isn't just an inconvenience — it has measurable business impact. Google found that a <strong>100ms delay in load time</strong> can reduce conversions by 7%. Amazon calculated that every additional second of latency costs them 1.6 billion dollars per year.</p>
+        <br>
+        <p style="line-height: 1.7;">The web is accessed by billions of people on devices that range from the latest iPhone to low-end Android phones on 3G connections. Writing performant code is an act of <strong>inclusivity</strong> — you're ensuring your application works for everyone, not just users on fast networks with powerful hardware.</p>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:1rem; margin-top:1.5rem;">
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">💸</div>
+                <strong style="color:var(--cyan);">Revenue</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">53% of mobile users abandon sites that take more than 3 seconds to load</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">📈</div>
+                <strong style="color:var(--blue);">SEO</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Google uses Core Web Vitals as a direct ranking signal in search results</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.07);border:1px solid rgba(122,75,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🌍</div>
+                <strong style="color:var(--purple);">Accessibility</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Fast sites work on slow networks and low-power devices used by billions</p>
+            </div>
+            <div style="background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">😊</div>
+                <strong style="color:#ffa500;">UX</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Perceived speed directly correlates with user satisfaction and brand trust</p>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border-left:4px solid var(--cyan);padding:1rem;border-radius:0 8px 8px 0;margin-top:1.5rem;">
+            <strong>🔑 The Performance Mindset:</strong>
+            <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.6rem;">Performance is not something you bolt on after shipping a feature — it's a discipline you apply throughout the development process. The best time to fix a performance issue is before it exists: choose the right architecture, load only what you need, and measure everything.</p>
+        </div>
+    </div>
+
+    <!-- 1.2 How Browsers Render Pages -->
+    <div class="content-card">
+        <h3>🖥️ 1.2 How Browsers Render Pages — The Critical Rendering Path</h3>
+        <p>Before you can optimise, you need to understand <em>how</em> the browser goes from a URL to painted pixels on screen. This pipeline is called the <strong>Critical Rendering Path (CRP)</strong> and every step is a potential bottleneck.</p>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;margin-top:1.2rem;">
+            <strong style="color:var(--cyan);">The 6 Steps of the CRP:</strong>
+            <div style="font-family:monospace;font-size:0.85rem;color:var(--text-secondary);margin-top:1rem;text-align:center;line-height:2.5;">
+                <span style="background:rgba(91,124,255,0.15);border:1px solid var(--blue);padding:0.3rem 0.8rem;border-radius:6px;color:var(--blue);">1. DNS Lookup</span>
+                <span style="color:var(--text-secondary);padding:0 0.5rem;">→</span>
+                <span style="background:rgba(91,124,255,0.15);border:1px solid var(--blue);padding:0.3rem 0.8rem;border-radius:6px;color:var(--blue);">2. TCP + TLS</span>
+                <span style="color:var(--text-secondary);padding:0 0.5rem;">→</span>
+                <span style="background:rgba(40,224,255,0.15);border:1px solid var(--cyan);padding:0.3rem 0.8rem;border-radius:6px;color:var(--cyan);">3. HTTP Request</span>
+                <span style="color:var(--text-secondary);padding:0 0.5rem;">→</span>
+                <span style="background:rgba(40,224,255,0.15);border:1px solid var(--cyan);padding:0.3rem 0.8rem;border-radius:6px;color:var(--cyan);">4. Parse HTML → DOM</span>
+                <span style="color:var(--text-secondary);padding:0 0.5rem;">→</span>
+                <span style="background:rgba(122,75,255,0.15);border:1px solid var(--purple);padding:0.3rem 0.8rem;border-radius:6px;color:var(--purple);">5. Build CSSOM + Render Tree</span>
+                <span style="color:var(--text-secondary);padding:0 0.5rem;">→</span>
+                <span style="background:rgba(122,75,255,0.15);border:1px solid var(--purple);padding:0.3rem 0.8rem;border-radius:6px;color:var(--purple);">6. Layout → Paint → Composite</span>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ff6b6b;">🚧 Render-Blocking Resources</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">By default, <strong>CSS is render-blocking</strong> — the browser won't paint anything until all CSS is downloaded and parsed. <strong>JavaScript is both render-blocking and parser-blocking</strong> — it pauses HTML parsing completely.</p>
+                <div style="background:#000;padding:0.6rem;border-radius:4px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#ff6b6b;overflow-x:auto;"><code>&lt;!-- BAD: blocks rendering --&gt;
+&lt;script src="heavy-lib.js"&gt;&lt;/script&gt;
+&lt;link rel="stylesheet" href="all-styles.css"&gt;</code></pre>
+                </div>
+            </div>
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">✅ Non-Blocking Techniques</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Use <code>defer</code> and <code>async</code> to let HTML parse while scripts download. Use media queries on CSS to avoid blocking non-critical styles.</p>
+                <div style="background:#000;padding:0.6rem;border-radius:4px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;"><code>&lt;!-- GOOD: non-blocking --&gt;
+&lt;script src="app.js" defer&gt;&lt;/script&gt;
+&lt;script src="analytics.js" async&gt;&lt;/script&gt;
+&lt;link rel="stylesheet" href="print.css"
+      media="print"&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🔍 defer vs async — What's the Difference?</strong>
+            <table style="width:100%;border-collapse:collapse;margin-top:0.8rem;font-size:0.83rem;">
+                <thead><tr style="border-bottom:1px solid var(--border-color);">
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Attribute</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Download</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Execution</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Order</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Use for</th>
+                </tr></thead>
+                <tbody style="color:var(--text-secondary);">
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;"><code>defer</code></td>
+                        <td style="padding:0.5rem;">Parallel</td>
+                        <td style="padding:0.5rem;">After HTML parsed</td>
+                        <td style="padding:0.5rem;">Preserved</td>
+                        <td style="padding:0.5rem;">App scripts that need DOM</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;"><code>async</code></td>
+                        <td style="padding:0.5rem;">Parallel</td>
+                        <td style="padding:0.5rem;">As soon as downloaded</td>
+                        <td style="padding:0.5rem;">Not guaranteed</td>
+                        <td style="padding:0.5rem;">Independent scripts (analytics)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.5rem;"><em>none</em></td>
+                        <td style="padding:0.5rem;">Blocks</td>
+                        <td style="padding:0.5rem;">Immediately</td>
+                        <td style="padding:0.5rem;">Preserved</td>
+                        <td style="padding:0.5rem;">Almost never</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 1.3 Core Web Vitals -->
+    <div class="content-card">
+        <h3>📊 1.3 Core Web Vitals — Google's Performance Metrics</h3>
+        <p>Core Web Vitals are the metrics Google uses to measure user experience and factor into search rankings. They measure three fundamental aspects: <strong>loading</strong>, <strong>interactivity</strong>, and <strong>visual stability</strong>.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.3);padding:1.2rem;border-radius:8px;">
+                <div style="font-size:2rem;text-align:center;">🖼️</div>
+                <h4 style="color:var(--cyan);text-align:center;margin:0.5rem 0;">LCP</h4>
+                <p style="font-size:0.8rem;color:var(--text-secondary);text-align:center;font-weight:600;">Largest Contentful Paint</p>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;">Time until the largest visible element (hero image, heading) is rendered.</p>
+                <div style="margin-top:0.8rem;font-size:0.8rem;">
+                    <div style="color:#10b981;">✅ Good: &lt; 2.5s</div>
+                    <div style="color:#f59e0b;">⚠ Needs work: 2.5–4s</div>
+                    <div style="color:#ef4444;">❌ Poor: &gt; 4s</div>
+                </div>
+                <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:0.6rem;"><strong>Fix:</strong> Preload hero images, use CDN, eliminate render-blocking resources.</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.3);padding:1.2rem;border-radius:8px;">
+                <div style="font-size:2rem;text-align:center;">👆</div>
+                <h4 style="color:var(--blue);text-align:center;margin:0.5rem 0;">INP</h4>
+                <p style="font-size:0.8rem;color:var(--text-secondary);text-align:center;font-weight:600;">Interaction to Next Paint</p>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;">Latency from user interaction (click, tap, key) to the next visual update.</p>
+                <div style="margin-top:0.8rem;font-size:0.8rem;">
+                    <div style="color:#10b981;">✅ Good: &lt; 200ms</div>
+                    <div style="color:#f59e0b;">⚠ Needs work: 200–500ms</div>
+                    <div style="color:#ef4444;">❌ Poor: &gt; 500ms</div>
+                </div>
+                <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:0.6rem;"><strong>Fix:</strong> Break up long tasks, use web workers, avoid heavy event handlers.</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.07);border:1px solid rgba(122,75,255,0.3);padding:1.2rem;border-radius:8px;">
+                <div style="font-size:2rem;text-align:center;">📐</div>
+                <h4 style="color:var(--purple);text-align:center;margin:0.5rem 0;">CLS</h4>
+                <p style="font-size:0.8rem;color:var(--text-secondary);text-align:center;font-weight:600;">Cumulative Layout Shift</p>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;">Amount of unexpected layout shifts — elements jumping around after load.</p>
+                <div style="margin-top:0.8rem;font-size:0.8rem;">
+                    <div style="color:#10b981;">✅ Good: &lt; 0.1</div>
+                    <div style="color:#f59e0b;">⚠ Needs work: 0.1–0.25</div>
+                    <div style="color:#ef4444;">❌ Poor: &gt; 0.25</div>
+                </div>
+                <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:0.6rem;"><strong>Fix:</strong> Always set width/height on images and iframes, avoid inserting content above existing content.</p>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">HOW TO MEASURE CORE WEB VITALS IN CODE</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Using the web-vitals library (npm install web-vitals)
+import { onLCP, onINP, onCLS } from 'web-vitals';
+
+function sendToAnalytics({ name, value, rating }) {
+  console.log(`${name}: ${value} (${rating})`);
+  // Send to your analytics endpoint
+  fetch('/analytics', {
+    method: 'POST',
+    body: JSON.stringify({ name, value, rating })
+  });
+}
+
+onLCP(sendToAnalytics);
+onINP(sendToAnalytics);
+onCLS(sendToAnalytics);</code></pre>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🛠️ Tools to Measure Performance:</strong>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.8rem;margin-top:0.8rem;font-size:0.82rem;">
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">Lighthouse</strong><br><span style="color:var(--text-secondary);">Built into Chrome DevTools — audit any page</span></div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">PageSpeed Insights</strong><br><span style="color:var(--text-secondary);">Real-world + lab data from Google</span></div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">WebPageTest</strong><br><span style="color:var(--text-secondary);">Waterfall charts, filmstrips, global testing</span></div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">Chrome DevTools</strong><br><span style="color:var(--text-secondary);">Network, Performance, and Coverage tabs</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.4 Network Optimisation -->
+    <div class="content-card">
+        <h3>🌐 1.4 Network Optimisation — Fewer and Faster Requests</h3>
+        <p>The single most impactful thing you can do for performance is <strong>reduce the amount of data transferred over the network</strong>. Every byte has a cost — download time, parsing time, memory usage.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">📦 HTTP/2 and HTTP/3</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Modern HTTP protocols eliminate the "head-of-line blocking" of HTTP/1.1. HTTP/2 multiplexes multiple requests over one connection — making dozens of small files efficient. HTTP/3 uses QUIC (UDP-based) for even lower latency.</p>
+                <div style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Check if a site uses HTTP/2
+curl -I --http2 https://example.com
+
+# Nginx — enable HTTP/2
+server {
+  listen 443 ssl http2;
+  # ...
+}</code></pre>
+                </div>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">🗜️ Compression</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Gzip and Brotli compress text assets before sending them. Brotli typically achieves 15–25% better compression than Gzip. Most modern CDNs apply this automatically.</p>
+                <div style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Nginx — enable Brotli + Gzip
+brotli on;
+brotli_comp_level 6;
+gzip on;
+gzip_types text/css application/javascript
+           application/json image/svg+xml;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">RESOURCE HINTS — TELL THE BROWSER WHAT'S COMING</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code>&lt;!-- dns-prefetch: resolve DNS before the browser needs the resource --&gt;
+&lt;link rel="dns-prefetch" href="//fonts.googleapis.com"&gt;
+
+&lt;!-- preconnect: DNS + TCP + TLS handshake in advance --&gt;
+&lt;link rel="preconnect" href="https://api.example.com"&gt;
+
+&lt;!-- preload: high-priority fetch for resources you'll need soon --&gt;
+&lt;link rel="preload" href="/hero.webp" as="image"&gt;
+&lt;link rel="preload" href="/fonts/inter.woff2" as="font" crossorigin&gt;
+
+&lt;!-- prefetch: low-priority fetch for next-page resources --&gt;
+&lt;link rel="prefetch" href="/dashboard.js"&gt;
+
+&lt;!-- modulepreload: preload + parse ES modules --&gt;
+&lt;link rel="modulepreload" href="/app.js"&gt;</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.8rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;">
+                <strong style="color:var(--cyan);">Code Splitting</strong>
+                <p style="color:var(--text-secondary);margin-top:0.3rem;">Split JS bundles per route — only load what the current page needs</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;">
+                <strong style="color:var(--cyan);">Tree Shaking</strong>
+                <p style="color:var(--text-secondary);margin-top:0.3rem;">Remove unused code from your bundle during build (Vite, Webpack, Rollup)</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;">
+                <strong style="color:var(--cyan);">Minification</strong>
+                <p style="color:var(--text-secondary);margin-top:0.3rem;">Remove whitespace, comments, shorten variable names. esbuild is 10–100× faster than alternatives</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;">
+                <strong style="color:var(--cyan);">Bundle Analysis</strong>
+                <p style="color:var(--text-secondary);margin-top:0.3rem;">Use <code>vite-bundle-visualizer</code> or <code>webpack-bundle-analyzer</code> to find bloat</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.5 Image Optimisation -->
+    <div class="content-card">
+        <h3>🖼️ 1.5 Image Optimisation — The Biggest Win</h3>
+        <p>Images are typically <strong>50–80% of a page's total byte weight</strong>. Optimising images is almost always the single highest-ROI performance improvement you can make.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">📋 Modern Image Formats:</strong>
+                <table style="width:100%;border-collapse:collapse;margin-top:0.8rem;font-size:0.82rem;">
+                    <thead><tr style="border-bottom:1px solid var(--border-color);">
+                        <th style="text-align:left;padding:0.4rem;color:var(--cyan);">Format</th>
+                        <th style="text-align:left;padding:0.4rem;color:var(--cyan);">Best For</th>
+                        <th style="text-align:left;padding:0.4rem;color:var(--cyan);">vs JPEG</th>
+                    </tr></thead>
+                    <tbody style="color:var(--text-secondary);">
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:0.4rem;"><strong>WebP</strong></td>
+                            <td style="padding:0.4rem;">Photos, general</td>
+                            <td style="padding:0.4rem;color:#10b981;">~30% smaller</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:0.4rem;"><strong>AVIF</strong></td>
+                            <td style="padding:0.4rem;">Photos, high quality</td>
+                            <td style="padding:0.4rem;color:#10b981;">~50% smaller</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:0.4rem;"><strong>SVG</strong></td>
+                            <td style="padding:0.4rem;">Icons, logos</td>
+                            <td style="padding:0.4rem;color:#10b981;">Scales infinitely</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:0.4rem;"><strong>PNG</strong></td>
+                            <td style="padding:0.4rem;">Transparency needed</td>
+                            <td style="padding:0.4rem;color:var(--text-secondary);">Lossless</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">⚡ Lazy Loading and Responsive Images:</strong>
+                <div style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>&lt;!-- Native lazy loading --&gt;
+&lt;img src="photo.webp"
+     loading="lazy"
+     decoding="async"
+     width="800"
+     height="600"
+     alt="Description"&gt;
+
+&lt;!-- Responsive images --&gt;
+&lt;picture&gt;
+  &lt;source srcset="hero.avif" type="image/avif"&gt;
+  &lt;source srcset="hero.webp" type="image/webp"&gt;
+  &lt;img src="hero.jpg" alt="Hero"&gt;
+&lt;/picture&gt;
+
+&lt;!-- Multiple sizes for different screens --&gt;
+&lt;img srcset="sm.jpg 480w, md.jpg 768w, lg.jpg 1200w"
+     sizes="(max-width: 768px) 100vw, 50vw"
+     src="lg.jpg" alt="..."&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(40,224,255,0.06);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong style="color:var(--cyan);">🔧 Image Optimisation Checklist:</strong>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-top:0.8rem;font-size:0.82rem;color:var(--text-secondary);">
+                <div>✔ Use WebP or AVIF instead of JPEG/PNG</div>
+                <div>✔ Always specify width and height attributes</div>
+                <div>✔ Add <code>loading="lazy"</code> to below-fold images</div>
+                <div>✔ Add <code>fetchpriority="high"</code> to LCP image</div>
+                <div>✔ Serve images via CDN with edge caching</div>
+                <div>✔ Use <code>&lt;picture&gt;</code> for format fallbacks</div>
+                <div>✔ Compress images before uploading (Squoosh, Sharp)</div>
+                <div>✔ Use CSS for decorative images, not &lt;img&gt;</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.6 Caching -->
+    <div class="content-card">
+        <h3>💾 1.6 Caching — The Fastest Request is the One Never Made</h3>
+        <p>Caching is the most powerful performance technique because it completely eliminates the network round-trip. A properly cached asset loads in microseconds from memory, not hundreds of milliseconds from a server.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">HTTP CACHE HEADERS — THE FUNDAMENTALS</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code># Cache immutable assets (hashed filenames) forever
+Cache-Control: public, max-age=31536000, immutable
+# app.a3f9c2.js → cached for 1 year, never revalidated
+
+# Cache HTML documents — always revalidate
+Cache-Control: no-cache
+# Browser caches it but must check with server before using
+
+# Never cache sensitive data
+Cache-Control: no-store, private
+
+# ETags — conditional revalidation
+ETag: "33a64df551425fcc55e"
+# Browser sends: If-None-Match: "33a64df551425fcc55e"
+# Server responds: 304 Not Modified (no body!) or 200 with new content
+
+# Last-Modified alternative
+Last-Modified: Wed, 21 Oct 2023 07:28:00 GMT
+# Browser sends: If-Modified-Since: Wed, 21 Oct 2023 07:28:00 GMT</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔑 Cache-Busting Strategy</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Cache forever with immutable assets, but include a content hash in the filename. When the file changes, the hash changes, the browser downloads the new file.</p>
+                <div style="background:#000;padding:0.6rem;border-radius:4px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;"><code># Vite does this automatically:
+app.a3f9c2d1.js  ← hash from content
+style.8b4e1f2a.css
+
+# Old file = cached forever
+# New file = different URL = fresh download</code></pre>
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">⚙️ Service Worker Cache</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Service Workers intercept network requests and can serve from a programmatic cache — enabling offline support and instant repeat visits.</p>
+                <div style="background:#000;padding:0.6rem;border-radius:4px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;"><code>// service-worker.js
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(cached => cached || fetch(event.request))
+  );
+});</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.7 JavaScript Runtime Performance -->
+    <div class="content-card">
+        <h3>⚙️ 1.7 JavaScript Runtime Performance</h3>
+        <p>The JavaScript engine (V8 in Chrome/Node) has a single-threaded event loop. Long-running JavaScript tasks block the main thread, preventing the browser from responding to user input, running animations, or rendering updates. This is what causes the "jank" users feel.</p>
+
+        <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1.2rem;border-radius:8px;margin-top:1.2rem;">
+            <strong style="color:#ff6b6b;">🚫 The Main Thread is a Shared Resource</strong>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">When your JavaScript runs a 500ms task, the browser cannot respond to clicks, scroll events, or animations for that entire 500ms. A task longer than <strong>50ms is considered a "Long Task"</strong> and directly impacts INP.</p>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">BREAKING UP LONG TASKS — SCHEDULER API</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// BAD: Blocks the main thread for all 10,000 items
+function processAllItems(items) {
+  items.forEach(item => heavyProcess(item)); // 500ms+ blocking task
+}
+
+// GOOD: Yield to the browser between chunks
+async function processInChunks(items, chunkSize = 100) {
+  for (let i = 0; i < items.length; i += chunkSize) {
+    const chunk = items.slice(i, i + chunkSize);
+    chunk.forEach(item => heavyProcess(item));
+    
+    // Yield — let the browser handle pending interactions
+    await scheduler.yield();          // Modern (Chrome 115+)
+    // Or fallback: await new Promise(resolve => setTimeout(resolve, 0));
+  }
+}
+
+// Web Workers — true parallelism for CPU-heavy tasks
+const worker = new Worker('/heavy-worker.js');
+worker.postMessage({ data: largeDataset });
+worker.onmessage = ({ data }) => {
+  // Result arrives without blocking main thread
+  updateUI(data.result);
+};</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔁 Debounce and Throttle</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Prevent expensive functions from running too frequently in response to rapid events.</p>
+                <div style="background:#000;padding:0.6rem;border-radius:4px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Debounce: wait until user stops typing
+const search = debounce((query) => {
+  fetchResults(query);
+}, 300);
+input.addEventListener('input', (e) => search(e.target.value));
+
+// Throttle: at most once per 16ms (~60fps)
+const onScroll = throttle(() => {
+  updateParallax();
+}, 16);
+window.addEventListener('scroll', onScroll);</code></pre>
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">📐 Memoisation</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Cache the results of expensive pure functions so they only compute once per unique input.</p>
+                <div style="background:#000;padding:0.6rem;border-radius:4px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>function memoize(fn) {
+  const cache = new Map();
+  return function (...args) {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) return cache.get(key);
+    const result = fn.apply(this, args);
+    cache.set(key, result);
+    return result;
+  };
+}
+
+const expensiveCalc = memoize((n) => {
+  // ... heavy computation
+  return result;
+});</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.8 Rendering & the DOM -->
+    <div class="content-card">
+        <h3>🎨 1.8 Rendering Pipeline — Layout, Paint, Composite</h3>
+        <p>After the initial page load, every visual update triggers some portion of the browser's rendering pipeline. Understanding which CSS properties trigger which pipeline steps is essential to achieving smooth 60fps animations.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,100,100,0.08);border:1px solid rgba(255,100,100,0.3);padding:1.2rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.5rem;">📐</div>
+                <strong style="color:#ff6b6b;">Layout (Reflow)</strong>
+                <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem;">Most expensive. Recalculates position and size of all affected elements. Triggered by: <code>width</code>, <code>height</code>, <code>margin</code>, <code>padding</code>, <code>top</code>, <code>left</code>, <code>font-size</code>.</p>
+            </div>
+            <div style="background:rgba(255,165,0,0.08);border:1px solid rgba(255,165,0,0.3);padding:1.2rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.5rem;">🖌️</div>
+                <strong style="color:#ffa500;">Paint</strong>
+                <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem;">Fills in pixels. Triggered by: <code>color</code>, <code>background</code>, <code>border-radius</code>, <code>box-shadow</code>, <code>outline</code>. Skips layout step.</p>
+            </div>
+            <div style="background:rgba(40,224,255,0.08);border:1px solid rgba(40,224,255,0.3);padding:1.2rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.5rem;">✨</div>
+                <strong style="color:var(--cyan);">Composite Only</strong>
+                <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.4rem;">Cheapest. Moves already-painted layers. Only triggered by: <code>transform</code>, <code>opacity</code>. <strong>Always use these for animations.</strong></p>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">PERFORMANT ANIMATIONS — ALWAYS USE TRANSFORM + OPACITY</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>/* BAD — triggers layout on every frame (jank!) */
+.box { transition: left 0.3s, top 0.3s, width 0.3s; }
+
+/* GOOD — composite only, GPU-accelerated, silky smooth */
+.box { transition: transform 0.3s, opacity 0.3s; }
+.box.moved { transform: translateX(100px) scale(1.1); }
+.box.hidden { opacity: 0; }
+
+/* Force GPU layer promotion (use sparingly) */
+.animated-element {
+  will-change: transform;
+  /* Or: transform: translateZ(0); — the old hack */
+}
+
+/* Use requestAnimationFrame for JS animations */
+function animate() {
+  element.style.transform = `translateX(${x}px)`;
+  x += velocity;
+  requestAnimationFrame(animate); // Syncs with display refresh
+}</code></pre>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🚫 Forced Layout / Layout Thrashing</strong>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Reading layout properties (like <code>offsetWidth</code>) after writing style forces the browser to immediately flush and recalculate layout. In a loop, this creates "layout thrashing" — one of the most common performance bugs.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:0.8rem;">
+                <div style="background:#000;padding:0.6rem;border-radius:4px;">
+                    <p style="color:#ff6b6b;font-size:0.72rem;margin-bottom:0.3rem;">❌ BAD — layout thrashing</p>
+                    <pre style="font-size:0.72rem;color:#ff6b6b;overflow-x:auto;"><code>items.forEach(item => {
+  item.style.width = container.offsetWidth + 'px';
+  // Read after write = forced layout!
+});</code></pre>
+                </div>
+                <div style="background:#000;padding:0.6rem;border-radius:4px;">
+                    <p style="color:#0f0;font-size:0.72rem;margin-bottom:0.3rem;">✅ GOOD — batch reads then writes</p>
+                    <pre style="font-size:0.72rem;color:#0f0;overflow-x:auto;"><code>const width = container.offsetWidth; // Read once
+items.forEach(item => {
+  item.style.width = width + 'px'; // Write only
+});</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.9 Modern Rendering Patterns -->
+    <div class="content-card">
+        <h3>🏗️ 1.9 Modern Rendering Patterns — SSR, SSG, ISR, CSR</h3>
+        <p>One of the most important architectural decisions in modern web development is <em>where and when</em> your HTML is generated. Each strategy has different performance characteristics.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(40,224,255,0.06);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <h4 style="color:var(--cyan);margin-bottom:0.5rem;">📄 SSG — Static Site Generation</h4>
+                <p style="font-size:0.82rem;color:var(--text-secondary);">HTML generated at <strong>build time</strong>. Served directly from CDN. Fastest possible TTFB.</p>
+                <p style="font-size:0.78rem;color:#10b981;margin-top:0.5rem;">Best for: Blogs, docs, marketing sites, content that rarely changes.</p>
+                <p style="font-size:0.78rem;color:#f59e0b;margin-top:0.3rem;">Trade-off: Rebuild needed to update content. Doesn't scale to millions of pages.</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.06);border:1px solid rgba(91,124,255,0.2);padding:1.2rem;border-radius:8px;">
+                <h4 style="color:var(--blue);margin-bottom:0.5rem;">⚙️ SSR — Server-Side Rendering</h4>
+                <p style="font-size:0.82rem;color:var(--text-secondary);">HTML generated on the <strong>server per request</strong>. Always fresh data. Good SEO.</p>
+                <p style="font-size:0.78rem;color:#10b981;margin-top:0.5rem;">Best for: Dashboards, e-commerce, user-specific content, real-time data.</p>
+                <p style="font-size:0.78rem;color:#f59e0b;margin-top:0.3rem;">Trade-off: Higher TTFB than SSG, server compute cost on every request.</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.06);border:1px solid rgba(122,75,255,0.2);padding:1.2rem;border-radius:8px;">
+                <h4 style="color:var(--purple);margin-bottom:0.5rem;">🔄 ISR — Incremental Static Regen.</h4>
+                <p style="font-size:0.82rem;color:var(--text-secondary);">SSG with a <strong>revalidation timer</strong>. Pages rebuilt in background after a set interval.</p>
+                <p style="font-size:0.78rem;color:#10b981;margin-top:0.5rem;">Best for: E-commerce product pages, news sites — fast + fresh.</p>
+                <p style="font-size:0.78rem;color:#f59e0b;margin-top:0.3rem;">Trade-off: First request after revalidation gets stale page. Next.js feature.</p>
+            </div>
+            <div style="background:rgba(255,165,0,0.06);border:1px solid rgba(255,165,0,0.2);padding:1.2rem;border-radius:8px;">
+                <h4 style="color:#ffa500;margin-bottom:0.5rem;">🌐 CSR — Client-Side Rendering</h4>
+                <p style="font-size:0.82rem;color:var(--text-secondary);">HTML generated in the <strong>browser via JavaScript</strong>. Initial load = empty HTML shell.</p>
+                <p style="font-size:0.78rem;color:#10b981;margin-top:0.5rem;">Best for: Highly interactive apps, logged-in experiences, SPAs.</p>
+                <p style="font-size:0.78rem;color:#f59e0b;margin-top:0.3rem;">Trade-off: Slow initial load, poor SEO without hydration, blank screen flash.</p>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">NEXT.JS — MIXING RENDERING STRATEGIES PER PAGE</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">// SSG — runs at build time
+export async function getStaticProps() {
+  const posts = await fetchAllPosts();
+  return { props: { posts } };
+}
+
+// SSR — runs on every request
+export async function getServerSideProps({ req }) {
+  const user = await getUser(req.cookies.token);
+  return { props: { user } };
+}
+
+// ISR — SSG + revalidate every 60 seconds
+export async function getStaticProps() {
+  const products = await fetchProducts();
+  return { props: { products }, revalidate: 60 };
+}
+
+// React Server Components (Next.js App Router — default)
+async function ProductPage({ id }) {
+  const product = await db.products.findById(id); // Runs on server!
+  return &lt;ProductDetail product={product} /&gt;;
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- 1.10 Font Optimisation -->
+    <div class="content-card">
+        <h3>✍️ 1.10 Font Optimisation — Eliminating Flash of Invisible Text</h3>
+        <p>Web fonts are a surprisingly common source of performance problems. A poorly loaded font causes the dreaded <strong>FOIT</strong> (Flash of Invisible Text) or <strong>FOUT</strong> (Flash of Unstyled Text), degrading both perceived performance and CLS.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">FONT LOADING BEST PRACTICES</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code">/* 1. Self-host fonts instead of relying on Google Fonts CDN */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter.woff2') format('woff2'); /* woff2 only — universal support */
+  font-weight: 100 900;    /* Variable font — covers all weights */
+  font-display: swap;      /* Show fallback font, swap when loaded */
+  font-style: normal;
+}
+
+/* 2. Preload critical fonts in &lt;head&gt; */
+&lt;link rel="preload" href="/fonts/inter.woff2"
+      as="font" type="font/woff2" crossorigin&gt;
+
+/* 3. Size-adjust fallback font to reduce layout shift */
+@font-face {
+  font-family: 'Inter-fallback';
+  src: local('Arial');
+  size-adjust: 107%;           /* Match Inter's metrics */
+  ascent-override: 95%;
+  descent-override: 25%;
+}
+
+body {
+  font-family: 'Inter', 'Inter-fallback', sans-serif;
+}</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.8rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">font-display: swap</strong><br><span style="color:var(--text-secondary);">Show system font immediately, swap when web font loads</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">Variable Fonts</strong><br><span style="color:var(--text-secondary);">One file for all weights and styles — huge file size reduction</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">Subsetting</strong><br><span style="color:var(--text-secondary);">Only include characters your site actually uses (latin subset)</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">Local Fonts</strong><br><span style="color:var(--text-secondary);"><code>local('Arial')</code> — use OS font if available, zero download</span></div>
+        </div>
+    </div>
+
+    <!-- 1.11 CSS Performance -->
+    <div class="content-card">
+        <h3>🎨 1.11 CSS Performance — Selectors, Containment and content-visibility</h3>
+        <p>CSS has its own set of performance considerations beyond just file size. Complex selectors, unnecessary reflows, and painting large areas all impact rendering speed.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">🔍 Selector Efficiency</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Browsers match CSS selectors right-to-left. Complex selectors are slower — but in practice, the performance difference is negligible for normal pages. Focus instead on <strong>what CSS triggers</strong>.</p>
+                <div style="background:#000;padding:0.6rem;border-radius:4px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">/* Avoid: expensive selector */
+.nav ul li a span { color: blue; }
+
+/* Prefer: specific class */
+.nav-link-text { color: blue; }
+
+/* Avoid: universal selector in complex rules */
+.container * { box-sizing: border-box; }
+
+/* Prefer: set once at root */
+*, *::before, *::after { box-sizing: border-box; }</code></pre>
+                </div>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">📦 CSS Containment and content-visibility</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">New CSS properties that tell the browser to skip rendering work for off-screen content — dramatically speeding up initial load for long pages.</p>
+                <div style="background:#000;padding:0.6rem;border-radius:4px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">/* Skip layout, paint, style for off-screen elements */
+.article-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 300px; /* Estimated height */
+}
+
+/* Isolate element from rest of page */
+.widget {
+  contain: layout style paint;
+  /* Changes inside don't affect outside */
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.12 Performance Budget -->
+    <div class="content-card">
+        <h3>📋 1.12 Performance Budgets and Monitoring</h3>
+        <p>A <strong>performance budget</strong> is a set of limits on metrics that directly affect performance. It acts as a constraint that teams commit to — preventing performance regressions from slipping into production unnoticed.</p>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>Example Performance Budget:</strong>
+            <table style="width:100%;border-collapse:collapse;margin-top:0.8rem;font-size:0.83rem;">
+                <thead><tr style="border-bottom:1px solid var(--border-color);">
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Metric</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Budget</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Why</th>
+                </tr></thead>
+                <tbody style="color:var(--text-secondary);">
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;">Total JS (compressed)</td>
+                        <td style="padding:0.5rem;color:#10b981;">&lt; 200KB</td>
+                        <td style="padding:0.5rem;">Parse + execute on mid-range phone</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;">Total CSS (compressed)</td>
+                        <td style="padding:0.5rem;color:#10b981;">&lt; 50KB</td>
+                        <td style="padding:0.5rem;">Render-blocking cost</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;">LCP</td>
+                        <td style="padding:0.5rem;color:#10b981;">&lt; 2.5s</td>
+                        <td style="padding:0.5rem;">Google "Good" threshold</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;">INP</td>
+                        <td style="padding:0.5rem;color:#10b981;">&lt; 200ms</td>
+                        <td style="padding:0.5rem;">Responsive to all interactions</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.5rem;">CLS</td>
+                        <td style="padding:0.5rem;color:#10b981;">&lt; 0.1</td>
+                        <td style="padding:0.5rem;">No unexpected layout shifts</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">ENFORCE BUDGET IN CI — LIGHTHOUSE CI</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">// lighthouserc.js
+module.exports = {
+  ci: {
+    assert: {
+      assertions: {
+        'largest-contentful-paint': ['error', { maxNumericValue: 2500 }],
+        'cumulative-layout-shift':  ['error', { maxNumericValue: 0.1  }],
+        'total-blocking-time':      ['warn',  { maxNumericValue: 300  }],
+        'uses-webp-images':         ['warn',  { minScore: 0.8 }]
+      }
+    }
+  }
+};</code></pre>
+        </div>
+    </div>
+
+    <!-- 1.13 Conclusion -->
+    <div class="content-card" style="background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.08)); border-color: rgba(40,224,255,0.3);">
+        <h3>🎓 1.13 Module Conclusion & Next Steps</h3>
+        <p>Performance is not a one-time task — it's a <strong>continuous practice</strong>. The techniques in this module will help you build faster applications, but the real skill is developing an instinct for performance: asking <em>"what will this cost?"</em> before writing every line of code.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">✅ What you've covered:</strong>
+                <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>✔ Why performance matters — business impact</li>
+                    <li>✔ The Critical Rendering Path in depth</li>
+                    <li>✔ Core Web Vitals (LCP, INP, CLS)</li>
+                    <li>✔ Network optimisation (HTTP/2, compression, hints)</li>
+                    <li>✔ Image optimisation (WebP, AVIF, lazy loading)</li>
+                    <li>✔ HTTP caching and cache-busting strategies</li>
+                    <li>✔ JavaScript runtime performance and Long Tasks</li>
+                    <li>✔ Rendering pipeline (Layout, Paint, Composite)</li>
+                    <li>✔ Modern rendering patterns (SSR, SSG, ISR, CSR)</li>
+                    <li>✔ Font optimisation and FOIT/FOUT prevention</li>
+                    <li>✔ CSS performance and content-visibility</li>
+                    <li>✔ Performance budgets and CI enforcement</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">🗺️ Your next steps:</strong>
+                <div style="margin-top:0.6rem;font-size:0.83rem;">
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">1️⃣ Audit a real project with Lighthouse</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Run Lighthouse on a site you own and fix the top 3 issues it finds</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">2️⃣ Analyse your bundle</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Use <code>vite-bundle-visualizer</code> to find and eliminate unused code</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">3️⃣ Convert images to WebP/AVIF</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Replace all JPEG/PNG images in a project with modern formats</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;">
+                        <strong style="color:var(--blue);">4️⃣ Set up Lighthouse CI</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Add performance budget checks to your GitHub Actions pipeline</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:1.2rem;margin-top:1.2rem;">
+            <strong>🏆 Final Challenge:</strong>
+            <p style="font-size:0.9rem;color:var(--text-secondary);margin-top:0.5rem;">Take any web project and achieve a Lighthouse score of 90+ in all four categories (Performance, Accessibility, Best Practices, SEO). Document every change you made and what it improved. This is the hands-on work that solidifies every concept in this module.</p>
+        </div>
+    </div>
+
+        </div>
+
+        <!-- LAB TAB -->
+        <div id="lab" class="tab-panel">
+            <h3>Performance Inspector</h3>
+            <p style="margin-bottom: 1rem; font-size: 0.9rem;">Analyse HTML snippets for common performance issues and get optimisation suggestions.</p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header">HTML / CODE SNIPPET</div>
+                    <textarea class="lab-textarea" id="perf-input">&lt;!-- Paste your HTML here to analyse --&gt;
+&lt;head&gt;
+  &lt;script src="heavy-lib.js"&gt;&lt;/script&gt;
+  &lt;link rel="stylesheet" href="styles.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;img src="hero.jpg" width="1200" height="600"&gt;
+  &lt;img src="gallery1.jpg"&gt;
+  &lt;img src="gallery2.png"&gt;
+  &lt;img src="gallery3.jpg"&gt;
+&lt;/body&gt;</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header">PERFORMANCE ANALYSIS</div>
+                    <div class="lab-iframe" id="perf-output">Click "Analyse" to inspect your code for performance issues...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runPerfAnalysis()">Analyse Performance</button>
+        </div>
+
+        <!-- QUIZ TAB -->
+        <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>📊 Quiz: Performance & Rendering</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your mastery of browser rendering, Core Web Vitals, network optimisation and runtime performance.</p>
+
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What is the Critical Rendering Path?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) A technique for lazy loading images</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B"> B) The sequence of steps the browser takes to convert HTML, CSS, and JS into pixels on screen</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C"> C) A CSS property for GPU acceleration</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) A server-side rendering pattern</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. What does LCP measure?</p>
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) The total number of layout shifts on a page</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B"> B) The time until the largest visible content element is rendered</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C"> C) The latency between user interaction and the next visual update</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) The total bytes of JavaScript loaded</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. What is the key difference between <code>defer</code> and <code>async</code> script attributes?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) <code>defer</code> downloads in parallel; <code>async</code> blocks the parser</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B"> B) <code>defer</code> executes after HTML is fully parsed in order; <code>async</code> executes as soon as downloaded, in any order</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C"> C) They are identical — both wait for DOMContentLoaded</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) <code>async</code> only works with ES modules</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. Which CSS property change triggers ONLY the Composite step (cheapest)?</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) <code>width</code></label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B"> B) <code>background-color</code></label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C"> C) <code>transform</code></label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) <code>font-size</code></label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. What is "layout thrashing"?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) When CSS animations cause flickering</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B"> B) When too many DOM elements are created</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C"> C) When reading layout properties after writing styles forces the browser to recalculate layout repeatedly in a loop</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) When the page layout breaks on mobile devices</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. Which image format offers approximately 50% better compression than JPEG?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A"> A) PNG</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) GIF</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C"> C) WebP</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) AVIF</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. What does <code>Cache-Control: no-cache</code> actually do?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Prevents the browser from storing the resource at all</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Stores the resource but requires revalidation with the server before using it</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Caches the resource for 0 seconds</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Only allows CDN caching, not browser caching</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. What is a "Long Task" in browser performance?</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) A network request that takes more than 1 second</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B"> B) Any JavaScript task that blocks the main thread for more than 50ms</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C"> C) A CSS animation longer than 1 second</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) A database query exceeding 100ms</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. In SSG (Static Site Generation), when is the HTML generated?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) On every user request at runtime</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B"> B) At build time, once, before deployment</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C"> C) In the browser via JavaScript</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) On first request then cached</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. What does <code>font-display: swap</code> do?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Prevents web fonts from loading at all</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Shows invisible text until the font loads</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C"> C) Shows a fallback font immediately, then swaps to the web font when it loads</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Loads fonts asynchronously after the page is interactive</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What is the purpose of <code>content-visibility: auto</code>?</p>
+                <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Hides the element from screen readers</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Tells the browser to skip rendering work for off-screen elements, improving initial load speed</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Makes the element visible on all screen sizes</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Enables automatic lazy loading for child images</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. What is ISR (Incremental Static Regeneration)?</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) A technique to progressively load JavaScript in chunks</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Static generation with a revalidation timer — pages are rebuilt in the background after a set interval</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Client-side rendering with incremental hydration</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) A way to serve different HTML to different users</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. Which resource hint performs DNS lookup + TCP + TLS handshake in advance?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) <code>rel="dns-prefetch"</code></label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B"> B) <code>rel="preload"</code></label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C"> C) <code>rel="preconnect"</code></label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) <code>rel="prefetch"</code></label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. What is CLS and what is its "Good" threshold?</p>
+                <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Core Loading Speed — under 1 second</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Cumulative Layout Shift — a score under 0.1 measuring unexpected visual movement</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Cached Layout Snapshot — under 50ms</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Client Layout Score — under 200ms</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. What is the main advantage of using Web Workers?</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) They make HTTP requests faster</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B"> B) They allow CSS to be applied asynchronously</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C"> C) They run JavaScript on a separate thread, keeping the main thread free for UI updates and interactions</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) They cache network responses automatically</label>
+            </div>
+        </form>
+
+        <div class="quiz-controls">
+            <button id="submit-quiz" class="btn btn-primary">Submit Assessment</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+class QuizManager {
+    constructor() {
+        this.questionsData = {
+            q1:  { correct: 'B', exp: 'The Critical Rendering Path is the sequence of steps — DNS, TCP, HTML parse, CSSOM build, Render Tree, Layout, Paint, Composite — the browser takes to display a page.' },
+            q2:  { correct: 'B', exp: 'LCP (Largest Contentful Paint) measures the time until the largest visible content element (hero image, heading) is fully rendered. Target: < 2.5s.' },
+            q3:  { correct: 'B', exp: 'defer downloads in parallel but executes after HTML is fully parsed, in source order. async executes immediately when downloaded, in any order. Use defer for app scripts, async for independent scripts like analytics.' },
+            q4:  { correct: 'C', exp: 'transform and opacity are the only CSS properties that trigger only the Composite step — they move/fade already-painted layers on the GPU without recalculating layout or repainting.' },
+            q5:  { correct: 'C', exp: 'Layout thrashing occurs when you read a layout property (like offsetWidth) immediately after writing a style, forcing the browser to synchronously recalculate layout. In a loop, this can cause hundreds of reflows per frame.' },
+            q6:  { correct: 'D', exp: 'AVIF (AV1 Image Format) offers approximately 50% better compression than JPEG. WebP offers ~30% better. AVIF has broad modern browser support and should be preferred, with WebP as fallback.' },
+            q7:  { correct: 'B', exp: 'Confusingly, no-cache does not prevent caching — it stores the resource but requires the browser to revalidate with the server (via ETag or Last-Modified) before using the cached copy. Use no-store to prevent all caching.' },
+            q8:  { correct: 'B', exp: 'A Long Task is any JavaScript task that occupies the main thread for more than 50ms. Long Tasks directly harm INP because the browser cannot respond to user interactions while they run.' },
+            q9:  { correct: 'B', exp: 'In SSG, HTML is generated once at build time and the resulting static files are deployed to a CDN. This gives the fastest possible TTFB since no server computation is needed per request.' },
+            q10: { correct: 'C', exp: 'font-display: swap shows a fallback system font immediately (preventing invisible text / FOIT), then swaps to the web font when it finishes loading. This trades a flash of unstyled text (FOUT) for a better perceived load time.' },
+            q11: { correct: 'B', exp: 'content-visibility: auto tells the browser to completely skip layout, paint, and style calculation for off-screen elements. This can dramatically reduce initial render time on pages with long content.' },
+            q12: { correct: 'B', exp: 'ISR combines the speed of SSG with reasonable content freshness. Pages are served as static files but a background revalidation rebuilds them after a configurable time interval. It\'s a Next.js feature.' },
+            q13: { correct: 'C', exp: 'preconnect performs the full connection setup (DNS + TCP + TLS) to a third-party origin ahead of time. dns-prefetch only resolves DNS. Use preconnect for origins you\'ll fetch critical resources from soon.' },
+            q14: { correct: 'B', exp: 'CLS (Cumulative Layout Shift) measures the total amount of unexpected visual movement — elements jumping around after load. A score below 0.1 is "Good". Fix it by always setting width/height on images and avoiding inserting content above existing content.' },
+            q15: { correct: 'C', exp: 'Web Workers run on a completely separate thread from the main thread. CPU-intensive work (data processing, parsing, compression) can be offloaded to a worker, keeping the main thread free to handle user interactions and animations at 60fps.' }
+        };
+        this.init();
+    }
+
+    init() {
+        document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+        document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+    }
+
+    submitQuiz() {
+        const form = document.getElementById('quiz-form');
+        const formData = new FormData(form);
+        let score = 0;
+        let feedbackHTML = '';
+
+        Object.keys(this.questionsData).forEach((key, index) => {
+            const userAnswer = formData.get(key);
+            const isCorrect = userAnswer === this.questionsData[key].correct;
+            if (isCorrect) score++;
+            feedbackHTML += `
+    <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+        <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+        <div>
+            <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+            ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+        </div>
+    </div>`;
+        });
+
+        const total = Object.keys(this.questionsData).length;
+        const percent = Math.round((score / total) * 100);
+        const resultsDiv = document.getElementById('quiz-results');
+        let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+        document.getElementById('quiz-score').innerHTML = `
+            <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+            <p style="color: var(--text-secondary)">${percent >= 70 ? 'Excellent! You understand how browsers work under the hood.' : 'Review the rendering pipeline and network optimisation sections and try again.'}</p>`;
+        document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clearQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-results').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+document.addEventListener('DOMContentLoaded', () => { new QuizManager(); });
+</script>
+
+        <!-- RESOURCES TAB -->
+        <div id="resources" class="tab-panel">
+            <div class="content-card">
+                <h3>Recommended Resources</h3>
+                <p style="color:var(--text-secondary);margin-bottom:1.5rem;">A curated list of the best resources for mastering web performance and rendering.</p>
+                <div>
+                    <h4 style="color:var(--cyan);margin-bottom:0.8rem;">Official Documentation & Guides</h4>
+                    <a href="#" class="resource-link">web.dev/performance — Google's Performance Learning Path</a>
+                    <a href="#" class="resource-link">MDN Web Docs — Critical Rendering Path</a>
+                    <a href="#" class="resource-link">web.dev/explore/metrics — Core Web Vitals Explained</a>
+                    <a href="#" class="resource-link">Chrome Developers — Rendering Performance Guide</a>
+                </div>
+                <div style="margin-top:1.5rem;">
+                    <h4 style="color:var(--cyan);margin-bottom:0.8rem;">Tools</h4>
+                    <a href="#" class="resource-link">PageSpeed Insights — Real-world CWV data</a>
+                    <a href="#" class="resource-link">WebPageTest — Advanced waterfall analysis</a>
+                    <a href="#" class="resource-link">Squoosh — Browser-based image compression</a>
+                    <a href="#" class="resource-link">Bundlephobia — Check npm package sizes before adding them</a>
+                </div>
+                <div style="margin-top:1.5rem;">
+                    <h4 style="color:var(--cyan);margin-bottom:0.8rem;">Deep Dives</h4>
+                    <a href="#" class="resource-link">Inside look at modern web browser (4-part series) — Google</a>
+                    <a href="#" class="resource-link">JavaScript Event Loop Visualised — Jake Archibald</a>
+                    <a href="#" class="resource-link">HTTP/2 Push is Dead — Jake Archibald</a>
+                    <a href="#" class="resource-link">Patterns.dev — Rendering Patterns (SSR, SSG, ISR, Streaming)</a>
+                </div>
+                <div style="margin-top:1.5rem;">
+                    <h4 style="color:var(--cyan);margin-bottom:0.8rem;">Quick References</h4>
+                    <a href="#" class="resource-link">CSS Triggers — Which properties trigger Layout/Paint/Composite</a>
+                    <a href="#" class="resource-link">Lighthouse Scoring Calculator</a>
+                    <a href="#" class="resource-link">web-vitals npm package — Measure CWV in production</a>
+                    <a href="#" class="resource-link">HTTP Caching — MDN Reference</a>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.5rem;">
+                    <p>💡 <strong>Tip:</strong> The Chrome DevTools Performance tab is the most powerful tool you have. Learn to read flame charts and identify Long Tasks — it will change how you debug performance forever.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- EVALUATION TAB -->
+        <div id="evaluation" class="tab-panel">
+    <div class="content-card">
+        <h3>🎯 Mastery Criteria: Performance & Rendering</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            Criteria organised by importance levels to assess your mastery of web performance and browser rendering.
+        </p>
+
+        <div class="evaluation-grid">
+            <div class="evaluation-column">
+                <h4 class="evaluation-title essential">
+                    <span>💠</span> Essential
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>CRP:</strong> Explain the Critical Rendering Path and identify render-blocking resources.</li>
+                    <li><strong>Core Web Vitals:</strong> Know what LCP, INP, and CLS measure and their "Good" thresholds.</li>
+                    <li><strong>Images:</strong> Use WebP/AVIF, lazy loading, and correct width/height attributes.</li>
+                    <li><strong>Scripts:</strong> Apply <code>defer</code> and <code>async</code> correctly to script tags.</li>
+                    <li><strong>Lighthouse:</strong> Run and interpret a Lighthouse audit on a real page.</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title important">
+                    <span>⭐</span> Important
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>Caching:</strong> Configure Cache-Control headers and implement cache-busting with content hashes.</li>
+                    <li><strong>Rendering Pipeline:</strong> Identify which CSS changes trigger Layout, Paint, or Composite only.</li>
+                    <li><strong>Network Hints:</strong> Use preconnect, preload, and prefetch appropriately.</li>
+                    <li><strong>Bundle Size:</strong> Use code splitting and tree shaking to reduce JavaScript payload.</li>
+                    <li><strong>Fonts:</strong> Prevent FOIT/FOUT with font-display and preloading.</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title advanced">
+                    <span>🚀</span> Advanced
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>Long Tasks:</strong> Profile and break up Long Tasks using scheduler.yield() and Web Workers.</li>
+                    <li><strong>Rendering Patterns:</strong> Choose between SSR, SSG, ISR, and CSR based on requirements.</li>
+                    <li><strong>content-visibility:</strong> Apply CSS containment to skip off-screen rendering work.</li>
+                    <li><strong>Performance Budget:</strong> Define and enforce budgets in a CI/CD pipeline with Lighthouse CI.</li>
+                    <li><strong>RUM:</strong> Measure Core Web Vitals in production with real user monitoring.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+</main>
+
+<script>
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+        const progressMap = { learn: 25, lab: 50, quiz: 75, resources: 90, evaluation: 100 };
+        document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+        document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+        window.scrollTo({ top: 150, behavior: 'smooth' });
+    }
+
+    function runPerfAnalysis() {
+        const input = document.getElementById('perf-input').value;
+        const out = document.getElementById('perf-output');
+        let issues = [];
+        let suggestions = [];
+
+        if (/<script\b(?![^>]*\b(?:defer|async)\b)[^>]*src=/i.test(input))
+            issues.push('🔴 <strong>Render-blocking script</strong> detected. Add <code>defer</code> or <code>async</code> to &lt;script src&gt; tags.');
+
+        if (/<img\b(?![^>]*\bloading\s*=)/i.test(input))
+            issues.push('🟡 <strong>Missing lazy loading</strong>. Add <code>loading="lazy"</code> to below-the-fold images.');
+
+        if (/<img\b(?![^>]*\bwidth\s*=)[^>]*>/i.test(input))
+            issues.push('🟡 <strong>Missing width/height attributes</strong> on &lt;img&gt;. This causes Cumulative Layout Shift (CLS).');
+
+        if (/\.jpg|\.jpeg|\.png/i.test(input))
+            issues.push('🟡 <strong>Legacy image formats</strong> (JPEG/PNG) detected. Consider converting to WebP or AVIF for 30–50% size reduction.');
+
+        if (!/fetchpriority\s*=\s*["']high["']/i.test(input) && /<img/i.test(input))
+            suggestions.push('💡 Add <code>fetchpriority="high"</code> to your LCP (hero) image to tell the browser to prioritise it.');
+
+        if (!/rel\s*=\s*["']preload["']/i.test(input))
+            suggestions.push('💡 Consider adding <code>&lt;link rel="preload"&gt;</code> for critical resources like your hero image or main font.');
+
+        if (!/rel\s*=\s*["']preconnect["']/i.test(input))
+            suggestions.push('💡 Add <code>&lt;link rel="preconnect"&gt;</code> for third-party origins (CDNs, APIs, font providers).');
+
+        let html = '<strong style="color:#28e0ff;">Performance Analysis Report</strong><br><br>';
+
+        if (issues.length === 0 && suggestions.length === 0) {
+            html += '<span style="color:#10b981;">✅ No obvious issues found in this snippet. Run Lighthouse for a full audit.</span>';
+        } else {
+            if (issues.length > 0) {
+                html += `<strong style="color:#ff6b6b;">Issues Found (${issues.length}):</strong><br>`;
+                issues.forEach(i => { html += `<div style="margin:0.5rem 0;padding:0.5rem;background:rgba(255,100,100,0.08);border-radius:4px;">${i}</div>`; });
+            }
+            if (suggestions.length > 0) {
+                html += `<br><strong style="color:#ffd700;">Suggestions (${suggestions.length}):</strong><br>`;
+                suggestions.forEach(s => { html += `<div style="margin:0.5rem 0;padding:0.5rem;background:rgba(255,200,0,0.06);border-radius:4px;">${s}</div>`; });
+            }
+        }
+
+        html += '<br><em style="color:#555;">Run Lighthouse in Chrome DevTools for a comprehensive audit with real scores.</em>';
+        out.innerHTML = html;
+    }
+</script>
+
+</body>
+</html>

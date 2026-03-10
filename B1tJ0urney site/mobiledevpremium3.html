@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Native Mobile Programming</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #d000ff;
+            --purple: #c266ff;
+            --cyan: #a200ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(91, 124, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(207, 75, 255, 0.1) 0%, rgba(217, 91, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255,255,255,0.1); border: 1px solid var(--border-color);
+            color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px;
+            font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+
+        .tab-button {
+            flex: 1; min-width: 120px; padding: 1rem 1.5rem;
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.3s ease; position: relative; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card {
+            background: rgba(255,255,255,0.03); padding: 1.5rem;
+            border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;
+        }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); }
+
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 0.75rem 0; }
+        .styled-list li { margin-bottom: 0.6rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        .code-block {
+            background: rgba(0,0,0,0.5); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.82rem; line-height: 1.6; }
+        .code-block .kw  { color: #ff79c6; }
+        .code-block .fn  { color: #50fa7b; }
+        .code-block .str { color: #f1fa8c; }
+        .code-block .cm  { color: #6272a4; font-style: italic; }
+        .code-block .ty  { color: #8be9fd; }
+        .code-block .num { color: #bd93f9; }
+
+        /* Info box */
+        .info-box {
+            background: rgba(162, 0, 255, 0.08);
+            border: 1px solid rgba(162, 0, 255, 0.25);
+            border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0;
+            font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);
+        }
+        .info-box strong { color: var(--cyan); }
+
+        /* Comparison table */
+        .compare-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.875rem; }
+        .compare-table th { background: rgba(255,255,255,0.07); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid var(--border-color); }
+        .compare-table td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .compare-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 420px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header-bar { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); border-radius: 8px 8px 0 0; }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; line-height: 1.6; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; font-size: 0.9rem; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Quiz */
+        .quiz-option {
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem;
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;
+            margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05));
+            border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem;
+        }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+
+        .feedback-item {
+            display: flex; align-items: flex-start; gap: 1rem; padding: 1rem;
+            border-radius: 8px; background: rgba(255,255,255,0.03);
+        }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 1rem; font-weight: 600; margin-bottom: 1rem;
+            padding-bottom: 0.75rem; border-bottom: 2px solid;
+        }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .compare-table { font-size: 0.78rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-mobile.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: Native Mobile Programming</h1>
+            <p class="course-description">
+                Master native mobile development using Swift for iOS and Kotlin for Android. Learn modern UI frameworks, architecture patterns, async programming, hardware access, and the full publishing workflow.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• Swift • Kotlin • SwiftUI • Jetpack Compose • MVVM • Async</span></div>
+                <div class="meta-item"><span>📌</span><span>Prerequisite: Mobile Development Fundamentals</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- LEARN -->
+            <div id="aprender" class="tab-panel active">
+
+                <div class="content-card">
+                    <h3>Why Native Programming Matters</h3>
+                    <p>Native development means building mobile apps directly in the official languages and SDKs of each platform.</p>
+                    <ul class="styled-list" style="margin-top: 0.75rem;">
+                        <li>Swift → iOS</li>
+                        <li>Kotlin → Android</li>
+                    </ul>
+                    <p style="margin-top: 0.75rem;">Native apps offer:</p>
+                    <ul class="styled-list">
+                        <li>Maximum performance</li>
+                        <li>Full hardware access</li>
+                        <li>Best UI responsiveness</li>
+                        <li>Long-term ecosystem support</li>
+                        <li>Best compatibility with platform updates</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Native programming is essential for developers who want to build professional-grade apps or work in mobile-focused companies.</p>
+
+                    <!-- NEW -->
+                    <div class="info-box" style="margin-top: 1.25rem;">
+                        <strong>💡 Native vs Hybrid — When Does It Matter?</strong><br>
+                        For most apps — social, e-commerce, productivity — Flutter or React Native can do the job well. Native becomes non-negotiable when you need: <strong>maximum graphics performance</strong> (games, AR/VR), <strong>deep hardware integration</strong> (custom Bluetooth protocols, NFC, secure enclave), <strong>zero-latency UI</strong> (financial trading, medical devices), or when your company has a dedicated iOS and Android team and can maintain two codebases. Native skills are also required to write <strong>native modules</strong> that extend cross-platform apps.
+                    </div>
+
+                    <p style="margin-top: 1.25rem;"><strong>Swift vs Kotlin — At a Glance:</strong></p>
+                    <table class="compare-table">
+                        <thead>
+                            <tr><th>Feature</th><th>Swift (iOS)</th><th>Kotlin (Android)</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Created by</td><td>Apple (2014)</td><td>JetBrains (2011), Google (2017)</td></tr>
+                            <tr><td>Null safety</td><td>Optionals (<code>String?</code>)</td><td>Nullable types (<code>String?</code>)</td></tr>
+                            <tr><td>Memory management</td><td>ARC (Automatic Reference Counting)</td><td>JVM Garbage Collector</td></tr>
+                            <tr><td>Async model</td><td>async/await, Combine</td><td>Coroutines, Flow</td></tr>
+                            <tr><td>UI framework</td><td>SwiftUI, UIKit</td><td>Jetpack Compose, XML</td></tr>
+                            <tr><td>IDE</td><td>Xcode (macOS only)</td><td>Android Studio (all OS)</td></tr>
+                            <tr><td>Interop</td><td>Objective-C compatible</td><td>Java compatible</td></tr>
+                            <tr><td>Other uses</td><td>macOS, watchOS, server (Vapor)</td><td>Backend (Ktor), Multiplatform (KMP)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-card">
+                    <h3>Swift – The Official Language of iOS</h3>
+                    <p>Swift is a modern, fast, safe language created by Apple in 2014.</p>
+                    <p style="margin-top: 0.75rem;"><strong>Key characteristics:</strong></p>
+                    <ul class="styled-list">
+                        <li>Type-safe</li>
+                        <li>High performance</li>
+                        <li>Easy to read</li>
+                        <li>Memory-safe (ARC – Automatic Reference Counting)</li>
+                        <li>Designed for modern iOS APIs</li>
+                    </ul>
+                    <p style="margin-top: 0.75rem;">Swift powers: iOS, iPadOS, watchOS, macOS, tvOS.</p>
+
+                    <div class="code-explanation" style="margin-top: 1.5rem;">
+                        <p><span class="highlight">Swift Syntax Basics</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Variables and constants</span>
+<span class="kw">var</span> name = <span class="str">"Nuno"</span>
+<span class="kw">let</span> age = <span class="num">20</span>   <span class="cm">// constant</span>
+
+<span class="cm">// Functions</span>
+<span class="kw">func</span> <span class="fn">greet</span>(_ person: <span class="ty">String</span>) -> <span class="ty">String</span> {
+    <span class="kw">return</span> <span class="str">"Hello, \(person)"</span>
+}
+
+<span class="cm">// Optionals</span>
+<span class="kw">var</span> username: <span class="ty">String</span>?
+username = <span class="str">"bitjourney"</span>
+
+<span class="cm">// Safe unwrapping</span>
+<span class="kw">if let</span> user = username {
+    print(user)
+}</pre>
+                        </div>
+                        <p>Swift prevents common crashes with safe handling of null values (optionals).</p>
+                    </div>
+
+                    <!-- NEW: Swift structs, classes, protocols -->
+                    <div class="code-explanation">
+                        <p><span class="highlight">Swift Structs, Classes &amp; Protocols</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Struct (value type — preferred in Swift)</span>
+<span class="kw">struct</span> <span class="ty">User</span> {
+    <span class="kw">let</span> name: <span class="ty">String</span>
+    <span class="kw">var</span> age: <span class="ty">Int</span>
+
+    <span class="kw">func</span> <span class="fn">greet</span>() -> <span class="ty">String</span> { <span class="str">"Hi, I'm \(name)"</span> }
+}
+
+<span class="cm">// Protocol (like an interface)</span>
+<span class="kw">protocol</span> <span class="ty">Describable</span> {
+    <span class="kw">func</span> <span class="fn">describe</span>() -> <span class="ty">String</span>
+}
+
+<span class="cm">// Class (reference type — use for ViewModels)</span>
+<span class="kw">class</span> <span class="ty">ProfileViewModel</span>: <span class="ty">ObservableObject</span> {
+    <span class="kw">@Published var</span> user: <span class="ty">User</span>?
+}</pre>
+                        </div>
+                        <p style="margin-top: 0.5rem;">In Swift, <strong>structs</strong> are value types (copied on assignment) and are preferred for data models. <strong>Classes</strong> are reference types (shared in memory) and are used for ViewModels and services. <strong>Protocols</strong> define contracts — use them for dependency injection and testability.</p>
+                    </div>
+
+                    <!-- NEW: Closures -->
+                    <div class="code-explanation">
+                        <p><span class="highlight">Swift Closures (Anonymous Functions)</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Closure syntax</span>
+<span class="kw">let</span> multiply = { (a: <span class="ty">Int</span>, b: <span class="ty">Int</span>) -> <span class="ty">Int</span> <span class="kw">in</span>
+    <span class="kw">return</span> a * b
+}
+
+<span class="cm">// Trailing closure syntax (common in SwiftUI)</span>
+<span class="ty">Button</span>(<span class="str">"Save"</span>) {
+    <span class="fn">saveData</span>()
+}
+
+<span class="cm">// Closures as callbacks</span>
+<span class="fn">fetchUser</span>(id: <span class="num">1</span>) { user <span class="kw">in</span>
+    print(user.name)
+}</pre>
+                        </div>
+                        <p style="margin-top: 0.5rem;">Closures are a fundamental part of Swift — they power callbacks, SwiftUI button actions, and higher-order functions like <code>.map</code>, <code>.filter</code>, and <code>.reduce</code>.</p>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">SwiftUI – Modern iOS UI Framework</span></p>
+                        <div class="code-block">
+<pre><span class="kw">var</span> body: <span class="kw">some</span> <span class="ty">View</span> {
+    <span class="ty">Text</span>(<span class="str">"Hello World"</span>)
+        .font(.title)
+        .foregroundColor(.blue)
+}</pre>
+                        </div>
+                        <p>Benefits: less boilerplate, real-time preview, easy animations, responsive layouts.</p>
+                    </div>
+
+                    <!-- NEW: SwiftUI state -->
+                    <div class="code-explanation">
+                        <p><span class="highlight">SwiftUI State Management</span></p>
+                        <div class="code-block">
+<pre><span class="kw">struct</span> <span class="ty">CounterView</span>: <span class="ty">View</span> {
+    <span class="kw">@State private var</span> count = <span class="num">0</span>           <span class="cm">// local state</span>
+    <span class="kw">@ObservedObject var</span> vm: <span class="ty">CounterVM</span>      <span class="cm">// external ViewModel</span>
+    <span class="kw">@EnvironmentObject var</span> auth: <span class="ty">AuthService</span> <span class="cm">// global injection</span>
+
+    <span class="kw">var</span> body: <span class="kw">some</span> <span class="ty">View</span> {
+        <span class="ty">VStack</span> {
+            <span class="ty">Text</span>(<span class="str">"Count: \(count)"</span>)
+            <span class="ty">Button</span>(<span class="str">"+"</span>) { count += <span class="num">1</span> }
+        }
+    }
+}</pre>
+                        </div>
+                        <p style="margin-top: 0.5rem;"><strong>@State</strong> = local view state. <strong>@ObservedObject</strong> = subscribes to a ViewModel. <strong>@EnvironmentObject</strong> = injects a shared object from the view hierarchy. <strong>@Binding</strong> = two-way link to a parent's @State.</p>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">UIKit – Traditional iOS Framework</span></p>
+                        <div class="code-block">
+<pre><span class="kw">let</span> label = <span class="ty">UILabel</span>()
+label.text = <span class="str">"Hello"</span>
+label.textColor = .blue</pre>
+                        </div>
+                        <p>UIKit uses an imperative style. Many legacy and enterprise apps still use it.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Kotlin – The Official Language of Android</h3>
+                    <p>Kotlin replaced Java as Google's preferred language for Android.</p>
+                    <p style="margin-top: 0.75rem;"><strong>Key characteristics:</strong></p>
+                    <ul class="styled-list">
+                        <li>Null-safety</li>
+                        <li>Very concise syntax</li>
+                        <li>Interoperable with Java</li>
+                        <li>Coroutine support (for async tasks)</li>
+                        <li>Highly productive</li>
+                    </ul>
+                    <p style="margin-top: 0.75rem;">Kotlin powers: Android, backend (Ktor), multiplatform projects.</p>
+
+                    <div class="code-explanation" style="margin-top: 1.5rem;">
+                        <p><span class="highlight">Kotlin Syntax Basics</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Variables and constants</span>
+<span class="kw">var</span> name = <span class="str">"Nuno"</span>
+<span class="kw">val</span> age = <span class="num">20</span>   <span class="cm">// constant</span>
+
+<span class="cm">// Functions</span>
+<span class="kw">fun</span> <span class="fn">greet</span>(person: <span class="ty">String</span>): <span class="ty">String</span> {
+    <span class="kw">return</span> <span class="str">"Hello, $person"</span>
+}
+
+<span class="cm">// Null-safety</span>
+<span class="kw">var</span> username: <span class="ty">String</span>? = <span class="kw">null</span>
+<span class="kw">val</span> len = username?.<span class="fn">length</span>        <span class="cm">// safe call</span>
+<span class="kw">val</span> display = username ?: <span class="str">"Guest"</span> <span class="cm">// Elvis operator</span></pre>
+                        </div>
+                    </div>
+
+                    <!-- NEW: Kotlin data classes, sealed classes, lambdas -->
+                    <div class="code-explanation">
+                        <p><span class="highlight">Kotlin Data Classes &amp; Sealed Classes</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Data class — auto-generates equals, hashCode, toString, copy</span>
+<span class="kw">data class</span> <span class="ty">User</span>(<span class="kw">val</span> name: <span class="ty">String</span>, <span class="kw">val</span> age: <span class="ty">Int</span>)
+
+<span class="kw">val</span> user = <span class="ty">User</span>(<span class="str">"Nuno"</span>, <span class="num">20</span>)
+<span class="kw">val</span> updated = user.copy(age = <span class="num">21</span>)  <span class="cm">// immutable update</span>
+
+<span class="cm">// Sealed class — exhaustive state modeling</span>
+<span class="kw">sealed class</span> <span class="ty">UiState</span> {
+    <span class="kw">object</span> <span class="ty">Loading</span> : <span class="ty">UiState</span>()
+    <span class="kw">data class</span> <span class="ty">Success</span>(<span class="kw">val</span> data: <span class="ty">List</span>&lt;<span class="ty">User</span>&gt;) : <span class="ty">UiState</span>()
+    <span class="kw">data class</span> <span class="ty">Error</span>(<span class="kw">val</span> message: <span class="ty">String</span>) : <span class="ty">UiState</span>()
+}
+
+<span class="cm">// Exhaustive when expression</span>
+<span class="kw">when</span>(state) {
+    <span class="kw">is</span> <span class="ty">UiState</span>.<span class="ty">Loading</span>  -> <span class="fn">showSpinner</span>()
+    <span class="kw">is</span> <span class="ty">UiState</span>.<span class="ty">Success</span>  -> <span class="fn">showList</span>(state.data)
+    <span class="kw">is</span> <span class="ty">UiState</span>.<span class="ty">Error</span>    -> <span class="fn">showError</span>(state.message)
+}</pre>
+                        </div>
+                        <p style="margin-top: 0.5rem;"><strong>Data classes</strong> are Kotlin's clean replacement for Java POJOs. <strong>Sealed classes</strong> are perfect for modeling UI state — the <code>when</code> block is exhaustive, so the compiler warns you if you miss a case.</p>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">Kotlin Lambdas &amp; Higher-Order Functions</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Lambda syntax</span>
+<span class="kw">val</span> double = { x: <span class="ty">Int</span> -> x * <span class="num">2</span> }
+
+<span class="cm">// Higher-order functions</span>
+<span class="kw">val</span> numbers = listOf(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>)
+<span class="kw">val</span> evens  = numbers.<span class="fn">filter</span>  { it % <span class="num">2</span> == <span class="num">0</span> }   <span class="cm">// [2, 4]</span>
+<span class="kw">val</span> doubled = numbers.<span class="fn">map</span>    { it * <span class="num">2</span> }           <span class="cm">// [2,4,6,8,10]</span>
+<span class="kw">val</span> sum     = numbers.<span class="fn">reduce</span> { acc, i -> acc + i } <span class="cm">// 15</span>
+
+<span class="cm">// Trailing lambda (used in Compose)</span>
+<span class="ty">Button</span>(onClick = { <span class="fn">saveData</span>() }) {
+    <span class="ty">Text</span>(<span class="str">"Save"</span>)
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">Android UI with XML</span></p>
+                        <div class="code-block">
+<pre>&lt;<span class="ty">TextView</span>
+    android:text=<span class="str">"Hello World"</span>
+    android:textSize=<span class="str">"20sp"</span>
+    android:textColor=<span class="str">"@color/black"</span>/&gt;</pre>
+                        </div>
+                        <p>Traditional apps use XML layouts combined with Activities and Fragments.</p>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">Jetpack Compose – Modern Android UI</span></p>
+                        <div class="code-block">
+<pre>@<span class="ty">Composable</span>
+<span class="kw">fun</span> <span class="fn">Greeting</span>() {
+    <span class="ty">Text</span>(
+        text = <span class="str">"Hello World"</span>,
+        fontSize = <span class="num">24</span>.sp,
+        color = <span class="ty">Color</span>.Blue
+    )
+}</pre>
+                        </div>
+                        <p>Benefits: faster development, less boilerplate, reactive UI, works great with Kotlin coroutines.</p>
+                    </div>
+
+                    <!-- NEW: Compose state -->
+                    <div class="code-explanation">
+                        <p><span class="highlight">Jetpack Compose State Management</span></p>
+                        <div class="code-block">
+<pre>@<span class="ty">Composable</span>
+<span class="kw">fun</span> <span class="fn">CounterScreen</span>(viewModel: <span class="ty">CounterViewModel</span> = viewModel()) {
+    <span class="cm">// Collect StateFlow as Compose state</span>
+    <span class="kw">val</span> count <span class="kw">by</span> viewModel.count.<span class="fn">collectAsState</span>()
+
+    <span class="ty">Column</span> {
+        <span class="ty">Text</span>(<span class="str">"Count: $count"</span>)
+        <span class="ty">Button</span>(onClick = { viewModel.<span class="fn">increment</span>() }) {
+            <span class="ty">Text</span>(<span class="str">"+"</span>)
+        }
+    }
+}
+
+<span class="cm">// ViewModel exposes state as StateFlow</span>
+<span class="kw">class</span> <span class="ty">CounterViewModel</span> : <span class="ty">ViewModel</span>() {
+    <span class="kw">private val</span> _count = <span class="ty">MutableStateFlow</span>(<span class="num">0</span>)
+    <span class="kw">val</span> count: <span class="ty">StateFlow</span>&lt;<span class="ty">Int</span>&gt; = _count.<span class="fn">asStateFlow</span>()
+    <span class="kw">fun</span> <span class="fn">increment</span>() { _count.value++ }
+}</pre>
+                        </div>
+                        <p style="margin-top: 0.5rem;"><strong>StateFlow</strong> is a hot reactive stream that holds a current value. Compose's <code>collectAsState()</code> subscribes and recomposes the UI automatically when the value changes.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Native Architecture Fundamentals</h3>
+                    <div class="code-explanation">
+                        <p><span class="highlight">iOS architectural patterns:</span> MVC, MVVM, VIPER, Clean Architecture</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Android architectural patterns:</span> MVVM (most recommended), MVI, Clean Architecture</p>
+                    </div>
+                    <p style="margin-top: 1rem;"><strong>Common components:</strong></p>
+                    <ul class="styled-list">
+                        <li>View</li>
+                        <li>ViewModel</li>
+                        <li>LiveData / StateFlow</li>
+                        <li>Repository</li>
+                        <li>Use Cases</li>
+                    </ul>
+
+                    <!-- NEW: MVVM explained with code -->
+                    <div class="info-box" style="margin-top: 1.25rem;">
+                        <strong>🏗️ MVVM — Why It's the Default Choice</strong><br>
+                        MVVM separates responsibilities so that:<br>
+                        • <strong>View</strong> (SwiftUI/Compose) — only renders UI, observes state<br>
+                        • <strong>ViewModel</strong> — holds UI state, handles user actions, no reference to UI<br>
+                        • <strong>Model/Repository</strong> — fetches/stores data (API, database)<br><br>
+                        This separation makes code <strong>testable</strong> (you can unit test the ViewModel without a screen), <strong>maintainable</strong> (UI and logic don't mix), and <strong>reactive</strong> (state changes automatically update the UI).
+                    </div>
+
+                    <p style="margin-top: 1.25rem;"><strong>Clean Architecture Layers:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Presentation Layer</span> — Views + ViewModels. Observes state, dispatches actions.</li>
+                        <li><span class="highlight">Domain Layer</span> — Use Cases (business rules). Pure Kotlin/Swift, no dependencies on UI or data sources.</li>
+                        <li><span class="highlight">Data Layer</span> — Repositories + Data Sources (API, Room/CoreData, cache). Implements data interfaces defined in domain.</li>
+                    </ul>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Repository Pattern (Kotlin Example)</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Interface in domain layer</span>
+<span class="kw">interface</span> <span class="ty">UserRepository</span> {
+    <span class="kw">suspend fun</span> <span class="fn">getUser</span>(id: <span class="ty">Int</span>): <span class="ty">User</span>
+}
+
+<span class="cm">// Implementation in data layer</span>
+<span class="kw">class</span> <span class="ty">UserRepositoryImpl</span>(
+    <span class="kw">private val</span> api: <span class="ty">ApiService</span>,
+    <span class="kw">private val</span> cache: <span class="ty">UserDao</span>
+) : <span class="ty">UserRepository</span> {
+    <span class="kw">override suspend fun</span> <span class="fn">getUser</span>(id: <span class="ty">Int</span>): <span class="ty">User</span> {
+        cache.<span class="fn">getUser</span>(id) ?:
+            api.<span class="fn">fetchUser</span>(id).<span class="fn">also</span> { cache.<span class="fn">insert</span>(it) }
+    }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Working With APIs</h3>
+                    <p>Both platforms use JSON frequently.</p>
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Swift – Codable</span></p>
+                        <div class="code-block">
+<pre><span class="kw">struct</span> <span class="ty">User</span>: <span class="ty">Codable</span> {
+    <span class="kw">let</span> name: <span class="ty">String</span>
+}</pre>
+                        </div>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Kotlin – Data Class</span></p>
+                        <div class="code-block">
+<pre><span class="kw">data class</span> <span class="ty">User</span>(<span class="kw">val</span> name: <span class="ty">String</span>)</pre>
+                        </div>
+                    </div>
+                    <p style="margin-top: 0.75rem;"><strong>Networking libraries:</strong></p>
+                    <ul class="styled-list">
+                        <li>iOS: URLSession, Alamofire</li>
+                        <li>Android: Retrofit + OkHttp</li>
+                    </ul>
+
+                    <!-- NEW: Full API call examples -->
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Full API Call — Swift async/await</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Define the model</span>
+<span class="kw">struct</span> <span class="ty">Post</span>: <span class="ty">Codable</span> {
+    <span class="kw">let</span> id: <span class="ty">Int</span>
+    <span class="kw">let</span> title: <span class="ty">String</span>
+}
+
+<span class="cm">// Network function</span>
+<span class="kw">func</span> <span class="fn">fetchPost</span>(id: <span class="ty">Int</span>) <span class="kw">async throws</span> -> <span class="ty">Post</span> {
+    <span class="kw">let</span> url = <span class="ty">URL</span>(string: <span class="str">"https://jsonplaceholder.typicode.com/posts/\(id)"</span>)!
+    <span class="kw">let</span> (data, _) = <span class="kw">try await</span> <span class="ty">URLSession</span>.shared.<span class="fn">data</span>(from: url)
+    <span class="kw">return try</span> <span class="ty">JSONDecoder</span>().<span class="fn">decode</span>(<span class="ty">Post</span>.<span class="kw">self</span>, from: data)
+}
+
+<span class="cm">// Call from ViewModel</span>
+<span class="kw">func</span> <span class="fn">loadPost</span>() {
+    <span class="ty">Task</span> {
+        <span class="kw">do</span> {
+            post = <span class="kw">try await</span> <span class="fn">fetchPost</span>(id: <span class="num">1</span>)
+        } <span class="kw">catch</span> {
+            errorMessage = error.localizedDescription
+        }
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">Full API Call — Kotlin with Retrofit</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Model</span>
+<span class="kw">data class</span> <span class="ty">Post</span>(<span class="kw">val</span> id: <span class="ty">Int</span>, <span class="kw">val</span> title: <span class="ty">String</span>)
+
+<span class="cm">// Retrofit interface</span>
+<span class="kw">interface</span> <span class="ty">ApiService</span> {
+    @<span class="ty">GET</span>(<span class="str">"posts/{id}"</span>)
+    <span class="kw">suspend fun</span> <span class="fn">getPost</span>(@<span class="ty">Path</span>(<span class="str">"id"</span>) id: <span class="ty">Int</span>): <span class="ty">Post</span>
+}
+
+<span class="cm">// Retrofit instance (singleton)</span>
+<span class="kw">val</span> api = <span class="ty">Retrofit</span>.Builder()
+    .baseUrl(<span class="str">"https://jsonplaceholder.typicode.com/"</span>)
+    .addConverterFactory(<span class="ty">GsonConverterFactory</span>.<span class="fn">create</span>())
+    .build()
+    .create(<span class="ty">ApiService</span>::class.java)
+
+<span class="cm">// ViewModel call</span>
+<span class="kw">fun</span> <span class="fn">loadPost</span>() {
+    viewModelScope.<span class="fn">launch</span> {
+        <span class="kw">try</span> {
+            _post.value = api.<span class="fn">getPost</span>(<span class="num">1</span>)
+        } <span class="kw">catch</span> (e: <span class="ty">Exception</span>) {
+            _error.value = e.message
+        }
+    }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Asynchronous Programming</h3>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Swift async tools:</span> async/await, Combine, GCD</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Kotlin async tools:</span> Coroutines, Flow, suspend functions</p>
+                        <div class="code-block">
+<pre><span class="kw">suspend fun</span> <span class="fn">loadData</span>() {
+    <span class="kw">val</span> result = api.<span class="fn">getData</span>()
+}</pre>
+                        </div>
+                    </div>
+
+                    <!-- NEW: Thread safety, main thread, coroutine scopes -->
+                    <div class="info-box" style="margin-top: 1.25rem;">
+                        <strong>🧵 The Golden Rule: Never Block the Main Thread</strong><br>
+                        All UI rendering happens on the <strong>main thread</strong>. Running heavy work there (network calls, file I/O, complex calculations) freezes the UI — users see "jank" or the app becoming unresponsive. Always dispatch long-running work to a background thread, then <strong>return to the main thread</strong> to update the UI.
+                    </div>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Swift — Structured Concurrency</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// async/await — runs on background, returns to caller's context</span>
+<span class="kw">func</span> <span class="fn">loadUsers</span>() <span class="kw">async</span> -> [<span class="ty">User</span>] {
+    <span class="kw">let</span> data = <span class="kw">await</span> <span class="fn">fetchFromAPI</span>()
+    <span class="kw">return try!</span> <span class="ty">JSONDecoder</span>().<span class="fn">decode</span>([<span class="ty">User</span>].<span class="kw">self</span>, from: data)
+}
+
+<span class="cm">// Run two tasks in parallel</span>
+<span class="kw">async let</span> posts  = <span class="fn">fetchPosts</span>()
+<span class="kw">async let</span> profile = <span class="fn">fetchProfile</span>()
+<span class="kw">let</span> (p, u) = <span class="kw">await</span> (posts, profile) <span class="cm">// both complete before continuing</span>
+
+<span class="cm">// Update UI on main thread</span>
+<span class="kw">await</span> <span class="ty">MainActor</span>.<span class="fn">run</span> { self.users = loaded }</pre>
+                        </div>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">Kotlin — Coroutine Scopes &amp; Dispatchers</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Dispatchers control which thread runs the code</span>
+viewModelScope.<span class="fn">launch</span>(Dispatchers.IO) {   <span class="cm">// background I/O thread</span>
+    <span class="kw">val</span> users = repository.<span class="fn">fetchUsers</span>()    <span class="cm">// network/DB call</span>
+    <span class="fn">withContext</span>(Dispatchers.Main) {         <span class="cm">// switch to UI thread</span>
+        _users.value = users
+    }
+}
+
+<span class="cm">// Parallel execution with async</span>
+<span class="kw">val</span> postsDeferred   = <span class="kw">async</span> { api.<span class="fn">getPosts</span>() }
+<span class="kw">val</span> profileDeferred = <span class="kw">async</span> { api.<span class="fn">getProfile</span>() }
+<span class="kw">val</span> posts   = postsDeferred.<span class="fn">await</span>()
+<span class="kw">val</span> profile = profileDeferred.<span class="fn">await</span>()</pre>
+                        </div>
+                        <p style="margin-top: 0.5rem;">Key dispatchers: <strong>Dispatchers.Main</strong> (UI thread), <strong>Dispatchers.IO</strong> (network/disk), <strong>Dispatchers.Default</strong> (CPU-heavy work).</p>
+                    </div>
+
+                    <!-- NEW: Flow / Combine -->
+                    <div class="code-explanation">
+                        <p><span class="highlight">Reactive Streams — Kotlin Flow vs Swift Combine</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Kotlin Flow — emit a sequence of values over time</span>
+<span class="kw">fun</span> <span class="fn">observeMessages</span>(): <span class="ty">Flow</span>&lt;<span class="ty">List</span>&lt;<span class="ty">Message</span>&gt;&gt; = flow {
+    <span class="kw">while</span>(<span class="kw">true</span>) {
+        emit(db.<span class="fn">getMessages</span>())
+        delay(<span class="num">5000</span>)
+    }
+}
+
+<span class="cm">// Collect in ViewModel</span>
+viewModelScope.<span class="fn">launch</span> {
+    repository.<span class="fn">observeMessages</span>()
+        .<span class="fn">collect</span> { _messages.value = it }
+}</pre>
+                        </div>
+                        <p style="margin-top: 0.5rem;">Flow (Kotlin) and Combine (Swift) enable <strong>reactive programming</strong> — instead of requesting data once, you subscribe to a stream that emits new values whenever the data changes. This is ideal for real-time features like chat, live feeds, and database observation.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Accessing Device Hardware</h3>
+                    <p>Native apps can fully control:</p>
+                    <ul class="styled-list">
+                        <li>Camera</li>
+                        <li>GPS</li>
+                        <li>Accelerometer</li>
+                        <li>Bluetooth</li>
+                        <li>Notifications</li>
+                        <li>Local storage</li>
+                        <li>Secure enclave / biometrics</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">This is where native development shines compared to hybrid apps.</p>
+
+                    <!-- NEW: Hardware code examples -->
+                    <div class="code-explanation" style="margin-top: 1.25rem;">
+                        <p><span class="highlight">Location (GPS) — Android</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Request permissions in Manifest</span>
+<span class="cm">// &lt;uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/&gt;</span>
+
+<span class="cm">// Fused Location Provider (Jetpack)</span>
+<span class="kw">val</span> fusedClient = <span class="ty">LocationServices</span>.<span class="fn">getFusedLocationProviderClient</span>(context)
+fusedClient.<span class="fn">lastLocation</span>.<span class="fn">addOnSuccessListener</span> { location ->
+    location?.<span class="kw">let</span> {
+        println(<span class="str">"Lat: ${it.latitude}, Lng: ${it.longitude}"</span>)
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">Biometric Authentication — iOS</span></p>
+                        <div class="code-block">
+<pre><span class="kw">import</span> LocalAuthentication
+
+<span class="kw">let</span> context = <span class="ty">LAContext</span>()
+<span class="kw">var</span> error: <span class="ty">NSError</span>?
+
+<span class="kw">if</span> context.<span class="fn">canEvaluatePolicy</span>(.deviceOwnerAuthenticationWithBiometrics, error: &amp;error) {
+    context.<span class="fn">evaluatePolicy</span>(.deviceOwnerAuthenticationWithBiometrics,
+                             localizedReason: <span class="str">"Confirm your identity"</span>) { success, _ <span class="kw">in</span>
+        <span class="kw">if</span> success { <span class="fn">unlockApp</span>() }
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <p style="margin-top: 1rem;"><strong>Permission Request Pattern (Android — Runtime Permissions):</strong></p>
+                    <ul class="styled-list">
+                        <li>Declare permission in <code>AndroidManifest.xml</code></li>
+                        <li>Check if permission is granted at runtime using <code>ActivityCompat.checkSelfPermission()</code></li>
+                        <li>Request if not granted: <code>ActivityCompat.requestPermissions()</code></li>
+                        <li>Handle the result in <code>onRequestPermissionsResult()</code></li>
+                        <li>Handle permanent denial gracefully (show rationale dialog)</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Performance &amp; Optimization</h3>
+                    <p>Native apps:</p>
+                    <ul class="styled-list">
+                        <li>Start faster</li>
+                        <li>Use fewer resources</li>
+                        <li>Have smoother animations</li>
+                        <li>Handle large data processing better</li>
+                    </ul>
+                    <p style="margin-top: 0.75rem;"><strong>Optimizations include:</strong> lazy loading, efficient layouts, memory management, background tasks.</p>
+
+                    <!-- NEW: Profiling tools and memory leaks -->
+                    <p style="margin-top: 1.25rem;"><strong>Profiling Tools:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Xcode Instruments</span> (iOS) — Time Profiler, Leaks, Memory Graph, Energy Log, Core Data analyzer</li>
+                        <li><span class="highlight">Android Profiler</span> (Android Studio) — CPU, Memory, Network, Energy profilers in real-time</li>
+                        <li><span class="highlight">LeakCanary</span> (Android) — Library that automatically detects memory leaks and shows a notification with the full object graph</li>
+                    </ul>
+
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>⚠️ Memory Leaks in Native Apps</strong><br>
+                        A memory leak occurs when an object is no longer needed but isn't released from memory. Common causes:<br>
+                        <strong>Swift</strong> — Retain cycles: a ViewModel holds a closure that captures <code>self</code> strongly → use <code>[weak self]</code> inside closures.<br>
+                        <strong>Kotlin</strong> — Activity/Fragment leaks: storing a reference to a Context in a long-lived object (e.g., a singleton). Use <code>WeakReference</code> or application context instead.
+                    </div>
+
+                    <p style="margin-top: 1.25rem;"><strong>Lazy Loading &amp; List Optimization:</strong></p>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Kotlin — LazyColumn (Compose)</span></p>
+                        <div class="code-block">
+<pre><span class="cm">// Only renders visible items — efficient for large lists</span>
+<span class="ty">LazyColumn</span> {
+    items(users) { user ->
+        <span class="ty">UserRow</span>(user)   <span class="cm">// composable per item</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Swift — LazyVStack / List</span></p>
+                        <div class="code-block">
+<pre><span class="ty">List</span>(users) { user <span class="kw">in</span>
+    <span class="ty">UserRow</span>(user: user)
+}
+<span class="cm">// List in SwiftUI is lazy by default</span>
+<span class="cm">// Use LazyVStack inside ScrollView for custom layouts</span></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW: Local storage card -->
+                <div class="content-card">
+                    <h3>Local Storage</h3>
+                    <p>Native apps have several options for persisting data on the device:</p>
+
+                    <table class="compare-table" style="margin-top: 1rem;">
+                        <thead>
+                            <tr><th>Storage Type</th><th>iOS</th><th>Android</th><th>Best For</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Key-Value Store</td><td>UserDefaults</td><td>SharedPreferences / DataStore</td><td>Settings, tokens, flags</td></tr>
+                            <tr><td>Relational DB</td><td>Core Data, SQLite</td><td>Room (Jetpack)</td><td>Structured app data</td></tr>
+                            <tr><td>Secure Storage</td><td>Keychain</td><td>Android Keystore / EncryptedSharedPreferences</td><td>Passwords, tokens</td></tr>
+                            <tr><td>Files</td><td>FileManager</td><td>File API / Storage</td><td>Documents, media, cache</td></tr>
+                            <tr><td>In-memory Cache</td><td>NSCache</td><td>LruCache / Memory</td><td>Image/data caching</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="code-explanation" style="margin-top: 1.25rem;">
+                        <p><span class="highlight">Room Database (Android) — Simple Example</span></p>
+                        <div class="code-block">
+<pre>@<span class="ty">Entity</span>
+<span class="kw">data class</span> <span class="ty">Note</span>(@<span class="ty">PrimaryKey</span>(autoGenerate = <span class="kw">true</span>) <span class="kw">val</span> id: <span class="ty">Int</span> = <span class="num">0</span>,
+               <span class="kw">val</span> text: <span class="ty">String</span>)
+
+@<span class="ty">Dao</span>
+<span class="kw">interface</span> <span class="ty">NoteDao</span> {
+    @<span class="ty">Query</span>(<span class="str">"SELECT * FROM note"</span>) <span class="kw">fun</span> <span class="fn">getAll</span>(): <span class="ty">Flow</span>&lt;<span class="ty">List</span>&lt;<span class="ty">Note</span>&gt;&gt;
+    @<span class="ty">Insert</span>  <span class="kw">suspend fun</span> <span class="fn">insert</span>(note: <span class="ty">Note</span>)
+    @<span class="ty">Delete</span>  <span class="kw">suspend fun</span> <span class="fn">delete</span>(note: <span class="ty">Note</span>)
+}
+
+@<span class="ty">Database</span>(entities = [<span class="ty">Note</span>::class], version = <span class="num">1</span>)
+<span class="kw">abstract class</span> <span class="ty">AppDatabase</span> : <span class="ty">RoomDatabase</span>() {
+    <span class="kw">abstract fun</span> <span class="fn">noteDao</span>(): <span class="ty">NoteDao</span>
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Publishing Native Apps</h3>
+                    <div class="code-explanation">
+                        <p><span class="highlight">iOS → App Store</span><br>Requires: Apple Developer Account, signing &amp; certificates, App Store Connect submission.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Android → Google Play</span><br>Requires: Google Developer Account, Android App Bundle (.aab), Play Console submission.</p>
+                    </div>
+                    <p style="margin-top: 0.75rem;">Reviews are often faster on Android.</p>
+
+                    <!-- NEW: Signing + build types -->
+                    <p style="margin-top: 1.25rem;"><strong>iOS Signing Flow:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Certificates</span> — Prove your identity to Apple. Development cert for testing, Distribution cert for App Store.</li>
+                        <li><span class="highlight">App ID</span> — Unique identifier for your app (e.g., <code>com.company.appname</code>).</li>
+                        <li><span class="highlight">Provisioning Profile</span> — Links your certificate + App ID + device list. Required to install on physical devices.</li>
+                        <li><span class="highlight">Xcode Automatic Signing</span> — Handles most of this automatically for development. Manual signing needed for CI/CD.</li>
+                        <li><span class="highlight">Archive &amp; Upload</span> — Product → Archive → Distribute App → App Store Connect.</li>
+                    </ul>
+
+                    <p style="margin-top: 1.25rem;"><strong>Android Build Process:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Debug builds</span> — Signed with a debug key automatically. For local testing only.</li>
+                        <li><span class="highlight">Release builds</span> — Must be signed with your own keystore file. <strong>Never lose this file</strong> — losing it means you can never update your app on Play Store.</li>
+                        <li><span class="highlight">APK vs AAB</span> — APK is the full install package. AAB (Android App Bundle) is the modern format: Google Play generates optimized APKs per device, reducing download size by ~15–20%.</li>
+                        <li><span class="highlight">ProGuard / R8</span> — Code shrinking and obfuscation. Enable for release builds to reduce size and protect code.</li>
+                    </ul>
+
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>🔑 Keep Your Keystore Safe!</strong><br>
+                        The Android keystore is a <strong>cryptographic file</strong> used to sign your app. If you lose it, you cannot publish updates to your existing app — you would have to create a new app listing from scratch. Store it in a password manager, secure cloud backup, and version control (encrypted). This is one of the most common catastrophic mistakes made by Android developers.
+                    </div>
+                </div>
+
+                <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                    <h3>Section Conclusion</h3>
+                    <p>Now you understand:</p>
+                    <ul class="styled-list">
+                        <li>Swift &amp; iOS basics</li>
+                        <li>Kotlin &amp; Android basics</li>
+                        <li>UI frameworks (SwiftUI &amp; Jetpack Compose)</li>
+                        <li>Native architecture patterns</li>
+                        <li>Async programming</li>
+                        <li>Hardware integration</li>
+                        <li>Publishing workflows</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">This is the foundation of becoming a native mobile developer.</p>
+                </div>
+
+            </div>
+
+            <!-- LAB -->
+            <div id="laboratorio" class="tab-panel">
+                <h3 style="margin-bottom: 1rem;">Code Translator Console</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">Write a description of what you want to do and select a platform. The console will show you the equivalent code pattern for both Swift and Kotlin.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header-bar">SCENARIO INPUT</div>
+                        <textarea class="lab-textarea" id="lab-input">// What do you want to do?
+// Try one of these keywords:
+//   variable, function, null, list,
+//   api, async, composable, navigation
+
+scenario = "async"
+
+// Platform to focus on:
+platform = "both"   // swift | kotlin | both</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header-bar">CODE PATTERNS</div>
+                        <div class="lab-output" id="lab-output">
+                            Click "Show Patterns" to see Swift and Kotlin code examples for your chosen scenario...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runLab()">▶ Show Patterns</button>
+            </div>
+
+            <!-- QUIZ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Quiz: Native Mobile Programming</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge on Swift, Kotlin, SwiftUI, Jetpack Compose, architecture, async programming, and publishing. Answer all 15 questions.</p>
+
+                    <form id="quiz-form">
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">1. Name the official iOS language.</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Java</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Swift</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Kotlin</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Dart</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">2. Name the official Android language.</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Swift</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) JavaScript</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Kotlin</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Objective-C</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">3. What is SwiftUI?</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) A database tool</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) A UI framework for building Apple platform interfaces</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) A testing framework</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) A networking library</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">4. What is Jetpack Compose?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) A database management system</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) A modern UI toolkit for Android development</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) A deployment tool</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) A debugging framework</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">5. What does the "?" symbol mean in Kotlin?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Marks a nullable type</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Creates a loop</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Defines a function</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Ends a statement</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">6. What is an Activity in Android?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) A background process</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B"> B) A database table</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) A screen representing a user interface in Android</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) A layout file</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">7. What is an iOS ViewController?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) A database model</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) A component that manages and controls an iOS screen</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) A networking service</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) A UI animation tool</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">8. What does async/await achieve?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Increases memory usage</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) Simplifies asynchronous programming</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Replaces functions</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Removes callbacks completely</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">9. Why are optionals important in Swift?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) They reduce code size</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) They allow variables to safely hold null values</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) They improve UI design</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) They replace arrays</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">10. Name one Android networking library.</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Alamofire</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Retrofit</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) UIKit</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) NumPy</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">11. What is ARC in Swift?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) A UI animation framework</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Automatic Reference Counting for memory management</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) A networking protocol</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) A database library</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">12. What is a coroutine in Kotlin?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) A UI component</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) A database query</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) A lightweight asynchronous task</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) A layout structure</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">13. What is MVVM?</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) A database format</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) A design pattern separating Model, View, and ViewModel</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) A networking tool</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) A mobile OS</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">14. Where are iOS apps published?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Google Play Store</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Apple App Store</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Microsoft Store</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) GitHub</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">15. What file format does Android require for publishing?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) IPA</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) APK or AAB</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C"> C) EXE</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) DMG</label>
+                        </div>
+
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display: none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div id="recursos" class="tab-panel">
+                <h3 style="margin-bottom: 1.5rem;">Support Materials</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ Swift Language Guide – Apple Developer Documentation</a>
+                    <a href="#" class="resource-link">→ SwiftUI Tutorials – Apple Official</a>
+                    <a href="#" class="resource-link">→ Kotlin Language Reference – JetBrains</a>
+                    <a href="#" class="resource-link">→ Jetpack Compose Documentation – Android Developers</a>
+                    <a href="#" class="resource-link">→ Android Architecture Guide – MVVM &amp; Clean Architecture</a>
+                    <a href="#" class="resource-link">→ Kotlin Coroutines Guide – JetBrains</a>
+                    <a href="#" class="resource-link">→ Retrofit – Android Networking Library</a>
+                    <a href="#" class="resource-link">→ Alamofire – iOS Networking Library</a>
+                    <a href="#" class="resource-link">→ App Store Connect – iOS Publishing Guide</a>
+                    <a href="#" class="resource-link">→ Google Play Console – Android Publishing Guide</a>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: Native Mobile Programming</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        To successfully complete this module, demonstrate understanding across the following competency levels:
+                    </p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>Swift is the language for iOS; Kotlin for Android</li>
+                                <li>Difference between var and let / val</li>
+                                <li>What optionals are in Swift and null-safety in Kotlin</li>
+                                <li>What SwiftUI and Jetpack Compose are</li>
+                                <li>What an Activity is (Android)</li>
+                                <li>What a ViewController is (iOS)</li>
+                                <li>What ARC is and why it matters</li>
+                                <li>Where iOS and Android apps are published</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Writing basic Swift functions and structs</li>
+                                <li>Writing basic Kotlin functions and data classes</li>
+                                <li>Building a simple screen with SwiftUI</li>
+                                <li>Building a simple screen with Jetpack Compose</li>
+                                <li>Consuming a REST API with URLSession or Retrofit</li>
+                                <li>Understanding the MVVM architecture pattern</li>
+                                <li>Using async/await in Swift</li>
+                                <li>Using coroutines and suspend in Kotlin</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Implementing full MVVM with LiveData or StateFlow</li>
+                                <li>Accessing hardware (camera, GPS, biometrics)</li>
+                                <li>Managing local storage (Core Data / Room)</li>
+                                <li>Implementing push notifications</li>
+                                <li>Writing unit and UI tests for native apps</li>
+                                <li>Signing, archiving, and submitting to App Store / Play Store</li>
+                                <li>Using Combine (Swift) or Flow (Kotlin) for reactive streams</li>
+                                <li>Implementing Clean Architecture with Use Cases</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+            document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runLab() {
+            const input = document.getElementById('lab-input').value.toLowerCase();
+            const output = document.getElementById('lab-output');
+
+            const patterns = {
+                variable: {
+                    swift: `// Swift variables\nvar name = "Nuno"   // mutable\nlet age  = 20        // constant\nvar score: Int = 0   // explicit type`,
+                    kotlin: `// Kotlin variables\nvar name = "Nuno"   // mutable\nval age  = 20        // constant\nvar score: Int = 0   // explicit type`
+                },
+                function: {
+                    swift: `// Swift function\nfunc greet(_ name: String) -> String {\n    return "Hello, \\(name)"\n}`,
+                    kotlin: `// Kotlin function\nfun greet(name: String): String {\n    return "Hello, $name"\n}`
+                },
+                null: {
+                    swift: `// Swift optionals\nvar username: String? = nil\n\n// Safe unwrap\nif let user = username {\n    print(user)\n}`,
+                    kotlin: `// Kotlin null-safety\nvar username: String? = null\n\n// Safe call\nval len = username?.length\n\n// Elvis operator\nval display = username ?: "Guest"`
+                },
+                list: {
+                    swift: `// Swift arrays\nvar fruits = ["Apple", "Banana"]\nfruits.append("Cherry")\nprint(fruits[0])`,
+                    kotlin: `// Kotlin lists\nval fruits = mutableListOf("Apple", "Banana")\nfruits.add("Cherry")\nprintln(fruits[0])`
+                },
+                api: {
+                    swift: `// Swift – URLSession\nURLSession.shared.dataTask(with: url) { data, _, _ in\n    if let data = data {\n        let user = try? JSONDecoder().decode(User.self, from: data)\n    }\n}.resume()`,
+                    kotlin: `// Kotlin – Retrofit\ninterface ApiService {\n    @GET("users/1")\n    suspend fun getUser(): User\n}\n\n// Call it inside a coroutine\nval user = api.getUser()`
+                },
+                async: {
+                    swift: `// Swift async/await\nfunc loadData() async {\n    let result = await api.fetchData()\n    print(result)\n}`,
+                    kotlin: `// Kotlin coroutine\nsuspend fun loadData() {\n    val result = api.getData()\n    println(result)\n}\n\n// Launch coroutine\nviewModelScope.launch {\n    loadData()\n}`
+                },
+                composable: {
+                    swift: `// SwiftUI (equivalent)\nvar body: some View {\n    VStack {\n        Text("Hello")\n            .font(.title)\n        Button("Tap me") {\n            print("tapped")\n        }\n    }\n}`,
+                    kotlin: `// Jetpack Compose\n@Composable\nfun MyScreen() {\n    Column {\n        Text(text = "Hello", fontSize = 24.sp)\n        Button(onClick = { println("tapped") }) {\n            Text("Tap me")\n        }\n    }\n}`
+                },
+                navigation: {
+                    swift: `// SwiftUI navigation\nNavigationView {\n    NavigationLink("Go to Detail", destination: DetailView())\n}`,
+                    kotlin: `// Jetpack Compose navigation\nNavHost(navController, startDestination = "home") {\n    composable("home") { HomeScreen() }\n    composable("detail") { DetailScreen() }\n}`
+                }
+            };
+
+            let matched = null;
+            const keywords = Object.keys(patterns);
+            for (const key of keywords) {
+                if (input.includes(key)) { matched = key; break; }
+            }
+
+            if (!matched) {
+                output.innerHTML = `<span style="color:#f59e0b;">⚠ No matching pattern found.<br>Try a keyword like: ${keywords.join(', ')}</span>`;
+                return;
+            }
+
+            const p = patterns[matched];
+
+            output.innerHTML = `
+                <span style="color:#28e0ff;font-weight:bold;">Scenario: ${matched.toUpperCase()}</span><br><br>
+                <span style="color:#ff79c6;">🍎 SWIFT (iOS)</span><br>
+                <pre style="color:#a8ff78;margin:0.5rem 0 1rem 0">${p.swift}</pre>
+                <span style="color:#50fa7b;">🤖 KOTLIN (Android)</span><br>
+                <pre style="color:#f1fa8c;margin:0.5rem 0 0 0">${p.kotlin}</pre>
+                <br><em style="color:#b6c0de;">Both achieve the same goal — notice how similar the patterns are!</em>
+            `;
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questionsData = {
+                    q1:  { correct: 'B', exp: 'Swift is the official and modern language for iOS development, created by Apple in 2014.' },
+                    q2:  { correct: 'C', exp: 'Kotlin is Google\'s preferred language for Android, replacing Java as the primary choice.' },
+                    q3:  { correct: 'B', exp: 'SwiftUI is Apple\'s declarative UI framework for building interfaces across all Apple platforms.' },
+                    q4:  { correct: 'B', exp: 'Jetpack Compose is Google\'s modern declarative UI toolkit for Android, replacing XML layouts.' },
+                    q5:  { correct: 'A', exp: 'The "?" in Kotlin marks a type as nullable, meaning it can hold a null value safely.' },
+                    q6:  { correct: 'C', exp: 'An Activity represents a single screen in Android that the user interacts with.' },
+                    q7:  { correct: 'B', exp: 'A ViewController manages a single screen in iOS apps, handling the UI and its interactions.' },
+                    q8:  { correct: 'B', exp: 'async/await simplifies asynchronous programming by allowing you to write async code in a sequential style.' },
+                    q9:  { correct: 'B', exp: 'Optionals allow variables to safely hold null values, preventing common null-pointer crashes at compile time.' },
+                    q10: { correct: 'B', exp: 'Retrofit is a popular Android networking library that simplifies HTTP API calls, often used with OkHttp.' },
+                    q11: { correct: 'B', exp: 'ARC (Automatic Reference Counting) manages Swift\'s memory automatically, freeing objects when no longer needed.' },
+                    q12: { correct: 'C', exp: 'Coroutines are lightweight asynchronous tasks in Kotlin that simplify async code without blocking threads.' },
+                    q13: { correct: 'B', exp: 'MVVM (Model-View-ViewModel) is an architecture pattern that separates data, UI, and business logic.' },
+                    q14: { correct: 'B', exp: 'iOS apps are published to the Apple App Store via App Store Connect with a developer account.' },
+                    q15: { correct: 'B', exp: 'Android apps are published as APK (older) or AAB (Android App Bundle, modern preferred format) to Google Play.' }
+                };
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0, feedbackHTML = '';
+
+                Object.keys(this.questionsData).forEach((key, index) => {
+                    const userAnswer = formData.get(key);
+                    const isCorrect = userAnswer === this.questionsData[key].correct;
+                    if (isCorrect) score++;
+
+                    feedbackHTML += `
+                        <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                            <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                            <div>
+                                <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                ${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+                            </div>
+                        </div>`;
+                });
+
+                this.displayResults(score, feedbackHTML);
+            }
+
+            displayResults(score, feedbackHTML) {
+                const total = Object.keys(this.questionsData).length;
+                const percent = Math.round((score / total) * 100);
+                const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+
+                document.getElementById('quiz-score').innerHTML = `
+                    <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                    <p style="color:var(--text-secondary)">${percent >= 70
+                        ? 'Excellent! You have strong foundations in native mobile development.'
+                        : 'Review the Swift and Kotlin sections, async programming, and architecture patterns.'}</p>`;
+
+                document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                const resultsDiv = document.getElementById('quiz-results');
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            clearQuiz() {
+                document.getElementById('quiz-form').reset();
+                document.getElementById('quiz-results').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+</body>
+</html>

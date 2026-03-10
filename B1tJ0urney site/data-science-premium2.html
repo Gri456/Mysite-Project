@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Statistics & Mathematics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+    --bg-dark: #0b0d14;
+
+    /* Nova paleta verde */
+    --green-primary: #22c55e;     /* verde principal */
+    --green-secondary: #4ade80;   /* verde claro */
+    --green-accent: #16a34a;      /* verde forte */
+    --green-cyan: #2dd4bf;        /* verde-água (mantém vibe tech) */
+    --cyan: #28e0ff;              /* ciano para detalhes e destaques */
+
+    --text-light: #e8ecf8;
+    --text-secondary: #b6c0de;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px; font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary {
+    background: linear-gradient(135deg, var(--green-primary), var(--green-cyan));
+    color: white;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente: from-lime-500 via-green-400 to-lime-400 */
+    background: linear-gradient(to right, #84cc16, #4ade80, #a3e635);
+
+    /* Faz o gradiente aplicar apenas ao texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback para browsers antigos */
+}
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill {
+    height: 100%;background: linear-gradient(90deg, var(--green-primary), var(--green-cyan));width: 0%; transition: width 0.3s ease;
+}
+
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active {
+    background: rgba(15, 155, 67, 0.3);
+} 
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--green-primary), var(--green-cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--green-primary);; display: flex; align-items: center; gap: 10px; }
+        .content-card h4 { margin: 1.2rem 0 0.6rem; color: var(--green-cyan);; font-size: 1rem; }
+        .code-explanation { border-left: 3px solid var(--green-primary);; padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--green-cyan);; font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Code block */
+        .code-block {
+            background: #0a0c12;
+            border: 1px solid rgba(91,124,255,0.3);
+            border-radius: 8px; padding: 1.2rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; }
+        .code-block code { font-family: 'Courier New', Consolas, monospace; font-size: 0.875rem; line-height: 1.7; color: #c9d1d9; }
+        .code-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: block; }
+
+        /* Tip / Warning boxes */
+        .tip-box { background: rgba(34, 197, 94, 0.08);
+    border-left: 4px solid var(--green-primary); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .tip-box strong { color: var(--green-primary); }
+        .warning-box { background: rgba(255, 165, 0, 0.07); border-left: 4px solid #ffa500; border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .warning-box strong { color: #ffa500; }
+
+        /* Two-column grid */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+        .mini-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mini-card h5 { color: var(--cyan); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .mini-card p, .mini-card li { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+
+        /* Chapter header */
+        .chapter-header {
+            background: linear-gradient(
+                135deg,
+                rgba(34, 197, 94, 0.15),
+                rgba(45, 212, 191, 0.08)
+            );
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; margin-top: 2.5rem;
+        }
+        .chapter-header:first-child { margin-top: 0; }
+        .chapter-header h2 { font-size: 1.4rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.4rem; }
+        .chapter-header p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-secondary); font-size: 0.88rem; }
+        .data-table thead tr { border-bottom: 2px solid var(--border-color); text-align: left; }
+        .data-table th { padding: 10px; font-weight: 600; color: var(--text-light); }
+        .data-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .data-table td { padding: 10px; }
+
+        /* Inline formula highlight */
+        .formula { font-family: monospace; background: rgba(40,224,255,0.1); padding: 2px 8px; border-radius: 4px; color: var(--cyan); font-size: 0.9rem; }
+
+        /* Quiz */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(40, 224, 255, 0.05)); border: 1px solid rgba(34, 197, 94, 0.08); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #0a0c12; color: #c9d1d9; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-data-science.html" class="btn btn-back">← Back</a>
+                <a href="browse.html" class="btn btn-primary">Explore</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objective: Statistics & Mathematics</h1>
+            <p class="course-description">
+                Understand the statistical and mathematical foundations that underpin Data Science. Learn to interpret data, measure uncertainty, and support business decisions through rigorous and well-founded analyses.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• Statistics • Probability • Analysis</span></div>
+                <div class="meta-item"><span>📌</span><span>Base for EDA, modelling and evaluation</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Evaluation</button>
+            </nav>
+
+            <!-- ===================== LEARN TAB ===================== -->
+            <div id="aprender" class="tab-panel active">
+
+                <!-- ─────────── CHAPTER 1 ─────────── -->
+                <div class="chapter-header">
+                    <h2>📊 Chapter 1 — The Role of Statistics in Data Science</h2>
+                    <p>Statistics is not just formulas — it's a framework for reasoning under uncertainty. Without it, any model is just guesswork dressed up in code.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>📊 1.1 Why Statistics Is the Foundation</h3>
+                    <p>Statistics provides the language and tools to understand <span class="highlight">what the data is saying</span>, distinguish real patterns from random noise, and communicate findings with appropriate confidence. Every phase of a Data Science project relies on it:</p>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>📋 Data Understanding</h5>
+                            <p>Descriptive statistics summarize thousands of rows into a few numbers — mean, median, spread, shape. Impossible to eyeball 1 million rows; easy with <code>df.describe()</code>.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>🔍 EDA & Feature Engineering</h5>
+                            <p>Correlation analysis, distribution fitting, and outlier detection all require statistical thinking to distinguish signal from noise.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>🤖 Modelling</h5>
+                            <p>Every ML algorithm has statistical assumptions. Linear regression assumes normally distributed residuals. Violating these leads to bad predictions.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>✅ Evaluation</h5>
+                            <p>Comparing models, running A/B tests, calculating confidence intervals — all pure statistics. Is model A really better, or just lucky on this test set?</p>
+                        </div>
+                    </div>
+                    <div class="tip-box">
+                        <strong>💡 The two branches:</strong> <strong>Descriptive statistics</strong> summarizes what already happened in your data. <strong>Inferential statistics</strong> uses a sample to draw conclusions about the larger population — and quantifies the uncertainty in doing so.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>📂 1.2 Types of Data — The Full Picture</h3>
+                    <p>Before choosing any metric, chart, or model, you must identify the type of data you're working with. The wrong choice leads to meaningless results.</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Type</th><th>Sub-type</th><th>Definition</th><th>Examples</th><th>Allowed Statistics</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Numerical</strong></td><td>Discrete</td><td>Integer counts, no fractions</td><td># of orders, # of employees</td><td>Mean, median, mode, std</td></tr>
+                            <tr><td><strong>Numerical</strong></td><td>Continuous</td><td>Any value in a range</td><td>Temperature, height, time</td><td>All statistics, histograms, KDE</td></tr>
+                            <tr><td><strong>Categorical</strong></td><td>Nominal</td><td>Labels without order</td><td>Country, gender, product category</td><td>Mode, frequency, chi-squared</td></tr>
+                            <tr><td><strong>Categorical</strong></td><td>Ordinal</td><td>Labels with meaningful order</td><td>Rating (1–5), education level</td><td>Median, Spearman correlation</td></tr>
+                            <tr><td><strong>Binary</strong></td><td>—</td><td>Only two possible values</td><td>Yes/No, Fraud/Not fraud</td><td>Proportions, logistic regression</td></tr>
+                            <tr><td><strong>Date/Time</strong></td><td>—</td><td>Temporal measurements</td><td>Order date, sensor timestamp</td><td>Trends, seasonality, lag features</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="code-block">
+                        <span class="code-label">Identifying Data Types in Python</span>
+                        <pre><code>import pandas as pd
+import numpy as np
+
+df = pd.read_csv("sales_data.csv")
+
+# Automatic type detection
+print(df.dtypes)
+# customer_id       int64      → Discrete numerical (but treated as ID)
+# order_date       object      → Date/Time (needs conversion)
+# total_amount    float64      → Continuous numerical
+# category         object      → Categorical nominal
+# rating            int64      → Categorical ordinal (1–5)
+# is_returned        bool      → Binary
+
+# Fix types where needed
+df["order_date"] = pd.to_datetime(df["order_date"])
+df["category"] = df["category"].astype("category")  # Saves memory
+df["rating"] = pd.Categorical(df["rating"], categories=[1,2,3,4,5], ordered=True)
+
+# Get counts of each type
+print(df.dtypes.value_counts())
+
+# Summary by type
+numerical = df.select_dtypes(include=[np.number])
+categorical = df.select_dtypes(include=["category", "object"])
+
+print("Numerical columns:", numerical.columns.tolist())
+print("Categorical columns:", categorical.columns.tolist())</code></pre>
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ Common mistake:</strong> Treating ordinal data as numerical. If satisfaction is rated 1–5, the numbers have order but the gap between 2 and 3 is not necessarily the same as between 4 and 5. Using the mean on ordinal data can be misleading — use the median instead.
+                    </div>
+                </div>
+
+                <!-- ─────────── CHAPTER 2 ─────────── -->
+                <div class="chapter-header">
+                    <h2>📐 Chapter 2 — Descriptive Statistics In Depth</h2>
+                    <p>Descriptive statistics turns a mountain of data into a handful of meaningful numbers. Master these and EDA becomes intuitive.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>📐 2.1 Measures of Central Tendency</h3>
+                    <p>These metrics answer the question: <span class="highlight">"Where is the centre of my data?"</span> Choosing the wrong one can mislead entire business decisions.</p>
+                    <h4>Mean (Arithmetic Average)</h4>
+                    <div class="formula-box">x̄ = (x₁ + x₂ + ... + xₙ) / n = Σxᵢ / n</div>
+                    <div class="code-block">
+                        <span class="code-label">Mean vs Median — The Salary Example</span>
+                        <pre><code>import numpy as np
+
+# Team salaries (one executive distorts the picture)
+salaries = np.array([2000, 2200, 2400, 2600, 2800, 3000, 45000])
+
+mean_salary = np.mean(salaries)    # 8571 — distorted by executive!
+median_salary = np.median(salaries) # 2600 — represents most employees
+
+print(f"Mean: €{mean_salary:,.0f}")    # Mean: €8,571
+print(f"Median: €{median_salary:,.0f}") # Median: €2,600
+
+# The executive earns 15x the team median.
+# Reporting the mean as "average salary" would be misleading.
+
+# Weighted mean — when observations have different importance
+products = ["A", "B", "C"]
+prices = np.array([100, 200, 50])
+quantities = np.array([50, 10, 200])  # Weights
+
+weighted_mean = np.average(prices, weights=quantities)
+print(f"Weighted average price: €{weighted_mean:.2f}")  # €69.23
+# Very different from simple mean: €116.67</code></pre>
+                    </div>
+
+                    <h4>Median</h4>
+                    <p>The middle value when data is sorted. For an even number of values, it's the average of the two middle values. <span class="highlight">Robust to outliers</span> — the #1 reason to prefer it for skewed distributions.</p>
+
+                    <h4>Mode</h4>
+                    <p>The most frequently occurring value. The only measure of central tendency applicable to <strong>nominal categorical data</strong>. A dataset can be unimodal, bimodal, or multimodal.</p>
+
+                    <div class="code-block">
+                        <span class="code-label">Central Tendency in Practice</span>
+                        <pre><code>import pandas as pd
+from scipy import stats
+
+# House prices in a neighbourhood (€ thousands)
+prices = pd.Series([120, 130, 135, 140, 145, 150, 155, 160, 165, 850])
+
+print(f"Mean:   {prices.mean():.0f}k")    # 225k (pulled up by mansion)
+print(f"Median: {prices.median():.0f}k")  # 147k (fair representation)
+print(f"Mode:   {prices.mode()[0]:.0f}k") # 120k (minimum in set)
+
+# Trimmed mean — remove top/bottom 10% before averaging
+trimmed = stats.trim_mean(prices, 0.1)   # 145k — good compromise
+print(f"Trimmed Mean (10%): {trimmed:.0f}k")
+
+# Decision: which to report?
+# "Average house price" in ads → Mean (sounds higher)
+# Honest market report → Median (reflects typical buyer experience)
+
+# Geometric mean — for growth rates, ratios, percentages
+annual_returns = [1.10, 1.25, 0.85, 1.30, 1.05]  # 10%, 25%, -15%, 30%, 5%
+geometric_mean = stats.gmean(annual_returns) - 1
+print(f"Average annual return: {geometric_mean:.1%}")  # 9.4%
+# Arithmetic mean would give 11% — WRONG for compound growth!</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>📏 2.2 Measures of Dispersion</h3>
+                    <p>Central tendency alone is incomplete. Two datasets can have the same mean but completely different distributions. Dispersion metrics answer: <span class="highlight">"How spread out is the data?"</span></p>
+
+                    <h4>Range and IQR</h4>
+                    <div class="formula-box">
+                        Range = Max − Min
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        IQR = Q3 − Q1
+                    </div>
+
+                    <h4>Variance and Standard Deviation</h4>
+                    <div class="formula-box">
+                        σ² (population) = Σ(xᵢ − μ)² / N
+                        &nbsp;&nbsp;&nbsp;
+                        s² (sample) = Σ(xᵢ − x̄)² / (n−1)
+                        <br>
+                        σ = √σ²
+                    </div>
+
+                    <div class="code-block">
+                        <span class="code-label">Dispersion Metrics — Full Toolkit</span>
+                        <pre><code>import numpy as np
+import pandas as pd
+
+# Two factories, same average output, very different reliability
+factory_a = np.array([98, 99, 100, 101, 102])  # Consistent
+factory_b = np.array([70, 85, 100, 115, 130])  # Highly variable
+
+for name, data in [("Factory A", factory_a), ("Factory B", factory_b)]:
+    print(f"\n{name}:")
+    print(f"  Mean:              {np.mean(data):.1f}")      # Both: 100.0
+    print(f"  Range:             {np.ptp(data)}")           # A:4, B:60
+    print(f"  Variance:          {np.var(data, ddof=1):.1f}") # A:2.5, B:437.5
+    print(f"  Std Dev:           {np.std(data, ddof=1):.2f}") # A:1.58, B:20.92
+    q1, q3 = np.percentile(data, [25, 75])
+    print(f"  IQR:               {q3-q1:.1f}")
+
+# Coefficient of Variation — relative spread (unit-free)
+cv_a = (np.std(factory_a, ddof=1) / np.mean(factory_a)) * 100
+cv_b = (np.std(factory_b, ddof=1) / np.mean(factory_b)) * 100
+print(f"\nCV Factory A: {cv_a:.1f}%")  # 1.6% — very consistent
+print(f"CV Factory B: {cv_b:.1f}%")  # 20.9% — highly variable
+
+# Same mean, VERY different implications for quality control!
+
+# Percentiles — understanding the full distribution
+delivery_times = np.random.lognormal(mean=3.5, sigma=0.5, size=10000)
+p50 = np.percentile(delivery_times, 50)
+p90 = np.percentile(delivery_times, 90)
+p99 = np.percentile(delivery_times, 99)
+print(f"\nDelivery Time Percentiles:")
+print(f"  50th (median): {p50:.1f} hours")
+print(f"  90th:          {p90:.1f} hours  ← SLA target")
+print(f"  99th:          {p99:.1f} hours  ← Worst case")</code></pre>
+                    </div>
+                    <div class="tip-box">
+                        <strong>💡 Why n−1 for sample variance?</strong> Using n in the denominator underestimates the population variance because the sample mean is already optimized to minimize deviations. Dividing by n−1 (Bessel's correction) gives an unbiased estimate. In practice: use <code>ddof=1</code> in NumPy for sample data.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>📉 2.3 Distribution Shape — Skewness & Kurtosis</h3>
+                    <p>The shape of a distribution reveals patterns invisible to mean and std. Many ML algorithms assume normality — knowing when that assumption is violated prevents silent errors.</p>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>Symmetric (Skew ≈ 0)</h5>
+                            <p>Mean ≈ Median ≈ Mode. Bell curve. Example: heights, IQ scores, measurement errors.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Right-Skewed (Positive, Skew &gt; 0)</h5>
+                            <p>Long right tail. Mean &gt; Median. Example: income, house prices, website response times.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Left-Skewed (Negative, Skew &lt; 0)</h5>
+                            <p>Long left tail. Mean &lt; Median. Example: age at retirement, test scores near maximum.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>High Kurtosis (Heavy Tails)</h5>
+                            <p>More extreme outliers than normal. Common in financial returns. "Black swan" events are more likely than normal distribution predicts.</p>
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Detecting Skewness & Kurtosis</span>
+                        <pre><code>import numpy as np
+from scipy import stats
+
+# Simulate different distributions
+normal_data = np.random.normal(0, 1, 10000)
+skewed_data = np.random.lognormal(0, 1, 10000)  # Right-skewed
+
+for name, data in [("Normal", normal_data), ("Log-Normal", skewed_data)]:
+    skewness = stats.skew(data)
+    kurt = stats.kurtosis(data)  # Excess kurtosis (0 = normal)
+    print(f"\n{name}:")
+    print(f"  Skewness: {skewness:.3f}")  # Normal≈0, LogNormal≈6
+    print(f"  Kurtosis: {kurt:.3f}")      # Normal≈0, LogNormal≈large
+
+# Rule of thumb for skewness:
+# |skew| < 0.5  → approximately symmetric (OK for most methods)
+# |skew| 0.5–1  → moderately skewed (consider transformation)
+# |skew| > 1    → highly skewed (strongly consider log/sqrt transform)
+
+# Shapiro-Wilk test for normality (works well for n < 5000)
+stat, p_value = stats.shapiro(normal_data[:500])
+print(f"\nShapiro-Wilk p-value (normal): {p_value:.4f}")  # >0.05 → can't reject normality
+
+stat2, p_value2 = stats.shapiro(skewed_data[:500])
+print(f"Shapiro-Wilk p-value (skewed): {p_value2:.4f}")  # <0.05 → reject normality
+
+# Log transformation — fixes right skew
+import numpy as np
+log_transformed = np.log1p(skewed_data)  # log(1+x) for zero-safety
+print(f"\nSkewness after log transform: {stats.skew(log_transformed):.3f}")</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>📦 2.4 The Five-Number Summary & Box Plots</h3>
+                    <p>The Five-Number Summary gives a compact but complete view of a distribution: Minimum, Q1, Median, Q3, Maximum — plus outlier detection via IQR fences.</p>
+                    <div class="code-block">
+                        <span class="code-label">Box Plot Analysis in Python</span>
+                        <pre><code>import numpy as np
+import pandas as pd
+
+def five_number_summary(data, label=""):
+    arr = np.array(data)
+    q1, median, q3 = np.percentile(arr, [25, 50, 75])
+    iqr = q3 - q1
+    lower_fence = q1 - 1.5 * iqr
+    upper_fence = q3 + 1.5 * iqr
+    outliers = arr[(arr < lower_fence) | (arr > upper_fence)]
+
+    print(f"\n── {label} ──────────────────────")
+    print(f"  Min:          {arr.min():.2f}")
+    print(f"  Q1 (25th):    {q1:.2f}")
+    print(f"  Median (50th):{median:.2f}")
+    print(f"  Q3 (75th):    {q3:.2f}")
+    print(f"  Max:          {arr.max():.2f}")
+    print(f"  IQR:          {iqr:.2f}")
+    print(f"  Lower fence:  {lower_fence:.2f}")
+    print(f"  Upper fence:  {upper_fence:.2f}")
+    print(f"  Outliers ({len(outliers)}): {outliers}")
+    return outliers
+
+# Exam scores dataset
+scores = [45, 52, 58, 61, 65, 67, 70, 72, 74, 76, 78, 80, 82, 85, 88, 92, 95, 98, 20, 100]
+outliers = five_number_summary(scores, "Exam Scores")
+
+# Visualise
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+sns.histplot(scores, kde=True, ax=axes[0])
+axes[0].set_title("Distribution")
+sns.boxplot(y=scores, ax=axes[1])
+axes[1].set_title("Box Plot — outliers visible as diamonds")
+plt.tight_layout()
+plt.show()</code></pre>
+                    </div>
+                </div>
+
+                <!-- ─────────── CHAPTER 3 ─────────── -->
+                <div class="chapter-header">
+                    <h2>🎲 Chapter 3 — Probability Theory</h2>
+                    <p>Probability is the mathematical language of uncertainty. Every classification model outputs a probability. Every A/B test relies on it. You cannot do Data Science without it.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🎲 3.1 Probability Fundamentals</h3>
+                    <p>Probability is a number between 0 and 1 that quantifies how likely an event is to occur. P(A) = 0 means impossible; P(A) = 1 means certain.</p>
+                    <div class="code-block">
+                        <span class="code-label">Core Probability Rules</span>
+                        <pre><code>from fractions import Fraction
+
+# ── Sample space and events ──────────────────────────
+# Roll a fair die: sample space Ω = {1, 2, 3, 4, 5, 6}
+sample_space = set(range(1, 7))
+
+A = {2, 4, 6}      # Event A: even number
+B = {1, 2, 3}      # Event B: number ≤ 3
+
+# Basic probability: |event| / |sample space|
+P_A = len(A) / len(sample_space)   # 3/6 = 0.5
+P_B = len(B) / len(sample_space)   # 3/6 = 0.5
+
+# ── Key Rules ──────────────────────────────────────────
+# Addition rule: P(A ∪ B) = P(A) + P(B) - P(A ∩ B)
+A_union_B = A | B         # {1, 2, 3, 4, 6}
+A_inter_B = A & B         # {2}
+P_AuB = len(A_union_B) / len(sample_space)   # 5/6
+P_AiB = len(A_inter_B) / len(sample_space)   # 1/6
+
+print(f"P(A):     {P_A:.3f}")
+print(f"P(B):     {P_B:.3f}")
+print(f"P(A∪B):   {P_AuB:.3f}")   # = 0.5 + 0.5 - 1/6 = 5/6 ✅
+print(f"P(A∩B):   {P_AiB:.3f}")
+
+# Complement rule: P(Aᶜ) = 1 - P(A)
+P_not_A = 1 - P_A   # P(odd number) = 0.5
+
+# Multiplication rule for INDEPENDENT events
+# P(A ∩ B) = P(A) × P(B) [only if A and B are independent]
+# Rolling 6 twice: P = 1/6 × 1/6 = 1/36
+
+# Conditional probability: P(A|B) = P(A∩B) / P(B)
+P_A_given_B = P_AiB / P_B   # P(even | ≤3) = (1/6)/(3/6) = 1/3
+print(f"P(A|B):   {P_A_given_B:.3f}")   # 0.333</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🧬 3.2 Bayes' Theorem — Updating Beliefs with Evidence</h3>
+                    <p>Bayes' theorem tells us how to rationally update our beliefs when new evidence arrives. It's the foundation of spam filters, medical diagnosis, and Bayesian ML models.</p>
+                    <div class="formula-box">
+                        P(A|B) = P(B|A) × P(A) / P(B)
+                        <br>
+                        Posterior = (Likelihood × Prior) / Evidence
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Bayes Applied — Three Real Scenarios</span>
+                        <pre><code">def bayes(p_prior, p_positive_given_positive, p_positive_given_negative):
+    """
+    p_prior: base rate of the condition
+    p_positive_given_positive: P(test positive | condition present) — sensitivity
+    p_positive_given_negative: P(test positive | condition absent) — false positive rate
+    """
+    p_negative = 1 - p_prior
+    p_positive_total = (p_positive_given_positive * p_prior +
+                        p_positive_given_negative * p_negative)
+    posterior = (p_positive_given_positive * p_prior) / p_positive_total
+    return posterior
+
+# ── Scenario 1: Medical Test ──────────────────────────
+# Rare disease: 1% prevalence. Test: 99% sensitivity, 5% false positive rate.
+p_disease = bayes(
+    p_prior=0.01,
+    p_positive_given_positive=0.99,
+    p_positive_given_negative=0.05
+)
+print(f"P(disease | positive test): {p_disease:.1%}")
+# Only 16.7%! Most positives are false positives when base rate is low.
+
+# ── Scenario 2: Email Spam Filter ────────────────────
+# 30% of emails are spam.
+# P("FREE" appears | spam) = 0.80
+# P("FREE" appears | not spam) = 0.05
+p_spam_given_free = bayes(
+    p_prior=0.30,
+    p_positive_given_positive=0.80,
+    p_positive_given_negative=0.05
+)
+print(f"P(spam | email contains 'FREE'): {p_spam_given_free:.1%}")
+# 87.3% — strong spam indicator
+
+# ── Scenario 3: Fraud Detection ──────────────────────
+# 0.5% of transactions are fraudulent.
+# Fraud detection model: 90% recall, 1% false positive rate.
+p_fraud_given_flagged = bayes(
+    p_prior=0.005,
+    p_positive_given_positive=0.90,
+    p_positive_given_negative=0.01
+)
+print(f"P(fraud | flagged by model): {p_fraud_given_flagged:.1%}")
+# 31.1% — still most flags are false! Need manual review.</code></pre>
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ The base rate fallacy:</strong> Ignoring the prior probability (base rate) is one of the most common reasoning errors in data analysis. Even a very accurate test will produce mostly false positives if the condition is rare. Always consider the base rate before interpreting probabilities.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔔 3.3 Probability Distributions</h3>
+                    <p>A probability distribution describes the likelihood of each possible outcome. Choosing the right distribution to model your data is critical for correct inference.</p>
+                    <h4>Discrete Distributions</h4>
+                    <div class="code-block">
+                        <span class="code-label">Binomial, Poisson, Geometric</span>
+                        <pre><code>from scipy import stats
+import numpy as np
+
+# ── Binomial Distribution ────────────────────────────
+# n independent trials, each with probability p of success
+# Question: If 30% of customers buy, what's P(exactly 5 buy) in 20 visits?
+n, p = 20, 0.30
+binom = stats.binom(n=n, p=p)
+print(f"P(exactly 5 buy):    {binom.pmf(5):.4f}")    # 0.1789
+print(f"P(at most 8 buy):    {binom.cdf(8):.4f}")    # 0.8867
+print(f"Expected purchases:  {binom.mean():.1f}")    # 6.0
+print(f"Std dev:             {binom.std():.2f}")     # 2.05
+
+# ── Poisson Distribution ─────────────────────────────
+# Events occurring at a constant rate λ per interval
+# Question: A website gets 120 visits/hour. P(getting exactly 2 in 1 minute)?
+lam = 120 / 60  # λ = 2 visits per minute
+poisson = stats.poisson(mu=lam)
+print(f"\nP(exactly 2 visits/min): {poisson.pmf(2):.4f}")  # 0.2707
+print(f"P(0 visits in a minute): {poisson.pmf(0):.4f}")   # 0.1353
+print(f"P(5+ visits/minute):     {1 - poisson.cdf(4):.4f}")
+
+# ── Geometric Distribution ───────────────────────────
+# How many trials until first success?
+# P(first sale on the 3rd call) with p=0.2?
+geom = stats.geom(p=0.2)
+print(f"\nP(first sale on call 3): {geom.pmf(3):.4f}")   # 0.128
+print(f"Expected calls needed:   {geom.mean():.1f}")     # 5.0</code></pre>
+                    </div>
+                    <h4>Continuous Distributions</h4>
+                    <div class="code-block">
+                        <span class="code-label">Normal, Exponential, Uniform</span>
+                        <pre><code>from scipy import stats
+import numpy as np
+
+# ── Normal Distribution (Gaussian) ───────────────────
+# The most important distribution in statistics
+mu, sigma = 170, 10   # Mean height 170cm, std 10cm
+norm = stats.norm(loc=mu, scale=sigma)
+
+print("Height Distribution (μ=170, σ=10):")
+print(f"P(height < 160cm): {norm.cdf(160):.4f}")   # 0.1587 — 15.9%
+print(f"P(height > 190cm): {1-norm.cdf(190):.4f}") # 0.0228 — 2.3%
+print(f"P(160 < h < 180):  {norm.cdf(180)-norm.cdf(160):.4f}") # 68.3%
+
+# Empirical Rule (68-95-99.7 rule):
+for k in [1, 2, 3]:
+    p = norm.cdf(mu + k*sigma) - norm.cdf(mu - k*sigma)
+    print(f"  μ ± {k}σ covers: {p:.1%}")
+# μ ± 1σ: 68.3%, μ ± 2σ: 95.4%, μ ± 3σ: 99.7%
+
+# Standardisation (Z-score)
+x = 185
+z_score = (x - mu) / sigma
+print(f"\nZ-score for height=185: {z_score:.2f}")  # z=1.5
+print(f"Percentile: {norm.cdf(x):.1%}")            # 93.3th percentile
+
+# ── Exponential Distribution ─────────────────────────
+# Time between events in a Poisson process
+# Average wait time for support: 5 minutes
+rate = 1/5  # λ = 0.2 events per minute
+expon = stats.expon(scale=1/rate)  # scale = mean
+print(f"\nP(wait < 3 min): {expon.cdf(3):.4f}")    # 0.4512
+print(f"P(wait > 10 min): {1-expon.cdf(10):.4f}") # 0.1353 — 13.5%</code></pre>
+                    </div>
+                    <div class="tip-box">
+                        <strong>💡 Central Limit Theorem (CLT):</strong> As sample size grows, the distribution of the <em>sample mean</em> approaches a Normal distribution — regardless of the original distribution's shape. This is why so many statistical tests assume normality and why it works even on non-normal data, as long as n is large enough (typically n &gt; 30).
+                    </div>
+                </div>
+
+                <!-- ─────────── CHAPTER 4 ─────────── -->
+                <div class="chapter-header">
+                    <h2>🔗 Chapter 4 — Correlation, Covariance & Relationships</h2>
+                    <p>Understanding how variables relate is the bridge between raw data and meaningful models. This chapter gives you the full mathematical toolkit.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔗 4.1 Covariance & Correlation</h3>
+                    <p>Covariance measures the <em>direction</em> of a linear relationship. Correlation normalises it so the <em>strength</em> is comparable across different variables.</p>
+                    <div class="formula-box">
+                        Cov(X,Y) = Σ[(xᵢ−x̄)(yᵢ−ȳ)] / (n−1)
+                        <br>
+                        r (Pearson) = Cov(X,Y) / (σₓ × σᵧ)   →   range: [−1, +1]
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">All Three Correlation Methods</span>
+                        <pre><code>import numpy as np
+import pandas as pd
+from scipy import stats
+
+np.random.seed(42)
+n = 100
+
+# Create correlated variables
+study_hours = np.random.uniform(0, 10, n)
+exam_score = 40 + 5 * study_hours + np.random.normal(0, 8, n)  # Strong positive
+sleep_hours = np.random.uniform(4, 10, n)
+errors = 20 - 1.5 * sleep_hours + np.random.normal(0, 3, n)    # Negative correlation
+
+df = pd.DataFrame({
+    "study_hours": study_hours,
+    "exam_score": exam_score,
+    "sleep_hours": sleep_hours,
+    "coding_errors": errors
+})
+
+# ── Pearson — linear relationships, assumes normality
+pearson_r, pearson_p = stats.pearsonr(df["study_hours"], df["exam_score"])
+print(f"Pearson r (study↔score): {pearson_r:.3f}, p={pearson_p:.4f}")
+
+# ── Spearman — monotonic relationships, robust to outliers
+# Use when: ordinal data, non-linear but monotonic, outliers present
+spearman_r, spearman_p = stats.spearmanr(df["sleep_hours"], df["coding_errors"])
+print(f"Spearman ρ (sleep↔errors): {spearman_r:.3f}, p={spearman_p:.4f}")
+
+# ── Kendall — robust, better for small samples
+kendall_tau, kendall_p = stats.kendalltau(df["study_hours"], df["exam_score"])
+print(f"Kendall τ (study↔score): {kendall_tau:.3f}, p={kendall_p:.4f}")
+
+# ── Full correlation matrix ─────────────────────────
+corr_matrix = df.corr(method="pearson")
+print("\nCorrelation Matrix:")
+print(corr_matrix.round(3))
+
+# Interpretation guide:
+# |r| 0.0–0.2: negligible
+# |r| 0.2–0.4: weak
+# |r| 0.4–0.6: moderate
+# |r| 0.6–0.8: strong
+# |r| 0.8–1.0: very strong</code></pre>
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ Correlation ≠ Causation — Classic Examples:</strong><br>
+                        • Ice cream sales and drowning deaths are highly correlated (caused by summer heat — a confounder).<br>
+                        • Shoe size correlates with reading ability in children (caused by age — not shoe size that improves reading).<br>
+                        • Nicolas Cage movies released correlates with pool drownings (spurious — pure coincidence).<br>
+                        Always ask: is there a confounding variable? A mediating variable? Reverse causation?
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>📊 4.2 Anscombe's Quartet — Why You Must Visualize</h3>
+                    <p>Francis Anscombe created four datasets in 1973 that are statistically nearly identical but look completely different when plotted. This is the single most important lesson in applied statistics.</p>
+                    <div class="code-block">
+                        <span class="code-label">Anscombe's Quartet</span>
+                        <pre><code>import pandas as pd
+import numpy as np
+
+# All four datasets have:
+# Mean x = 9, Mean y ≈ 7.5
+# Var x = 11, Var y ≈ 4.12
+# Correlation r ≈ 0.816
+# Regression line: y ≈ 3 + 0.5x
+
+datasets = {
+    "I":   {"x": [10,8,13,9,11,14,6,4,12,7,5],
+            "y": [8.04,6.95,7.58,8.81,8.33,9.96,7.24,4.26,10.84,4.82,5.68]},
+    "II":  {"x": [10,8,13,9,11,14,6,4,12,7,5],
+            "y": [9.14,8.14,8.74,8.77,9.26,8.10,6.13,3.10,9.13,7.26,4.74]},
+    "III": {"x": [10,8,13,9,11,14,6,4,12,7,5],
+            "y": [7.46,6.77,12.74,7.11,7.81,8.84,6.08,5.39,8.15,6.42,5.73]},
+    "IV":  {"x": [8,8,8,8,8,8,8,19,8,8,8],
+            "y": [6.58,5.76,7.71,8.84,8.47,7.04,5.25,12.50,5.56,7.91,6.89]}
+}
+
+from scipy import stats
+
+for name, data in datasets.items():
+    x, y = np.array(data["x"]), np.array(data["y"])
+    slope, intercept, r, p, se = stats.linregress(x, y)
+    print(f"Dataset {name}: r={r:.3f}, slope={slope:.3f}, intercept={intercept:.3f}")
+
+# Output:
+# Dataset I:   r=0.816, slope=0.500, intercept=3.000  ← Linear, normal scatter ✅
+# Dataset II:  r=0.816, slope=0.500, intercept=3.001  ← Curved — linear model is WRONG
+# Dataset III: r=0.816, slope=0.500, intercept=3.002  ← One outlier distorting everything
+# Dataset IV:  r=0.817, slope=0.500, intercept=3.002  ← Extreme leverage point
+
+# LESSON: Always plot your data BEFORE fitting a model.
+# Summary statistics are necessary but NEVER sufficient.</code></pre>
+                    </div>
+                </div>
+
+                <!-- ─────────── CHAPTER 5 ─────────── -->
+                <div class="chapter-header">
+                    <h2>🧪 Chapter 5 — Inferential Statistics & Hypothesis Testing</h2>
+                    <p>Inferential statistics lets us draw conclusions about a population from a sample — and quantify exactly how confident we are. It's the engine behind A/B tests, model comparisons, and scientific claims.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🧪 5.1 Sampling & Estimation</h3>
+                    <p>We can rarely measure an entire population. Sampling lets us estimate population parameters from a subset, with quantified uncertainty.</p>
+                    <div class="code-block">
+                        <span class="code-label">Sampling, Standard Error & Confidence Intervals</span>
+                        <pre><code>import numpy as np
+from scipy import stats
+
+# Population: 1 million customer satisfaction scores (1–10)
+np.random.seed(42)
+population = np.random.normal(loc=7.2, scale=1.5, size=1_000_000)
+print(f"True population mean: {population.mean():.4f}")  # ~7.2000
+
+# ── Sampling ──────────────────────────────────────────
+sample = np.random.choice(population, size=100, replace=False)
+sample_mean = sample.mean()
+sample_std = sample.std(ddof=1)
+n = len(sample)
+
+print(f"Sample mean:          {sample_mean:.4f}")
+print(f"Sample std:           {sample_std:.4f}")
+
+# ── Standard Error — uncertainty of the sample mean ──
+# SE = σ / √n  (smaller with larger samples)
+standard_error = sample_std / np.sqrt(n)
+print(f"Standard Error:       {standard_error:.4f}")
+
+# ── 95% Confidence Interval ───────────────────────────
+# "If we repeated this sampling 100 times, ~95 CIs would contain the true mean"
+confidence_level = 0.95
+t_critical = stats.t.ppf((1 + confidence_level) / 2, df=n-1)
+margin_of_error = t_critical * standard_error
+
+ci_lower = sample_mean - margin_of_error
+ci_upper = sample_mean + margin_of_error
+print(f"\n95% Confidence Interval: [{ci_lower:.4f}, {ci_upper:.4f}]")
+print(f"True mean inside CI: {ci_lower <= population.mean() <= ci_upper}")
+
+# ── How sample size affects uncertainty ──────────────
+for n_size in [10, 50, 100, 500, 1000]:
+    s = np.random.choice(population, size=n_size)
+    se = s.std(ddof=1) / np.sqrt(n_size)
+    t_c = stats.t.ppf(0.975, df=n_size-1)
+    moe = t_c * se
+    print(f"n={n_size:5d}: SE={se:.4f}, Margin of Error = ±{moe:.4f}")</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>⚗️ 5.2 Hypothesis Testing — The Complete Framework</h3>
+                    <p>Hypothesis testing is the formal statistical procedure for making decisions based on data. Every A/B test, every model comparison, every "is this result real?" question uses this framework.</p>
+                    <div class="code-explanation">
+                        <strong>Step 1 — Formulate Hypotheses:</strong> H₀ (null) = no effect / no difference. H₁ (alternative) = there IS an effect.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 2 — Choose Significance Level (α):</strong> Typically 0.05 (5%). This is the maximum probability of a Type I error you're willing to accept.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 3 — Choose & Run the Test:</strong> Select based on data type and question (see table below).
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 4 — Compute p-value:</strong> The probability of observing this result (or more extreme) if H₀ were true.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 5 — Make Decision:</strong> If p &lt; α → Reject H₀. If p ≥ α → Fail to reject H₀ (not the same as "H₀ is true"!).
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 6 — Calculate Effect Size:</strong> Statistical significance ≠ practical importance. Always report how large the effect is.
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Test</th><th>When to Use</th><th>Scipy Function</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>One-sample t-test</strong></td><td>Compare sample mean to a known value</td><td><code>stats.ttest_1samp(data, popmean)</code></td></tr>
+                            <tr><td><strong>Independent t-test</strong></td><td>Compare means of two independent groups</td><td><code>stats.ttest_ind(group1, group2)</code></td></tr>
+                            <tr><td><strong>Paired t-test</strong></td><td>Before/after measurements on same subjects</td><td><code>stats.ttest_rel(before, after)</code></td></tr>
+                            <tr><td><strong>ANOVA (one-way)</strong></td><td>Compare means of 3+ groups</td><td><code>stats.f_oneway(g1, g2, g3)</code></td></tr>
+                            <tr><td><strong>Chi-squared</strong></td><td>Association between categorical variables</td><td><code>stats.chi2_contingency(table)</code></td></tr>
+                            <tr><td><strong>Mann-Whitney U</strong></td><td>Non-parametric alternative to t-test</td><td><code>stats.mannwhitneyu(g1, g2)</code></td></tr>
+                            <tr><td><strong>Shapiro-Wilk</strong></td><td>Test for normality of distribution</td><td><code>stats.shapiro(data)</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-card">
+                    <h3>⚗️ 5.3 Tests in Practice — Full A/B Test Example</h3>
+                    <div class="code-block">
+                        <span class="code-label">Complete A/B Test — Step by Step</span>
+                        <pre><code>import numpy as np
+from scipy import stats
+
+np.random.seed(42)
+
+# ── Context ───────────────────────────────────────────
+# E-commerce: Does new checkout button increase conversion rate?
+# Current (Control): 12% conversion
+# New design (Treatment): we want to detect a ≥2% absolute improvement
+# Required sample: ~2000/group (based on power analysis)
+
+# Simulate 30 days of data
+n_control = 2100
+n_treatment = 1980
+conversions_control = int(n_control * 0.121)     # 12.1%
+conversions_treatment = int(n_treatment * 0.141)  # 14.1%
+
+# ── Method 1: Two-proportion z-test ──────────────────
+from statsmodels.stats.proportion import proportions_ztest
+
+count = np.array([conversions_treatment, conversions_control])
+nobs = np.array([n_treatment, n_control])
+
+z_stat, p_value = proportions_ztest(count, nobs, alternative="larger")
+print(f"Z-statistic: {z_stat:.4f}")
+print(f"P-value:     {p_value:.4f}")
+
+alpha = 0.05
+if p_value < alpha:
+    print(f"✅ SIGNIFICANT: Reject H₀. New design wins! (p={p_value:.4f})")
+else:
+    print(f"❌ NOT SIGNIFICANT: Cannot reject H₀. (p={p_value:.4f})")
+
+# ── Effect size — practical significance ─────────────
+rate_control   = conversions_control / n_control
+rate_treatment = conversions_treatment / n_treatment
+absolute_lift = rate_treatment - rate_control
+relative_lift = (rate_treatment - rate_control) / rate_control
+
+print(f"\nControl rate:     {rate_control:.2%}")
+print(f"Treatment rate:   {rate_treatment:.2%}")
+print(f"Absolute lift:    +{absolute_lift:.2%}")
+print(f"Relative lift:    +{relative_lift:.1%}")
+
+# ── Business impact ───────────────────────────────────
+monthly_visitors = 50000
+monthly_orders = monthly_visitors * rate_control
+new_orders = monthly_visitors * rate_treatment
+avg_order_value = 85  # €
+
+revenue_gain = (new_orders - monthly_orders) * avg_order_value
+print(f"\nEstimated monthly revenue gain: €{revenue_gain:,.0f}")</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>⚠️ 5.4 Common Statistical Errors to Avoid</h3>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>Type I Error (False Positive)</h5>
+                            <p>Rejecting H₀ when it's actually true. Probability = α (significance level). Claiming an effect exists when it doesn't. Controlled by setting a lower α (e.g., 0.01).</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Type II Error (False Negative)</h5>
+                            <p>Failing to reject H₀ when it's actually false. Probability = β. Missing a real effect. Reduced by increasing sample size or using a more sensitive test.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>p-hacking / Data Dredging</h5>
+                            <p>Running many tests until p &lt; 0.05 appears by chance. With 20 tests at α=0.05, one significant result is expected by chance. Use Bonferroni correction: α/n_tests.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Peeking at Results</h5>
+                            <p>Stopping an A/B test early when you see a significant result. Inflates false positive rate dramatically. Always pre-determine sample size with power analysis.</p>
+                        </div>
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ Statistical Power:</strong> The probability of detecting a real effect when it exists. Power = 1 − β. Typically set to 80% or 90%. Low power = missing real effects. Always do a power analysis BEFORE running a test to determine the required sample size.
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Power Analysis — Required Sample Size</span>
+                        <pre><code>from statsmodels.stats.power import TTestIndPower, NormalIndPower
+
+# What sample size do I need?
+# Parameters:
+# effect_size: Cohen's d (small=0.2, medium=0.5, large=0.8)
+# alpha = 0.05 (significance level)
+# power = 0.80 (80% chance of detecting the effect if it exists)
+
+analysis = TTestIndPower()
+
+for effect_size in [0.2, 0.5, 0.8]:
+    n = analysis.solve_power(
+        effect_size=effect_size,
+        alpha=0.05,
+        power=0.80,
+        alternative="two-sided"
+    )
+    print(f"Effect size {effect_size}: need n={n:.0f} per group")
+
+# Effect 0.2 (small):  n=394 per group  → 788 total
+# Effect 0.5 (medium): n=64 per group   → 128 total
+# Effect 0.8 (large):  n=26 per group   → 52 total
+
+# For proportions A/B test:
+from statsmodels.stats.power import NormalIndPower
+prop_analysis = NormalIndPower()
+# Detect 2% lift from 12% to 14% baseline
+from statsmodels.stats.proportion import proportion_effectsize
+effect = proportion_effectsize(0.14, 0.12)
+n_prop = prop_analysis.solve_power(effect_size=effect, alpha=0.05, power=0.80)
+print(f"\nA/B test (12%→14%): need n={n_prop:.0f} per group")</code></pre>
+                    </div>
+                </div>
+
+                <!-- ─────────── CHAPTER 6 ─────────── -->
+                <div class="chapter-header">
+                    <h2>📐 Chapter 6 — Linear Algebra & Mathematics for Data Science</h2>
+                    <p>Machine learning is built on linear algebra. Vectors, matrices, and operations are how models represent and process data at scale.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔢 6.1 Vectors & Matrices — The Data Containers</h3>
+                    <p>In Data Science, a dataset is a matrix. Each row is an observation (data point). Each column is a feature. Understanding matrix operations unlocks how ML algorithms actually work.</p>
+                    <div class="code-block">
+                        <span class="code-label">Essential Linear Algebra with NumPy</span>
+                        <pre><code>import numpy as np
+
+# ── Vectors ──────────────────────────────────────────
+# A data point: one row of your dataset
+user_features = np.array([28, 3.5, 12, 1, 0])  # age, years_edu, income_k, premium, churned
+
+# Dot product — similarity measure used in many ML algorithms
+v1 = np.array([1, 2, 3])
+v2 = np.array([4, 5, 6])
+dot_product = np.dot(v1, v2)   # 1*4 + 2*5 + 3*6 = 32
+print(f"Dot product: {dot_product}")
+
+# Vector norm (magnitude)
+magnitude = np.linalg.norm(v1)   # √(1²+2²+3²) = √14
+print(f"Magnitude of v1: {magnitude:.4f}")
+
+# Cosine similarity — angle between vectors (used in NLP, recommendations)
+cos_sim = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+print(f"Cosine similarity: {cos_sim:.4f}")  # 0.9746 — very similar direction
+
+# ── Matrices ─────────────────────────────────────────
+# Dataset: 4 users, 3 features
+X = np.array([
+    [25, 50000, 3],   # User 1: age, salary, years_exp
+    [30, 75000, 7],   # User 2
+    [45, 120000, 20], # User 3
+    [28, 60000, 5]    # User 4
+])
+
+print(f"\nShape: {X.shape}")  # (4, 3) — 4 rows, 3 columns
+
+# Matrix operations
+print(f"Transpose shape: {X.T.shape}")  # (3, 4)
+
+# Matrix multiplication — fundamental in neural networks
+W = np.random.randn(3, 2)  # Weight matrix
+output = X @ W   # (4,3) @ (3,2) = (4,2) — linear transformation
+print(f"After linear transform: {output.shape}")
+
+# Statistics on matrices
+print(f"\nColumn means: {X.mean(axis=0)}")  # Mean of each feature
+print(f"Row means:    {X.mean(axis=1)}")   # Mean per user</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🎯 6.2 Eigenvalues, Eigenvectors & PCA</h3>
+                    <p>Eigendecomposition is the mathematical foundation of <span class="highlight">Principal Component Analysis (PCA)</span> — the most common dimensionality reduction technique in Data Science.</p>
+                    <div class="code-block">
+                        <span class="code-label">PCA Step by Step — The Math</span>
+                        <pre><code>import numpy as np
+from sklearn.preprocessing import StandardScaler
+
+# Dataset: 100 students, 4 exam subjects
+np.random.seed(42)
+n = 100
+math    = np.random.normal(70, 15, n)
+physics = 0.8 * math + np.random.normal(0, 8, n)   # Correlated with math
+history = np.random.normal(65, 12, n)
+art     = np.random.normal(60, 18, n)
+
+X = np.column_stack([math, physics, history, art])  # (100, 4)
+
+# ── Step 1: Standardize ──────────────────────────────
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# ── Step 2: Covariance Matrix ────────────────────────
+cov_matrix = np.cov(X_scaled.T)   # (4, 4) matrix
+print("Covariance Matrix:")
+print(np.round(cov_matrix, 3))
+
+# ── Step 3: Eigendecomposition ───────────────────────
+eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
+
+# Sort by eigenvalue (descending — largest variance first)
+idx = np.argsort(eigenvalues)[::-1]
+eigenvalues = eigenvalues[idx]
+eigenvectors = eigenvectors[:, idx]
+
+# ── Step 4: Explained Variance ───────────────────────
+explained_variance = eigenvalues / eigenvalues.sum()
+cumulative_variance = np.cumsum(explained_variance)
+
+print("\nPrincipal Components:")
+for i, (ev, exp, cum) in enumerate(zip(eigenvalues, explained_variance, cumulative_variance)):
+    print(f"  PC{i+1}: eigenvalue={ev:.3f}, explains {exp:.1%}, cumulative={cum:.1%}")
+
+# ── Step 5: Project data ─────────────────────────────
+k = 2  # Keep top 2 components (enough to explain most variance)
+components = eigenvectors[:, :k]
+X_pca = X_scaled @ components  # (100, 2) — 4D data → 2D!
+
+print(f"\nOriginal shape: {X.shape}")
+print(f"Reduced shape:  {X_pca.shape}")
+print(f"Variance retained: {cumulative_variance[k-1]:.1%}")
+
+# ── Using Scikit-Learn (the practical way) ───────────
+from sklearn.decomposition import PCA
+pca = PCA(n_components=0.95)  # Keep enough components for 95% variance
+X_reduced = pca.fit_transform(X_scaled)
+print(f"\nSklearn PCA: {X.shape[1]} → {X_reduced.shape[1]} dimensions")</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>📉 6.3 Regression Mathematics — The Foundation of Prediction</h3>
+                    <p>Linear regression is the simplest predictive model — and understanding its mathematics illuminates every other model that follows.</p>
+                    <div class="formula-box">
+                        ŷ = β₀ + β₁x₁ + β₂x₂ + ... + βₚxₚ + ε
+                        <br>
+                        Cost (MSE) = (1/n) × Σ(yᵢ − ŷᵢ)²
+                        <br>
+                        Normal Equation: β = (XᵀX)⁻¹ × Xᵀy
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Linear Regression — From Scratch & with Sklearn</span>
+                        <pre><code">import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+from sklearn.model_selection import train_test_split
+
+np.random.seed(42)
+n = 200
+
+# Generate realistic housing data
+area = np.random.uniform(50, 300, n)
+bedrooms = np.random.randint(1, 6, n)
+age = np.random.uniform(1, 50, n)
+price = (area * 2500 + bedrooms * 15000 - age * 1000
+         + np.random.normal(0, 20000, n))  # Noise
+
+X = np.column_stack([area, bedrooms, age])
+y = price
+
+# ── From Scratch (Normal Equation) ───────────────────
+X_bias = np.column_stack([np.ones(n), X])  # Add bias column
+beta = np.linalg.pinv(X_bias.T @ X_bias) @ X_bias.T @ y
+print("Coefficients from scratch:")
+print(f"  Intercept: {beta[0]:,.0f}")
+print(f"  Area:      {beta[1]:,.0f} per m²")
+print(f"  Bedrooms:  {beta[2]:,.0f} per bedroom")
+print(f"  Age:       {beta[3]:,.0f} per year")
+
+# ── With Scikit-Learn (Production) ───────────────────
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+# Evaluation metrics
+r2 = r2_score(y_test, y_pred)
+mae = mean_absolute_error(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+
+print(f"\nModel Performance:")
+print(f"  R²:   {r2:.4f}   → model explains {r2:.1%} of price variance")
+print(f"  MAE:  €{mae:,.0f}  → average prediction error")
+print(f"  RMSE: €{rmse:,.0f}  → penalizes large errors more")
+
+# Residual analysis
+residuals = y_test - y_pred
+print(f"\nResiduals:")
+print(f"  Mean: {residuals.mean():.0f}   (should be ≈ 0)")
+print(f"  Std:  {residuals.std():.0f}")</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card" style="background: linear-gradient(45deg, rgba(91,124,255,0.1), rgba(40,224,255,0.1)); border-left: 5px solid var(--cyan);">
+                    <h3>🏆 Module Summary — You Now Think Statistically</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Completing this module means you can approach data problems with mathematical rigour:</p>
+                    <div class="two-col">
+                        <div>
+                            <ul class="styled-list">
+                                <li>Identify data types and choose appropriate statistics</li>
+                                <li>Compute and interpret mean, median, variance, IQR</li>
+                                <li>Detect outliers with IQR fences and Z-scores</li>
+                                <li>Characterize distribution shape (skewness, kurtosis)</li>
+                                <li>Apply Bayes' theorem to real estimation problems</li>
+                                <li>Choose the right probability distribution for your data</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <ul class="styled-list">
+                                <li>Calculate confidence intervals for sample estimates</li>
+                                <li>Design and run A/B tests with proper power analysis</li>
+                                <li>Interpret p-values without falling into common traps</li>
+                                <li>Understand and avoid Type I/II errors and p-hacking</li>
+                                <li>Work with vectors and matrices for ML foundations</li>
+                                <li>Apply PCA and linear regression from first principles</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="tip-box" style="margin-top: 1rem;">
+                        <strong>🎯 Next Step:</strong> Move to Module 3 — Python & Pandas for Data Wrangling, or reinforce this knowledge by working through a real dataset on Kaggle, applying every statistical concept you learned here.
+                    </div>
+                </div>
+
+            </div><!-- end #aprender -->
+
+            <!-- ===================== LAB TAB ===================== -->
+            <div id="laboratorio" class="tab-panel">
+                <h3>Statistics Console</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Practice data extraction. Try filtering customers with high spending.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">SQL EDITOR</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT customer_name, total_spent,
+       AVG(total_spent) OVER() AS avg_all,
+       RANK() OVER(ORDER BY total_spent DESC) AS rank
+FROM sales
+WHERE total_spent > 1500
+ORDER BY total_spent DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">QUERY RESULT</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Click "Run" to simulate the query...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Run Query</button>
+            </div>
+
+            <!-- ===================== QUIZ TAB ===================== -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Statistics Quiz for Data Science</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge of Statistics for Data Science. Answer the 15 questions and receive immediate feedback.</p>
+                    <form id="quiz-form">
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">1. What is the analytical basis of Data Science that allows us to measure uncertainty?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Graphic Design</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B" data-correct="true"> B) Statistics</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Digital Marketing</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Hardware Engineering</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">2. If we are counting the number of customers in a store, what type of data are we using?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A" data-correct="true"> A) Discrete Numerical</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Continuous Numerical</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Categorical Nominal</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Categorical Ordinal</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">3. Classifying satisfaction levels (e.g., Dissatisfied, Neutral, Satisfied) is an example of:</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) Nominal Data</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B" data-correct="true"> B) Ordinal Data</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Continuous Data</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Binary Data</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">4. Which measure is calculated by summing all values and dividing by the number of observations?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Median</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Mode</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C" data-correct="true"> C) Mean</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Range</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">5. Why is the Median preferred over the Mean for economic data (like salaries)?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Because it is easier to calculate</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B" data-correct="true"> B) Because it is more robust to extreme values (outliers)</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Because the mean only works with small numbers</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Because the median ignores negative numbers</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">6. In an ordered dataset, the value that occupies the central position is called:</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Mean</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B" data-correct="true"> B) Median</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) Standard Deviation</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Variance</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">7. What does the Standard Deviation indicate in a dataset?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) The most frequent value</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B" data-correct="true"> B) How spread out the data is relative to the mean</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) The total sum of all values</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Data entry errors</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">8. Variance is mathematically defined as:</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) The square root of the standard deviation</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) The difference between the highest and lowest value</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C" data-correct="true"> C) The average squared distance of the values from the mean</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) The inverse of the arithmetic mean</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">9. What is the characteristic shape of a "Normal Distribution"?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A" data-correct="true"> A) Bell shape (Gaussian curve)</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Upward straight line</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Staircase or step shape</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) U-shaped distribution</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">10. In a perfect Normal Distribution, what happens to the mean, median, and mode?</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) They are very far apart from each other</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B" data-correct="true"> B) They are equal or located at the same central point</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) The mean is always double the mode</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) The median is always zero</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">11. If sales increase when advertising investment increases, we have a:</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Negative correlation</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B" data-correct="true"> B) Positive correlation</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Zero correlation</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Reverse causality</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">12. "Correlation does not imply causation" means that:</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) If two events happen together, one caused the other</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B" data-correct="true"> B) The relationship may be a coincidence or caused by a third factor</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Statistics can never prove relationships</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Correlated variables should be deleted</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">13. In a hypothesis test, what does the Null Hypothesis (H₀) represent?</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) That there is a revolutionary effect</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B" data-correct="true"> B) That there is no effect or difference (status quo)</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) That the prediction model is 100% wrong</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) That the sample size is too small</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">14. What is the "p-value" in statistics?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) The market price of a data scientist</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B" data-correct="true"> B) The probability of obtaining the data if H₀ is true</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) The total number of independent variables</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) The Y-axis intercept point</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">15. When is a result considered "statistically significant"?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) When the p-value is close to 1</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) When the result occurred purely by chance</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"> C) When the probability of it being just chance is very low (p &lt; α)</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) When the mean is equal to the standard deviation</label>
+                        </div>
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display: none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+            class QuizManager {
+                constructor() {
+                    this.questionsData = {
+                        q1: { correct: 'B', exp: 'Statistics is the fundamental tool for quantifying uncertainty and validating patterns in Data Science.' },
+                        q2: { correct: 'A', exp: 'Discrete data represents counts (whole numbers), such as the number of people.' },
+                        q3: { correct: 'B', exp: 'Ordinal data has a logical order (e.g., satisfaction levels), but exact distances between values are not defined.' },
+                        q4: { correct: 'C', exp: 'The arithmetic mean is the sum of all values divided by the total number of observations.' },
+                        q5: { correct: 'B', exp: 'The median is not affected by extreme values (outliers), unlike the mean.' },
+                        q6: { correct: 'B', exp: 'The median is the value that splits the dataset in half when ordered.' },
+                        q7: { correct: 'B', exp: 'Standard deviation measures the variability or "spread" of data around the mean.' },
+                        q8: { correct: 'C', exp: 'Variance calculates the average of the squared distances of each point from the mean.' },
+                        q9: { correct: 'A', exp: 'The Gaussian curve or bell shape is the visual representation of the normal distribution.' },
+                        q10: { correct: 'B', exp: 'In a perfect normal distribution, the mean, median, and mode coincide at the centre.' },
+                        q11: { correct: 'B', exp: 'Positive correlation means that both variables move in the same direction.' },
+                        q12: { correct: 'B', exp: 'The fact that two things happen at the same time does not prove that one caused the other.' },
+                        q13: { correct: 'B', exp: 'The null hypothesis (H₀) assumes that there was no real change or effect.' },
+                        q14: { correct: 'B', exp: 'The p-value helps us decide whether or not to reject the null hypothesis.' },
+                        q15: { correct: 'C', exp: 'Statistical significance indicates the result is unlikely to have occurred by mere chance (p < α).' }
+                    };
+                    this.init();
+                }
+                init() {
+                    document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                    document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+                }
+                submitQuiz() {
+                    const form = document.getElementById('quiz-form');
+                    const formData = new FormData(form);
+                    let score = 0;
+                    let feedbackHTML = '';
+                    Object.keys(this.questionsData).forEach((key, index) => {
+                        const userAnswer = formData.get(key);
+                        const isCorrect = userAnswer === this.questionsData[key].correct;
+                        if (isCorrect) score++;
+                        feedbackHTML += `
+                            <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                                <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                                <div>
+                                    <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                    ${!isCorrect ? `<br><small class="correct-answer">
+                                            Correct answer: Option ${this.questionsData[key].correct}
+                                        </small>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    this.displayResults(score, feedbackHTML);
+                }
+                displayResults(score, feedbackHTML) {
+                    const total = Object.keys(this.questionsData).length;
+                    const percent = Math.round((score / total) * 100);
+                    const resultsDiv = document.getElementById('quiz-results');
+                    let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+                    document.getElementById('quiz-score').innerHTML = `
+                        <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                        <p style="color:var(--text-secondary)">${percent >= 70 ? 'Excellent! You are ready to master predictive models.' : 'Review the concepts of dispersion and correlation to improve.'}</p>`;
+                    document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                    resultsDiv.style.display = 'block';
+                    resultsDiv.scrollIntoView({ behavior: 'smooth' });
+                }
+                clearQuiz() {
+                    document.getElementById('quiz-form').reset();
+                    document.getElementById('quiz-results').style.display = 'none';
+                    window.scrollTo({ top: 150, behavior: 'smooth' });
+                }
+            }
+            document.addEventListener('DOMContentLoaded', () => { new QuizManager(); });
+            </script>
+
+            <!-- ===================== RESOURCES TAB ===================== -->
+            <div id="recursos" class="tab-panel">
+                <div class="content-card">
+                    <h3>Support Materials</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Curated resources for Statistics & Mathematics.</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                        <div class="mini-card">
+                            <h5>Statistics Fundamentals</h5>
+                            <a href="#" class="resource-link">→ StatQuest (YouTube) — Best explanations</a>
+                            <a href="#" class="resource-link">→ Khan Academy Statistics</a>
+                            <a href="#" class="resource-link">→ Think Stats (free book)</a>
+                            <a href="#" class="resource-link">→ Seeing Theory — Visual Probability</a>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Python Implementation</h5>
+                            <a href="#" class="resource-link">→ SciPy Statistics Documentation</a>
+                            <a href="#" class="resource-link">→ NumPy Linear Algebra Guide</a>
+                            <a href="#" class="resource-link">→ Statsmodels Documentation</a>
+                            <a href="#" class="resource-link">→ Pingouin — Statistical Testing in Python</a>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Mathematics for ML</h5>
+                            <a href="#" class="resource-link">→ Mathematics for Machine Learning (free PDF)</a>
+                            <a href="#" class="resource-link">→ 3Blue1Brown: Essence of Linear Algebra</a>
+                            <a href="#" class="resource-link">→ 3Blue1Brown: Calculus Series</a>
+                            <a href="#" class="resource-link">→ Gilbert Strang — Linear Algebra MIT</a>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Practice</h5>
+                            <a href="#" class="resource-link">→ Kaggle Statistics Datasets</a>
+                            <a href="#" class="resource-link">→ HackerRank Statistics Problems</a>
+                            <a href="#" class="resource-link">→ Scipy Stats Cookbook</a>
+                            <a href="#" class="resource-link">→ AB Testing Guide (Optimizely)</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================== EVALUATION TAB ===================== -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Domain Criteria: Statistics & Mathematics</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        To successfully complete this module, demonstrate understanding at the following competency levels:
+                    </p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>Understanding the role of statistics in Data Science projects</li>
+                                <li>Identify different data types (numerical and categorical)</li>
+                                <li>Difference between mean, median, and mode — when to use each</li>
+                                <li>Basic interpretation of variance and standard deviation</li>
+                                <li>Fundamental notions of probability and the addition/multiplication rules</li>
+                                <li>Read and interpret a histogram and box plot</li>
+                                <li>Understand what a confidence interval communicates</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Analyse distribution shape: skewness and kurtosis</li>
+                                <li>Calculate and interpret Pearson and Spearman correlation</li>
+                                <li>Apply Bayes' theorem to real estimation problems</li>
+                                <li>Choose the correct hypothesis test for different scenarios</li>
+                                <li>Identify and explain Type I and Type II errors</li>
+                                <li>Apply outlier detection (IQR fences, Z-scores)</li>
+                                <li>Understand and explain the Central Limit Theorem</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Design a complete A/B test with power analysis</li>
+                                <li>Correctly interpret p-values without common fallacies</li>
+                                <li>Differentiate between statistical and practical significance (effect size)</li>
+                                <li>Apply PCA and explain eigenvalues/eigenvectors conceptually</li>
+                                <li>Perform linear regression and interpret residuals</li>
+                                <li>Avoid p-hacking with Bonferroni or FDR corrections</li>
+                                <li>Use statistics to support business decisions with uncertainty ranges</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end tabs-container -->
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+            document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = `<strong>Query executed successfully.</strong><br><br>Results (Top 3):<br>───────────────────────────────────────<br>
+Rank 1 | Carlos Alberto | €4,250.00 | Avg: €2,743.50<br>
+Rank 2 | Beatriz Ramos  | €2,100.50 | Avg: €2,743.50<br>
+Rank 3 | Ricardo Jorge  | €1,880.00 | Avg: €2,743.50<br><br>
+<em>Tip: OVER() computed the average across all results, while RANK() ordered by spending descending.</em>`;
+        }
+    </script>
+</body>
+</html>

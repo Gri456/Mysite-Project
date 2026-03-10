@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - AI Implementation & Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #ff2d78;
+            --purple: #ff85c2;
+            --cyan: #e0006e;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(91,124,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(91,124,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1; }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(255,0,191,0.168) 0%, rgba(255,0,128,0.185) 50%, transparent 100%); pointer-events: none; z-index: -1; }
+
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,20,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Code blocks */
+        .code-block { background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.6; color: #a8ff78; }
+
+        /* Shared new styles */
+        .info-box { background: rgba(91,124,255,0.07); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+        .info-box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--purple); }
+        .section-divider { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .concept-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .concept-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 0.35rem; }
+        .concept-title { font-weight: 600; font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.4rem; }
+        .concept-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+        .metrics-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .metrics-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; font-weight: 600; }
+        .metrics-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .metrics-table tr:hover td { background: rgba(255,255,255,0.03); color: var(--text-light); }
+        .steps-flow { display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0; }
+        .step-item { display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; }
+        .step-num { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; font-weight: 700; font-size: 0.8rem; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .step-content { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4; }
+        .step-content strong { color: var(--text-light); }
+        .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .tool-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .tool-name { font-weight: 700; font-size: 0.88rem; color: var(--cyan); margin-bottom: 0.2rem; }
+        .tool-category { font-size: 0.7rem; color: var(--purple); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem; }
+        .tool-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 420px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Quiz */
+        .quiz-question { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05)); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255,255,255,0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .concept-grid, .tool-grid { grid-template-columns: 1fr 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+        }
+        @media (max-width: 480px) {
+            .concept-grid, .tool-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-ai.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: AI Implementation & Tools</h1>
+            <p class="course-description">
+                Learn how to implement AI in real-world applications. Master industry-standard libraries, APIs, deployment strategies, and integration patterns to build production-ready AI systems.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• APIs • TensorFlow • PyTorch • Deployment • RAG</span></div>
+                <div class="meta-item"><span>📌</span><span>AI Fundamentals</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size:0.8rem; margin-top:5px; color:var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event,'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event,'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event,'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event,'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- LEARN -->
+            <div id="aprender" class="tab-panel active">
+
+                <div class="content-card">
+                    <h3>Introduction: How AI Is Implemented in Real Applications</h3>
+                    <p>Understanding AI concepts is one thing. Implementing AI in real-world systems is another world entirely.</p>
+                    <p style="margin-top:0.75rem;">This module focuses on:</p>
+                    <ul class="styled-list">
+                        <li>Industry-standard AI libraries</li>
+                        <li>APIs for quick integration</li>
+                        <li>Practical ML/DL model deployment</li>
+                        <li>Using OpenAI, TensorFlow, and PyTorch</li>
+                        <li>Best practices for building production-ready AI systems</li>
+                    </ul>
+                    <p style="margin-top:1rem;">In modern development, AI is used via:</p>
+                    <ul class="styled-list">
+                        <li>APIs (easy, fast, scalable — e.g., OpenAI)</li>
+                        <li>Custom models (difficult but flexible — TensorFlow/PyTorch)</li>
+                    </ul>
+                    <p style="margin-top:1rem;">Both are essential for developers.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The full AI implementation landscape — when to use what:</p>
+                    <table class="metrics-table">
+                        <thead><tr><th>Approach</th><th>When To Use</th><th>Pros</th><th>Cons</th><th>Examples</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>AI via API</strong></td><td>Most applications — chatbots, content generation, embeddings, image gen</td><td>Zero infra, instant access to frontier models, scalable</td><td>Cost at scale, data privacy concerns, model lock-in</td><td>OpenAI, Anthropic, Google Gemini</td></tr>
+                            <tr><td><strong>Open-Source Models</strong></td><td>Privacy requirements, custom fine-tuning, no internet</td><td>Full control, no per-token cost, private data</td><td>Requires GPU infra, engineering effort</td><td>Llama 3, Mistral, Stable Diffusion</td></tr>
+                            <tr><td><strong>ML Frameworks (Custom)</strong></td><td>Novel architectures, research, proprietary domain data</td><td>Maximum flexibility</td><td>Most complex, requires ML expertise</td><td>TensorFlow, PyTorch</td></tr>
+                            <tr><td><strong>AutoML / No-Code AI</strong></td><td>Non-engineers who need ML on tabular data</td><td>No code required</td><td>Limited to standard tasks</td><td>Google AutoML, H2O.ai, CreateML</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="info-box">
+                        <div class="info-box-title">💡 The Modern AI Stack</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">Most production AI applications today use a combination: an <strong>LLM API</strong> for language tasks + an <strong>embedding model</strong> + a <strong>vector database</strong> for memory/retrieval + <strong>orchestration</strong> (LangChain/LlamaIndex) + a <strong>backend API</strong> (FastAPI/Node) + a <strong>frontend</strong>. Understanding how these layers fit together is the core skill of an AI engineer.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>AI via APIs – The Fastest Way to Integrate Intelligence</h3>
+                    <p>APIs allow applications to use powerful AI models without training anything.</p>
+                    <p style="margin-top:0.75rem;"><strong>Examples:</strong></p>
+                    <ul class="styled-list">
+                        <li>OpenAI API</li>
+                        <li>Google Gemini API</li>
+                        <li>Hugging Face Inference API</li>
+                        <li>Stability AI (image generation)</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>APIs give access to:</strong></p>
+                    <ul class="styled-list">
+                        <li>Text generation</li>
+                        <li>Code generation</li>
+                        <li>Image generation</li>
+                        <li>Speech-to-text</li>
+                        <li>Embeddings</li>
+                        <li>Moderation & safety filters</li>
+                    </ul>
+                    <p style="margin-top:1rem;">APIs make AI accessible to any app (web, mobile, backend).</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The complete API provider landscape — and how to choose:</p>
+                    <div class="tool-grid">
+                        <div class="tool-card">
+                            <div class="tool-category">Text / Reasoning</div>
+                            <div class="tool-name">OpenAI (GPT-4o, o3)</div>
+                            <div class="tool-desc">Industry standard. Function calling, vision, audio, streaming. Pricing: ~$2.50/M input tokens (GPT-4o-mini). Best for: general-purpose apps, coding, reasoning.</div>
+                        </div>
+                        <div class="tool-card">
+                            <div class="tool-category">Text / Long Context</div>
+                            <div class="tool-name">Anthropic (Claude)</div>
+                            <div class="tool-desc">200K context window, strong coding, safety features, computer use. Best for: document analysis, long conversations, code agents.</div>
+                        </div>
+                        <div class="tool-card">
+                            <div class="tool-category">Text / Multimodal</div>
+                            <div class="tool-name">Google Gemini</div>
+                            <div class="tool-desc">Native multimodal (text+image+audio+video). Integrated with Google Search. Best for: Google Workspace integration, multimodal apps.</div>
+                        </div>
+                        <div class="tool-card">
+                            <div class="tool-category">Open Source / Hosted</div>
+                            <div class="tool-name">Hugging Face API</div>
+                            <div class="tool-desc">Access to 300K+ open models (Llama, Mistral, FLUX, Whisper). Pay per inference or host yourself. Best for: specialized models, privacy-conscious apps.</div>
+                        </div>
+                        <div class="tool-card">
+                            <div class="tool-category">Embeddings</div>
+                            <div class="tool-name">OpenAI text-embedding-3</div>
+                            <div class="tool-desc">State-of-the-art embeddings. $0.02/M tokens. 1536 or 3072 dimensions. Best for: semantic search, RAG systems, clustering.</div>
+                        </div>
+                        <div class="tool-card">
+                            <div class="tool-category">Speech</div>
+                            <div class="tool-name">Whisper / ElevenLabs</div>
+                            <div class="tool-desc">Whisper: best-in-class speech-to-text, 99 languages. ElevenLabs: ultra-realistic voice synthesis and voice cloning. Best for: transcription, voice assistants.</div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-box-title">💰 API Cost Management</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">API costs scale with usage. Key strategies: (1) <strong>Use smaller models when possible</strong> — GPT-4o-mini is 15× cheaper than GPT-4o with similar performance on simple tasks. (2) <strong>Cache responses</strong> for repeated queries. (3) <strong>Limit context</strong> — only send the minimum context needed. (4) <strong>Batch requests</strong> with the Batch API (~50% discount). (5) <strong>Stream responses</strong> to improve perceived latency without increasing cost.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>OpenAI API – The Industry Standard for Text & Image AI</h3>
+                    <p>OpenAI provides APIs for:</p>
+                    <ul class="styled-list">
+                        <li>ChatGPT-style conversations</li>
+                        <li>Embeddings</li>
+                        <li>Image generation (DALL·E)</li>
+                        <li>Audio transcription (Whisper)</li>
+                        <li>Function calling / tool usage</li>
+                        <li>Reasoning & problem solving</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>Example: Text Completion (Node.js)</strong></p>
+                    <div class="code-block"><pre>import OpenAI from "openai";
+const client = new OpenAI({ apiKey: process.env.OPENAI_KEY });
+
+const response = await client.chat.completions.create({
+  model: "gpt-4.1",
+  messages: [{ role: "user", content: "Explain neural networks simply." }]
+});
+
+console.log(response.choices[0].message.content);</pre></div>
+
+                    <p><strong>Example: Image Generation</strong></p>
+                    <div class="code-block"><pre>const result = await client.images.generate({
+  model: "gpt-image-1",
+  prompt: "futuristic city with neon lights"
+});</pre></div>
+
+                    <p style="margin-top:1rem;"><strong>OpenAI Use Cases:</strong></p>
+                    <ul class="styled-list">
+                        <li>Chatbots · Automated writing · Code assistants · Customer support · Knowledge bases · E-commerce search optimization</li>
+                    </ul>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Advanced OpenAI API features — beyond basic completions:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Advanced Feature</div>
+                            <div class="concept-title">Function Calling / Tool Use</div>
+                            <div class="concept-desc">Define functions the model can "call" to access external data or execute actions. The model outputs structured JSON with function name and arguments — your code executes the function and returns results. Enables: weather lookup, database queries, API calls, code execution.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Advanced Feature</div>
+                            <div class="concept-title">Structured Outputs</div>
+                            <div class="concept-desc">Force the model to respond in a guaranteed JSON schema. Unlike prompt-based JSON requests (which can hallucinate or deviate), Structured Outputs guarantees valid JSON that matches your schema — critical for production pipelines where downstream code parses the response.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Advanced Feature</div>
+                            <div class="concept-title">Streaming</div>
+                            <div class="concept-desc">Instead of waiting for the full response, stream tokens as they're generated. Provides perceived instant response in UIs. Implement with: <code style="color:#a8ff78;">stream: true</code> and iterate over <code style="color:#a8ff78;">AsyncIterable</code>. Critical for chatbot UX — users abandon responses that take more than 1–2 seconds to start.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Advanced Feature</div>
+                            <div class="concept-title">Vision (Multimodal Input)</div>
+                            <div class="concept-desc">Send images alongside text. The model can describe images, extract text from screenshots, analyze charts, identify objects, and answer questions about visual content. Pass images as base64 or URL. Used for: document parsing, product photo analysis, accessibility tools.</div>
+                        </div>
+                    </div>
+                    <p style="margin-top:0.75rem; font-size:0.9rem;"><strong>Function Calling Example:</strong></p>
+                    <div class="code-block"><pre>const response = await client.chat.completions.create({
+  model: "gpt-4.1",
+  messages: [{ role: "user", content: "What's the weather in Lisbon?" }],
+  tools: [{
+    type: "function",
+    function: {
+      name: "get_weather",
+      description: "Get current weather for a city",
+      parameters: {
+        type: "object",
+        properties: { city: { type: "string" } },
+        required: ["city"]
+      }
+    }
+  }]
+});
+// Model returns: { tool_calls: [{ function: { name: "get_weather", arguments: '{"city":"Lisbon"}' } }] }</pre></div>
+                </div>
+
+                <div class="content-card">
+                    <h3>TensorFlow – Google's Framework for Deep Learning</h3>
+                    <p>TensorFlow is a powerful library used in:</p>
+                    <ul class="styled-list">
+                        <li>Deep learning · Computer vision · NLP · Production ML pipelines</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>Features:</strong> Fast training on GPUs · Integrated deployment tools (TF Serving) · Mobile support (TensorFlow Lite) · High-level API (Keras)</p>
+                    <p style="margin-top:1rem;"><strong>Example: Simple Neural Network (TensorFlow)</strong></p>
+                    <div class="code-block"><pre>import tensorflow as tf
+from tensorflow import keras
+
+model = keras.Sequential([
+    keras.layers.Dense(32, activation="relu"),
+    keras.layers.Dense(1)
+])
+
+model.compile(optimizer="adam", loss="mse")
+model.fit(X_train, y_train, epochs=10)</pre></div>
+                    <p style="margin-top:1rem;">TensorFlow is ideal for large-scale production ML pipelines.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The TensorFlow ecosystem — beyond basic training:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Training</div>
+                            <div class="concept-title">Keras — The High-Level API</div>
+                            <div class="concept-desc">Keras is TensorFlow's official high-level API. Build models with Sequential (layer-by-layer) or Functional (arbitrary graph) API. Includes built-in: callbacks (EarlyStopping, ModelCheckpoint), data pipelines (tf.data), distributed training (MirroredStrategy across multiple GPUs).</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Deployment</div>
+                            <div class="concept-title">TensorFlow Serving</div>
+                            <div class="concept-desc">Docker-based model server for production. Load a SavedModel, expose it as a gRPC or REST endpoint, handle multiple model versions with hot-reload. Zero-downtime model updates. Used by Google internally for billions of predictions/day.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Mobile / Edge</div>
+                            <div class="concept-title">TensorFlow Lite</div>
+                            <div class="concept-desc">Optimized runtime for mobile (Android/iOS) and edge devices (Raspberry Pi, microcontrollers). Convert models with the TFLite Converter. Supports quantization (INT8) for 4× smaller models with minimal accuracy loss. Used in Google Lens, Google Translate (offline), YouTube auto-captions.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Browser</div>
+                            <div class="concept-title">TensorFlow.js</div>
+                            <div class="concept-desc">Run ML models directly in the browser or Node.js. Use WebGL for GPU acceleration. Import pre-trained models from TF Hub or Python. Enables: real-time object detection in webcam, face filters, gesture control — all client-side with no server needed.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>PyTorch – Researchers' Favorite Framework</h3>
+                    <p>PyTorch is known for: Flexibility · Simplicity · Dynamic computation graphs · Being the preferred library for researchers.</p>
+                    <p style="margin-top:1rem;">It powers: GPT models · Stable Diffusion · LLaMA · Most new ML research papers</p>
+                    <p style="margin-top:1rem;"><strong>Example: PyTorch Neural Network</strong></p>
+                    <div class="code-block"><pre>import torch
+import torch.nn as nn
+
+model = nn.Sequential(
+    nn.Linear(10, 32),
+    nn.ReLU(),
+    nn.Linear(32, 1)
+)
+
+criterion = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters())
+
+output = model(X)
+loss = criterion(output, y)
+loss.backward()
+optimizer.step()</pre></div>
+                    <p style="margin-top:1rem;">PyTorch is excellent for experimentation and custom deep learning architectures.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The PyTorch ecosystem — what makes it the default for research and modern LLMs:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Core Feature</div>
+                            <div class="concept-title">Autograd — Dynamic Differentiation</div>
+                            <div class="concept-desc">PyTorch builds a computation graph dynamically as code runs (eager execution). This means you can use standard Python control flow (if/for) in your model — no need to declare a static graph first. Makes debugging far easier: just print tensors, set breakpoints, iterate.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Ecosystem</div>
+                            <div class="concept-title">Hugging Face Transformers</div>
+                            <div class="concept-desc">The standard library for working with pre-trained transformer models (BERT, GPT-2, Llama, Mistral, CLIP, Whisper). 500K+ models available. Load any model in 3 lines of code. Built on PyTorch (and TF). The single most important library in modern AI engineering.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Fine-Tuning</div>
+                            <div class="concept-title">PEFT / LoRA with Hugging Face</div>
+                            <div class="concept-desc">The PEFT library provides LoRA and QLoRA adapters that plug into any Hugging Face model. Fine-tune a 7B LLM on a single consumer GPU. Training takes hours instead of weeks. SFTTrainer (from TRL library) makes RLHF and DPO alignment straightforward.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Deployment</div>
+                            <div class="concept-title">TorchServe & ONNX Export</div>
+                            <div class="concept-desc">TorchServe is PyTorch's production serving framework — REST endpoints, batching, model versioning. Export to ONNX (Open Neural Network Exchange) format for deployment on any runtime (ONNX Runtime, TensorRT, CoreML, OpenVINO) with 2–10× inference speedup.</div>
+                        </div>
+                    </div>
+                    <p style="margin-top:0.75rem; font-size:0.9rem;"><strong>Loading a pre-trained model with Hugging Face:</strong></p>
+                    <div class="code-block"><pre>from transformers import pipeline
+
+# Load sentiment analysis pipeline (downloads model automatically)
+classifier = pipeline("sentiment-analysis")
+result = classifier("BitJourney is an amazing learning platform!")
+# Output: [{'label': 'POSITIVE', 'score': 0.9998}]
+
+# Load a specific model
+from transformers import AutoTokenizer, AutoModelForCausalLM
+tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
+model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")</pre></div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Deployment – Taking AI from Notebook to Production</h3>
+                    <p><strong>Methods:</strong> REST APIs · Cloud functions · Docker containers · TensorFlow Serving · TorchServe · FastAPI apps · Serverless functions</p>
+                    <div class="code-explanation" style="margin-top:1rem;">
+                        <p>The goal is always: <span class="highlight">Low latency, high reliability, easy scaling.</span></p>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The complete deployment pipeline — from model to users:</p>
+                    <div class="steps-flow">
+                        <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Save the model</strong> — Export in the correct format: TensorFlow SavedModel, PyTorch state_dict or TorchScript, ONNX for cross-runtime compatibility, or HuggingFace model card format.</div></div>
+                        <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Build a serving layer</strong> — Wrap the model in a FastAPI or Flask endpoint. Handle: input validation, preprocessing, inference, postprocessing, error handling. Add health check and metrics endpoints.</div></div>
+                        <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Containerize with Docker</strong> — Package model + dependencies into a Docker image. This ensures identical behavior in development, staging, and production. Use multi-stage builds to minimize image size.</div></div>
+                        <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Deploy to cloud</strong> — Options: Kubernetes (scale to thousands of replicas), AWS SageMaker / Google Vertex AI / Azure ML (managed ML platforms), serverless (AWS Lambda, Cloud Functions) for bursty workloads.</div></div>
+                        <div class="step-item"><div class="step-num">5</div><div class="step-content"><strong>Monitor in production</strong> — Track: request latency (P50/P95/P99), error rates, model accuracy drift, input distribution shift. Tools: Prometheus + Grafana, Datadog, Weights & Biases, Evidently AI.</div></div>
+                    </div>
+                    <p style="margin-top:0.75rem; font-size:0.9rem;"><strong>Minimal FastAPI deployment example:</strong></p>
+                    <div class="code-block"><pre>from fastapi import FastAPI
+import torch
+
+app = FastAPI()
+model = torch.load("model.pt")
+model.eval()
+
+@app.post("/predict")
+async def predict(data: dict):
+    x = torch.tensor(data["features"])
+    with torch.no_grad():
+        output = model(x)
+    return {"prediction": output.tolist()}
+
+# Run: uvicorn main:app --host 0.0.0.0 --port 8000</pre></div>
+                    <div class="info-box">
+                        <div class="info-box-title">⚡ Inference Optimization — Making Models Faster</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            <strong style="color:var(--text-light);">Quantization</strong> — Reduce weight precision from FP32 to INT8 or INT4. Up to 4× smaller model, 2–3× faster inference. Slight accuracy loss.<br>
+                            <strong style="color:var(--text-light);">Batching</strong> — Process multiple requests together. Dramatically improves GPU utilization. Tradeoff: higher latency per request.<br>
+                            <strong style="color:var(--text-light);">ONNX Runtime / TensorRT</strong> — Compile the model to an optimized binary for specific hardware. 2–10× speedup with no accuracy loss.<br>
+                            <strong style="color:var(--text-light);">Caching</strong> — Cache KV attention states (for LLMs) or full responses. Reduces cost for repeated/similar queries.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Connecting AI to Web Applications</h3>
+                    <p>You can integrate AI into: Web backends (Node.js, Python, Go) · Frontend apps (JavaScript + API) · Mobile apps (React Native, Swift) · Databases via embeddings · Search systems</p>
+                    <p style="margin-top:1rem;"><strong>Example Integration Flow:</strong></p>
+                    <div class="code-explanation">
+                        <p>1. User sends input<br>2. Backend forwards to AI API<br>3. AI returns result<br>4. Server processes output<br>5. Display result in UI</p>
+                    </div>
+                    <p style="margin-top:1rem;">This is the architecture used by chat widgets, image generators, and recommendation engines.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Full-stack AI integration patterns used in production:</p>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Pattern 1: Backend Proxy</span> — Never expose API keys to the client. The frontend sends requests to your own backend, which calls the AI API with your key and returns the result. Enables: rate limiting per user, logging, cost control, prompt injection protection, response caching.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Pattern 2: Streaming to Frontend</span> — For chatbot UIs, stream AI responses token-by-token using Server-Sent Events (SSE) or WebSockets. Backend receives streaming response from AI API and pipes it directly to the client. Framework support: Vercel AI SDK (Next.js), LangChain streaming, OpenAI stream helpers.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Pattern 3: Edge Functions</span> — Deploy AI API calls to edge locations (Cloudflare Workers, Vercel Edge, Deno Deploy). Reduces latency by running your proxy logic geographically near users. Critical for global apps where users expect sub-200ms response starts.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Pattern 4: Background AI Jobs</span> — For slow AI tasks (document analysis, image generation, fine-tuning), submit jobs to a queue (Redis + BullMQ, SQS, Celery). Workers process AI calls asynchronously. Frontend polls for completion or receives a webhook. Prevents HTTP timeout issues with long-running AI operations.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Vector Databases – Memory for AI Systems</h3>
+                    <p>To give AI long-term memory or search abilities, developers use vector databases:</p>
+                    <ul class="styled-list">
+                        <li>Pinecone · Weaviate · Chroma · Milvus</li>
+                    </ul>
+                    <p style="margin-top:1rem;">These store embeddings generated by AI models. Use cases: Semantic search · Chatbots with context · Knowledge retrieval</p>
+                    <p style="margin-top:1rem;">This is crucial for building <span class="highlight">RAG (Retrieval-Augmented Generation)</span> systems.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">How RAG works — and how to build one from scratch:</p>
+                    <div class="steps-flow">
+                        <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Ingest documents</strong> — Load PDFs, web pages, database records. Split into chunks (~500 tokens each with 50-token overlap to preserve context across chunk boundaries).</div></div>
+                        <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Generate embeddings</strong> — Convert each chunk to a dense vector using an embedding model (OpenAI text-embedding-3-small, or open-source alternatives like BGE-M3). Store vectors + metadata in vector DB.</div></div>
+                        <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Query time: embed the question</strong> — When a user asks a question, convert it to a vector using the same embedding model.</div></div>
+                        <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Similarity search</strong> — Find the top-K most semantically similar chunks using cosine similarity or dot product. Typical K=3–10 chunks.</div></div>
+                        <div class="step-item"><div class="step-num">5</div><div class="step-content"><strong>Augment the prompt</strong> — Insert the retrieved chunks into the LLM prompt as context: "Answer based only on the following information: [chunks]. Question: [user question]".</div></div>
+                        <div class="step-item"><div class="step-num">6</div><div class="step-content"><strong>Generate grounded answer</strong> — The LLM answers using real retrieved content, dramatically reducing hallucinations. Optionally cite the source chunks in the response.</div></div>
+                    </div>
+                    <p style="margin-top:0.75rem; font-size:0.9rem;"><strong>RAG with LangChain (Python):</strong></p>
+                    <div class="code-block"><pre>from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_community.vectorstores import Chroma
+from langchain.chains import RetrievalQA
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+# 1. Load and chunk documents
+loader = PyPDFLoader("company_docs.pdf")
+docs = loader.load()
+splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+chunks = splitter.split_documents(docs)
+
+# 2. Embed and store
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+vectorstore = Chroma.from_documents(chunks, embeddings)
+
+# 3. Create RAG chain
+llm = ChatOpenAI(model="gpt-4o-mini")
+qa_chain = RetrievalQA.from_chain_type(llm, retriever=vectorstore.as_retriever(k=4))
+
+# 4. Query
+answer = qa_chain.invoke("What is the refund policy?")
+print(answer["result"])</pre></div>
+                    <div class="info-box">
+                        <div class="info-box-title">📊 Comparing Vector Databases</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            <strong style="color:var(--text-light);">Chroma</strong> — Open-source, runs in-memory or persistent. Perfect for local dev and small apps. Zero infrastructure. Use: prototypes, small RAG apps.<br>
+                            <strong style="color:var(--text-light);">Pinecone</strong> — Fully managed, serverless. Best performance at scale. Handles billions of vectors. Use: production apps, when you don't want to manage infra.<br>
+                            <strong style="color:var(--text-light);">Weaviate</strong> — Open-source with cloud option. Built-in hybrid search (vector + keyword BM25). GraphQL API. Use: production with hybrid search requirements.<br>
+                            <strong style="color:var(--text-light);">pgvector</strong> — PostgreSQL extension. Store vectors alongside relational data in the same database. Use: existing Postgres apps, when you want to avoid a separate vector DB.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Real-World Use Cases</h3>
+                    <div class="code-explanation"><p><span class="highlight">✔ Chatbots & Assistants</span><br>Customer support, education, automation.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ Vision Systems</span><br>Object detection, facial recognition.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ Content Creation</span><br>Image generation, product photos, branding.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ Predictive Analytics</span><br>Finance, marketing, healthcare.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ AI Agents</span><br>Automated workflows using LLM reasoning.</p></div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">AI Agent architecture — the next frontier beyond chatbots:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Concept</div>
+                            <div class="concept-title">What Is an AI Agent?</div>
+                            <div class="concept-desc">An agent uses an LLM as a reasoning engine to autonomously plan and execute multi-step tasks. It can call tools (search, code execution, APIs, file access), observe results, update its plan, and iterate — without human intervention at each step.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Pattern</div>
+                            <div class="concept-title">ReAct Loop</div>
+                            <div class="concept-desc">The dominant agent pattern: Reason (think about the next action) → Act (call a tool) → Observe (see the result) → repeat until the task is complete. The LLM generates structured text describing its reasoning and tool calls, which the framework parses and executes.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Framework</div>
+                            <div class="concept-title">LangChain / LlamaIndex</div>
+                            <div class="concept-desc">LangChain provides chains, agents, tools, and memory abstractions. LlamaIndex specializes in data ingestion and RAG pipelines. Both support: multi-step agents, tool use, custom tools, conversation memory, structured output parsing, and integration with 50+ LLM providers.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Framework</div>
+                            <div class="concept-title">OpenAI Assistants API</div>
+                            <div class="concept-desc">Managed agent infrastructure from OpenAI. Handles: conversation threads (persistent memory), file search (built-in RAG), code interpreter (executes Python), function calling. No need to manage state yourself. Use for: customer service bots, data analysis assistants, document Q&A.</div>
+                        </div>
+                    </div>
+                    <p style="margin-top:0.75rem; font-size:0.9rem;"><strong>MLOps — Managing AI in Production:</strong></p>
+                    <table class="metrics-table">
+                        <thead><tr><th>MLOps Area</th><th>What It Covers</th><th>Tools</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Experiment Tracking</strong></td><td>Log hyperparameters, metrics, artifacts for every training run. Compare runs visually.</td><td>Weights & Biases, MLflow, Neptune</td></tr>
+                            <tr><td><strong>Model Registry</strong></td><td>Version and tag trained models. Track which version is in production. Enable rollback.</td><td>MLflow, HuggingFace Hub, Sagemaker Registry</td></tr>
+                            <tr><td><strong>CI/CD for ML</strong></td><td>Automatically retrain when new data arrives. Run evaluation tests before deploying. Gate on performance thresholds.</td><td>GitHub Actions, DVC, Metaflow</td></tr>
+                            <tr><td><strong>Data Pipelines</strong></td><td>Automate data ingestion, cleaning, feature engineering, train/test splits on a schedule.</td><td>Apache Airflow, Prefect, dbt</td></tr>
+                            <tr><td><strong>Model Monitoring</strong></td><td>Detect data drift (input distribution changed), concept drift (relationship changed), performance degradation.</td><td>Evidently AI, Arize, WhyLabs</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                    <h3>Section Conclusion</h3>
+                    <p>You now understand how AI is implemented using:</p>
+                    <ul class="styled-list">
+                        <li>AI APIs — provider landscape, cost management, advanced features (function calling, streaming, structured outputs)</li>
+                        <li>TensorFlow ecosystem — Keras, TF Serving, TFLite, TensorFlow.js</li>
+                        <li>PyTorch ecosystem — autograd, Hugging Face Transformers, PEFT/LoRA, TorchServe</li>
+                        <li>Deployment pipeline — save → serve → containerize → deploy → monitor</li>
+                        <li>Full-stack integration patterns — proxy, streaming, edge functions, background jobs</li>
+                        <li>Vector databases and RAG — end-to-end pipeline with LangChain</li>
+                        <li>AI Agents — ReAct pattern, LangChain, OpenAI Assistants API</li>
+                        <li>MLOps — experiment tracking, model registry, CI/CD, monitoring</li>
+                    </ul>
+                    <p style="margin-top:1rem;">This prepares you to build, deploy, and maintain real AI-powered applications at production scale.</p>
+                </div>
+
+            </div>
+
+            <!-- LAB -->
+            <div id="laboratorio" class="tab-panel">
+                <h3 style="margin-bottom:1rem;">API Integration Console</h3>
+                <p style="margin-bottom:1rem; font-size:0.9rem; color:var(--text-secondary);">Simulate an OpenAI API call. Edit the request payload below and run the simulation to see the expected response structure.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">REQUEST EDITOR (Node.js)</div>
+                        <textarea class="lab-textarea" id="lab-input">// Simulated OpenAI API call
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_KEY
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4.1",
+  messages: [
+    {
+      role: "system",
+      content: "You are a helpful AI assistant."
+    },
+    {
+      role: "user",
+      content: "Explain what a neural network is."
+    }
+  ],
+  max_tokens: 200
+});
+
+console.log(response.choices[0].message.content);</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">SIMULATED RESPONSE</div>
+                        <div class="lab-output" id="lab-output">
+                            Click "Run Simulation" to see the expected API response structure...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:1rem;" onclick="runLab()">▶ Run Simulation</button>
+            </div>
+
+            <!-- QUIZ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Quiz: AI Implementation & Tools</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:2rem;">Test your knowledge on AI APIs, frameworks, deployment, and integration patterns. Answer all 15 questions and get instant feedback.</p>
+
+                    <form id="quiz-form">
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">1. What is the main benefit of using an AI API?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Writing models from scratch</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Accessing powerful AI without managing infrastructure</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Replacing databases</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Removing internet requirements</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">2. Name a common use of the OpenAI API.</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) File compression</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Text generation and chatbots</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Hardware control</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Operating system updates</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">3. What framework is best for large-scale production ML?</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) NumPy</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) TensorFlow</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Excel</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) jQuery</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">4. Which library is known for research flexibility?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) PyTorch</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Bootstrap</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) Express</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) MySQL</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">5. What is a neural network used for?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) File storage</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Learning patterns from data</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Network routing</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Database indexing</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">6. What is a token?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) A hardware chip</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B"> B) A unit of text processed by a model</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) A database record</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) A network packet</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">7. What is an embedding used for?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Encrypting messages</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Compressing files</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Representing meaning as numerical vectors</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Increasing RAM</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">8. What is RAG?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) A graphics format</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) Retrieval-Augmented Generation combining search with AI</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) A training algorithm</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) A server protocol</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">9. What tool serves TensorFlow models in production?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) TensorServe</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) TensorFlow Serving</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) TF Deploy</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) TorchServe</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">10. What is TorchServe?</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) A web framework</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) A database</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) A tool for serving PyTorch models</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) A training dataset</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">11. Why use Docker for deployment?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) To design interfaces</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) To package apps with dependencies consistently</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) To write code faster</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) To replace APIs</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">12. What is the advantage of serverless AI functions?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Requires more hardware</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Automatic scaling with minimal infrastructure management</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Slower execution</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) No internet needed</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">13. Name one vector database.</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) MongoDB</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Pinecone</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Excel</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Redis CLI</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">14. What is fine-tuning?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Resetting a model</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Adapting a pre-trained model to a specific task</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Compressing weights</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Removing layers</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">15. What is latency and why does it matter?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Storage size</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Training accuracy</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Delay between request and response affecting user experience</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Network encryption</label>
+                        </div>
+
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display:none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div id="recursos" class="tab-panel">
+                <h3 style="margin-bottom:1.5rem;">Support Materials</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ OpenAI API Documentation</a>
+                    <a href="#" class="resource-link">→ TensorFlow Official Guide</a>
+                    <a href="#" class="resource-link">→ PyTorch Tutorials – Getting Started</a>
+                    <a href="#" class="resource-link">→ Hugging Face – Model Hub & Inference API</a>
+                    <a href="#" class="resource-link">→ FastAPI – Building AI REST APIs</a>
+                    <a href="#" class="resource-link">→ Docker – Containerizing ML Applications</a>
+                    <a href="#" class="resource-link">→ TensorFlow Serving – Production Deployment</a>
+                    <a href="#" class="resource-link">→ Pinecone – Vector Database Documentation</a>
+                    <a href="#" class="resource-link">→ LangChain – RAG & AI Agent Frameworks</a>
+                    <a href="#" class="resource-link">→ OpenAI Cookbook – Practical Examples & Recipes</a>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: AI Implementation & Tools</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:2rem;">To successfully complete this module, you should demonstrate understanding across the following competency levels:</p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>What an AI API is and how to call one</li>
+                                <li>Difference between APIs and custom models</li>
+                                <li>What TensorFlow and PyTorch are used for</li>
+                                <li>What tokens and embeddings are</li>
+                                <li>Basic neural network structure</li>
+                                <li>What RAG (Retrieval-Augmented Generation) means</li>
+                                <li>What a vector database is</li>
+                                <li>Basic AI integration flow (user → backend → API → UI)</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Writing API calls using the OpenAI SDK</li>
+                                <li>Building a simple neural network in TensorFlow or PyTorch</li>
+                                <li>Understanding model training loop (forward, loss, backward)</li>
+                                <li>Deploying a model via REST API (FastAPI)</li>
+                                <li>Using Docker for containerized deployment</li>
+                                <li>Connecting AI output to a web or mobile frontend</li>
+                                <li>Using vector databases for semantic search</li>
+                                <li>What fine-tuning is and when to use it</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Building a full RAG pipeline from scratch</li>
+                                <li>Fine-tuning a model on custom data</li>
+                                <li>Serving models at scale with TF Serving or TorchServe</li>
+                                <li>Implementing serverless AI functions on cloud providers</li>
+                                <li>Optimizing latency in AI API integrations</li>
+                                <li>Building AI agents with tool use / function calling</li>
+                                <li>MLOps pipelines (CI/CD for ML models)</li>
+                                <li>Monitoring and versioning deployed models</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+            document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runLab() {
+            const input = document.getElementById('lab-input').value;
+            const output = document.getElementById('lab-output');
+            const hasModel = input.includes('gpt-4') || input.includes('gpt-3') || input.includes('model');
+            const hasMessages = input.includes('messages') || input.includes('content');
+            const hasImage = input.includes('images.generate') || input.includes('dall');
+
+            if (hasImage) {
+                output.innerHTML = `
+                    <strong style="color:#28e0ff;">✔ Image Generation Request</strong><br><br>
+                    <strong style="color:#28e0ff;">Status:</strong> 200 OK<br>
+                    <strong style="color:#28e0ff;">Model:</strong> gpt-image-1<br><br>
+                    <span style="color:#a8ff78;">{</span><br>
+                    &nbsp;&nbsp;<span style="color:#f59e0b;">"created"</span>: 1714000000,<br>
+                    &nbsp;&nbsp;<span style="color:#f59e0b;">"data"</span>: [<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;{ <span style="color:#f59e0b;">"url"</span>: <span style="color:#10b981;">"https://oaidalleapi.../img-abc123.png"</span> }<br>
+                    &nbsp;&nbsp;]<br>
+                    <span style="color:#a8ff78;">}</span><br><br>
+                    <em style="color:#b6c0de;">Tip: The returned URL is temporary. Store the image if needed.</em>
+                `;
+            } else if (hasModel && hasMessages) {
+                output.innerHTML = `
+                    <strong style="color:#28e0ff;">✔ Chat Completion Response</strong><br><br>
+                    <strong style="color:#28e0ff;">Status:</strong> 200 OK<br>
+                    <strong style="color:#28e0ff;">Model:</strong> gpt-4.1<br>
+                    <strong style="color:#28e0ff;">Tokens used:</strong> ~180<br><br>
+                    <span style="color:#a8ff78;">{</span><br>
+                    &nbsp;&nbsp;<span style="color:#f59e0b;">"id"</span>: <span style="color:#10b981;">"chatcmpl-abc123"</span>,<br>
+                    &nbsp;&nbsp;<span style="color:#f59e0b;">"choices"</span>: [{<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">"message"</span>: {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">"role"</span>: <span style="color:#10b981;">"assistant"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">"content"</span>: <span style="color:#10b981;">"A neural network is a system of layers of interconnected nodes that learn patterns from data, inspired by the human brain..."</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;},<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">"finish_reason"</span>: <span style="color:#10b981;">"stop"</span><br>
+                    &nbsp;&nbsp;}],<br>
+                    &nbsp;&nbsp;<span style="color:#f59e0b;">"usage"</span>: { <span style="color:#f59e0b;">"total_tokens"</span>: 180 }<br>
+                    <span style="color:#a8ff78;">}</span><br><br>
+                    <em style="color:#b6c0de;">Tip: Access the response with response.choices[0].message.content</em>
+                `;
+            } else {
+                output.innerHTML = `
+                    <strong style="color:#f59e0b;">⚠ Incomplete Request</strong><br><br>
+                    Make sure your code includes a <strong style="color:#28e0ff;">model</strong> and a <strong style="color:#28e0ff;">messages</strong> array.<br><br>
+                    <em style="color:#b6c0de;">Tip: Use the default template as a starting point and modify the user message.</em>
+                `;
+            }
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questionsData = {
+                    q1:  { correct: 'B', exp: 'The main benefit of an AI API is accessing powerful AI without managing the underlying infrastructure.' },
+                    q2:  { correct: 'B', exp: 'The OpenAI API is commonly used for text generation, chatbots, and automated writing.' },
+                    q3:  { correct: 'B', exp: 'TensorFlow is designed for large-scale production ML pipelines with integrated deployment tools.' },
+                    q4:  { correct: 'A', exp: 'PyTorch is known for its flexibility, dynamic computation graphs, and popularity in research.' },
+                    q5:  { correct: 'B', exp: 'A neural network learns patterns from data through layers of interconnected nodes.' },
+                    q6:  { correct: 'B', exp: 'A token is a unit of text (roughly a word or part of a word) processed by a language model.' },
+                    q7:  { correct: 'C', exp: 'Embeddings represent meaning as numerical vectors, enabling semantic search and similarity comparisons.' },
+                    q8:  { correct: 'B', exp: 'RAG (Retrieval-Augmented Generation) combines vector search with AI generation to answer questions from a knowledge base.' },
+                    q9:  { correct: 'B', exp: 'TensorFlow Serving is the official tool for deploying TensorFlow models in production.' },
+                    q10: { correct: 'C', exp: 'TorchServe is the official tool for serving PyTorch models as REST APIs in production.' },
+                    q11: { correct: 'B', exp: 'Docker packages apps with all their dependencies, ensuring consistent behavior across environments.' },
+                    q12: { correct: 'B', exp: 'Serverless functions scale automatically and require minimal infrastructure management.' },
+                    q13: { correct: 'B', exp: 'Pinecone is a popular vector database for storing and querying AI embeddings.' },
+                    q14: { correct: 'B', exp: 'Fine-tuning adapts a pre-trained model to a specific task using a smaller, domain-specific dataset.' },
+                    q15: { correct: 'C', exp: 'Latency is the delay between a request and its response. Low latency is critical for good user experience.' }
+                };
+                this.init();
+            }
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0, feedbackHTML = '';
+                Object.keys(this.questionsData).forEach((key, index) => {
+                    const userAnswer = formData.get(key);
+                    const isCorrect = userAnswer === this.questionsData[key].correct;
+                    if (isCorrect) score++;
+                    feedbackHTML += `<div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}"><span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span><div><strong>Question ${index+1}:</strong> ${this.questionsData[key].exp}${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}</div></div>`;
+                });
+                this.displayResults(score, feedbackHTML);
+            }
+            displayResults(score, feedbackHTML) {
+                const total = Object.keys(this.questionsData).length;
+                const percent = Math.round((score / total) * 100);
+                const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+                document.getElementById('quiz-score').innerHTML = `<div class="${scoreClass}">${score}/${total} (${percent}%)</div><p style="color:var(--text-secondary)">${percent >= 70 ? 'Excellent! You are ready to build real AI applications.' : 'Review the concepts on APIs, frameworks, and deployment and try again.'}</p>`;
+                document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                const resultsDiv = document.getElementById('quiz-results');
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+            clearQuiz() {
+                document.getElementById('quiz-form').reset();
+                document.getElementById('quiz-results').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+</body>
+</html>

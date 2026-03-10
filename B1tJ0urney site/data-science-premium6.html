@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Evaluation & Metrics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+    --bg-dark: #0b0d14;
+
+    /* Nova paleta verde */
+    --green-primary: #22c55e;     /* verde principal */
+    --green-secondary: #4ade80;   /* verde claro */
+    --green-accent: #16a34a;      /* verde forte */
+    --green-cyan: #2dd4bf;        /* verde-água (mantém vibe tech) */
+    --cyan: #28e0ff;              /* ciano para detalhes e destaques */
+
+    --text-light: #e8ecf8;
+    --text-secondary: #b6c0de;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px; font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary {
+    background: linear-gradient(135deg, var(--green-primary), var(--green-cyan));
+    color: white;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente: from-lime-500 via-green-400 to-lime-400 */
+    background: linear-gradient(to right, #84cc16, #4ade80, #a3e635);
+
+    /* Faz o gradiente aplicar apenas ao texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback para browsers antigos */
+}
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill {
+    height: 100%;background: linear-gradient(90deg, var(--green-primary), var(--green-cyan));width: 0%; transition: width 0.3s ease;
+}
+
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active {
+    background: rgba(15, 155, 67, 0.3);
+} 
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--green-primary), var(--green-cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--green-primary);; display: flex; align-items: center; gap: 10px; }
+        .content-card h4 { margin: 1.2rem 0 0.6rem; color: var(--green-cyan);; font-size: 1rem; }
+        .code-explanation { border-left: 3px solid var(--green-primary);; padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--green-cyan);; font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Code block */
+        .code-block {
+            background: #0a0c12;
+            border: 1px solid rgba(91,124,255,0.3);
+            border-radius: 8px; padding: 1.2rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; }
+        .code-block code { font-family: 'Courier New', Consolas, monospace; font-size: 0.875rem; line-height: 1.7; color: #c9d1d9; }
+        .code-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: block; }
+
+        /* Tip / Warning boxes */
+        .tip-box { background: rgba(34, 197, 94, 0.08);
+    border-left: 4px solid var(--green-primary); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .tip-box strong { color: var(--green-primary); }
+        .warning-box { background: rgba(255, 165, 0, 0.07); border-left: 4px solid #ffa500; border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .warning-box strong { color: #ffa500; }
+
+        /* Two-column grid */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+        .mini-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mini-card h5 { color: var(--cyan); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .mini-card p, .mini-card li { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+
+        /* Chapter header */
+        .chapter-header {
+            background: linear-gradient(
+                135deg,
+                rgba(34, 197, 94, 0.15),
+                rgba(45, 212, 191, 0.08)
+            );
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; margin-top: 2.5rem;
+        }
+        .chapter-header:first-child { margin-top: 0; }
+        .chapter-header h2 { font-size: 1.4rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.4rem; }
+        .chapter-header p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-secondary); font-size: 0.88rem; }
+        .data-table thead tr { border-bottom: 2px solid var(--border-color); text-align: left; }
+        .data-table th { padding: 10px; font-weight: 600; color: var(--text-light); }
+        .data-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .data-table td { padding: 10px; }
+
+        /* Inline formula highlight */
+        .formula { font-family: monospace; background: rgba(40,224,255,0.1); padding: 2px 8px; border-radius: 4px; color: var(--cyan); font-size: 0.9rem; }
+
+        /* Quiz */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(40, 224, 255, 0.05)); border: 1px solid rgba(34, 197, 94, 0.08); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #0a0c12; color: #c9d1d9; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-data-science.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objective: Evaluation & MMetrics</h1>
+            <p class="course-description">
+                Validate before trusting. Learn to measure, interpret, and compare the performance of Machine Learning models, ensuring predictions are reliable, robust, and aligned with business objectives.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item">
+                    <span>⏱</span>
+                    <span>4–6h</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>• RMSE • Accuracy • Precision & Recall</span>
+                </div>
+                <div class="meta-item">
+                    <span>📌</span>
+                    <span>Model Evaluation, Validation and Interpretation</span>
+                </div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progresso: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Laboratory</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Evaluation</button>
+            </nav>
+
+            <div id="aprender" class="tab-panel active">
+
+    <!-- 6.1 -->
+    <div class="content-card">
+        <h3>📊 6.1 Evaluation & Metrics: The Quality Seal</h3>
+        <p>Building a model is only half the job. The other half — the one that separates amateurs from professionals — is knowing <strong>how to measure whether that model actually works</strong>. Without rigorous evaluation, you are flying blind: you have no idea if the model will perform in the real world or completely collapse the moment it sees new data.</p>
+        <p style="margin-top:0.8rem;">Evaluation answers the question every stakeholder will eventually ask: <em>"Can we trust this model with our business decisions?"</em></p>
+
+        <div class="code-explanation" style="margin-top:1rem;">
+            <strong>🎯 What you'll master in this module:</strong>
+            <br><br>• <span class="highlight">Scientific Validation:</span> How to correctly split data so evaluation is fair and honest.
+            <br>• <span class="highlight">Regression Metrics:</span> MAE, MSE, RMSE, R² — measuring errors in numerical predictions.
+            <br>• <span class="highlight">Classification Metrics:</span> Accuracy, Precision, Recall, F1-Score, AUC-ROC — going far beyond simple correctness.
+            <br>• <span class="highlight">Confusion Matrix:</span> The definitive diagnostic tool to understand exactly where your model fails.
+            <br>• <span class="highlight">Cross-Validation:</span> Getting robust, trustworthy performance estimates.
+            <br>• <span class="highlight">Imbalanced Datasets:</span> Why accuracy lies, and what to do about it.
+            <br>• <span class="highlight">Business Alignment:</span> Translating technical metrics into real decisions and financial impact.
+        </div>
+
+        <div style="background:rgba(91,124,255,0.08); border-radius:8px; padding:1rem; margin-top:1rem; border:1px solid rgba(91,124,255,0.2);">
+            <strong style="color:var(--cyan);">💡 Real-world analogy:</strong>
+            <p style="margin-top:0.5rem; color:var(--text-secondary);">Imagine hiring a weather forecaster. You wouldn't judge their performance by asking them to predict yesterday's weather — they already know it! You test them on <em>tomorrow's</em> weather. The same principle applies to every ML model: evaluation must always happen on data the model has never seen before.</p>
+        </div>
+    </div>
+
+    <!-- 6.2 -->
+    <div class="content-card">
+        <h3>🧪 6.2 Data Splitting — The Foundation of Honest Evaluation</h3>
+        <p>The cardinal rule of Machine Learning: <strong>never evaluate a model on the data it was trained with.</strong> A model "tested" on its own training data will always look perfect — it has already memorised the answers. This is called <em>Data Leakage</em>, and it produces dangerously optimistic results that evaporate in production.</p>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">The Three-Way Split</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
+            <div style="background:rgba(40,224,255,0.05); border:1px solid rgba(40,224,255,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan);">🏋️ Training Set (~70%)</strong>
+                <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.5rem;">The data the model learns from. All parameter fitting happens here. The model sees these examples over and over during training.</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.05); border:1px solid rgba(122,75,255,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--purple);">🔬 Validation Set (~15%)</strong>
+                <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.5rem;">Used during development to tune hyperparameters and compare model versions. Guides decisions <em>without</em> contaminating the final test.</p>
+            </div>
+            <div style="background:rgba(255,107,107,0.05); border:1px solid rgba(255,107,107,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:#ff6b6b;">🔒 Test Set (~15%)</strong>
+                <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.5rem;">Locked away until the very end. Used only once to simulate real-world performance. Touch it too many times and it becomes another validation set — defeating its purpose.</p>
+            </div>
+        </div>
+
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem; margin-top:1rem;">from sklearn.model_selection import train_test_split
+
+# Step 1: Split off 20% for testing (kept locked until the end)
+X_temp, X_test, y_temp, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Step 2: From the remaining 80%, split 20% for validation
+X_train, X_val, y_train, y_val = train_test_split(
+    X_temp, y_temp, test_size=0.2, random_state=42, stratify=y_temp
+)
+
+print(f"Train:      {X_train.shape[0]} samples ({X_train.shape[0]/len(X)*100:.0f}%)")
+print(f"Validation: {X_val.shape[0]} samples ({X_val.shape[0]/len(X)*100:.0f}%)")
+print(f"Test:       {X_test.shape[0]} samples ({X_test.shape[0]/len(X)*100:.0f}%)")</pre>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">⚠️ What is Data Leakage?</h4>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">Data leakage occurs when information from <em>outside</em> the training set accidentally influences the model. It can be subtle:</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.75rem;">
+            <div style="background:rgba(255,107,107,0.06); border:1px solid rgba(255,107,107,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:#ff6b6b;">❌ Target Leakage</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">Using a feature that is a <em>consequence</em> of the target, not a cause. Example: using "medication prescribed" to predict "diagnosis" — the medication was prescribed <em>because</em> of the diagnosis.</p>
+            </div>
+            <div style="background:rgba(255,107,107,0.06); border:1px solid rgba(255,107,107,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:#ff6b6b;">❌ Train-Test Contamination</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">Fitting a scaler or imputer on the full dataset (including test data) before splitting. The model indirectly "sees" test statistics during training. Always fit transformers on train data only.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6.3 -->
+    <div class="content-card">
+        <h3>🔄 6.3 Cross-Validation — Robust Evaluation</h3>
+        <p>A single train/test split can be misleading — you might get lucky (or unlucky) with how the data was divided. <strong>K-Fold Cross-Validation</strong> solves this by training and evaluating the model K times, each time using a different fold as the validation set.</p>
+
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem; margin-top:0.75rem; text-align:center;">
+            <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:0.75rem;">With K=5, the data is split into 5 equal parts. The model trains 5 times:</p>
+            <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:4px; font-size:0.75rem;">
+                <div style="background:rgba(16,185,129,0.2); border:1px solid #10b981; border-radius:4px; padding:0.4rem; color:#10b981;">VAL</div>
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+                <div style="background:rgba(16,185,129,0.2); border:1px solid #10b981; border-radius:4px; padding:0.4rem; color:#10b981;">VAL</div>
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+                <div style="background:rgba(16,185,129,0.2); border:1px solid #10b981; border-radius:4px; padding:0.4rem; color:#10b981;">VAL</div>
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+                <div style="background:rgba(91,124,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:0.4rem; color:var(--blue);">TRAIN</div>
+            </div>
+            <p style="color:var(--text-secondary); font-size:0.78rem; margin-top:0.5rem;">Final score = average of all 5 validation scores → much more reliable than one split</p>
+        </div>
+
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem; margin-top:1rem;">from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# StratifiedKFold preserves class proportions in each fold
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+scores = cross_val_score(model, X_train, y_train, cv=cv, scoring='f1')
+
+print(f"F1 per fold: {scores.round(3)}")
+print(f"Mean F1:     {scores.mean():.3f}")
+print(f"Std Dev:     {scores.std():.3f}")   # Low std = stable, consistent model
+# Rule of thumb: std > 0.05 means the model is sensitive to data split — investigate!</pre>
+
+        <div style="background:rgba(91,124,255,0.08); border-radius:8px; padding:0.85rem; margin-top:0.75rem;">
+            <strong style="color:var(--blue);">💡 When to use which CV strategy?</strong>
+            <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.4rem;"><strong style="color:var(--text-light);">K-Fold</strong> — standard choice for regression. <strong style="color:var(--text-light);">Stratified K-Fold</strong> — always use for classification (keeps class balance). <strong style="color:var(--text-light);">TimeSeriesSplit</strong> — mandatory for time-series data, where future data must never appear in training folds.</p>
+        </div>
+    </div>
+
+    <!-- 6.4 -->
+    <div class="content-card">
+        <h3>📈 6.4 Regression Metrics — Measuring Numerical Error</h3>
+        <p>When the model's output is a continuous number (house price, temperature, sales volume), we measure the <em>distance</em> between predictions and actual values. Each metric captures a different aspect of that distance.</p>
+
+        <div style="display:flex; flex-direction:column; gap:1rem; margin-top:1rem;">
+
+            <div style="background:rgba(40,224,255,0.05); border-left:4px solid var(--cyan); border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:var(--cyan);">MAE — Mean Absolute Error</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">The average of all absolute differences between predictions and actual values. Easy to interpret: if MAE = 5,000€, the model is off by 5,000€ on average. Treats all errors equally — a 1€ error and a 10,000€ error are both just their absolute value.</p>
+                <code style="color:#ffb86c; font-size:0.82rem; display:block; margin-top:0.4rem;">MAE = (1/n) × Σ |y_real − y_pred|</code>
+                <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">from sklearn.metrics import mean_absolute_error
+mae = mean_absolute_error(y_test, y_pred)
+print(f"MAE: {mae:,.2f}€")   # Interpret in the original unit of your target</pre>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem;"><strong>✅ Best when:</strong> all errors have similar consequences and you need a metric executives can understand intuitively.</p>
+            </div>
+
+            <div style="background:rgba(122,75,255,0.05); border-left:4px solid var(--purple); border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:var(--purple);">MSE — Mean Squared Error</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">Squares each error before averaging. This heavily penalises large errors — a 10€ error contributes 100 to the sum, but a 100€ error contributes 10,000. The result is in squared units, making it hard to interpret directly, but MSE is the foundation for RMSE.</p>
+                <code style="color:#ffb86c; font-size:0.82rem; display:block; margin-top:0.4rem;">MSE = (1/n) × Σ (y_real − y_pred)²</code>
+                <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">from sklearn.metrics import mean_squared_error
+mse = mean_squared_error(y_test, y_pred)
+print(f"MSE: {mse:,.2f}")    # Note: in squared units — hard to interpret directly</pre>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem;"><strong>✅ Best when:</strong> large errors are disproportionately costly (e.g., a single prediction being off by €100,000 is much worse than 100 predictions off by €1,000).</p>
+            </div>
+
+            <div style="background:rgba(255,184,108,0.05); border-left:4px solid #ffb86c; border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:#ffb86c;">RMSE — Root Mean Squared Error</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">The square root of MSE. Returns the metric to the original unit of the target (like MAE), while still penalising large errors more than small ones. The most widely used regression metric in practice — it balances interpretability and sensitivity to outliers.</p>
+                <code style="color:#ffb86c; font-size:0.82rem; display:block; margin-top:0.4rem;">RMSE = √MSE = √[(1/n) × Σ (y_real − y_pred)²]</code>
+                <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">import numpy as np
+from sklearn.metrics import mean_squared_error
+
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+# Or with newer sklearn versions:
+rmse = mean_squared_error(y_test, y_pred, squared=False)
+print(f"RMSE: {rmse:,.2f}€")  # Interpretable — same unit as your target</pre>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem;"><strong>✅ Best when:</strong> you want interpretability (same unit as target) AND you want to penalise large errors more than MAE does.</p>
+            </div>
+
+            <div style="background:rgba(91,124,255,0.05); border-left:4px solid var(--blue); border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:var(--blue);">R² — Coefficient of Determination</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">Measures how much of the variance in the target the model explains. R²=1.0 means a perfect model. R²=0 means the model is no better than always predicting the mean. R² can be negative if the model is catastrophically bad. Unlike MAE/RMSE, R² is unitless — it works across different datasets for comparison.</p>
+                <code style="color:#ffb86c; font-size:0.82rem; display:block; margin-top:0.4rem;">R² = 1 − (SS_residuals / SS_total)</code>
+                <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">from sklearn.metrics import r2_score
+r2 = r2_score(y_test, y_pred)
+print(f"R²: {r2:.4f}")
+# Interpretation: R²=0.85 → model explains 85% of the variance in house prices</pre>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem;"><strong>✅ Best when:</strong> comparing models across different scales or datasets. Always report R² alongside RMSE — they tell different parts of the story.</p>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">📊 Side-by-Side Comparison</h4>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem; overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.82rem;">
+                <thead>
+                    <tr style="color:var(--cyan); border-bottom:1px solid var(--border-color);">
+                        <th style="text-align:left; padding:0.5rem;">Metric</th>
+                        <th style="text-align:left; padding:0.5rem;">Unit</th>
+                        <th style="text-align:left; padding:0.5rem;">Penalises Outliers?</th>
+                        <th style="text-align:left; padding:0.5rem;">Easy to Explain?</th>
+                        <th style="text-align:left; padding:0.5rem;">Use When</th>
+                    </tr>
+                </thead>
+                <tbody style="color:var(--text-secondary);">
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem; color:var(--cyan);">MAE</td>
+                        <td style="padding:0.5rem;">Same as target</td>
+                        <td style="padding:0.5rem;">No (linear)</td>
+                        <td style="padding:0.5rem;">✅ Yes</td>
+                        <td style="padding:0.5rem;">All errors equally important</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem; color:var(--purple);">MSE</td>
+                        <td style="padding:0.5rem;">Squared units</td>
+                        <td style="padding:0.5rem;">✅ Yes (squared)</td>
+                        <td style="padding:0.5rem;">❌ Hard</td>
+                        <td style="padding:0.5rem;">Optimisation / loss function</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem; color:#ffb86c;">RMSE</td>
+                        <td style="padding:0.5rem;">Same as target</td>
+                        <td style="padding:0.5rem;">✅ Yes (moderate)</td>
+                        <td style="padding:0.5rem;">✅ Yes</td>
+                        <td style="padding:0.5rem;">Most production use cases</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.5rem; color:var(--blue);">R²</td>
+                        <td style="padding:0.5rem;">Unitless (0–1)</td>
+                        <td style="padding:0.5rem;">Indirect</td>
+                        <td style="padding:0.5rem;">✅ Yes (% variance)</td>
+                        <td style="padding:0.5rem;">Comparing models across datasets</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🐍 Complete Regression Evaluation in Practice</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+def evaluate_regression(y_true, y_pred, model_name="Model"):
+    mae  = mean_absolute_error(y_true, y_pred)
+    mse  = mean_squared_error(y_true, y_pred)
+    rmse = np.sqrt(mse)
+    r2   = r2_score(y_true, y_pred)
+    mape = np.mean(np.abs((y_true - y_pred) / y_true)) * 100  # % error
+
+    print(f"\n── {model_name} Evaluation ──")
+    print(f"  MAE:  {mae:>10,.2f}  → avg error in original units")
+    print(f"  RMSE: {rmse:>10,.2f}  → penalises large errors more")
+    print(f"  R²:   {r2:>10.4f}  → {r2*100:.1f}% of variance explained")
+    print(f"  MAPE: {mape:>10.2f}%  → avg % error (scale-independent)")
+    return {'MAE': mae, 'RMSE': rmse, 'R2': r2, 'MAPE': mape}
+
+# Compare two models
+results_rf  = evaluate_regression(y_test, y_pred_rf, "Random Forest")
+results_lr  = evaluate_regression(y_test, y_pred_lr, "Linear Regression")</pre>
+    </div>
+
+    <!-- 6.5 -->
+    <div class="content-card">
+        <h3>🎯 6.5 Classification Metrics — Beyond Simple Accuracy</h3>
+        <p>For classification problems (predicting categories), metrics are more nuanced. The single biggest mistake beginners make is relying on <strong>Accuracy</strong> alone — a metric that can be catastrophically misleading when classes are imbalanced.</p>
+
+        <div style="background:rgba(255,107,107,0.08); border:1px solid rgba(255,107,107,0.3); border-radius:8px; padding:1rem; margin-top:1rem;">
+            <strong style="color:#ff6b6b;">⚠️ The Accuracy Trap — A Concrete Example</strong>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.5rem;">Imagine a dataset with 99% non-fraud transactions and 1% fraud. A model that predicts "not fraud" for every single transaction achieves <strong>99% accuracy</strong> — yet it completely fails at its job (catching fraud). Accuracy is a lying metric here. You need Precision, Recall, and F1.</p>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">📐 Accuracy</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary);">The proportion of all predictions (positive AND negative) that were correct. Simple to understand, useless for imbalanced problems.</p>
+        <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:8px; font-size:0.78rem;">from sklearn.metrics import accuracy_score
+acc = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {acc:.4f} ({acc*100:.1f}%)")
+# Accuracy = (TP + TN) / (TP + TN + FP + FN)</pre>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🎯 Precision — Quality of Positive Predictions</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary);">Of all the times the model said "Positive", how often was it actually right? High Precision = few false alarms.</p>
+        <code style="color:#ffb86c; font-size:0.85rem; display:block; margin:0.5rem 0;">Precision = TP / (TP + FP)</code>
+        <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:8px; font-size:0.78rem;">from sklearn.metrics import precision_score
+precision = precision_score(y_test, y_pred)
+print(f"Precision: {precision:.4f}")
+# High Precision → when model says POSITIVE, trust it
+# Optimise for Precision when: false alarms are costly
+# Example: spam filter — sending legit email to spam is very bad</pre>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🔍 Recall (Sensitivity) — Coverage of Actual Positives</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary);">Of all the actual Positives in the dataset, how many did the model catch? High Recall = few missed positives.</p>
+        <code style="color:#ffb86c; font-size:0.85rem; display:block; margin:0.5rem 0;">Recall = TP / (TP + FN)</code>
+        <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:8px; font-size:0.78rem;">from sklearn.metrics import recall_score
+recall = recall_score(y_test, y_pred)
+print(f"Recall: {recall:.4f}")
+# High Recall → model catches most real positives
+# Optimise for Recall when: missing a positive is catastrophic
+# Example: cancer screening — missing a real case is dangerous</pre>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">⚖️ The Precision-Recall Trade-Off</h4>
+        <p style="color:var(--text-secondary); font-size:0.85rem;">Precision and Recall pull in opposite directions. Lowering the classification threshold catches more positives (↑ Recall) but also more false alarms (↓ Precision). The right balance depends entirely on the business cost of each error type.</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.75rem;">
+            <div style="background:rgba(40,224,255,0.05); border:1px solid rgba(40,224,255,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan);">Prioritise RECALL when…</strong>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem; padding-left:1rem; line-height:1.8;">
+                    <li>Cancer / disease detection</li>
+                    <li>Structural safety defect detection</li>
+                    <li>Fraud detection (missing fraud is costly)</li>
+                    <li>Predictive maintenance (missing failure = breakdown)</li>
+                </ul>
+            </div>
+            <div style="background:rgba(122,75,255,0.05); border:1px solid rgba(122,75,255,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--purple);">Prioritise PRECISION when…</strong>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem; padding-left:1rem; line-height:1.8;">
+                    <li>Spam filtering (blocking legit email is bad)</li>
+                    <li>Recommendation systems (bad recs lose trust)</li>
+                    <li>Legal / judiciary risk scoring</li>
+                    <li>Ad targeting (wasted budget on irrelevant users)</li>
+                </ul>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🏆 F1-Score — The Balanced Metric</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary);">The harmonic mean of Precision and Recall. F1 punishes extreme imbalance — if either Precision or Recall is very low, F1 will be low too. Perfect when you need a single metric balancing both.</p>
+        <code style="color:#ffb86c; font-size:0.85rem; display:block; margin:0.5rem 0;">F1 = 2 × (Precision × Recall) / (Precision + Recall)</code>
+        <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:8px; font-size:0.78rem;">from sklearn.metrics import f1_score, classification_report
+
+f1 = f1_score(y_test, y_pred)
+print(f"F1-Score: {f1:.4f}")
+
+# The full classification report — always print this!
+print(classification_report(y_test, y_pred, target_names=['No Fraud', 'Fraud']))
+# Output shows Precision, Recall, F1 for EACH class + weighted averages</pre>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">📉 AUC-ROC — Threshold-Independent Evaluation</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary);">The Area Under the ROC Curve measures a model's ability to discriminate between classes across ALL possible classification thresholds. It answers: "Is the model consistently ranking positives higher than negatives?" — regardless of what threshold you choose.</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.75rem;">
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem; font-size:0.82rem; color:var(--text-secondary);">
+                <p><strong style="color:var(--cyan);">AUC = 0.5</strong> → Random guessing (worthless)</p>
+                <p style="margin-top:0.4rem;"><strong style="color:#ffb86c;">AUC = 0.7–0.8</strong> → Acceptable</p>
+                <p style="margin-top:0.4rem;"><strong style="color:#10b981;">AUC = 0.8–0.9</strong> → Good</p>
+                <p style="margin-top:0.4rem;"><strong style="color:#10b981;">AUC = 0.9–1.0</strong> → Excellent</p>
+                <p style="margin-top:0.4rem;"><strong style="color:#10b981;">AUC = 1.0</strong> → Perfect (suspect overfitting!)</p>
+            </div>
+            <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:8px; font-size:0.76rem;">from sklearn.metrics import roc_auc_score, roc_curve
+
+# Need probability scores, not just 0/1 labels
+y_proba = model.predict_proba(X_test)[:, 1]
+
+auc = roc_auc_score(y_test, y_proba)
+print(f"AUC-ROC: {auc:.4f}")
+
+# Get the ROC curve points
+fpr, tpr, thresholds = roc_curve(y_test, y_proba)
+# fpr = False Positive Rate (x-axis)
+# tpr = True Positive Rate = Recall (y-axis)</pre>
+        </div>
+    </div>
+
+    <!-- 6.6 -->
+    <div class="content-card">
+        <h3>🧩 6.6 The Confusion Matrix — Your Diagnostic Dashboard</h3>
+        <p>The Confusion Matrix is the most informative single evaluation tool for classification. It breaks down predictions into four categories, giving you a complete picture of where the model succeeds and where it fails.</p>
+
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1.25rem; margin-top:1rem; overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:center;">
+                <thead>
+                    <tr>
+                        <th style="padding:0.6rem;"></th>
+                        <th style="padding:0.6rem; color:var(--cyan);">Predicted: Positive</th>
+                        <th style="padding:0.6rem; color:var(--cyan);">Predicted: Negative</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding:0.6rem; color:var(--cyan); font-weight:600; text-align:left;">Actual: Positive</td>
+                        <td style="padding:0.6rem; background:rgba(16,185,129,0.15); color:#10b981; border-radius:6px;">
+                            <strong>TP — True Positive</strong><br>
+                            <small>✅ Model correctly predicted Positive<br>e.g. Correctly flagged fraud</small>
+                        </td>
+                        <td style="padding:0.6rem; background:rgba(239,68,68,0.12); color:#ef4444; border-radius:6px;">
+                            <strong>FN — False Negative</strong><br>
+                            <small>❌ Missed a real Positive (Type II error)<br>e.g. Missed a real fraud case</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.6rem; color:var(--cyan); font-weight:600; text-align:left;">Actual: Negative</td>
+                        <td style="padding:0.6rem; background:rgba(239,68,68,0.12); color:#ef4444; border-radius:6px;">
+                            <strong>FP — False Positive</strong><br>
+                            <small>⚠️ False alarm (Type I error)<br>e.g. Flagged innocent transaction</small>
+                        </td>
+                        <td style="padding:0.6rem; background:rgba(16,185,129,0.15); color:#10b981; border-radius:6px;">
+                            <strong>TN — True Negative</strong><br>
+                            <small>✅ Correctly predicted Negative<br>e.g. Correctly cleared transaction</small>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem; margin-top:1rem;">from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+# [[TN  FP]
+#  [FN  TP]]
+
+tn, fp, fn, tp = cm.ravel()
+print(f"\nTP: {tp}  |  FP: {fp}")
+print(f"FN: {fn}  |  TN: {tn}")
+print(f"\nPrecision: {tp/(tp+fp):.3f}")
+print(f"Recall:    {tp/(tp+fn):.3f}")
+print(f"Specificity (True Negative Rate): {tn/(tn+fp):.3f}")
+
+# Visual plot
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['Legit', 'Fraud'])
+disp.plot(cmap='Blues')
+plt.title('Confusion Matrix — Fraud Detection Model')
+plt.show()</pre>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🧠 Reading the Matrix — What Each Cell Means in Practice</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div style="background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:#10b981;">✅ True Positives (TP)</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">The model correctly identified a real case. In fraud detection: caught a real fraudster. In medicine: correctly diagnosed a sick patient. These are the "wins" — what the model is hired to do.</p>
+            </div>
+            <div style="background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:#10b981;">✅ True Negatives (TN)</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">The model correctly cleared an innocent case. In fraud: correctly cleared a legitimate transaction. In medicine: correctly declared a healthy person as healthy. Also a "win" — but often less interesting than TP in imbalanced problems.</p>
+            </div>
+            <div style="background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:#ef4444;">⚠️ False Positives (FP) — Type I Error</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">False alarm. The model raised the alert but was wrong. In fraud: blocked a legitimate payment. In medicine: told a healthy person they might be sick. FP erodes user trust and causes operational friction. Reducing FP improves Precision.</p>
+            </div>
+            <div style="background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:#ef4444;">🚨 False Negatives (FN) — Type II Error</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">The silent killer. The model missed a real positive. In fraud: let a fraudster through. In medicine: missed a real diagnosis. FN is often the <em>most dangerous</em> error — things go wrong without any warning. Reducing FN improves Recall.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6.7 -->
+    <div class="content-card">
+        <h3>🏚️ 6.7 Imbalanced Datasets — When the Data Lies to You</h3>
+        <p>Most real-world classification problems are imbalanced: fraud is rare, diseases are rare, equipment failures are rare. When the majority class dominates (e.g., 99% vs 1%), standard training will produce a model that simply predicts the majority class — and gets rewarded for it with high accuracy.</p>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">🔧 Strategy 1 — Resampling</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div style="background:rgba(40,224,255,0.05); border:1px solid rgba(40,224,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan);">Oversampling (SMOTE)</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">Synthetically generates new minority-class samples by interpolating between existing ones. Balances the dataset without simply duplicating data.</p>
+                <pre style="background:#000; color:#0f0; padding:0.6rem; border-radius:6px; font-size:0.73rem; margin-top:0.5rem;">from imblearn.over_sampling import SMOTE
+sm = SMOTE(random_state=42)
+X_res, y_res = sm.fit_resample(X_train, y_train)
+print(pd.Series(y_res).value_counts())</pre>
+            </div>
+            <div style="background:rgba(122,75,255,0.05); border:1px solid rgba(122,75,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--purple);">Undersampling</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">Removes majority-class samples until the classes are balanced. Risk of losing useful information — only recommended with very large datasets.</p>
+                <pre style="background:#000; color:#0f0; padding:0.6rem; border-radius:6px; font-size:0.73rem; margin-top:0.5rem;">from imblearn.under_sampling import RandomUnderSampler
+rus = RandomUnderSampler(random_state=42)
+X_res, y_res = rus.fit_resample(X_train, y_train)</pre>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">🔧 Strategy 2 — Class Weights</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary);">Tell the algorithm that minority-class errors are more costly. Most Scikit-Learn models support <code>class_weight='balanced'</code> — no resampling needed.</p>
+        <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:8px; font-size:0.78rem;">from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+
+# Option A: automatic balancing
+model_rf = RandomForestClassifier(class_weight='balanced', random_state=42)
+
+# Option B: custom weights (minority class gets 10x more weight)
+model_lr = LogisticRegression(class_weight={0: 1, 1: 10}, random_state=42)
+
+model_rf.fit(X_train, y_train)</pre>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">🔧 Strategy 3 — Threshold Tuning</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary);">By default, classifiers use 0.5 as the decision threshold. Lowering it (e.g., to 0.3) means the model classifies more cases as Positive — increasing Recall at the cost of Precision. The optimal threshold depends on the business cost of FP vs FN.</p>
+        <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:8px; font-size:0.78rem;">import numpy as np
+from sklearn.metrics import precision_recall_curve, f1_score
+
+y_proba = model.predict_proba(X_test)[:, 1]
+
+# Find the threshold that maximises F1
+precisions, recalls, thresholds = precision_recall_curve(y_test, y_proba)
+f1_scores = 2 * (precisions * recalls) / (precisions + recalls + 1e-9)
+best_threshold = thresholds[np.argmax(f1_scores)]
+
+print(f"Optimal threshold: {best_threshold:.3f}")
+y_pred_tuned = (y_proba >= best_threshold).astype(int)
+print(f"Tuned F1: {f1_score(y_test, y_pred_tuned):.4f}")</pre>
+    </div>
+
+    <!-- 6.8 -->
+    <div class="content-card">
+        <h3>🔁 6.8 Overfitting & Underfitting — Diagnosing with Metrics</h3>
+        <p>Evaluation metrics are not just for measuring performance — they're a diagnostic tool that reveals fundamental problems with how the model learned. Comparing train vs test metrics is the clearest signal.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div style="background:rgba(255,107,107,0.07); border:1px solid rgba(255,107,107,0.25); border-radius:8px; padding:1rem;">
+                <strong style="color:#ff6b6b;">🔴 Overfitting</strong>
+                <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.75rem; margin-top:0.75rem; font-family:monospace; font-size:0.8rem; color:#0f0;">
+                    Train F1:  0.98<br>
+                    Test  F1:  0.61<br>
+                    <span style="color:#ff6b6b;">Gap: 0.37 ← Too large!</span>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.6rem;">Model memorised training data. Fails on new data. Reduce complexity, add regularisation, or get more data.</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.07); border:1px solid rgba(91,124,255,0.25); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--blue);">✅ Good Fit</strong>
+                <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.75rem; margin-top:0.75rem; font-family:monospace; font-size:0.8rem; color:#0f0;">
+                    Train F1:  0.89<br>
+                    Test  F1:  0.85<br>
+                    <span style="color:#10b981;">Gap: 0.04 ← Healthy!</span>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.6rem;">Small, consistent gap. The model has generalised well. Deploy with confidence — continue monitoring in production.</p>
+            </div>
+            <div style="background:rgba(255,184,108,0.07); border:1px solid rgba(255,184,108,0.25); border-radius:8px; padding:1rem;">
+                <strong style="color:#ffb86c;">🟡 Underfitting</strong>
+                <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:0.75rem; margin-top:0.75rem; font-family:monospace; font-size:0.8rem; color:#0f0;">
+                    Train F1:  0.58<br>
+                    Test  F1:  0.55<br>
+                    <span style="color:#ffb86c;">Both low ← Too simple!</span>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.6rem;">Model failed to learn patterns from training data itself. Use a more complex model, engineer better features, or reduce regularisation.</p>
+            </div>
+        </div>
+
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem; margin-top:1rem;">from sklearn.metrics import f1_score
+
+# Always compare train vs test performance to diagnose fit
+train_f1 = f1_score(y_train, model.predict(X_train))
+test_f1  = f1_score(y_test,  model.predict(X_test))
+gap      = train_f1 - test_f1
+
+print(f"Train F1: {train_f1:.4f}")
+print(f"Test  F1: {test_f1:.4f}")
+print(f"Gap:      {gap:.4f}")
+
+if gap > 0.10:
+    print("⚠️  WARNING: Large gap — possible Overfitting")
+elif test_f1 < 0.65:
+    print("⚠️  WARNING: Low performance — possible Underfitting")
+else:
+    print("✅ Model appears well-fitted")</pre>
+    </div>
+
+    <!-- 6.9 -->
+    <div class="content-card">
+        <h3>🔍 6.9 Model Comparison — Choosing the Best Model Systematically</h3>
+        <p>In practice, you will always train multiple models and need a structured, reproducible way to compare them. Never choose a model based on a single metric or a single data split.</p>
+
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">import pandas as pd
+import numpy as np
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.metrics import f1_score, roc_auc_score
+
+# Define models to compare
+models = {
+    'Logistic Regression': LogisticRegression(max_iter=1000, random_state=42),
+    'Random Forest':       RandomForestClassifier(n_estimators=100, random_state=42),
+    'Gradient Boosting':   GradientBoostingClassifier(n_estimators=100, random_state=42),
+    'SVM':                 SVC(probability=True, random_state=42)
+}
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+results = []
+
+for name, model in models.items():
+    f1_scores  = cross_val_score(model, X_train, y_train, cv=cv, scoring='f1')
+    auc_scores = cross_val_score(model, X_train, y_train, cv=cv, scoring='roc_auc')
+    
+    results.append({
+        'Model':      name,
+        'F1 Mean':    f1_scores.mean().round(4),
+        'F1 Std':     f1_scores.std().round(4),
+        'AUC Mean':   auc_scores.mean().round(4),
+        'AUC Std':    auc_scores.std().round(4),
+    })
+
+df_results = pd.DataFrame(results).sort_values('F1 Mean', ascending=False)
+print(df_results.to_string(index=False))</pre>
+
+        <div style="background:rgba(91,124,255,0.08); border:1px solid rgba(91,124,255,0.2); border-radius:8px; padding:1rem; margin-top:1rem;">
+            <strong style="color:var(--blue);">💡 Model Selection Checklist:</strong>
+            <ul style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1.25rem; line-height:1.9;">
+                <li>Compare using Cross-Validation (not single split) to avoid lucky/unlucky splits</li>
+                <li>Check both mean AND standard deviation — a stable model (low std) may be preferred over a slightly higher mean with high variance</li>
+                <li>Always evaluate the final chosen model on the locked test set — only once</li>
+                <li>Consider interpretability requirements: sometimes a slightly worse but explainable model wins</li>
+                <li>Factor in inference time for production constraints (e.g., real-time fraud detection)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 6.10 -->
+    <div class="content-card">
+        <h3>💼 6.10 Technical Metrics vs Business Impact</h3>
+        <p>The final and most important skill: <strong>translating numbers into decisions</strong>. A model with 87% AUC-ROC is technically impressive — but what does that mean for the business? How many frauds does it catch? How much money does it save? What does each error cost?</p>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">🏥 Case 1 — Medical Diagnosis (Maximise Recall)</h4>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem;">
+            <p style="font-size:0.85rem; color:var(--text-secondary);">A model screening for a serious disease has 1,000 test patients, 50 of whom actually have the disease.</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.75rem; font-size:0.82rem;">
+                <div>
+                    <p style="color:#ff6b6b; font-weight:600;">❌ High Precision, Low Recall (0.90P / 0.60R)</p>
+                    <p style="color:var(--text-secondary);">Catches 30 of 50 sick patients. Misses 20. Those 20 go untreated — with potentially fatal consequences. The model "looks clean" but fails its core mission.</p>
+                </div>
+                <div>
+                    <p style="color:#10b981; font-weight:600;">✅ Lower Precision, High Recall (0.70P / 0.96R)</p>
+                    <p style="color:var(--text-secondary);">Catches 48 of 50 sick patients. Sends some false alarms (extra tests for healthy patients), but the cost of follow-up tests is much lower than the cost of missing real cases.</p>
+                </div>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">💳 Case 2 — Fraud Detection (Balance Precision & Recall)</h4>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem;">
+            <p style="font-size:0.85rem; color:var(--text-secondary);">A payment processor handles 1,000,000 transactions/day. 0.1% are fraud (1,000 fraud cases). Each fraudulent transaction costs €500 on average. Each false alarm (blocking a legit transaction) costs €5 in customer service.</p>
+            <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.75rem;"># Business cost calculation
+fraud_cases     = 1000
+avg_fraud_cost  = 500      # €500 per missed fraud
+fp_cost         = 5        # €5 per false alarm
+
+# Model A: Recall=0.90, Precision=0.85
+fn_a = fraud_cases * (1 - 0.90)     # = 100 missed frauds
+fp_a = (fraud_cases * 0.90) / 0.85 * (1-0.85)  # ≈ 159 false alarms
+cost_a = (fn_a * avg_fraud_cost) + (fp_a * fp_cost)
+print(f"Model A daily cost: €{cost_a:,.0f}")   # € 50,795
+
+# Model B: Recall=0.80, Precision=0.95
+fn_b = fraud_cases * (1 - 0.80)     # = 200 missed frauds
+fp_b = (fraud_cases * 0.80) / 0.95 * (1-0.95)  # ≈ 42 false alarms
+cost_b = (fn_b * avg_fraud_cost) + (fp_b * fp_cost)
+print(f"Model B daily cost: €{cost_b:,.0f}")   # €100,211
+
+# Model A wins! Despite lower Precision, higher Recall saves more money</pre>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">📊 Case 3 — House Price Prediction (Minimise RMSE in Context)</h4>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem;">
+            <p style="font-size:0.85rem; color:var(--text-secondary);">Two models predict house prices. Model A has RMSE = €15,000. Model B has RMSE = €22,000. Is Model A always better?</p>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.5rem;">Not necessarily. If the average house price is €500,000, an RMSE of €15,000 means ~3% error — excellent. But if Model A achieves this only because it overfits the test area's price range and collapses on other neighbourhoods, while Model B is more consistent across all regions, Model B may be the better choice for a nationwide platform. <strong>Always ask: what does "good" mean in this business context?</strong></p>
+        </div>
+
+        <div style="background:rgba(40,224,255,0.07); border:1px solid rgba(40,224,255,0.2); border-radius:8px; padding:1.25rem; margin-top:1rem;">
+            <strong style="color:var(--cyan);">🗣️ How to Speak Business Language About Metrics</strong>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.75rem; font-size:0.83rem;">
+                <div>
+                    <p style="color:#ff6b6b; font-weight:600;">❌ Technical (don't say this to a CEO)</p>
+                    <p style="color:var(--text-secondary); font-style:italic; margin-top:0.3rem;">"Our model achieves an AUC-ROC of 0.91 and an F1-Score of 0.83 on the test partition."</p>
+                </div>
+                <div>
+                    <p style="color:#10b981; font-weight:600;">✅ Business (say this instead)</p>
+                    <p style="color:var(--text-secondary); font-style:italic; margin-top:0.3rem;">"Our model catches 9 out of 10 fraud cases before they clear, saving an estimated €2.1M/month, while only incorrectly blocking 1 in 500 legitimate payments."</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6.11 -->
+    <div class="content-card">
+        <h3>🐍 6.11 Complete Evaluation Workflow in Python</h3>
+        <p>A professional, reusable evaluation function that covers all the key metrics, handles both binary and multiclass classification, and produces a clean summary report.</p>
+
+        <pre style="background:#000; color:#0f0; padding:1.25rem; border-radius:8px; font-size:0.77rem; line-height:1.6; overflow-x:auto;">import numpy as np
+import pandas as pd
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    roc_auc_score, confusion_matrix, classification_report,
+    mean_absolute_error, mean_squared_error, r2_score
+)
+
+# ── Classification Evaluator ────────────────────────────────────────────
+def evaluate_classifier(y_true, y_pred, y_proba=None, model_name="Model", labels=None):
+    print(f"\n{'='*55}")
+    print(f"  📊 {model_name} — Classification Report")
+    print(f"{'='*55}")
+
+    print(f"  Accuracy:  {accuracy_score(y_true, y_pred):.4f}")
+    print(f"  Precision: {precision_score(y_true, y_pred, average='weighted'):.4f}")
+    print(f"  Recall:    {recall_score(y_true, y_pred, average='weighted'):.4f}")
+    print(f"  F1-Score:  {f1_score(y_true, y_pred, average='weighted'):.4f}")
+
+    if y_proba is not None:
+        auc = roc_auc_score(y_true, y_proba, multi_class='ovr')
+        print(f"  AUC-ROC:   {auc:.4f}")
+
+    print(f"\n  Confusion Matrix:")
+    cm = confusion_matrix(y_true, y_pred)
+    print(cm)
+
+    print(f"\n  Detailed Report:")
+    print(classification_report(y_true, y_pred, target_names=labels))
+
+# ── Regression Evaluator ─────────────────────────────────────────────────
+def evaluate_regressor(y_true, y_pred, model_name="Model"):
+    mae  = mean_absolute_error(y_true, y_pred)
+    mse  = mean_squared_error(y_true, y_pred)
+    rmse = np.sqrt(mse)
+    r2   = r2_score(y_true, y_pred)
+    mape = np.mean(np.abs((y_true - y_pred) / (y_true + 1e-9))) * 100
+
+    print(f"\n{'='*55}")
+    print(f"  📈 {model_name} — Regression Report")
+    print(f"{'='*55}")
+    print(f"  MAE:   {mae:>12,.4f}  (avg absolute error)")
+    print(f"  RMSE:  {rmse:>12,.4f}  (penalises large errors)")
+    print(f"  R²:    {r2:>12.4f}  ({r2*100:.1f}% variance explained)")
+    print(f"  MAPE:  {mape:>11.2f}%  (avg % error)")
+
+# ── Usage ────────────────────────────────────────────────────────────────
+# For classification:
+evaluate_classifier(
+    y_test, y_pred,
+    y_proba=model.predict_proba(X_test)[:, 1],
+    model_name="Random Forest — Churn Detection",
+    labels=['Stays', 'Churns']
+)
+
+# For regression:
+evaluate_regressor(y_test, y_pred, model_name="XGBoost — House Price")</pre>
+    </div>
+
+    <!-- Conclusion -->
+    <div class="content-card" style="border-color: var(--cyan);">
+        <h3>✅ Conclusion of Module 6 — You Are Now an Evaluation Expert</h3>
+        <p>Evaluation is what separates intuition from science — and a good Data Scientist from a great one. Here is everything you have mastered in this module:</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            <ul class="styled-list">
+                <li>Why honest evaluation requires separate train/validation/test splits</li>
+                <li>What Data Leakage is and how to prevent it</li>
+                <li>K-Fold and Stratified K-Fold Cross-Validation</li>
+                <li>Regression metrics: MAE, MSE, RMSE, R², MAPE</li>
+                <li>Classification metrics: Accuracy, Precision, Recall, F1, AUC-ROC</li>
+                <li>The Precision-Recall trade-off and when to prioritise each</li>
+            </ul>
+            <ul class="styled-list">
+                <li>Reading and interpreting the Confusion Matrix</li>
+                <li>Diagnosing Overfitting and Underfitting through metrics</li>
+                <li>Strategies for imbalanced datasets (SMOTE, class weights, thresholds)</li>
+                <li>Systematic multi-model comparison</li>
+                <li>Translating technical metrics into business impact</li>
+                <li>Building complete, reusable evaluation pipelines in Python</li>
+            </ul>
+        </div>
+        <div style="background:rgba(40,224,255,0.07); border-radius:8px; padding:1rem; margin-top:1rem; text-align:center;">
+            <p style="font-size:1.05rem; color:var(--cyan); font-weight:600;">Don't be fooled by 99% accuracy — always look at the Confusion Matrix.</p>
+            <p style="color:var(--text-secondary); margin-top:0.4rem;">A model is only as good as its worst failure mode, evaluated on data it has never seen.</p>
+        </div>
+    </div>
+</div>
+            <div id="laboratorio" class="tab-panel">
+                <h3>Consola SQL de Dados</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Pratica a extração de dados. Tenta filtrar clientes com gastos elevados.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">EDITOR SQL</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT cliente_nome, total_gasto 
+FROM vendas 
+WHERE total_gasto > 1500
+ORDER BY total_gasto DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">RESULTADO DA QUERY</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Clique em "Executar" para simular a consulta na base de dados...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Executar Query</button>
+            </div>
+
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>Model Evaluation & Metrics Quiz</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge on Model Validation and Evaluation Metrics. Answer the 15 questions for immediate feedback.</p>
+        
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. Why should we not evaluate a model using the same data used for training?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Because it would make the computer slow.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B" data-correct="true"> B) To avoid Data Leakage and artificially high results.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Because training data is automatically deleted.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) There is no problem with using the same data.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. What is the "Test set" in the Data Science pipeline?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Data used for the algorithm to learn patterns.</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B" data-correct="true"> B) Data never seen by the model, used to simulate the real world.</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C"> C) An exact copy of the training data.</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Data that contains intentional errors.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. Which of these metrics is exclusive to Regression problems (numerical values)?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) F1-Score</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B"> B) Precision</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C" data-correct="true"> C) RMSE (Root Mean Squared Error)</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Accuracy</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. What does the MAE (Mean Absolute Error) metric measure?</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A" data-correct="true"> A) The average absolute error between prediction and reality.</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B"> B) The total percentage of correct answers.</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C"> C) The square root of the squared error.</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) The number of false positives.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. What is the main danger of relying solely on "Accuracy"?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) It is very difficult to calculate.</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B" data-correct="true"> B) It can be misleading in imbalanced datasets.</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C"> C) It only works for regression models.</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) It forces the use of more RAM.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. In Classification, which metric focuses on the quality of predicted positives?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A" data-correct="true"> A) Precision</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) Recall</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C"> C) RMSE</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) MSE</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. Which metric prioritizes identifying all actual positive cases (e.g., detecting diseases)?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Precision</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B" data-correct="true"> B) Recall</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C"> C) MAE</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Accuracy</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. What is the F1-Score?</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) The sum of all model errors.</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"> B) The balance (harmonic mean) between Precision and Recall.</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C"> C) The first version of an AI model.</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) A speed metric.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. In a Confusion Matrix, what is a "False Positive"?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Predicting negative when it is negative.</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B" data-correct="true"> B) Predicting positive when it is negative (false alarm).</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Hitting the positive target.</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Forgetting to provide an answer.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. Which error is more critical in a diagnosis of a serious disease?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) False Positive (saying they have it when they don't).</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B" data-correct="true"> B) False Negative (saying they don't have it when they do).</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C"> C) True Negative.</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Rounding error.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What is the purpose of Cross-Validation?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q11" value="A" data-correct="true"> A) To obtain a stable evaluation by splitting data multiple times.</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B"> B) To cross data from different companies.</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C"> C) To delete outliers.</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) To validate salaries.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. If a model is perfect on training data but terrible on testing data, we have:</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Underfitting.</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B" data-correct="true"> B) Overfitting (lack of generalization).</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C"> C) An ideal model.</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) A code error.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. Which metric penalizes large errors more severely in regression?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) MAE</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B" data-correct="true"> B) MSE (Mean Squared Error)</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Accuracy</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Recall</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. What does "generalization ability" mean?</p>
+                <label class="quiz-option"><input type="radio" name="q14" value="A" data-correct="true"> A) Performing well on new data that the model has never seen.</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Being a model that does everything at once.</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Being easy for anyone to read.</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Having no defined parameters.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. What is the ultimate focus of evaluation in a real project?</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Having the highest accuracy at any cost.</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Using the most complex algorithm.</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"> C) Ensuring the model is reliable and generates business value.</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Impressing with colorful charts.</label>
+            </div>
+        </form>
+        <div class="quiz-controls" style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback" class="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+
+            <div id="recursos" class="tab-panel">
+                <h3>Materiais de Apoio</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ Guia Definitivo: Python para Análise de Dados</a>
+                    <a href="#" class="resource-link">→ Cheat Sheet: Comandos SQL Essenciais</a>
+                    <a href="#" class="resource-link">→ Documentação Scikit-Learn: Escolhendo o Algoritmo Certo</a>
+                    <a href="#" class="resource-link">→ Workshop: Storytelling com Dados</a>
+                </div>
+            </div>
+
+            <div id="avaliacao" class="tab-panel">
+    <div class="content-card">
+        <h3>🎯 Domain Criteria: Evaluation & Metrics</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+To successfully complete this module, you must demonstrate competence at the following mastery levels in evaluating, validating, and interpreting the performance of Machine Learning models in real-world contexts.
+        </p>
+        
+        <div class="evaluation-grid">
+            <div class="evaluation-column">
+                <h4 class="evaluation-title essential">
+                    <span>💠</span> Essential
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Understanding the importance of evaluation in the Data Science pipeline</li>
+                    <li>Ability to distinguish between training and test data</li>
+                    <li>Basic knowledge of main regression metrics (MAE, MSE, RMSE)</li>
+                    <li>Basic knowledge of main classification metrics (Accuracy, Precision, Recall)</li>
+                    <li>Simple interpretation of numerical performance results</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title important">
+                    <span>⭐</span> Important
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Appropriate choice of metrics based on problem type (regression vs classification)</li>
+                    <li>Interpretation of confusion matrices</li>
+                    <li>Ability to identify signs of overfitting and underfitting through metrics</li>
+                    <li>Use of cross-validation for more robust evaluation</li>
+                    <li>Structured comparison of multiple models based on relevant metrics</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title advanced">
+                    <span>🚀</span> Advanced
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Alignment of technical metrics with business objectives and impact</li>
+                    <li>Critical evaluation of models in imbalanced datasets</li>
+                    <li>Deep interpretation of the trade-off between Precision and Recall</li>
+                    <li>Ability to technically justify the choice of a final model</li>
+                    <li>Identification of risks such as data leakage and limitations of evaluation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+        </div><!-- end tabs-container -->
+    </main>
+
+    <script>
+    // Quiz functionality
+    class QuizManager {
+        constructor() {
+            this.questionsData = {
+                q1: { correct: 'B', exp: 'Evaluating with training data is "cheating"; the model already knows the answers.' },
+                q2: { correct: 'B', exp: 'The test set simulates real-world use with data the model has never processed before.' },
+                q3: { correct: 'C', exp: 'RMSE measures the distance between numerical values, making it the standard metric for Regression.' },
+                q4: { correct: 'A', exp: 'MAE gives us the simple average of the error, making it easy to explain to stakeholders.' },
+                q5: { correct: 'B', exp: 'If 99% of the data belongs to one class, accuracy will be high even if the model learns nothing.' },
+                q6: { correct: 'A', exp: 'Precision focuses on trustworthiness: if the model predicts positive, how likely is it to be true?' },
+                q7: { correct: 'B', exp: 'Recall focuses on coverage: out of all actual cases, how many did the model capture?' },
+                q8: { correct: 'B', exp: 'F1-Score is the harmonic mean that penalizes extreme values of either Precision or Recall.' },
+                q9: { correct: 'B', exp: 'A False Positive is a Type I error: a false alarm (e.g., flagging a valid email as spam).' },
+                q10: { correct: 'B', exp: 'A False Negative in healthcare means missing a real problem, which can be fatal.' },
+                q11: { correct: 'A', exp: 'Cross-Validation ensures that performance is consistent across different parts of the dataset.' },
+                q12: { correct: 'B', exp: 'Overfitting happens when the model memorizes training noise and loses its ability to generalize.' },
+                q13: { correct: 'B', exp: 'MSE squares the error, meaning large errors have a much heavier impact on the final metric.' },
+                q14: { correct: 'A', exp: 'Generalizing is the goal of ML: learning universal patterns rather than isolated examples.' },
+                q15: { correct: 'C', exp: 'Technical metrics only matter if they help the business make better decisions or save costs.' }
+            };
+            this.init();
+        }
+
+        init() {
+            document.getElementById('submit-quiz').addEventListener('click', () => {
+                this.submitQuiz();
+            });
+
+            document.getElementById('clear-quiz').addEventListener('click', () => {
+                this.clearQuiz();
+            });
+        }
+
+        submitQuiz() {
+                    const form = document.getElementById('quiz-form');
+                    const formData = new FormData(form);
+                    let score = 0;
+                    let feedbackHTML = '';
+                    Object.keys(this.questionsData).forEach((key, index) => {
+                        const userAnswer = formData.get(key);
+                        const isCorrect = userAnswer === this.questionsData[key].correct;
+                        if (isCorrect) score++;
+                        feedbackHTML += `
+                            <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                                <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                                <div>
+                                    <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                    ${!isCorrect ? `<br><small class="correct-answer">
+                                            Correct answer: Option ${this.questionsData[key].correct}
+                                        </small>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    this.displayResults(score, feedbackHTML);
+                }
+
+        displayResults(score, feedbackHTML) {
+            const total = Object.keys(this.questionsData).length;
+            const percent = Math.round((score / total) * 100);
+            const resultsDiv = document.getElementById('quiz-results');
+            
+            let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+
+            document.getElementById('quiz-score').innerHTML = `
+                <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                <p style="color: var(--text-secondary)">${percent >= 70 ? 'Amazing! You have mastered the fundamentals.' : 'Keep practicing to improve.'}</p>
+            `;
+
+            document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        clearQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-results').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    // Initialize when the document is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        new QuizManager();
+    });
+</script>
+
+    <script>
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-panel");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            let progressMap = { 'aprender': 25, 'laboratorio': 50, 'quiz': 75, 'recursos': 90, 'avaliacao': 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executada com sucesso.</strong><br><br>Resultados (Top 3):<br>-----------------------<br>1. Carlos Alberto | 4.250,00€<br>2. Beatriz Ramos | 2.100,50€<br>3. Ricardo Jorge | 1.880,00€<br><br><em>Dica: O filtro WHERE funcionou corretamente eliminando registos abaixo de 1500€.</em>";
+        }
+    </script>
+</body>
+</html>

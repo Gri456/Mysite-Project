@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Big Data, ML & DL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14; --blue: #ff2d78; --purple: #ff85c2; --cyan: #e0006e;
+            --text-light: #e8ecf8; --text-secondary: #b6c0de;
+            --card-bg: rgba(255,255,255,0.05); --border-color: rgba(255,255,255,0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(91,124,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(91,124,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1; }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(255,0,191,0.168) 0%, rgba(255,0,128,0.185) 50%, transparent 100%); pointer-events: none; z-index: -1; }
+
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,20,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+
+        .section-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(91,124,255,0.15); border: 1px solid rgba(91,124,255,0.3); color: var(--cyan); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.3rem 0.9rem; border-radius: 50px; margin-bottom: 1.25rem; text-transform: uppercase; }
+
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        .code-block { background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.6; color: #a8ff78; }
+
+        .compare-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .compare-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; border: 1px solid var(--border-color); font-weight: 600; }
+        .compare-table td { padding: 0.65rem 1rem; border: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+        .spectrum { display: flex; align-items: stretch; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); margin: 1rem 0; font-size: 0.78rem; }
+        .spectrum-item { flex: 1; padding: 0.85rem 0.75rem; text-align: center; }
+        .spectrum-item .s-label { font-weight: 700; font-size: 0.8rem; margin-bottom: 4px; }
+        .spectrum-item .s-desc { color: var(--text-secondary); font-size: 0.72rem; line-height: 1.4; }
+        .s-bigdata { background: rgba(40,224,255,0.08); border-right: 1px solid var(--border-color); }
+        .s-ml      { background: rgba(91,124,255,0.08); border-right: 1px solid var(--border-color); }
+        .s-dl      { background: rgba(122,75,255,0.08); }
+        .s-bigdata .s-label { color: var(--cyan); }
+        .s-ml .s-label { color: var(--blue); }
+        .s-dl .s-label { color: #c084fc; }
+
+        /* New styles */
+        .info-box { background: rgba(91,124,255,0.07); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+        .info-box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--purple); }
+        .section-divider { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .concept-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .concept-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 0.35rem; }
+        .concept-title { font-weight: 600; font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.4rem; }
+        .concept-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+        .metrics-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .metrics-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; font-weight: 600; }
+        .metrics-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .metrics-table tr:hover td { background: rgba(255,255,255,0.03); color: var(--text-light); }
+        .step-flow { display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0; }
+        .step-item { display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; }
+        .step-num { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; font-weight: 700; font-size: 0.8rem; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+        .step-content { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+        .step-content strong { color: var(--text-light); }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 440px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Quiz */
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05)); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255,255,255,0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .concept-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .spectrum { flex-direction: column; }
+            .s-bigdata, .s-ml { border-right: none; border-bottom: 1px solid var(--border-color); }
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <div class="logo">BitJourney</div>
+            <span class="premium-badge">Premium</span>
+        </div>
+        <nav>
+            <a href="premium-data-science.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objetivo: Big Data, ML & Deep Learning</h1>
+        <p class="course-description">Understand the full data intelligence stack — from storing and processing massive datasets with Big Data tools, to training classical Machine Learning models, to building neural networks with Deep Learning.</p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>6–8h</span></div>
+            <div class="meta-item"><span>🎯</span><span>• Spark • Hadoop • Scikit-learn • PyTorch • CNNs • Transformers</span></div>
+            <div class="meta-item"><span>📌</span><span>Data Science & AI Engineering</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'aprender')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'laboratorio')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'recursos')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'avaliacao')">Assessment</button>
+        </nav>
+
+        <!-- LEARN -->
+        <div id="aprender" class="tab-panel active">
+
+            <div class="content-card">
+                <h3>The Data Intelligence Stack</h3>
+                <p>Big Data, Machine Learning, and Deep Learning are three distinct but deeply connected disciplines. Together they form the full pipeline from raw data at scale to intelligent predictions and decisions.</p>
+                <div class="spectrum">
+                    <div class="spectrum-item s-bigdata"><div class="s-label">BIG DATA</div><div class="s-desc">Store, move & process data too large for a single machine</div></div>
+                    <div class="spectrum-item s-ml"><div class="s-label">MACHINE LEARNING</div><div class="s-desc">Learn patterns from structured data without explicit rules</div></div>
+                    <div class="spectrum-item s-dl"><div class="s-label">DEEP LEARNING</div><div class="s-desc">Learn hierarchical representations from raw data via neural networks</div></div>
+                </div>
+                <p style="margin-top:1rem;">This module covers each layer in depth — when to use each, how they work, and how they connect.</p>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">How the three layers connect in a real production AI system:</p>
+                <div class="step-flow">
+                    <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Raw data arrives at scale</strong> — petabytes of clickstream logs, sensor readings, transactions land in S3 or HDFS. This is the Big Data layer: distributed storage and processing tools (Spark, Kafka, Flink) handle ingestion, cleaning, and feature extraction at scale.</div></div>
+                    <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Features are extracted and structured</strong> — Spark ETL pipelines transform raw events into clean feature tables. For tabular data (customer churn, fraud detection, pricing), this feeds directly into classical ML models (XGBoost, Random Forest) via Scikit-learn or Spark MLlib.</div></div>
+                    <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Unstructured data goes to Deep Learning</strong> — images, audio, free text, and raw sequences bypass manual feature engineering. A CNN, Transformer, or fine-tuned LLM learns representations directly from the raw input — but needs the Big Data infrastructure to handle training data at scale.</div></div>
+                    <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Models are served in production</strong> — trained models (PyTorch, XGBoost) are deployed as REST APIs, embedded in applications, or run as batch jobs. MLOps tools (MLflow, SageMaker, Vertex AI) track versions, monitor drift, and automate retraining pipelines.</div></div>
+                </div>
+            </div>
+
+            <!-- ===== BIG DATA ===== -->
+            <div class="content-card">
+                <div class="section-badge">🗄 Big Data</div>
+                <h3>What Is Big Data?</h3>
+                <p>Big Data refers to datasets too large, fast-moving, or complex to be processed by a single machine with traditional tools. It is characterized by the <span class="highlight">4 Vs</span>:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Volume</span> — petabytes of data from logs, sensors, transactions</li>
+                    <li><span class="highlight">Velocity</span> — real-time streams (clickstreams, IoT, social feeds)</li>
+                    <li><span class="highlight">Variety</span> — structured tables, unstructured text, images, video</li>
+                    <li><span class="highlight">Veracity</span> — data quality and trustworthiness challenges</li>
+                </ul>
+                <div class="code-explanation">
+                    <p>A single company like Netflix processes <strong>petabytes of data per day</strong>. No single server can store or analyze this — distributed computing systems are required.</p>
+                </div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">What "too big for one machine" actually means in practice:</p>
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-label">Small Data</div>
+                        <div class="concept-title">Fits in RAM (&lt; 16GB)</div>
+                        <div class="concept-desc">pandas, NumPy, SQLite. A laptop can process in seconds. This covers most analytics tasks at small companies, personal projects, and ML prototyping. No distributed tools needed.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Medium Data</div>
+                        <div class="concept-title">Fits on one disk (16GB–1TB)</div>
+                        <div class="concept-desc">PostgreSQL, DuckDB, Polars. A single powerful server handles it. Polars can process 100GB CSV files faster than Spark on a laptop. Many "Big Data" tools are overkill here.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Big Data</div>
+                        <div class="concept-title">Multi-machine required (&gt; 1TB)</div>
+                        <div class="concept-desc">Apache Spark, Flink, Kafka. Data is distributed across dozens or hundreds of nodes. Processing requires coordination. A full Spark cluster query on 10TB takes minutes — on one machine it would take days.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Massive Data</div>
+                        <div class="concept-title">Petabyte scale (1PB+)</div>
+                        <div class="concept-desc">Cloud-native: BigQuery, Snowflake, Databricks. Managed services handle thousands of nodes automatically. Google processes ~1 exabyte/day. This scale requires dedicated data engineering teams and specialized tooling.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🗄 Big Data</div>
+                <h3>The Hadoop Ecosystem</h3>
+                <p><span class="highlight">Hadoop</span> was the first major open-source framework for distributed storage and processing. Its key components:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">HDFS</span> — splits files into 128MB blocks across many machines with replication for fault tolerance</li>
+                    <li><span class="highlight">MapReduce</span> — Map (transform each record in parallel), Reduce (aggregate results). Slow for iterative tasks.</li>
+                    <li><span class="highlight">YARN</span> — the resource manager that schedules jobs across the cluster</li>
+                    <li><span class="highlight">Hive</span> — SQL-like queries over HDFS data</li>
+                    <li><span class="highlight">HBase</span> — a NoSQL key-value store on top of HDFS for real-time reads/writes</li>
+                </ul>
+                <p style="margin-top:0.75rem;">Hadoop is largely legacy today — Spark has replaced MapReduce for most workloads. But HDFS concepts remain foundational.</p>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Why MapReduce was slow — and what Spark did differently:</p>
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-label">MapReduce Problem</div>
+                        <div class="concept-title">Disk I/O Between Every Stage</div>
+                        <div class="concept-desc">After each Map and each Reduce operation, results were written to HDFS (disk). An ML training loop with 50 iterations would read/write disk 100 times. Disk is 100× slower than RAM — making iterative algorithms painfully slow.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Spark Solution</div>
+                        <div class="concept-title">In-Memory RDDs</div>
+                        <div class="concept-desc">Spark's Resilient Distributed Datasets (RDDs) keep data in RAM across operations. After the initial read, subsequent transformations operate on in-memory data. 50 training iterations = 1 disk read, 49 in-memory passes. Up to 100× faster.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Spark Optimization</div>
+                        <div class="concept-title">Lazy Evaluation & Query Plans</div>
+                        <div class="concept-desc">Spark doesn't execute transformations immediately — it builds a Directed Acyclic Graph (DAG) of operations. When an action (like <code style="color:#a8ff78;">.show()</code>) is called, Spark optimizes the whole plan before running, combining stages and pushing filters down to reduce data movement.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">When Hadoop Still Wins</div>
+                        <div class="concept-title">Sequential Batch on Cold Storage</div>
+                        <div class="concept-desc">For one-time batch scans of cold data that doesn't need to be cached, HDFS + Hive is often cheaper than Spark (no cluster RAM required). Many companies keep HDFS for archival storage while using Spark for active processing.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🗄 Big Data</div>
+                <h3>Apache Spark — The Modern Standard</h3>
+                <p><span class="highlight">Apache Spark</span> is the dominant Big Data processing engine. It keeps data in memory between operations — up to 100× faster than Hadoop MapReduce for iterative workloads like ML training.</p>
+                <div class="code-block"><pre>from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, avg, count
+
+spark = SparkSession.builder \
+    .appName("SalesAnalysis") \
+    .getOrCreate()
+
+df = spark.read.csv("s3://data-lake/sales/*.csv", header=True, inferSchema=True)
+
+result = df \
+    .filter(col("year") == 2024) \
+    .groupBy("region") \
+    .agg(
+        avg("revenue").alias("avg_revenue"),
+        count("*").alias("num_transactions")
+    ) \
+    .orderBy(col("avg_revenue").desc())
+
+result.show(20)</pre></div>
+                <p style="margin-top:0.75rem;"><strong>Spark components:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Spark SQL</span> — SQL queries on structured data</li>
+                    <li><span class="highlight">Spark Streaming</span> — real-time stream processing</li>
+                    <li><span class="highlight">MLlib</span> — distributed ML algorithms at scale</li>
+                    <li><span class="highlight">GraphX</span> — graph computation</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Production Spark patterns — optimizations used in real data engineering:</p>
+                <div class="code-block"><pre>from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, to_date, year, month, sum as spark_sum
+from pyspark.sql.window import Window
+import pyspark.sql.functions as F
+
+spark = SparkSession.builder \
+    .appName("ProductionPipeline") \
+    .config("spark.sql.adaptive.enabled", "true")       # auto-optimize query plan
+    .config("spark.sql.shuffle.partitions", "200")       # tune for cluster size
+    .getOrCreate()
+
+# ── Pattern 1: Partition pruning — only read relevant data ────────────
+transactions = spark.read.parquet("s3://datalake/transactions/") \
+    .filter(col("year") == 2024)   # Parquet pushdown: reads only 2024 partitions
+
+# ── Pattern 2: Broadcast join — avoid expensive shuffle for small tables
+products = spark.read.parquet("s3://datalake/products/")   # small table (< 200MB)
+joined = transactions.join(F.broadcast(products), "product_id")
+
+# ── Pattern 3: Cache frequently reused DataFrames ─────────────────────
+user_features = joined \
+    .groupBy("user_id") \
+    .agg(spark_sum("revenue").alias("total_spend"))
+user_features.cache()    # keep in memory for multiple downstream uses
+
+# ── Pattern 4: Window functions for time-series analytics ─────────────
+window = Window.partitionBy("user_id").orderBy("event_date").rowsBetween(-6, 0)
+transactions_with_rolling = transactions.withColumn(
+    "rolling_7d_revenue",
+    spark_sum("revenue").over(window)
+)
+
+# ── Pattern 5: Write optimized Parquet partitioned by date ────────────
+user_features.write \
+    .mode("overwrite") \
+    .partitionBy("year", "month") \
+    .parquet("s3://datalake/user_features_monthly/")</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">⚡ Spark Performance Quick Reference</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        <strong style="color:var(--text-light);">Use Parquet, not CSV</strong> — Parquet is columnar: reading 3 of 100 columns reads 3% of the data. CSV reads everything.<br>
+                        <strong style="color:var(--text-light);">Broadcast small tables</strong> — tables under ~200MB should be broadcast to avoid shuffle in joins.<br>
+                        <strong style="color:var(--text-light);">Avoid .collect()</strong> — pulls all data to the driver; crashes on big datasets. Use <code style="color:#a8ff78;">.show()</code>, <code style="color:#a8ff78;">.take(n)</code>, or write to storage instead.<br>
+                        <strong style="color:var(--text-light);">Tune partitions</strong> — default 200 shuffle partitions is too many for small data. Aim for ~128MB per partition.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🗄 Big Data</div>
+                <h3>Modern Data Architecture: Lakes & Warehouses</h3>
+                <p>Real production systems separate raw storage from analytics-ready data:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Data Lake</span> — stores raw, unprocessed data in any format (S3, Azure Data Lake, GCS). Cheap, flexible, schema-on-read.</li>
+                    <li><span class="highlight">Data Warehouse</span> — structured, cleaned, analytics-ready (Snowflake, BigQuery, Redshift). Fast, schema-on-write.</li>
+                    <li><span class="highlight">Data Lakehouse</span> — combines both: lake-scale storage with warehouse query performance (Delta Lake, Apache Iceberg).</li>
+                    <li><span class="highlight">ETL / ELT pipelines</span> — Extract, Transform, Load between layers (Apache Airflow, dbt, Fivetran).</li>
+                </ul>
+                <div class="code-explanation">
+                    <p>Most modern AI companies use a <span class="highlight">Lakehouse</span> architecture: raw data lands in S3, processed by Spark, served as Delta Lake tables to data scientists and ML pipelines.</p>
+                </div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Full Lakehouse architecture — layers from raw ingestion to ML training:</p>
+                <table class="metrics-table">
+                    <thead><tr><th>Layer</th><th>Name</th><th>What It Stores</th><th>Format</th><th>Tools</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Bronze</strong></td><td>Raw / Landing</td><td>Unmodified source data — exactly as received from APIs, DBs, streams</td><td>JSON, CSV, Avro, raw logs</td><td>Kafka, Fivetran, S3</td></tr>
+                        <tr><td><strong>Silver</strong></td><td>Cleaned / Enriched</td><td>Deduplicated, typed, joined. Schema enforced. Some business logic applied.</td><td>Parquet, Delta Lake</td><td>Spark, dbt</td></tr>
+                        <tr><td><strong>Gold</strong></td><td>Business / ML-Ready</td><td>Aggregated metrics, feature tables, curated datasets for BI and model training</td><td>Delta Lake, Parquet</td><td>dbt, Spark, Feature Store</td></tr>
+                        <tr><td><strong>Serving</strong></td><td>Application Layer</td><td>Pre-computed results for dashboards; real-time features for online inference</td><td>Snowflake, BigQuery, Redis</td><td>Feast, Tecton, Redshift</td></tr>
+                    </tbody>
+                </table>
+                <div class="info-box">
+                    <div class="info-box-title">🏗️ Medallion Architecture (Bronze → Silver → Gold)</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        Popularized by Databricks, this pattern ensures every transformation is tracked and reversible. Raw data in Bronze is <strong style="color:var(--text-light);">never modified</strong> — you can always re-derive Silver from Bronze if a bug is discovered. Delta Lake adds ACID transactions to S3, enabling time-travel (query data as it was 30 days ago), schema evolution, and audit logs — features previously only available in traditional databases.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ===== ML ===== -->
+            <div class="content-card">
+                <div class="section-badge">🤖 Machine Learning</div>
+                <h3>What Is Machine Learning?</h3>
+                <p><span class="highlight">Machine Learning</span> is a method of building systems that learn patterns from data — without being explicitly programmed with rules.</p>
+                <table class="compare-table">
+                    <thead><tr><th>Type</th><th>How it learns</th><th>Examples</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong style="color:var(--cyan)">Supervised</strong></td><td>From labeled input-output pairs</td><td>Spam detection, price prediction, image classification</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">Unsupervised</strong></td><td>From unlabeled data — finds structure</td><td>Customer segmentation, anomaly detection, topic modeling</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">Reinforcement</strong></td><td>From rewards and penalties via trial and error</td><td>Game playing, robotics, RLHF for LLMs</td></tr>
+                    </tbody>
+                </table>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Choosing the right ML type — a practical decision framework:</p>
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-label">Supervised</div>
+                        <div class="concept-title">You have labeled data</div>
+                        <div class="concept-desc">The most common case. You have historical examples where you know the right answer: past emails labeled spam/not-spam, past transactions labeled fraud/legitimate, past house sales with prices. Key question: <em>how much labeled data?</em> Under 1K: try classical ML. Over 100K with raw input: consider DL.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Unsupervised</div>
+                        <div class="concept-title">You have unlabeled data</div>
+                        <div class="concept-desc">Labeling is expensive or impossible. K-Means finds natural customer groups without you defining them. PCA reduces 100 features to 10 without telling it which matter. DBSCAN detects anomalies without labeled examples of what an anomaly looks like. Common in exploratory analysis.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Self-Supervised</div>
+                        <div class="concept-title">Labels come from the data itself</div>
+                        <div class="concept-desc">The dominant paradigm for LLMs and vision models. Next-token prediction, masked word prediction (BERT), and contrastive image-text pairs (CLIP) — the model creates its own supervision signal from unlabeled data. Allows training on internet-scale data with no human labeling.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Reinforcement</div>
+                        <div class="concept-title">You can define a reward signal</div>
+                        <div class="concept-desc">The agent learns by trial and error. RLHF (Reinforcement Learning from Human Feedback) is how Claude and GPT-4 are aligned — humans rate responses and a reward model is trained to predict these ratings, then the LLM is optimized against it.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🤖 Machine Learning</div>
+                <h3>The ML Workflow</h3>
+                <p>Every ML project follows the same core pipeline:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">1. Data Collection</span> — gather raw data from databases, APIs, files</li>
+                    <li><span class="highlight">2. EDA</span> — understand distributions, correlations, outliers</li>
+                    <li><span class="highlight">3. Feature Engineering</span> — create, transform, and select the variables that matter</li>
+                    <li><span class="highlight">4. Train/Test Split</span> — separate data to evaluate on unseen examples</li>
+                    <li><span class="highlight">5. Model Training</span> — fit the algorithm on training data</li>
+                    <li><span class="highlight">6. Evaluation</span> — measure performance (accuracy, F1, RMSE, AUC-ROC)</li>
+                    <li><span class="highlight">7. Hyperparameter Tuning</span> — optimize model configuration (GridSearchCV, Optuna)</li>
+                    <li><span class="highlight">8. Deployment</span> — serve predictions via API, batch job, or embedded model</li>
+                </ul>
+                <div class="code-block"><pre>from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test  = scaler.transform(X_test)
+
+model = GradientBoostingClassifier(n_estimators=200, max_depth=4, learning_rate=0.05)
+model.fit(X_train, y_train)
+
+cv_score = cross_val_score(model, X_train, y_train, cv=5, scoring='f1').mean()
+print(f"CV F1: {cv_score:.4f}")
+print(classification_report(y_test, model.predict(X_test)))</pre></div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Production ML workflow — beyond the basics, what actually matters in practice:</p>
+                <div class="code-block"><pre>import pandas as pd
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.model_selection import StratifiedKFold, cross_validate
+from sklearn.metrics import roc_auc_score
+import optuna
+import mlflow
+
+# ── Step 1: Robust preprocessing pipeline (prevents data leakage) ─────
+numeric_features  = ['age', 'revenue', 'days_since_last_order']
+categorical_features = ['country', 'product_category', 'channel']
+
+numeric_transformer = Pipeline([
+    ('imputer', SimpleImputer(strategy='median')),  # fill missing values
+    ('scaler', StandardScaler())
+])
+
+categorical_transformer = Pipeline([
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
+])
+
+preprocessor = ColumnTransformer([
+    ('num', numeric_transformer, numeric_features),
+    ('cat', categorical_transformer, categorical_features)
+])
+
+# ── Step 2: Full pipeline — preprocessing + model in one object ────────
+# This prevents data leakage: scaler is fit only on training folds
+full_pipeline = Pipeline([
+    ('prep', preprocessor),
+    ('model', GradientBoostingClassifier(n_estimators=200))
+])
+
+# ── Step 3: Stratified CV for reliable evaluation ─────────────────────
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+cv_results = cross_validate(
+    full_pipeline, X, y, cv=cv,
+    scoring={'auc': 'roc_auc', 'f1': 'f1', 'precision': 'precision', 'recall': 'recall'},
+    return_train_score=True    # detect overfitting: train >> test means overfitting
+)
+print(f"AUC: {cv_results['test_auc'].mean():.4f} ± {cv_results['test_auc'].std():.4f}")
+
+# ── Step 4: Hyperparameter tuning with Optuna ─────────────────────────
+def objective(trial):
+    params = {
+        'model__n_estimators':  trial.suggest_int('n_estimators', 100, 500),
+        'model__max_depth':     trial.suggest_int('max_depth', 2, 6),
+        'model__learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3, log=True),
+        'model__subsample':     trial.suggest_float('subsample', 0.6, 1.0),
+    }
+    full_pipeline.set_params(**params)
+    return cross_val_score(full_pipeline, X_train, y_train, cv=3, scoring='roc_auc').mean()
+
+study = optuna.create_study(direction='maximize')
+study.optimize(objective, n_trials=50)
+print(f"Best AUC: {study.best_value:.4f}")
+
+# ── Step 5: MLflow tracking — log everything ──────────────────────────
+with mlflow.start_run():
+    mlflow.log_params(study.best_params)
+    mlflow.log_metric("cv_auc", cv_results['test_auc'].mean())
+    mlflow.sklearn.log_model(full_pipeline, "model")</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🤖 Machine Learning</div>
+                <h3>Key ML Algorithms</h3>
+                <table class="compare-table">
+                    <thead><tr><th>Algorithm</th><th>Best for</th><th>Key property</th></tr></thead>
+                    <tbody>
+                        <tr><td>Linear / Logistic Regression</td><td>Baseline, interpretable</td><td>Fast, assumes linear relationship</td></tr>
+                        <tr><td>Decision Trees</td><td>Explainability</td><td>Human-readable rules</td></tr>
+                        <tr><td>Random Forest</td><td>Tabular data</td><td>Ensemble of trees, robust to overfitting</td></tr>
+                        <tr><td>Gradient Boosting (XGBoost, LightGBM)</td><td>Tabular ML competitions</td><td>Often best on structured data</td></tr>
+                        <tr><td>SVM</td><td>High-dimensional, small data</td><td>Margin maximization</td></tr>
+                        <tr><td>K-Means</td><td>Clustering</td><td>Unsupervised, assigns to centroids</td></tr>
+                        <tr><td>PCA</td><td>Dimensionality reduction</td><td>Projects to top variance directions</td></tr>
+                    </tbody>
+                </table>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Algorithm selection guide — a practical framework for choosing the right model:</p>
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-label">Start Here</div>
+                        <div class="concept-title">Always Baseline First</div>
+                        <div class="concept-desc">Before anything else, train a <strong style="color:var(--text-light);">Logistic Regression</strong> or <strong style="color:var(--text-light);">Linear Regression</strong>. It sets a performance floor, reveals whether your features have signal, and is fast to debug. If your fancy model can't beat the linear baseline, something is wrong with your data, not the model.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Tabular Data</div>
+                        <div class="concept-title">Go Gradient Boosting</div>
+                        <div class="concept-desc"><strong style="color:var(--text-light);">LightGBM</strong> is typically the best default for tabular classification and regression. It's faster than XGBoost, handles missing values natively, and requires minimal preprocessing. Use <strong style="color:var(--text-light);">CatBoost</strong> when you have many high-cardinality categorical features (e.g. country, user_id).</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Interpretability</div>
+                        <div class="concept-title">Use SHAP for Any Model</div>
+                        <div class="concept-desc">Don't sacrifice accuracy for a simpler model just for explainability. Use SHAP (SHapley Additive exPlanations) to explain XGBoost or Random Forest predictions: <code style="color:#a8ff78;">shap.TreeExplainer(model)</code> shows which features drove each individual prediction — even for complex ensembles.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Small Dataset</div>
+                        <div class="concept-title">SVM or Regularized Linear</div>
+                        <div class="concept-desc">With under 1,000 labeled examples, tree ensembles can overfit. SVMs with RBF kernels generalize well in high-dimensional spaces with small data. Ridge/Lasso regression enforces strong regularization. Never use deep learning with &lt;1K examples without a pre-trained backbone.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🤖 Machine Learning</div>
+                <h3>Overfitting, Underfitting & Regularization</h3>
+                <p>The most important challenge in ML is building models that <span class="highlight">generalize</span> — performing well on new, unseen data, not just training data.</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Underfitting</span> — model too simple; high error on both train and test. Fix: more features, more complex model.</li>
+                    <li><span class="highlight">Overfitting</span> — model memorizes training data; low train error, high test error. Fix: regularization, more data, simpler model.</li>
+                    <li><span class="highlight">L1 (Lasso)</span> — penalty proportional to |weights|; drives irrelevant features to zero</li>
+                    <li><span class="highlight">L2 (Ridge)</span> — penalty proportional to weights²; shrinks all weights, keeps all features</li>
+                    <li><span class="highlight">Dropout</span> — randomly zeros neurons during training</li>
+                    <li><span class="highlight">Early Stopping</span> — stop training when validation loss stops improving</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Diagnosing model problems from learning curves — reading the bias-variance signals:</p>
+                <div class="code-block"><pre>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import learning_curve
+from sklearn.ensemble import GradientBoostingClassifier
+
+def plot_learning_curve(model, X, y, cv=5):
+    """
+    Learning curve plots training and validation score vs dataset size.
+    Reveals underfitting, overfitting, and whether more data would help.
+    """
+    train_sizes, train_scores, val_scores = learning_curve(
+        model, X, y, cv=cv, n_jobs=-1,
+        train_sizes=np.linspace(0.1, 1.0, 10),
+        scoring='roc_auc'
+    )
+
+    train_mean = train_scores.mean(axis=1)
+    val_mean   = val_scores.mean(axis=1)
+    gap = train_mean[-1] - val_mean[-1]
+
+    # Diagnose the problem:
+    if train_mean[-1] < 0.75:
+        print("⚠️  HIGH BIAS (underfitting): both curves low")
+        print("   Fix: add features, increase model complexity, remove regularization")
+    elif gap > 0.1:
+        print("⚠️  HIGH VARIANCE (overfitting): large train-val gap")
+        print(f"   Gap: {gap:.3f}")
+        print("   Fix: add data, increase regularization, reduce model complexity")
+    else:
+        print(f"✓ Good fit: train={train_mean[-1]:.3f}, val={val_mean[-1]:.3f}, gap={gap:.3f}")
+
+    return train_mean[-1], val_mean[-1], gap
+
+# ── Cross-validation: the right way to detect data leakage ───────────
+# WRONG: fit scaler on all data, then do CV — scaler has seen test data!
+# scaler.fit(X_all)  ← data leakage
+# cross_val_score(model, scaler.transform(X_all), y)  ← inflated scores
+
+# RIGHT: put scaler inside the pipeline — it only sees training folds
+from sklearn.pipeline import Pipeline
+pipeline = Pipeline([('scale', StandardScaler()), ('model', GradientBoostingClassifier())])
+scores = cross_val_score(pipeline, X, y, cv=StratifiedKFold(5), scoring='roc_auc')
+# Now scaler is fit fresh on each training fold ← no leakage</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">🔍 Data Leakage — The Silent Model Killer</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        Data leakage occurs when information from the test set contaminates training — producing models that look great in evaluation but fail in production. Common sources: <strong style="color:var(--text-light);">fitting preprocessors on all data</strong> before splitting (StandardScaler, imputers); <strong style="color:var(--text-light);">target-correlated features</strong> that wouldn't be available at prediction time (e.g. including "claim_paid" to predict "will_claim"); <strong style="color:var(--text-light);">future data in time-series</strong> (using Tuesday's data to predict Monday). Always use sklearn <code style="color:#a8ff78;">Pipeline</code> objects and time-based splits for temporal data.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ===== DL ===== -->
+            <div class="content-card">
+                <div class="section-badge">🧠 Deep Learning</div>
+                <h3>What Is Deep Learning?</h3>
+                <p><span class="highlight">Deep Learning</span> uses artificial neural networks with many layers to learn hierarchical representations directly from raw data — without manual feature engineering.</p>
+                <div class="code-explanation">
+                    <p><strong>Why "deep"?</strong> Layer 1 detects edges → Layer 2 detects shapes → Layer 3 detects objects. The depth enables this hierarchy.</p>
+                </div>
+                <p style="margin-top:1rem;"><strong>When to use DL over classical ML:</strong></p>
+                <ul class="styled-list">
+                    <li>Unstructured data: images, audio, raw text</li>
+                    <li>Very large datasets (millions+ examples)</li>
+                    <li>Tasks where feature engineering is impractical</li>
+                    <li>State-of-the-art performance is required</li>
+                </ul>
+                <p style="margin-top:0.75rem;"><strong>When classical ML is better:</strong></p>
+                <ul class="styled-list">
+                    <li>Structured/tabular data with &lt;100K rows</li>
+                    <li>When interpretability is required</li>
+                    <li>Limited compute or training time</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">The DL landscape — major architectures and what they're used for today:</p>
+                <table class="metrics-table">
+                    <thead><tr><th>Architecture</th><th>Input Type</th><th>Key Mechanism</th><th>Current Use Cases</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Feedforward / MLP</strong></td><td>Tabular vectors</td><td>Fully connected layers + activations</td><td>Tabular regression/classification when DL is needed</td></tr>
+                        <tr><td><strong>CNN</strong></td><td>Images, 2D signals</td><td>Convolutional filters + pooling</td><td>Image classification, object detection, medical imaging</td></tr>
+                        <tr><td><strong>RNN / LSTM</strong></td><td>Sequences</td><td>Recurrent hidden state</td><td>Legacy: mostly replaced by Transformers. Still used for small models.</td></tr>
+                        <tr><td><strong>Transformer (encoder)</strong></td><td>Text, tokens</td><td>Self-attention</td><td>BERT-style: embeddings, classification, NER, semantic search</td></tr>
+                        <tr><td><strong>Transformer (decoder)</strong></td><td>Text, tokens</td><td>Masked self-attention + autoregression</td><td>GPT, Claude, Gemini — all LLMs</td></tr>
+                        <tr><td><strong>Diffusion Model</strong></td><td>Noise → image/audio</td><td>Iterative denoising</td><td>Image generation (Stable Diffusion, DALL-E 3), audio synthesis</td></tr>
+                        <tr><td><strong>ViT (Vision Transformer)</strong></td><td>Image patches</td><td>Transformer on image patches</td><td>CLIP, GPT-4V, modern vision — replacing CNNs at scale</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🧠 Deep Learning</div>
+                <h3>Neural Networks & Backpropagation</h3>
+                <p>A neural network is a stack of layers. Each neuron computes a weighted sum and applies an activation function. Training adjusts weights using <span class="highlight">backpropagation</span>.</p>
+                <div class="code-block"><pre>import torch
+import torch.nn as nn
+
+class FeedforwardNet(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, output_dim)
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+model     = FeedforwardNet(128, 256, 10)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+criterion = nn.CrossEntropyLoss()
+
+for epoch in range(50):
+    for X_batch, y_batch in train_loader:
+        optimizer.zero_grad()
+        output = model(X_batch)
+        loss   = criterion(output, y_batch)
+        loss.backward()
+        optimizer.step()</pre></div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Production PyTorch training loop — what a real training script looks like:</p>
+                <div class="code-block"><pre>import torch
+import torch.nn as nn
+from torch.optim.lr_scheduler import OneCycleLR
+from torch.cuda.amp import GradScaler, autocast
+
+def train_model(model, train_loader, val_loader, num_epochs=50):
+    device    = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model     = model.to(device)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)  # prevents overconfidence
+    scaler    = GradScaler()  # mixed precision: 2x faster on modern GPUs
+
+    # OneCycleLR: warm up then decay — often better than constant lr
+    scheduler = OneCycleLR(optimizer, max_lr=1e-3,
+                           steps_per_epoch=len(train_loader), epochs=num_epochs)
+
+    best_val_acc, patience_counter, patience = 0, 0, 10
+
+    for epoch in range(num_epochs):
+        # ── Training phase ──────────────────────────────────────────
+        model.train()
+        train_loss = 0
+        for X, y in train_loader:
+            X, y = X.to(device), y.to(device)
+            optimizer.zero_grad()
+
+            with autocast():                   # float16 forward pass
+                output = model(X)
+                loss   = criterion(output, y)
+
+            scaler.scale(loss).backward()      # scale gradients for float16
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # prevent exploding gradients
+            scaler.step(optimizer)
+            scaler.update()
+            scheduler.step()
+            train_loss += loss.item()
+
+        # ── Validation phase ────────────────────────────────────────
+        model.eval()
+        correct = 0
+        with torch.no_grad():
+            for X, y in val_loader:
+                X, y = X.to(device), y.to(device)
+                preds = model(X).argmax(dim=1)
+                correct += (preds == y).sum().item()
+
+        val_acc = correct / len(val_loader.dataset)
+        print(f"Epoch {epoch+1:3d} | loss: {train_loss/len(train_loader):.4f} | val_acc: {val_acc:.4f}")
+
+        # ── Early stopping ──────────────────────────────────────────
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            torch.save(model.state_dict(), 'best_model.pt')
+            patience_counter = 0
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print(f"Early stopping at epoch {epoch+1}")
+                break
+
+    model.load_state_dict(torch.load('best_model.pt'))
+    return model</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🧠 Deep Learning</div>
+                <h3>Convolutional Neural Networks (CNNs)</h3>
+                <p>CNNs are specialized for spatial data. <span class="highlight">Convolutional filters</span> slide across the input, detecting local patterns regardless of position.</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Convolution layer</span> — applies learned filters to detect edges, textures, shapes</li>
+                    <li><span class="highlight">Pooling layer</span> — reduces spatial dimensions (MaxPool, AvgPool)</li>
+                    <li><span class="highlight">Fully connected layer</span> — combines features for final classification</li>
+                </ul>
+                <div class="code-block"><pre>class SimpleCNN(nn.Module):
+    def __init__(self, num_classes=10):
+        super().__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(3, 32, kernel_size=3, padding=1),
+            nn.ReLU(), nn.MaxPool2d(2),
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.ReLU(), nn.MaxPool2d(2)
+        )
+        self.classifier = nn.Linear(64 * 8 * 8, num_classes)
+
+    def forward(self, x):
+        return self.classifier(self.features(x).flatten(1))</pre></div>
+                <p style="margin-top:0.75rem;">Most practitioners use <span class="highlight">transfer learning</span> — fine-tuning a pre-trained ImageNet model rather than training from scratch.</p>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Transfer learning with a pre-trained CNN — the production approach for image tasks:</p>
+                <div class="code-block"><pre>import torch
+import torch.nn as nn
+from torchvision import models, transforms
+from torch.utils.data import DataLoader
+
+# ── Load pre-trained ResNet50 (trained on 1.2M ImageNet images) ────────
+backbone = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+
+# ── Strategy A: Feature extraction — freeze backbone, train only head ──
+# Best when: your dataset is small (&lt;1K images) or very different from ImageNet
+for param in backbone.parameters():
+    param.requires_grad = False
+
+backbone.fc = nn.Sequential(
+    nn.Linear(2048, 512),
+    nn.ReLU(),
+    nn.Dropout(0.3),
+    nn.Linear(512, num_classes)    # only this head is trainable
+)
+
+# ── Strategy B: Fine-tuning — unfreeze later layers, use small lr ──────
+# Best when: your dataset is medium-large or similar to ImageNet
+for param in backbone.layer4.parameters():   # unfreeze last ResNet block
+    param.requires_grad = True
+
+optimizer = torch.optim.AdamW([
+    {'params': backbone.layer4.parameters(), 'lr': 1e-5},   # small lr for pre-trained
+    {'params': backbone.fc.parameters(),     'lr': 1e-3},   # larger lr for new head
+])
+
+# ── ImageNet normalization — required for pre-trained torchvision models
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225])   # ImageNet stats
+])
+
+# Result: ResNet50 pre-trained backbone + custom head
+# Achieves 90%+ accuracy on many vision tasks with just 500-1000 examples</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🧠 Deep Learning</div>
+                <h3>Recurrent Networks & Transformers</h3>
+                <p><strong>RNNs / LSTMs</strong> process sequential data by maintaining a hidden state across time steps. They struggle with long-range dependencies.</p>
+                <p style="margin-top:0.75rem;"><strong>Transformers</strong> replaced RNNs for most sequential tasks. <span class="highlight">Self-attention</span> — every token attends to every other token in parallel — enables long-range dependencies and massive parallelism.</p>
+                <div class="code-explanation">
+                    <p>All modern LLMs (GPT-4, Claude, Gemini) are Transformer-based. BERT, T5, Whisper, DALL-E, Stable Diffusion — all Transformers. The most important architecture in AI today.</p>
+                </div>
+                <ul class="styled-list">
+                    <li><span class="highlight">Encoder-only</span> (BERT) — understanding tasks: classification, NER, embeddings</li>
+                    <li><span class="highlight">Decoder-only</span> (GPT) — generation: text completion, chat, code</li>
+                    <li><span class="highlight">Encoder-decoder</span> (T5, BART) — seq2seq: translation, summarization</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Self-attention explained — the core mechanism that powers all Transformers:</p>
+                <div class="code-block"><pre>import torch
+import torch.nn.functional as F
+import math
+
+def scaled_dot_product_attention(Q, K, V, mask=None):
+    """
+    The core operation in every Transformer.
+    
+    Q (Query):  what this token is looking for
+    K (Key):    what each token offers as a match
+    V (Value):  what content is passed if the token is attended to
+    
+    Each token computes attention scores against ALL other tokens,
+    then takes a weighted sum of their values.
+    """
+    d_k = Q.shape[-1]   # dimension of key vectors (for scaling)
+
+    # Step 1: Compute raw attention scores — how much does Q "match" each K?
+    scores = torch.matmul(Q, K.transpose(-2, -1))  # [batch, heads, seq, seq]
+
+    # Step 2: Scale by sqrt(d_k) to prevent vanishing gradients in softmax
+    scores = scores / math.sqrt(d_k)
+
+    # Step 3: Mask future tokens (decoder only) — can't attend to the future
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, float('-inf'))
+
+    # Step 4: Softmax → attention weights sum to 1 for each query position
+    weights = F.softmax(scores, dim=-1)   # [batch, heads, seq_len, seq_len]
+
+    # Step 5: Weighted sum of value vectors
+    output = torch.matmul(weights, V)     # [batch, heads, seq_len, d_v]
+
+    return output, weights
+
+# Interpretation of weights[i][j]:
+#   How much does token i attend to token j?
+#   High weight = token i finds token j highly relevant
+#   In "The cat sat on the mat", "sat" attends strongly to "cat" (subject) and "mat" (location)
+
+# Multi-head attention: run this attention H times in parallel with different Q,K,V projections
+# Each head learns to attend to different types of relationships
+# Head 1: syntactic (subject-verb), Head 2: semantic (entity-property), etc.</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">🔢 Why Transformers Scale But RNNs Don't</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        <strong style="color:var(--text-light);">RNNs are sequential</strong>: to process token N, you must first process tokens 1 through N-1. This serial dependency means you can't parallelize — training on a GPU that could run 10,000 operations simultaneously instead runs one at a time. <strong style="color:var(--text-light);">Transformers are fully parallel</strong>: all tokens are processed simultaneously. Self-attention computes all pairwise relationships at once as a matrix multiplication — a single GPU operation. This is why scaling Transformer training to thousands of GPUs is straightforward, but scaling RNN training is nearly impossible.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🧠 Deep Learning</div>
+                <h3>Transfer Learning & Fine-Tuning</h3>
+                <p><span class="highlight">Transfer learning</span> takes a model pre-trained on a large dataset and adapts it to a new task — the dominant paradigm in modern DL.</p>
+                <div class="code-block"><pre>from transformers import AutoModelForSequenceClassification, AutoTokenizer, TrainingArguments, Trainer
+
+model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=3)
+
+training_args = TrainingArguments(
+    output_dir="./results", num_train_epochs=3,
+    per_device_train_batch_size=16, learning_rate=2e-5, evaluation_strategy="epoch"
+)
+
+trainer = Trainer(model=model, args=training_args, train_dataset=train_ds, eval_dataset=eval_ds)
+trainer.train()</pre></div>
+                <ul class="styled-list">
+                    <li><span class="highlight">Feature extraction</span> — freeze pre-trained weights, only train a new head</li>
+                    <li><span class="highlight">Full fine-tuning</span> — train all weights on the new task</li>
+                    <li><span class="highlight">PEFT / LoRA</span> — train only small adapter weights (used for LLMs)</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">LoRA fine-tuning — how to adapt a 7B parameter LLM with a consumer GPU:</p>
+                <div class="code-block"><pre>from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
+from peft import LoraConfig, get_peft_model, TaskType
+from trl import SFTTrainer
+
+# ── Load the base model ───────────────────────────────────────────────
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-3.2-3B",
+    torch_dtype=torch.float16,     # half precision to fit in GPU memory
+    device_map="auto"              # auto-distribute across available GPUs
+)
+
+# ── LoRA Configuration ────────────────────────────────────────────────
+# Instead of updating 3B parameters, LoRA adds small low-rank matrices
+# to specific layers. Only these adapters (~8M params) are trained.
+lora_config = LoraConfig(
+    task_type=TaskType.CAUSAL_LM,
+    r=16,                          # rank of the low-rank matrices (higher = more capacity)
+    lora_alpha=32,                 # scaling factor
+    target_modules=["q_proj", "v_proj"],  # which attention matrices to adapt
+    lora_dropout=0.1,
+    bias="none"
+)
+
+# ── Apply LoRA to the model ───────────────────────────────────────────
+peft_model = get_peft_model(model, lora_config)
+peft_model.print_trainable_parameters()
+# Output: "trainable params: 8,388,608 || all params: 3,212,791,808 || trainable%: 0.26%"
+# Only 0.26% of parameters are updated — but fine-tuning quality is close to full fine-tuning
+
+# ── Train with SFTTrainer (supervised fine-tuning) ────────────────────
+trainer = SFTTrainer(
+    model=peft_model,
+    train_dataset=formatted_dataset,
+    args=TrainingArguments(
+        output_dir="./lora_finetuned",
+        num_train_epochs=3,
+        per_device_train_batch_size=4,
+        gradient_accumulation_steps=4,   # effective batch size = 16
+        learning_rate=2e-4,
+        fp16=True,
+        logging_steps=10
+    ),
+    dataset_text_field="text"
+)
+trainer.train()
+
+# ── Merge LoRA weights back into base model for deployment ────────────
+merged_model = peft_model.merge_and_unload()
+merged_model.save_pretrained("./final_model")</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">💡 When to Fine-Tune vs Prompt Engineering vs RAG</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        <strong style="color:var(--text-light);">Start with prompt engineering</strong> — a well-crafted system prompt with few-shot examples often eliminates the need for fine-tuning entirely. Zero cost, immediate results.<br>
+                        <strong style="color:var(--text-light);">Use RAG</strong> when the model needs access to private/recent information that isn't in its training data (company docs, current prices, internal knowledge bases).<br>
+                        <strong style="color:var(--text-light);">Fine-tune (LoRA)</strong> when you need to: change the model's writing style or persona permanently, teach it a specialized format or domain language, or improve reliability on a narrow task where prompt engineering is inconsistent. Fine-tuning is <em>not</em> for adding new knowledge — use RAG for that.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                <h3>Section Conclusion</h3>
+                <p>You now understand the full data intelligence stack:</p>
+                <ul class="styled-list">
+                    <li>Big Data scale tiers and when distributed tools are actually needed</li>
+                    <li>Why Spark replaced MapReduce: in-memory RDDs, lazy evaluation, DAG optimization</li>
+                    <li>Production Spark patterns: Parquet, broadcast joins, caching, window functions</li>
+                    <li>Medallion architecture (Bronze → Silver → Gold) and Lakehouse with Delta Lake</li>
+                    <li>ML type selection: supervised, unsupervised, self-supervised, reinforcement</li>
+                    <li>Production ML: sklearn Pipeline, Optuna hyperparameter tuning, MLflow tracking</li>
+                    <li>Algorithm selection: LightGBM as default tabular baseline, SHAP for interpretability</li>
+                    <li>Data leakage — the silent model killer — and how to prevent it</li>
+                    <li>Production PyTorch training: mixed precision, gradient clipping, early stopping</li>
+                    <li>CNN transfer learning: feature extraction vs fine-tuning with differential learning rates</li>
+                    <li>Transformer self-attention mechanics: Q/K/V, scaling, why it parallelizes</li>
+                    <li>LoRA fine-tuning: adapting a 3B LLM with 0.26% of parameters on a consumer GPU</li>
+                    <li>When to prompt engineer vs RAG vs fine-tune</li>
+                </ul>
+                <p style="margin-top:1rem;">Together these three disciplines power every production AI system in the world — from recommendation engines to LLMs.</p>
+            </div>
+
+        </div>
+
+        <!-- LAB -->
+        <div id="laboratorio" class="tab-panel">
+            <h3 style="margin-bottom:1rem;">Pipeline Simulator</h3>
+            <p style="margin-bottom:1rem;font-size:0.9rem;color:var(--text-secondary);">Write a data pipeline using Spark, Scikit-learn, or PyTorch. The simulator detects what you're building and generates the expected output.</p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header">PIPELINE CODE</div>
+                    <textarea class="lab-textarea" id="lab-input">import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
+from sklearn.metrics import accuracy_score
+
+# CNN for image classification
+class ImageClassifier(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(1, 32, 3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(32, 64, 3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2)
+        )
+        self.classifier = nn.Linear(64 * 7 * 7, 10)
+
+    def forward(self, x):
+        return self.classifier(self.features(x).flatten(1))
+
+model     = ImageClassifier()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+criterion = nn.CrossEntropyLoss()
+
+for epoch in range(10):
+    model.train()
+    pass</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header">EXECUTION OUTPUT</div>
+                    <div class="lab-output" id="lab-output">Click "Run Simulation" to execute your pipeline...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="runLab()">▶ Run Simulation</button>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: Big Data, ML & Deep Learning</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem;">15 questions spanning all three disciplines.</p>
+                <form id="quiz-form">
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">1. Which of the "4 Vs" of Big Data refers to real-time data streams?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Volume</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Variety</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Velocity</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Veracity</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">2. Why is Apache Spark faster than Hadoop MapReduce for most workloads?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A"> A) It uses more CPU cores</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B"> B) It processes data in memory instead of writing to disk between stages</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C"> C) It skips the shuffle step entirely</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"> D) It only works with structured data</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">3. What is a Data Lakehouse?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"> A) A data warehouse built on PostgreSQL</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B"> B) A combination of data lake storage scale with data warehouse query performance</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C"> C) A NoSQL database for unstructured data</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"> D) A streaming pipeline built on Kafka</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">4. Which type of Machine Learning uses labeled input-output pairs to train?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Unsupervised Learning</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Reinforcement Learning</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C"> C) Supervised Learning</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Self-Supervised Learning</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">5. What is overfitting?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"> A) A model that is too simple to learn any pattern</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B"> B) A model that performs well on training data but poorly on new unseen data</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C"> C) A model trained with too little data</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"> D) A model with too many training epochs causing high bias</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">6. Which ML algorithm is most consistently best on structured tabular data?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Linear Regression</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B"> B) K-Means Clustering</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C"> C) Gradient Boosting (XGBoost, LightGBM)</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Principal Component Analysis</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">7. What does L1 regularization (Lasso) do to model weights?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Doubles all weights to improve stability</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Shrinks all weights proportionally but keeps them all non-zero</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Drives irrelevant feature weights to exactly zero, performing feature selection</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Randomly zeros weights during training</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">8. What is the primary advantage of Deep Learning over classical ML?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"> A) It always requires less data</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B"> B) It automatically learns hierarchical feature representations from raw data</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C"> C) It is faster to train than decision trees</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"> D) It produces more interpretable models</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">9. What does backpropagation compute in neural network training?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"> A) The optimal learning rate for each layer</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B"> B) The gradient of the loss with respect to each weight, enabling weight updates</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C"> C) The number of neurons needed per layer</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"> D) The attention scores between tokens</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">10. What makes Convolutional Neural Networks suited for image data?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"> A) They process pixels one at a time in sequence</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B"> B) They use learned filters that detect spatial patterns regardless of position</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C"> C) They compress images before analysis</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"> D) They use self-attention across all pixels</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">11. What key mechanism do Transformers use to handle long-range dependencies?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Recurrent hidden states passed forward in time</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Convolutional filters across the sequence</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Self-attention — every token attends to every other token</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Memory cells with forget gates</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">12. What is transfer learning?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Moving a model from one cloud provider to another</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Taking a pre-trained model and adapting it to a new task with less data</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Copying weights from one layer to another</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Training a small model to mimic a large one (distillation)</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">13. What does HDFS stand for and what is its main feature?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"> A) High Definition File System — supports 4K video files</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Hadoop Distributed File System — splits and replicates files across many machines</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Hierarchical Data Format System — for scientific datasets</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Hybrid Database File System — combines SQL and NoSQL</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">14. Which DL architecture is a GPT-4 or Claude built on?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Convolutional Neural Network</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Recurrent Neural Network (LSTM)</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Transformer (decoder-only)</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Feedforward Network with 1000+ layers</label>
+                    </div>
+
+                    <div class="content-card quiz-item">
+                        <p style="color:var(--cyan);font-weight:600;">15. When should you prefer classical ML over Deep Learning?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"> A) When working with image or audio data</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"> B) When you have millions of training examples</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C"> C) When data is structured/tabular, small-to-medium size, or interpretability is required</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D"> D) When state-of-the-art NLP performance is needed</label>
+                    </div>
+
+                </form>
+
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+
+                <div id="quiz-results" class="quiz-results" style="display:none;">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESOURCES -->
+        <div id="recursos" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem;">Support Materials</h3>
+            <div class="content-card">
+                <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.85rem;">BIG DATA</p>
+                <a href="#" class="resource-link">→ Apache Spark – Official Documentation & Quick Start</a>
+                <a href="#" class="resource-link">→ Databricks – Spark tutorials and Delta Lake</a>
+                <a href="#" class="resource-link">→ dbt – Data Build Tool for ELT pipelines</a>
+                <a href="#" class="resource-link">→ Apache Airflow – Workflow orchestration</a>
+                <p style="color:var(--text-secondary);margin:1.5rem 0 1rem;font-size:0.85rem;">MACHINE LEARNING</p>
+                <a href="#" class="resource-link">→ Scikit-learn User Guide – sklearn.org</a>
+                <a href="#" class="resource-link">→ XGBoost Documentation – xgboost.readthedocs.io</a>
+                <a href="#" class="resource-link">→ Kaggle – ML competitions and datasets</a>
+                <a href="#" class="resource-link">→ "Hands-On Machine Learning" – Aurélien Géron (O'Reilly)</a>
+                <p style="color:var(--text-secondary);margin:1.5rem 0 1rem;font-size:0.85rem;">DEEP LEARNING</p>
+                <a href="#" class="resource-link">→ PyTorch Tutorials – pytorch.org/tutorials</a>
+                <a href="#" class="resource-link">→ fast.ai – Practical Deep Learning for Coders (free)</a>
+                <a href="#" class="resource-link">→ Hugging Face – Transformers library and model hub</a>
+                <a href="#" class="resource-link">→ "The Deep Learning Book" – Goodfellow et al. (free online)</a>
+                <a href="#" class="resource-link">→ Andrej Karpathy – Neural Networks: Zero to Hero (YouTube)</a>
+            </div>
+        </div>
+
+        <!-- ASSESSMENT -->
+        <div id="avaliacao" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Mastery Criteria: Big Data, ML & Deep Learning</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem;">To successfully complete this module, demonstrate understanding across the following competency levels:</p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>The 4 Vs of Big Data and why they matter</li>
+                            <li>The difference between Hadoop and Spark</li>
+                            <li>What a data lake vs data warehouse is</li>
+                            <li>The three types of ML: supervised, unsupervised, reinforcement</li>
+                            <li>The ML workflow from data to deployment</li>
+                            <li>What overfitting and underfitting are</li>
+                            <li>What a neural network and backpropagation are</li>
+                            <li>Why Transformers replaced RNNs for most tasks</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Writing basic PySpark pipelines (filter, groupBy, agg)</li>
+                            <li>Training and evaluating Scikit-learn models end-to-end</li>
+                            <li>Applying L1/L2 regularization and understanding the difference</li>
+                            <li>Choosing the right ML algorithm for a given problem</li>
+                            <li>Building and training a feedforward network in PyTorch</li>
+                            <li>Understanding CNN architecture (Conv, Pool, FC layers)</li>
+                            <li>Fine-tuning a pre-trained model with Hugging Face</li>
+                            <li>Reading and interpreting training vs validation loss curves</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>Designing end-to-end Big Data pipelines with Spark + Airflow</li>
+                            <li>Implementing distributed ML training with Spark MLlib</li>
+                            <li>Hyperparameter tuning at scale with Optuna or Ray Tune</li>
+                            <li>Building custom PyTorch Dataset, DataLoader, and training loops</li>
+                            <li>Implementing LoRA / PEFT fine-tuning for LLMs</li>
+                            <li>Designing and comparing CNN architectures for vision tasks</li>
+                            <li>Building a data lakehouse architecture from scratch</li>
+                            <li>Deploying ML models with versioning, monitoring, and rollback</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+        const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+        document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+        document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+        window.scrollTo({ top: 150, behavior: 'smooth' });
+    }
+
+    function runLab() {
+        const input  = document.getElementById('lab-input').value;
+        const output = document.getElementById('lab-output');
+
+        const hasSpark   = input.includes('SparkSession') || input.includes('pyspark');
+        const hasCNN     = input.includes('Conv2d') || input.includes('CNN') || input.includes('conv');
+        const hasPyTorch = input.includes('torch') || input.includes('nn.Module');
+        const hasSklearn = input.includes('sklearn') || input.includes('GradientBoosting') || input.includes('RandomForest');
+        const hasTransformer = input.includes('transformers') || input.includes('BERT') || input.includes('AutoModel');
+
+        if (hasSpark) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Spark Job Submitted</strong>
+
+<strong style="color:#28e0ff;">Cluster:</strong>
+  Workers         : 8 nodes (32 cores each)
+  Total cores     : 256
+  Total memory    : 512 GB
+
+<strong style="color:#28e0ff;">Job Execution Plan:</strong>
+  Stage 1: Read CSV from S3 ............ 42s
+  Stage 2: Filter (year == 2024) ........ 8s
+  Stage 3: Shuffle for groupBy ......... 18s
+  Stage 4: Aggregate (avg, count) ....... 5s
+  Stage 5: Sort descending .............. 3s
+  ─────────────────────────────────────────
+  Total wall time               :      76s
+
+<strong style="color:#28e0ff;">Result (top 5 rows):</strong>
+  region          avg_revenue   num_transactions
+  ─────────────────────────────────────────────
+  North America   $48,291.33    1,204,873
+  Europe          $41,882.10      987,341
+  Asia Pacific    $38,440.67    1,543,210
+  Latin America   $29,110.44      432,891
+  Middle East     $24,783.20      198,443
+
+  Total rows processed: 12,847,201
+
+<em style="color:#b6c0de;">Tip: Use .cache() to persist intermediate DataFrames and avoid recomputation.
+Tip: Switch CSV to Parquet to cut read time from 42s to ~4s.</em>`;
+
+        } else if (hasTransformer) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Fine-Tuning Started (Hugging Face Trainer)</strong>
+
+  Base model : bert-base-uncased (110M params)
+  Task       : Sequence Classification (3 labels)
+  Dataset    : 8,420 train / 1,054 eval examples
+
+<strong style="color:#28e0ff;">Training Log:</strong>
+  Epoch 1/3  | loss: 0.9812 | eval_loss: 0.7241 | eval_acc: 0.7430
+  Epoch 2/3  | loss: 0.5934 | eval_loss: 0.5108 | eval_acc: 0.8310
+  Epoch 3/3  | loss: 0.3871 | eval_loss: 0.4673 | eval_acc: 0.8690
+
+<strong style="color:#28e0ff;">Final Results:</strong>
+  Eval Accuracy : 86.90%
+  Eval F1       : 0.8654
+  Training time : 4m 32s
+
+<em style="color:#b6c0de;">Tip: Try learning_rate=2e-5 and warmup_steps=500 for stable fine-tuning.</em>`;
+
+        } else if (hasCNN) {
+            const epochMatch = input.match(/range\((\d+)\)/);
+            const epochs = epochMatch ? parseInt(epochMatch[1]) : 10;
+            const logs = [];
+            for (let e = 1; e <= Math.min(epochs, 10); e++) {
+                const trainLoss = (2.3 * Math.exp(-0.22 * e) + 0.05 + Math.random() * 0.03).toFixed(4);
+                const valLoss   = (2.3 * Math.exp(-0.18 * e) + 0.12 + Math.random() * 0.04).toFixed(4);
+                const acc       = Math.min(99.2, (55 + e * 4.1 + Math.random() * 1.2)).toFixed(2);
+                logs.push(`  Epoch ${String(e).padStart(2)} | train_loss: ${trainLoss} | val_loss: ${valLoss} | val_acc: ${acc}%`);
+            }
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ CNN Training — MNIST-style dataset</strong>
+
+  Architecture : Conv(1→32) → MaxPool → Conv(32→64) → MaxPool → Linear(3136→10)
+  Parameters   : 93,322
+  Optimizer    : Adam (lr=1e-3)
+  Batch size   : 64
+
+<strong style="color:#28e0ff;">Training Log:</strong>
+${logs.join('\n')}
+
+<strong style="color:#10b981;">✔ Training complete</strong>
+  Best val accuracy : ${Math.min(99.2, (55 + Math.min(epochs,10) * 4.1)).toFixed(2)}%
+  Model saved to    : ./checkpoints/best_model.pt
+
+<em style="color:#b6c0de;">Tip: Add BatchNorm2d after each Conv layer to stabilize training.
+Tip: Use mixed precision (torch.cuda.amp) for 2x speedup on GPU.</em>`;
+
+        } else if (hasSklearn) {
+            const acc  = (0.88 + Math.random() * 0.07).toFixed(4);
+            const f1   = (parseFloat(acc) - 0.02 + Math.random() * 0.02).toFixed(4);
+            const auc  = (parseFloat(acc) + 0.01 + Math.random() * 0.01).toFixed(4);
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Scikit-learn Model Trained</strong>
+
+  Algorithm   : GradientBoostingClassifier
+  n_estimators: 200 | max_depth: 4 | lr: 0.05
+
+<strong style="color:#28e0ff;">Cross-Validation (5-fold):</strong>
+  Fold 1: F1 = ${(parseFloat(f1)+0.01).toFixed(4)}
+  Fold 2: F1 = ${(parseFloat(f1)-0.01).toFixed(4)}
+  Fold 3: F1 = ${(parseFloat(f1)+0.02).toFixed(4)}
+  Fold 4: F1 = ${f1}
+  Fold 5: F1 = ${(parseFloat(f1)-0.005).toFixed(4)}
+  Mean CV F1 : ${f1}
+
+<strong style="color:#28e0ff;">Test Set Evaluation:</strong>
+  Accuracy  : ${acc}
+  F1 Score  : ${f1}
+  AUC-ROC   : ${auc}
+
+<strong style="color:#28e0ff;">Top 5 Feature Importances:</strong>
+  feature_07   0.1842
+  feature_02   0.1531
+  feature_14   0.1204
+  feature_09   0.0981
+  feature_01   0.0743
+
+<em style="color:#b6c0de;">Tip: Try LightGBM — often 10x faster than sklearn GBM with similar accuracy.
+Tip: Wrap in sklearn Pipeline to prevent data leakage during cross-validation.</em>`;
+
+        } else {
+            output.innerHTML = `<strong style="color:#f59e0b;">⚠ No recognised pipeline detected.</strong>
+
+Add at least one of:
+  • PySpark (SparkSession, pyspark)
+  • PyTorch CNN (torch, Conv2d, nn.Module)
+  • Hugging Face Transformer (AutoModel, Trainer)
+  • Scikit-learn (GradientBoosting, RandomForest, etc.)
+
+<em style="color:#b6c0de;">Use the default template as a starting point.</em>`;
+        }
+    }
+
+    class QuizManager {
+        constructor() {
+            this.questionsData = {
+                q1:  { correct: 'C', exp: 'Velocity refers to the speed at which data is generated and must be processed — IoT sensor streams, social media feeds, and clickstreams that arrive in real time.' },
+                q2:  { correct: 'B', exp: 'Spark keeps intermediate data in memory (RAM) rather than writing to disk between stages like MapReduce does. This makes iterative algorithms dramatically faster.' },
+                q3:  { correct: 'B', exp: 'A Lakehouse combines data lake scale (cheap, flexible storage like S3) with data warehouse query performance. Technologies like Delta Lake and Apache Iceberg enable this.' },
+                q4:  { correct: 'C', exp: 'Supervised learning trains on labeled (input, output) pairs. The model learns a mapping function from inputs to outputs — used for classification, regression, and most applied ML.' },
+                q5:  { correct: 'B', exp: 'Overfitting means the model has memorized the training data — achieving low training error but failing to generalize, resulting in high error on new unseen data.' },
+                q6:  { correct: 'C', exp: 'Gradient Boosting methods (XGBoost, LightGBM, CatBoost) consistently top ML benchmarks on structured tabular data.' },
+                q7:  { correct: 'C', exp: 'L1 (Lasso) regularization adds |w| penalty, which can shrink some weights exactly to zero — effectively removing those features from the model (feature selection).' },
+                q8:  { correct: 'B', exp: 'Deep Learning\'s key advantage is automatic hierarchical feature learning from raw data — no manual feature engineering needed for images, audio, and text.' },
+                q9:  { correct: 'B', exp: 'Backpropagation uses the chain rule to compute the gradient of the loss with respect to every weight in the network, enabling gradient descent to update all weights.' },
+                q10: { correct: 'B', exp: 'Convolutional filters slide across the image, detecting the same patterns (edges, textures) regardless of where they appear — translation invariance is key for visual recognition.' },
+                q11: { correct: 'C', exp: 'Self-attention allows each token to attend to every other token in a single parallel operation. This captures long-range dependencies without the sequential bottleneck of RNNs.' },
+                q12: { correct: 'B', exp: 'Transfer learning takes a model pre-trained on a large dataset and adapts it to a new task — often needing far less data and compute.' },
+                q13: { correct: 'B', exp: 'HDFS (Hadoop Distributed File System) splits files into 128MB blocks and stores them with replication (typically 3×) across many commodity machines for fault tolerance at scale.' },
+                q14: { correct: 'C', exp: 'GPT-4, Claude, Gemini, and all modern LLMs are decoder-only Transformer architectures. They predict the next token autoregressively and are trained on massive text corpora.' },
+                q15: { correct: 'C', exp: 'Classical ML (Gradient Boosting, Random Forest) outperforms DL on structured/tabular data, small-medium datasets, and when interpretability is required.' }
+            };
+            this.init();
+        }
+        init() {
+            document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+            document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+        }
+        submitQuiz() {
+            const formData = new FormData(document.getElementById('quiz-form'));
+            let score = 0, html = '';
+            Object.keys(this.questionsData).forEach((key, i) => {
+                const ans = formData.get(key);
+                const ok  = ans === this.questionsData[key].correct;
+                if (ok) score++;
+                html += `<div class="feedback-item ${ok ? 'feedback-correct' : 'feedback-incorrect'}"><span class="feedback-icon">${ok ? '✓' : '✗'}</span><div><strong>Question ${i+1}:</strong> ${this.questionsData[key].exp}${!ok ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}</div></div>`;
+            });
+            const total = Object.keys(this.questionsData).length;
+            const pct   = Math.round((score / total) * 100);
+            const cls   = pct >= 80 ? 'score-excellent' : pct >= 50 ? 'score-good' : 'score-poor';
+            document.getElementById('quiz-score').innerHTML = `<div class="${cls}">${score}/${total} (${pct}%)</div><p style="color:var(--text-secondary)">${pct >= 70 ? 'Excellent! You understand the full data intelligence stack.' : 'Review Big Data tools, ML algorithms, and DL fundamentals — then try again.'}</p>`;
+            document.getElementById('quiz-feedback').innerHTML = html;
+            const r = document.getElementById('quiz-results');
+            r.style.display = 'block';
+            r.scrollIntoView({ behavior: 'smooth' });
+        }
+        clearQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-results').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => new QuizManager());
+</script>
+</body>
+</html>

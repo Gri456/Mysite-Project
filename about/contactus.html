@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B1tJ0urney | Contacto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 10% 20%, #0a1f3b, #030614);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .digital-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00aaff, #6a0dad, #00ffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .btn-wrapper {
+            position: relative;
+            padding: 3px;
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            border-radius: 0.9em;
+            transition: all 0.4s ease;
+            display: inline-block;
+        }
+
+        .btn-wrapper:hover::before {
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            filter: blur(1.2em);
+        }
+
+        .btn-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            border-radius: 0.9em;
+            z-index: -10;
+            filter: blur(0);
+            transition: filter 0.4s ease;
+        }
+
+        .btn-wrapper .nav-btn {
+            font-size: 1.1em;
+            padding: 0.6em 1.2em;
+            border-radius: 0.7em;
+            border: none;
+            background-color: #000;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 2px 2px 3px #000000b4;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Page Header */
+        .page-header {
+            text-align: center;
+            padding: 4rem 0 2rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #00aaff, #00ffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #b0e0ff;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Contact Grid */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin: 4rem 0;
+        }
+
+        .contact-info {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 2.5rem;
+            height: fit-content;
+        }
+
+        .info-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: #00ffff;
+        }
+
+        .info-item {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+        }
+
+        .info-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .info-content h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+            color: #fff;
+        }
+
+        .info-content p {
+            color: #b0c0d0;
+            line-height: 1.6;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00ffff;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            background: #00ffff;
+            color: #030614;
+            box-shadow: 0 0 20px #00ffff;
+            transform: translateY(-5px);
+        }
+
+        /* Formulário */
+        .contact-form {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 2.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #00ffff;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 1rem;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .form-control::placeholder {
+            color: #808080;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 40px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            border: 2px solid transparent;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(0, 170, 255, 0.5);
+            border-color: #00ffff;
+        }
+
+        /* Mapa (simulado) */
+        .map-container {
+            margin: 4rem 0;
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .map-placeholder {
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            border-radius: 20px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            gap: 1rem;
+            opacity: 0.8;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-placeholder::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px);
+            animation: moveMap 20s linear infinite;
+        }
+
+        @keyframes moveMap {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .map-placeholder span {
+            font-size: 1.2rem;
+            background: rgba(0,0,0,0.5);
+            padding: 0.5rem 2rem;
+            border-radius: 40px;
+            z-index: 1;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .contact-grid { grid-template-columns: 1fr; }
+            .info-item { flex-direction: column; gap: 0.5rem; }
+        }
+
+        /* Toast de sucesso (simples) */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 1rem 2rem;
+            border-radius: 40px;
+            backdrop-filter: blur(10px);
+            font-weight: 600;
+            animation: slideIn 0.3s;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="digital-bg"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">B1tJ0urney</div>
+        <div class="nav-links">
+            <div class="btn-wrapper"><a href="index.html" class="nav-btn">Início</a></div>
+            <div class="btn-wrapper"><a href="cursos.html" class="nav-btn">Cursos</a></div>
+            <div class="btn-wrapper"><a href="comprar.html" class="nav-btn">Comprar</a></div>
+            <div class="btn-wrapper"><a href="equipa.html" class="nav-btn">Equipa</a></div>
+            <div class="btn-wrapper"><a href="contacto.html" class="nav-btn active">Contacto</a></div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Fala connosco</h1>
+                <p class="subtitle">Estamos aqui para ajudar. Envia a tua mensagem ou usa os contactos abaixo.</p>
+            </div>
+
+            <!-- Contact Grid -->
+            <div class="contact-grid">
+                <!-- Informações de contacto -->
+                <div class="contact-info">
+                    <h2 class="info-title"><i class="fas fa-compass" style="margin-right: 1rem;"></i>Onde nos encontrar</h2>
+                    
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="info-content">
+                            <h3>Morada</h3>
+                            <p>Av. da Inovação, 123<br>Escritório 4.2<br>4200-123 Porto, Portugal</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="info-content">
+                            <h3>Email</h3>
+                            <p>geral@b1tjourney.com<br>suporte@b1tjourney.com</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
+                        <div class="info-content">
+                            <h3>Telefone</h3>
+                            <p>+351 220 123 456<br>(dias úteis, 9h-18h)</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-clock"></i></div>
+                        <div class="info-content">
+                            <h3>Horário</h3>
+                            <p>Suporte online: 24/7 via chat<br>Atendimento telefónico: dias úteis 9h-18h</p>
+                        </div>
+                    </div>
+
+                    <h3 style="color: #00ffff; margin: 2rem 0 1rem;">Redes Sociais</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-x-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+
+                <!-- Formulário de contacto -->
+                <div class="contact-form">
+                    <h2 class="info-title" style="margin-bottom: 2rem;"><i class="fas fa-paper-plane" style="margin-right: 1rem;"></i>Envia mensagem</h2>
+                    
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label class="form-label" for="name">Nome</label>
+                            <input type="text" class="form-control" id="name" placeholder="O teu nome" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email</label>
+                            <input type="email" class="form-control" id="email" placeholder="teu@email.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="subject">Assunto</label>
+                            <input type="text" class="form-control" id="subject" placeholder="Assunto da mensagem" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="message">Mensagem</label>
+                            <textarea class="form-control" id="message" placeholder="Escreve a tua mensagem..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn"><i class="fas fa-rocket" style="margin-right: 0.5rem;"></i>Enviar mensagem</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Mapa (simulação) -->
+            <div class="map-container">
+                <h2 class="info-title" style="text-align: center; margin-bottom: 2rem;"><i class="fas fa-globe"></i> Estamos no mundo</h2>
+                <div class="map-placeholder">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Porto, Portugal — Sede</span>
+                </div>
+                <p style="color: #808080; margin-top: 1rem;">*Mapa interativo em breve (integração Google Maps)</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="logo">B1tJ0urney</div>
+        <p style="margin-top: 2rem;">© 2025 B1tJ0urney. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        // Simulação de envio do formulário
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validação simples
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const subject = document.getElementById('subject').value.trim();
+            const message = document.getElementById('message').value.trim();
+
+            if (!name || !email || !subject || !message) {
+                alert('Por favor, preenche todos os campos.');
+                return;
+            }
+
+            if (!email.includes('@') || !email.includes('.')) {
+                alert('Por favor, insere um email válido.');
+                return;
+            }
+
+            // Simular envio com sucesso
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = '<i class="fas fa-check-circle"></i> Mensagem enviada com sucesso! Entraremos em contacto em breve.';
+            document.body.appendChild(toast);
+
+            // Limpar formulário
+            this.reset();
+
+            // Remover toast após 5 segundos
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

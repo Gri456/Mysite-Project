@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Frontend Framework</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #5b7cff;
+            --purple: #7a4bff;
+            --cyan: #28e0ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 125, 230, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Gradient overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--blue), var(--cyan));
+            color: white;
+            box-shadow: 0 4px 15px rgba(91, 124, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(91, 124, 255, 0.4);
+        }
+        /* Main content */
+        .main-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .course-header {
+            margin-bottom: 2rem;
+        }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente baseado no Tailwind: from-blue-700 via-cyan-500 to-blue-600 */
+    background: linear-gradient(to right, #1d4ed8, #06b6d4, #2563eb);
+
+    /* Faz o gradiente aparecer apenas no texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback */
+}
+        .course-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .progress-section {
+            margin-bottom: 2rem;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Tabs */
+        .tabs-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .tab-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+        .tab-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+        .tab-button:hover {
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-button.active {
+            color: var(--text-light);
+            background: rgba(91, 124, 255, 0.1);
+        }
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+        .tab-content {
+            padding: 2rem;
+            min-height: 400px;
+        }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        
+        /* List improvement */
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Quiz Styles */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { 
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem; 
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;
+            transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+
+        /* Lab Styles */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #fff; color: #333; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Evaluation section styles */
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .evaluation-column {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .evaluation-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid;
+        }
+
+        .evaluation-title.essential {
+            color: var(--cyan);
+            border-bottom-color: var(--cyan);
+        }
+
+        .evaluation-title.important {
+            color: #ffd700;
+            border-bottom-color: #ffd700;
+        }
+
+        .evaluation-title.advanced {
+            color: #ff6b6b;
+            border-bottom-color: #ff6b6b;
+        }
+
+        .evaluation-icon {
+            font-size: 1.1rem;
+        }
+
+        .evaluation-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .evaluation-list li {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .evaluation-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .evaluation-column:nth-child(1) .evaluation-list li::before {
+            color: var(--cyan);
+        }
+
+        .evaluation-column:nth-child(2) .evaluation-list li::before {
+            color: #ffd700;
+        }
+
+        .evaluation-column:nth-child(3) .evaluation-list li::before {
+            color: #ff6b6b;
+        }
+
+        @media (max-width: 768px) {
+            .evaluation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /*Quiz*/
+        /* Adding quiz styles */
+        .quiz-question {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--blue);
+        }
+
+        .quiz-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--blue);
+        }
+
+        .option-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            font-family: 'Courier New', monospace;
+        }
+
+        .quiz-option:hover .option-text {
+            color: var(--text-light);
+        }
+
+        .quiz-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91, 124, 255, 0.1), rgba(40, 224, 255, 0.05));
+            border: 1px solid rgba(91, 124, 255, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .results-title {
+            color: var(--cyan);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .quiz-score {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-feedback {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .feedback-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+    }
+    .feedback-correct { border-left: 4px solid #10b981; }
+    .feedback-incorrect { border-left: 4px solid #ef4444; }
+    
+    .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+    .feedback-correct .feedback-icon { color: #10b981; }
+    .feedback-incorrect .feedback-icon { color: #ef4444; }
+
+    .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+    .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+    .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+            .evaluation-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                margin-top: 1rem;
+            }
+            .evaluation-column {
+                background: rgba(255,255,255,0.02);
+                padding: 1.5rem;
+                border-radius: 12px;
+                border: 1px solid var(--border-color);
+            }
+            .evaluation-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 1rem;
+                font-size: 1.1rem;
+            }
+            .essential { color: var(--cyan); }
+            .important { color: var(--blue); }
+            .advanced { color: var(--purple); }
+            .evaluation-list {
+                list-style: none;
+                font-size: 0.9rem;
+                color: var(--text-secondary);
+            }
+            .evaluation-list li {
+                margin-bottom: 0.6rem;
+                padding-left: 1.2rem;
+                position: relative;
+            }
+            .evaluation-list li::before {
+                content: '•';
+                position: absolute;
+                left: 0;
+                color: inherit;
+            }
+            .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+        </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium.html" class="btn btn-back">← Back</a>
+                <a href="browse.html" class="btn btn-primary">Browse</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Frontend Framework</h1>
+            <p class="course-description">
+                In this module you will deepen fundamental Frontend Framework concepts, learning to build modern and reactive web applications with React and Vue.<br>
+                The focus is on understanding how frameworks enable creating more efficient and scalable user interfaces.
+            <div class="course-meta">
+                <div class="meta-item">
+                    <span>⏱</span>
+                    <span>8–10h</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>• React • Vue • Components • State • SPA • SSR • Tooling (Vite)</span>
+                </div>
+                <div class="meta-item">
+                    <span>📌</span>
+                    <span>Basic knowledge of HTML, CSS and JavaScript</span>
+                </div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'learn')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'lab')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'resources')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'evaluation')">Evaluation</button>
+            </nav>
+
+           <div id="learn" class="tab-panel active">
+
+    <!-- 5.1 What is a Framework -->
+    <div class="content-card">
+        <h3>📘 5.1 What is a Frontend Framework?</h3>
+        <p>Before frameworks existed, developers had to manually write JavaScript to find elements in the DOM, update them, listen to events, and keep everything in sync. This worked for small pages, but as applications grew, it became a nightmare to maintain.</p>
+        <br>
+        <p>A <strong>Frontend Framework</strong> is a structured toolset that handles this repetitive work for you. It provides a <em>mental model</em> and a set of conventions so that teams can build complex applications in a consistent, scalable, and efficient way.</p>
+
+        <div class="code-explanation" style="margin-top: 1.2rem;">
+            <strong>🚫 Without a Framework (Vanilla JS):</strong>
+            <pre style="background:#000;padding:1rem;border-radius:6px;margin-top:0.5rem;font-size:0.82rem;overflow-x:auto;color:#0f0;"><code>// To update a counter you had to:
+const btn = document.getElementById('btn');
+const display = document.getElementById('count');
+let count = 0;
+btn.addEventListener('click', () => {
+    count++;
+    display.innerText = count; // Manual DOM update every time
+});</code></pre>
+        </div>
+
+        <div class="code-explanation" style="margin-top: 1.2rem;">
+            <strong>✅ With React (Framework):</strong>
+            <pre style="background:#000;padding:1rem;border-radius:6px;margin-top:0.5rem;font-size:0.82rem;overflow-x:auto;color:#0f0;"><code>// React updates the DOM automatically when state changes
+function Counter() {
+    const [count, setCount] = useState(0);
+    return &lt;button onClick={() => setCount(count + 1)}&gt;{count}&lt;/button&gt;;
+}</code></pre>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+            <div style="background: rgba(40,224,255,0.07); border:1px solid rgba(40,224,255,0.2); padding: 1rem; border-radius: 8px;">
+                <strong style="color:var(--cyan);">📈 Scalability</strong>
+                <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 0.4rem;">Organizes massive applications across hundreds of files in a sustainable way without losing track of logic.</p>
+            </div>
+            <div style="background: rgba(91,124,255,0.07); border:1px solid rgba(91,124,255,0.2); padding: 1rem; border-radius: 8px;">
+                <strong style="color:var(--blue);">⚡ Reactivity</strong>
+                <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 0.4rem;">The UI automatically reflects changes in data — no manual DOM manipulation needed.</p>
+            </div>
+            <div style="background: rgba(122,75,255,0.07); border:1px solid rgba(122,75,255,0.2); padding: 1rem; border-radius: 8px;">
+                <strong style="color:var(--purple);">🌍 Ecosystem</strong>
+                <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 0.4rem;">Thousands of community libraries, tools, and plugins ready to integrate (routing, forms, animations, etc.).</p>
+            </div>
+            <div style="background: rgba(255,165,0,0.07); border:1px solid rgba(255,165,0,0.2); padding: 1rem; border-radius: 8px;">
+                <strong style="color:#ffa500;">🤝 Team Work</strong>
+                <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 0.4rem;">Enforces consistent patterns and conventions so multiple developers can collaborate cleanly.</p>
+            </div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); border-left: 4px solid var(--cyan); padding: 1rem; border-radius: 0 8px 8px 0; margin-top: 1.5rem;">
+            <strong>🗺️ Popular Frameworks Compared:</strong>
+            <table style="width:100%; border-collapse:collapse; margin-top: 0.8rem; font-size: 0.85rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Framework</th>
+                        <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Created By</th>
+                        <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Language</th>
+                        <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Best For</th>
+                    </tr>
+                </thead>
+                <tbody style="color: var(--text-secondary);">
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;"><strong style="color:var(--blue);">React</strong></td>
+                        <td style="padding:0.5rem;">Meta (Facebook)</td>
+                        <td style="padding:0.5rem;">JSX + JS/TS</td>
+                        <td style="padding:0.5rem;">Large apps, flexibility, large ecosystem</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;"><strong style="color:#42b883;">Vue</strong></td>
+                        <td style="padding:0.5rem;">Evan You (community)</td>
+                        <td style="padding:0.5rem;">HTML + JS/TS</td>
+                        <td style="padding:0.5rem;">Gentle learning curve, elegant syntax</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;"><strong style="color:#dd0031;">Angular</strong></td>
+                        <td style="padding:0.5rem;">Google</td>
+                        <td style="padding:0.5rem;">TypeScript</td>
+                        <td style="padding:0.5rem;">Enterprise, opinionated, full framework</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.5rem;"><strong style="color:#ff3e00;">Svelte</strong></td>
+                        <td style="padding:0.5rem;">Rich Harris</td>
+                        <td style="padding:0.5rem;">Svelte + JS/TS</td>
+                        <td style="padding:0.5rem;">Performance, minimal bundle size</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5.2 Components -->
+    <div class="content-card">
+        <h3>🧩 5.2 Component Architecture</h3>
+        <p>Think of a web app like a newspaper. The newspaper is made up of <em>sections</em> (header, articles, sidebar, footer). Each section can be reused and updated independently. This is the idea behind <strong>Components</strong>.</p>
+        <br>
+        <p>A component is a <strong>self-contained, reusable piece of UI</strong>. It has its own structure (HTML/JSX), style, and behavior (JavaScript). Components can be as small as a button or as large as an entire page.</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1.2rem;">
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">REACT COMPONENT</p>
+                <pre style="font-size:0.8rem;color:#0f0;overflow-x:auto;"><code>// Functional Component
+function UserCard({ name, role }) {
+  return (
+    &lt;div className="card"&gt;
+      &lt;h2&gt;{name}&lt;/h2&gt;
+      &lt;p&gt;{role}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+// Using the component
+&lt;UserCard name="Ana" role="Dev" /&gt;
+&lt;UserCard name="João" role="Designer" /&gt;</code></pre>
+            </div>
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:#42b883;font-size:0.75rem;margin-bottom:0.5rem;">VUE COMPONENT (SFC)</p>
+                <pre style="font-size:0.8rem;color:#0f0;overflow-x:auto;"><code>&lt;template&gt;
+  &lt;div class="card"&gt;
+    &lt;h2&gt;{{ name }}&lt;/h2&gt;
+    &lt;p&gt;{{ role }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+defineProps(['name', 'role']);
+&lt;/script&gt;
+
+&lt;style scoped&gt;
+.card { padding: 1rem; }
+&lt;/style&gt;</code></pre>
+            </div>
+        </div>
+
+        <div style="margin-top:1.5rem;">
+            <strong>🌳 Component Tree — How apps are structured:</strong>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:1.2rem;margin-top:0.8rem;font-family:monospace;font-size:0.85rem;line-height:2;">
+                <span style="color:var(--cyan);">App</span> (Root)<br>
+                &nbsp;&nbsp;├── <span style="color:var(--blue);">Header</span><br>
+                &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:var(--purple);">Logo</span><br>
+                &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── <span style="color:var(--purple);">NavMenu</span><br>
+                &nbsp;&nbsp;├── <span style="color:var(--blue);">ProductList</span><br>
+                &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:var(--purple);">ProductCard</span><br>
+                &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:var(--purple);">ProductCard</span><br>
+                &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── <span style="color:var(--purple);">ProductCard</span><br>
+                &nbsp;&nbsp;└── <span style="color:var(--blue);">Footer</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.8rem;">Each component only knows about itself and its direct children. This isolation makes debugging and testing much easier.</p>
+        </div>
+    </div>
+
+    <!-- 5.3 Props and State -->
+    <div class="content-card">
+        <h3>📦 5.3 Props vs State — The Two Core Concepts</h3>
+        <p>Understanding the difference between <strong>Props</strong> and <strong>State</strong> is the single most important concept in component-based frameworks.</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.2rem; margin-top:1.2rem;">
+            <div style="background: rgba(91,124,255,0.08); border:1px solid rgba(91,124,255,0.3); padding:1.2rem; border-radius:8px;">
+                <h4 style="color:var(--blue); margin-bottom:0.8rem;">🔌 Props (Properties)</h4>
+                <ul style="list-style:none; font-size:0.85rem; color:var(--text-secondary); line-height:1.8;">
+                    <li>→ Passed <strong>from parent to child</strong></li>
+                    <li>→ <strong>Read-only</strong> — child cannot change them</li>
+                    <li>→ Like <em>arguments</em> to a function</li>
+                    <li>→ Make components reusable and configurable</li>
+                </ul>
+                <pre style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.8rem;font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>// Parent sends data
+&lt;Button label="Click me" color="blue" /&gt;
+
+// Child receives it
+function Button({ label, color }) {
+  return &lt;button style={{color}}&gt;{label}&lt;/button&gt;;
+}</code></pre>
+            </div>
+            <div style="background: rgba(40,224,255,0.08); border:1px solid rgba(40,224,255,0.3); padding:1.2rem; border-radius:8px;">
+                <h4 style="color:var(--cyan); margin-bottom:0.8rem;">📦 State</h4>
+                <ul style="list-style:none; font-size:0.85rem; color:var(--text-secondary); line-height:1.8;">
+                    <li>→ <strong>Internal</strong> data of a component</li>
+                    <li>→ <strong>Can change</strong> over time (user interaction, API response)</li>
+                    <li>→ When state changes, the component re-renders</li>
+                    <li>→ Local by default (stays inside the component)</li>
+                </ul>
+                <pre style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.8rem;font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>// React — useState hook
+const [isOpen, setIsOpen] = useState(false);
+
+// Vue — ref
+const isOpen = ref(false);
+
+// Toggle on click
+function toggle() { isOpen.value = !isOpen.value; }</code></pre>
+            </div>
+        </div>
+
+        <div style="background: rgba(255,165,0,0.07); border:1px solid rgba(255,165,0,0.2); padding:1rem; border-radius:8px; margin-top:1.2rem;">
+            <strong>💡 Golden Rule:</strong>
+            <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:0.4rem;">If data needs to be <em>shared between components</em>, lift it up to the <em>closest common parent</em>. If it's only used inside one component, keep it local with state. This is called <strong>"Lifting State Up"</strong>.</p>
+        </div>
+    </div>
+
+    <!-- 5.4 Lifecycle -->
+    <div class="content-card">
+        <h3>♻️ 5.4 Component Lifecycle</h3>
+        <p>Every component goes through a lifecycle — from the moment it appears on screen to the moment it disappears. Understanding this allows you to run code at the right moment (e.g., fetch data when a page loads, or clean up timers when a component is removed).</p>
+
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem; margin-top:1.2rem; text-align:center;">
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;">
+                <div style="font-size:2rem;">🐣</div>
+                <strong style="color:var(--cyan);">Mount</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Component is created and inserted into the DOM. Ideal for fetching data or setting subscriptions.</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.2);padding:1rem;border-radius:8px;">
+                <div style="font-size:2rem;">🔄</div>
+                <strong style="color:var(--blue);">Update</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Component re-renders because props or state changed. React compares old vs new (Virtual DOM diffing).</p>
+            </div>
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1rem;border-radius:8px;">
+                <div style="font-size:2rem;">🪦</div>
+                <strong style="color:#ff6b6b;">Unmount</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Component is removed from the DOM. Use this to clear timers, cancel requests, or remove listeners.</p>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1.2rem;">
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">REACT — useEffect</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>useEffect(() => {
+  // Runs on Mount
+  console.log("Component mounted!");
+  fetchData();
+
+  return () => {
+    // Runs on Unmount (cleanup)
+    console.log("Component removed!");
+  };
+}, []); // [] = only on mount
+
+// Runs every time 'userId' changes
+useEffect(() => {
+  fetchUser(userId);
+}, [userId]);</code></pre>
+            </div>
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:#42b883;font-size:0.75rem;margin-bottom:0.5rem;">VUE — Lifecycle Hooks</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>import { onMounted, onUnmounted } from 'vue';
+
+onMounted(() => {
+  // Runs when component mounts
+  console.log("Component mounted!");
+  fetchData();
+});
+
+onUnmounted(() => {
+  // Cleanup on unmount
+  console.log("Component removed!");
+});</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.5 Events and Interaction -->
+    <div class="content-card">
+        <h3>🖱️ 5.5 Events and User Interaction</h3>
+        <p>Frameworks provide clean and consistent ways to handle user interactions: clicks, form inputs, keyboard events, and more. Events in components are declared inline and connected to handler functions.</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1.2rem;">
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">REACT EVENTS</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>function LoginForm() {
+  const [name, setName] = useState("");
+
+  function handleSubmit(e) {
+    e.preventDefault(); // stop page reload
+    alert("Hello, " + name);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Your name"
+      /&gt;
+      &lt;button type="submit"&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+            </div>
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:#42b883;font-size:0.75rem;margin-bottom:0.5rem;">VUE EVENTS</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>&lt;template&gt;
+  &lt;form @submit.prevent="handleSubmit"&gt;
+    &lt;input v-model="name" placeholder="Your name" /&gt;
+    &lt;button type="submit"&gt;Login&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { ref } from 'vue';
+const name = ref('');
+
+function handleSubmit() {
+  alert('Hello, ' + name.value);
+}
+&lt;/script&gt;</code></pre>
+            </div>
+        </div>
+
+        <div style="margin-top:1.2rem;">
+            <strong>🗂️ Common Event Types:</strong>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:0.8rem; margin-top:0.8rem;">
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;">
+                    <code style="color:var(--cyan);">onClick / @click</code><br>
+                    <span style="color:var(--text-secondary);">Button click</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;">
+                    <code style="color:var(--cyan);">onChange / @change</code><br>
+                    <span style="color:var(--text-secondary);">Input field change</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;">
+                    <code style="color:var(--cyan);">onSubmit / @submit</code><br>
+                    <span style="color:var(--text-secondary);">Form submission</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;">
+                    <code style="color:var(--cyan);">onKeyDown / @keydown</code><br>
+                    <span style="color:var(--text-secondary);">Keyboard key pressed</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;">
+                    <code style="color:var(--cyan);">onMouseEnter / @mouseover</code><br>
+                    <span style="color:var(--text-secondary);">Mouse hover</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;">
+                    <code style="color:var(--cyan);">onScroll / @scroll</code><br>
+                    <span style="color:var(--text-secondary);">Page/element scroll</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.6 Conditional Rendering & Lists -->
+    <div class="content-card">
+        <h3>🔀 5.6 Conditional Rendering and Lists</h3>
+        <p>Frameworks make it easy to show or hide parts of the UI based on data, and to render lists of items dynamically — no more writing repetitive HTML by hand.</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1.2rem;">
+            <div>
+                <p style="font-size:0.85rem; color:var(--cyan); margin-bottom:0.6rem;"><strong>Conditional Rendering</strong></p>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>// React — using ternary and &&
+function Alert({ isError }) {
+  return (
+    &lt;div&gt;
+      {isError 
+        ? &lt;p className="error"&gt;Something went wrong!&lt;/p&gt;
+        : &lt;p className="success"&gt;All good!&lt;/p&gt;
+      }
+      {isError &amp;&amp; &lt;button&gt;Retry&lt;/button&gt;}
+    &lt;/div&gt;
+  );
+}
+
+// Vue — v-if / v-else
+// &lt;p v-if="isError"&gt;Error!&lt;/p&gt;
+// &lt;p v-else&gt;All good!&lt;/p&gt;</code></pre>
+                </div>
+            </div>
+            <div>
+                <p style="font-size:0.85rem; color:var(--cyan); margin-bottom:0.6rem;"><strong>Rendering Lists</strong></p>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>// React — .map() to render lists
+const products = ["Laptop", "Phone", "Tablet"];
+
+function ProductList() {
+  return (
+    &lt;ul&gt;
+      {products.map((item, index) =&gt; (
+        &lt;li key={index}&gt;{item}&lt;/li&gt;
+        // 'key' is required for performance!
+      ))}
+    &lt;/ul&gt;
+  );
+}
+
+// Vue — v-for
+// &lt;li v-for="item in products" :key="item"&gt;
+//   {{ item }}
+// &lt;/li&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: rgba(255,165,0,0.07); border:1px solid rgba(255,165,0,0.2); padding:1rem; border-radius:8px; margin-top:1.2rem;">
+            <strong>⚠️ Why is the <code>key</code> prop important?</strong>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.5rem;">When rendering lists, React and Vue need a unique <code>key</code> for each item to efficiently update the DOM. Without it, the framework cannot tell which items changed, leading to bugs and poor performance. Always use a unique ID — not just the index if the list order can change.</p>
+        </div>
+    </div>
+
+    <!-- 5.7 SPA and Routing -->
+    <div class="content-card">
+        <h3>🌐 5.7 SPA and Client-Side Routing</h3>
+        <p>A <strong>Single Page Application (SPA)</strong> loads one HTML file. All navigation between "pages" happens in the browser without a full page reload — JavaScript swaps the components on screen instead.</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.2rem; margin-top:1.2rem;">
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1rem;border-radius:8px;">
+                <strong style="color:#ff6b6b;">🐌 Traditional (MPA)</strong>
+                <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ Every link causes a full page reload</li>
+                    <li>→ Server sends a new HTML file each time</li>
+                    <li>→ Slower, more server load</li>
+                    <li>→ State is lost on navigation</li>
+                </ul>
+            </div>
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">⚡ SPA</strong>
+                <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ Navigation happens instantly (JS updates DOM)</li>
+                    <li>→ Server only provides data (via API/JSON)</li>
+                    <li>→ Faster, feels like a native app</li>
+                    <li>→ State is preserved between views</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">REACT ROUTER — Basic Setup</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+
+function App() {
+  return (
+    &lt;BrowserRouter&gt;
+      &lt;nav&gt;
+        &lt;Link to="/"&gt;Home&lt;/Link&gt;
+        &lt;Link to="/about"&gt;About&lt;/Link&gt;
+        &lt;Link to="/contact"&gt;Contact&lt;/Link&gt;
+      &lt;/nav&gt;
+
+      &lt;Routes&gt;
+        &lt;Route path="/" element={&lt;HomePage /&gt;} /&gt;
+        &lt;Route path="/about" element={&lt;AboutPage /&gt;} /&gt;
+        &lt;Route path="/contact" element={&lt;ContactPage /&gt;} /&gt;
+        &lt;Route path="/user/:id" element={&lt;UserPage /&gt;} /&gt; {/* Dynamic route */}
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}</code></pre>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:#42b883;font-size:0.75rem;margin-bottom:0.5rem;">VUE ROUTER — Basic Setup</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>// router/index.js
+import { createRouter, createWebHistory } from 'vue-router';
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/', component: HomePage },
+    { path: '/about', component: AboutPage },
+    { path: '/user/:id', component: UserPage }, // Dynamic
+  ]
+});
+
+// In template: &lt;RouterLink to="/"&gt;Home&lt;/RouterLink&gt;
+// View outlet: &lt;RouterView /&gt;</code></pre>
+        </div>
+    </div>
+
+    <!-- 5.8 Fetching Data from APIs -->
+    <div class="content-card">
+        <h3>🌍 5.8 Communicating with APIs</h3>
+        <p>Most modern applications need to communicate with a backend server to fetch or send data — user profiles, products, messages, etc. This is done using <strong>HTTP requests</strong> inside components, typically on mount.</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1.2rem;">
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">REACT — Fetch with useEffect</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>function UserProfile({ userId }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch(`https://api.example.com/users/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        setUser(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [userId]);
+
+  if (loading) return &lt;p&gt;Loading...&lt;/p&gt;;
+  if (error) return &lt;p&gt;Error: {error}&lt;/p&gt;;
+  return &lt;h2&gt;Hello, {user.name}!&lt;/h2&gt;;
+}</code></pre>
+            </div>
+            <div>
+                <div style="background:#000;padding:1rem;border-radius:8px;margin-bottom:1rem;">
+                    <p style="color:#42b883;font-size:0.75rem;margin-bottom:0.5rem;">VUE — Fetch on Mount</p>
+                    <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>const user = ref(null);
+const loading = ref(true);
+
+onMounted(async () => {
+  try {
+    const res = await fetch('/api/user/1');
+    user.value = await res.json();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    loading.value = false;
+  }
+});</code></pre>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                    <strong style="font-size:0.85rem;">📦 Axios — Easier than Fetch</strong>
+                    <pre style="font-size:0.78rem;color:var(--text-secondary);margin-top:0.5rem;"><code>// npm install axios
+import axios from 'axios';
+
+const { data } = await axios.get('/api/users');
+// Automatic JSON parsing
+// Better error handling
+// Interceptors for auth headers</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.2);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🔑 HTTP Methods you'll use most:</strong>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.8rem;margin-top:0.8rem;font-size:0.83rem;">
+                <div><code style="color:var(--cyan);">GET</code> — Read data</div>
+                <div><code style="color:#10b981;">POST</code> — Create new data</div>
+                <div><code style="color:#ffd700;">PUT / PATCH</code> — Update data</div>
+                <div><code style="color:#ff6b6b;">DELETE</code> — Remove data</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.9 Global State Management -->
+    <div class="content-card">
+        <h3>🏪 5.9 Global State Management</h3>
+        <p>Local state works great for one component. But what happens when multiple distant components need access to the same data? For example: the user's authentication status, shopping cart contents, or UI theme.</p>
+        <p style="margin-top:0.8rem;">Passing props down through many layers ("prop drilling") becomes messy. The solution is a <strong>Global Store</strong> — a single source of truth accessible from anywhere in the app.</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.2rem; margin-top:1.2rem;">
+            <div>
+                <p style="color:var(--cyan);font-weight:600;margin-bottom:0.8rem;">React — Context API (Built-in)</p>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>// 1. Create context
+const AuthContext = createContext(null);
+
+// 2. Provide it high in the tree
+function App() {
+  const [user, setUser] = useState(null);
+  return (
+    &lt;AuthContext.Provider value={{ user, setUser }}&gt;
+      &lt;AppContent /&gt;
+    &lt;/AuthContext.Provider&gt;
+  );
+}
+
+// 3. Use anywhere in the tree
+function Header() {
+  const { user } = useContext(AuthContext);
+  return &lt;p&gt;Welcome, {user?.name}&lt;/p&gt;;
+}</code></pre>
+                </div>
+            </div>
+            <div>
+                <p style="color:#42b883;font-weight:600;margin-bottom:0.8rem;">Vue — Pinia (Recommended)</p>
+                <div style="background:#000;padding:1rem;border-radius:8px;">
+                    <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>// stores/auth.js
+import { defineStore } from 'pinia';
+
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    user: null,
+    isLoggedIn: false
+  }),
+  actions: {
+    login(userData) {
+      this.user = userData;
+      this.isLoggedIn = true;
+    },
+    logout() {
+      this.user = null;
+      this.isLoggedIn = false;
+    }
+  }
+});
+
+// In any component:
+// const auth = useAuthStore();
+// auth.login({ name: 'Ana' });</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top:1.2rem;">
+            <strong>🗺️ When to use what:</strong>
+            <table style="width:100%;border-collapse:collapse;margin-top:0.8rem;font-size:0.83rem;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                        <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Solution</th>
+                        <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Use when...</th>
+                    </tr>
+                </thead>
+                <tbody style="color:var(--text-secondary);">
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;"><strong>Local state</strong></td>
+                        <td style="padding:0.5rem;">Data used only inside one component (input values, modal open/close)</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;"><strong>Context API / Provide-Inject</strong></td>
+                        <td style="padding:0.5rem;">Simple global data: theme, language, user session</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;"><strong>Pinia / Zustand / Redux</strong></td>
+                        <td style="padding:0.5rem;">Complex shared state: cart, notifications, large feature modules</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.5rem;"><strong>React Query / SWR</strong></td>
+                        <td style="padding:0.5rem;">Server state: caching API data, automatic refetching, loading states</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5.10 Forms -->
+    <div class="content-card">
+        <h3>📋 5.10 Forms and Validation</h3>
+        <p>Forms are one of the most common UI patterns. Frameworks offer powerful ways to handle controlled inputs, validation, and submission.</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1.2rem;">
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">REACT — Controlled Form + Validation</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>function RegisterForm() {
+  const [form, setForm] = useState({ email: '', pass: '' });
+  const [errors, setErrors] = useState({});
+
+  function validate() {
+    const newErrors = {};
+    if (!form.email.includes('@'))
+      newErrors.email = 'Invalid email';
+    if (form.pass.length &lt; 6)
+      newErrors.pass = 'Min 6 characters';
+    return newErrors;
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length &gt; 0) {
+      setErrors(errs);
+    } else {
+      console.log('Form submitted!', form);
+    }
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input
+        value={form.email}
+        onChange={e => setForm({...form, email: e.target.value})}
+      /&gt;
+      {errors.email &amp;&amp; &lt;p style={{color:'red'}}&gt;{errors.email}&lt;/p&gt;}
+      &lt;button type="submit"&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+            </div>
+            <div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-bottom:1rem;">
+                    <strong style="color:var(--cyan);">🔑 Controlled vs Uncontrolled</strong>
+                    <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">A <strong>controlled input</strong> has its value managed by React/Vue state. An <strong>uncontrolled input</strong> manages itself via the DOM (using <code>ref</code>). Controlled is recommended — it gives you full control over the value at all times.</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                    <strong style="color:var(--cyan);">📦 Form Libraries</strong>
+                    <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">For complex forms, use dedicated libraries:</p>
+                    <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;line-height:1.8;">
+                        <li>→ <strong>React Hook Form</strong> — lightweight, fast</li>
+                        <li>→ <strong>Formik</strong> — popular, full-featured</li>
+                        <li>→ <strong>Vee-Validate</strong> — Vue forms</li>
+                        <li>→ <strong>Zod / Yup</strong> — schema validation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.11 Performance -->
+    <div class="content-card">
+        <h3>⚡ 5.11 Performance Optimization</h3>
+        <p>A fast application is not just a technical achievement — it directly impacts user experience and business metrics. Even 100ms of delay can reduce conversions. Here are the main techniques:</p>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:1rem; margin-top:1.2rem;">
+            <div style="background:rgba(40,224,255,0.06);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🦥 Lazy Loading</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Load components only when they are needed (e.g., when the user navigates to that route). Reduces the initial bundle size.</p>
+                <pre style="background:#000;padding:0.6rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.6rem;overflow-x:auto;"><code>// React
+const Dashboard = React.lazy(() =>
+  import('./Dashboard')
+);</code></pre>
+            </div>
+            <div style="background:rgba(91,124,255,0.06);border:1px solid rgba(91,124,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--blue);">🧠 Memoization</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Prevent unnecessary re-renders by remembering previous results of expensive calculations or components.</p>
+                <pre style="background:#000;padding:0.6rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.6rem;overflow-x:auto;"><code>// React
+const result = useMemo(() =>
+  heavyCalculation(data), [data]
+);
+const MemoComp = React.memo(MyComponent);</code></pre>
+            </div>
+            <div style="background:rgba(122,75,255,0.06);border:1px solid rgba(122,75,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--purple);">✂️ Code Splitting</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Split your JavaScript bundle into smaller chunks so the browser only downloads what it needs for the current page.</p>
+                <pre style="background:#000;padding:0.6rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.6rem;overflow-x:auto;"><code>// Vite does this automatically
+// per route when you use
+// dynamic imports</code></pre>
+            </div>
+            <div style="background:rgba(255,165,0,0.06);border:1px solid rgba(255,165,0,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ffa500;">🖼️ Virtual DOM</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">React keeps a lightweight copy of the DOM in memory. On state change, it compares old vs new (diffing) and only updates what changed — minimizing expensive real DOM operations.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.12 SSR -->
+    <div class="content-card">
+        <h3>🖥️ 5.12 Server-Side Rendering (SSR) and Static Generation (SSG)</h3>
+        <p>SPAs are powerful, but they have a downside: the browser receives an almost empty HTML file and JavaScript builds the page. This hurts SEO and causes a blank screen while loading. That's where SSR and SSG come in.</p>
+
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem; margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.5rem;">📄</div>
+                <strong style="color:var(--blue);">CSR (SPA)</strong>
+                <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem;">Browser downloads JS, runs it, builds the page. Fast after load but slow first paint.</p>
+                <p style="font-size:0.75rem;color:#ff6b6b;margin-top:0.5rem;">❌ Bad SEO</p>
+            </div>
+            <div style="background:rgba(40,224,255,0.06);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.5rem;">⚡</div>
+                <strong style="color:var(--cyan);">SSR</strong>
+                <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem;">Server renders HTML for each request. User sees content immediately. Great for dynamic pages.</p>
+                <p style="font-size:0.75rem;color:#10b981;margin-top:0.5rem;">✅ Good SEO</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.06);border:1px solid rgba(91,124,255,0.2);padding:1.2rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.5rem;">🏗️</div>
+                <strong style="color:var(--blue);">SSG</strong>
+                <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem;">HTML is pre-built at compile time. Super fast. Great for blogs, documentation, marketing pages.</p>
+                <p style="font-size:0.75rem;color:#10b981;margin-top:0.5rem;">✅ Best performance</p>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                <strong>⚛️ Next.js (React)</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">The most popular React framework. Supports CSR, SSR, SSG and more in the same project. Used by Netflix, TikTok, Vercel.</p>
+                <code style="font-size:0.78rem;color:var(--cyan);">npx create-next-app@latest</code>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                <strong>🟩 Nuxt.js (Vue)</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">The Vue equivalent of Next.js. File-based routing, SSR, SSG, and auto-imports. Elegant and powerful.</p>
+                <code style="font-size:0.78rem;color:var(--cyan);">npx nuxi@latest init my-app</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.13 Tooling -->
+    <div class="content-card">
+        <h3>🛠️ 5.13 Modern Tooling — Vite, npm and the Dev Environment</h3>
+        <p>Before you can write framework code, you need a proper development environment. Modern tools make this fast and painless.</p>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap:1rem; margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ffd700;">📦 npm / pnpm / yarn</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Package managers to install libraries. <code>npm install react</code> downloads React from the internet and makes it available in your project.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#646cff;">⚡ Vite</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">The modern build tool. Starts your dev server in milliseconds and hot-reloads changes instantly. Much faster than the old Webpack-based tools.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#3178c6;">📘 TypeScript</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">A superset of JavaScript with static types. Catches bugs before runtime. Strongly recommended for any serious project.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#c2185b;">🎨 ESLint + Prettier</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Code quality and formatting tools. ESLint catches errors and bad practices; Prettier auto-formats your code consistently.</p>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">GETTING STARTED — React with Vite</p>
+            <pre style="font-size:0.83rem;color:#0f0;overflow-x:auto;"><code># Create a new React + Vite project
+npm create vite@latest my-app -- --template react
+
+cd my-app
+npm install    # Install dependencies
+npm run dev    # Start dev server at http://localhost:5173</code></pre>
+        </div>
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:#42b883;font-size:0.75rem;margin-bottom:0.5rem;">GETTING STARTED — Vue with Vite</p>
+            <pre style="font-size:0.83rem;color:#0f0;overflow-x:auto;"><code># Create a new Vue + Vite project
+npm create vite@latest my-app -- --template vue
+
+cd my-app
+npm install
+npm run dev</code></pre>
+        </div>
+    </div>
+
+    <!-- 5.14 Testing -->
+    <div class="content-card">
+        <h3>🧪 5.14 Testing Your Application</h3>
+        <p>Writing tests ensures your app works correctly and keeps working as it grows. There are three main types of tests in frontend development:</p>
+
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem; margin-top:1.2rem;">
+            <div style="background:rgba(40,224,255,0.06);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔬 Unit Tests</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Test individual functions and components in isolation. Fast and specific. Use <strong>Jest</strong> or <strong>Vitest</strong>.</p>
+                <pre style="background:#000;padding:0.5rem;border-radius:4px;font-size:0.72rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;"><code>test('adds 1+2 to equal 3', () => {
+  expect(add(1, 2)).toBe(3);
+});</code></pre>
+            </div>
+            <div style="background:rgba(91,124,255,0.06);border:1px solid rgba(91,124,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--blue);">🖼️ Component Tests</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Test how components render and behave when interacted with. Use <strong>React Testing Library</strong> or <strong>Vue Test Utils</strong>.</p>
+                <pre style="background:#000;padding:0.5rem;border-radius:4px;font-size:0.72rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;"><code>render(&lt;Button label="Click" /&gt;);
+fireEvent.click(screen.getByText('Click'));
+expect(mockFn).toHaveBeenCalled();</code></pre>
+            </div>
+            <div style="background:rgba(122,75,255,0.06);border:1px solid rgba(122,75,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--purple);">🌐 E2E Tests</strong>
+                <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Simulate real user behavior in a real browser. Test the full flow from login to checkout. Use <strong>Cypress</strong> or <strong>Playwright</strong>.</p>
+                <pre style="background:#000;padding:0.5rem;border-radius:4px;font-size:0.72rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;"><code>cy.visit('/login');
+cy.get('input').type('user@x.com');
+cy.get('button').click();
+cy.contains('Dashboard');</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.15 Accessibility -->
+    <div class="content-card">
+        <h3>♿ 5.15 Accessibility (a11y)</h3>
+        <p>Accessibility means building apps that everyone can use — including people with visual, motor, auditory, or cognitive impairments. It's not just ethical — it's required by law in many countries and improves SEO.</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1.2rem;">
+            <div>
+                <p style="color:var(--cyan);font-weight:600;margin-bottom:0.8rem;">Key Principles:</p>
+                <ul style="list-style:none;font-size:0.85rem;color:var(--text-secondary);line-height:2;">
+                    <li>→ Use semantic HTML elements (<code>&lt;button&gt;</code> not <code>&lt;div&gt;</code>)</li>
+                    <li>→ All images need descriptive <code>alt</code> attributes</li>
+                    <li>→ Every interactive element must be keyboard-focusable</li>
+                    <li>→ Color contrast ratio must be at least 4.5:1</li>
+                    <li>→ Use ARIA attributes for complex widgets</li>
+                    <li>→ Form inputs must have visible labels</li>
+                </ul>
+            </div>
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">ARIA ATTRIBUTES EXAMPLE</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;"><code>&lt;!-- Bad --&gt;
+&lt;div onClick={toggle}&gt;Menu&lt;/div&gt;
+
+&lt;!-- Good --&gt;
+&lt;button
+  onClick={toggle}
+  aria-expanded={isOpen}
+  aria-label="Toggle navigation menu"
+&gt;
+  Menu
+&lt;/button&gt;
+
+&lt;!-- Announce dynamic content --&gt;
+&lt;div aria-live="polite"&gt;
+  {statusMessage}
+&lt;/div&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.16 Project Structure -->
+    <div class="content-card">
+        <h3>📁 5.16 Scalable Project Structure</h3>
+        <p>As your app grows, file organization becomes critical. A consistent structure helps your team find files quickly and understand the codebase.</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1.2rem;">
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">RECOMMENDED REACT STRUCTURE</p>
+                <pre style="font-size:0.8rem;color:#0f0;overflow-x:auto;line-height:1.7;"><code>src/
+├── components/       # Reusable UI components
+│   ├── Button/
+│   │   ├── Button.jsx
+│   │   ├── Button.test.jsx
+│   │   └── Button.css
+│   └── Modal/
+├── pages/            # Route-level components
+│   ├── HomePage.jsx
+│   └── ProductPage.jsx
+├── hooks/            # Custom React hooks
+│   └── useAuth.js
+├── store/            # Global state (Redux/Zustand)
+│   └── authStore.js
+├── services/         # API calls
+│   └── userService.js
+├── utils/            # Helper functions
+│   └── formatDate.js
+└── App.jsx</code></pre>
+            </div>
+            <div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;margin-bottom:1rem;">
+                    <strong style="color:var(--cyan);">🧱 Feature-Based Structure</strong>
+                    <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">As apps scale further, organize by <em>feature</em> rather than by type. All files related to "Authentication" live together:</p>
+                    <pre style="background:#000;padding:0.6rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;"><code>src/features/
+├── auth/
+│   ├── components/
+│   ├── hooks/
+│   ├── store/
+│   └── api/
+└── products/
+    ├── components/
+    └── hooks/</code></pre>
+                </div>
+                <div style="background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.2);padding:1rem;border-radius:8px;">
+                    <strong>💡 Naming Conventions:</strong>
+                    <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;line-height:1.8;">
+                        <li>→ Components: <code>PascalCase</code></li>
+                        <li>→ Hooks: <code>useCamelCase</code></li>
+                        <li>→ Files: match component name</li>
+                        <li>→ Utils: <code>camelCase</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.17 Conclusion -->
+    <div class="content-card" style="background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.08)); border-color: rgba(40,224,255,0.3);">
+        <h3>🎓 5.17 Module Conclusion & Learning Path</h3>
+        <p>You now have a comprehensive understanding of modern Frontend Frameworks. From components and reactivity to SSR, testing, and accessibility — these concepts form the backbone of every professional web application built today.</p>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.2rem; margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">✅ What you've covered:</strong>
+                <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>✔ What frameworks are and why they exist</li>
+                    <li>✔ Component architecture (props, state, lifecycle)</li>
+                    <li>✔ Events, forms, and user interaction</li>
+                    <li>✔ Conditional rendering and list rendering</li>
+                    <li>✔ SPA and client-side routing</li>
+                    <li>✔ Fetching data from APIs</li>
+                    <li>✔ Global state management</li>
+                    <li>✔ Performance optimization</li>
+                    <li>✔ SSR and SSG with Next.js / Nuxt</li>
+                    <li>✔ Tooling (Vite, npm, TypeScript)</li>
+                    <li>✔ Testing (unit, component, E2E)</li>
+                    <li>✔ Accessibility and project structure</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">🗺️ Your next steps:</strong>
+                <div style="margin-top:0.6rem;font-size:0.83rem;">
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">1️⃣ Build a small project</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Todo App → Weather App → E-commerce product listing</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">2️⃣ Add a real API</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Connect to a public API (OpenWeather, PokeAPI, JSONPlaceholder)</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">3️⃣ Learn TypeScript</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Add types to your components and hooks</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;">
+                        <strong style="color:var(--blue);">4️⃣ Explore Next.js or Nuxt</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Build a full-stack app with SSR, file-based routing, and API routes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:1.2rem;margin-top:1.2rem;">
+            <strong>🏆 Challenge:</strong>
+            <p style="font-size:0.9rem;color:var(--text-secondary);margin-top:0.5rem;">Open YouTube, Netflix, or any complex web app and try to sketch on paper how its UI is divided into components. Think about: what data is state? What would be props? Which components share data? What would go in a global store? This mental exercise is what senior developers do every day.</p>
+        </div>
+    </div>
+
+</div>
+
+            <div id="lab" class="tab-panel">
+                <h3>SQL Data Console</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Practice data extraction. Try filtering customers with high spending.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">SQL EDITOR</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT customer_name, total_spent 
+FROM sales 
+WHERE total_spent > 1500
+ORDER BY total_spent DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">QUERY RESULT</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Click "Run" to simulate the database query...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Run Query</button>
+            </div>
+
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>📘 Quiz: Frontend Frameworks</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge about components, state, reactivity and SPA architecture.</p>
+        
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What is a frontend framework?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) A database</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B" data-correct="true"> B) A tool to build interactive interfaces</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C"> C) A web server</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) An operating system</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. Which of these is a frontend framework?</p>
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Node.js</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Express</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C" data-correct="true"> C) React</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) MongoDB</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. What is a component?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) A CSS file</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B" data-correct="true"> B) A reusable function that represents part of the interface</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C"> C) A backend server</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) A type of database</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. What does reactive UI mean?</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A" data-correct="true"> A) The interface updates automatically when state changes</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B"> B) The interface only updates when reloading the page</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C"> C) The interface only works offline</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) The interface uses only HTML</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. What is "state" in a frontend framework?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) A configuration file</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B" data-correct="true"> B) A set of data that can change over time</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C"> C) A type of server</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) A CSS style</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. What are props?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A" data-correct="true"> A) Data passed between components</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) HTTP methods</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C"> C) External libraries</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) System global variables</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. What is a SPA?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A" data-correct="true"> A) Single Page Application</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Server Processing Architecture</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Structured Page Access</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Simple Program Application</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. In a SPA, navigation:</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Reloads the page completely</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"> B) Updates only the necessary content</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Requires restarting the server</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Doesn't use JavaScript</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. Which tool is used for navigation in React?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Express Router</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Mongo Router</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"> C) React Router</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Node Router</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. What happens when state is updated?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) The server restarts</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B" data-correct="true"> B) The component re-renders</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C"> C) The database deletes data</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) CSS is recompiled</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. Which tool is used for modern fast development?</p>
+                <label class="quiz-option"><input type="radio" name="q11" value="A" data-correct="true"> A) Vite</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B"> B) MySQL</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Apache</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) PHP</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. What is Lazy Loading for?</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Making the site slower</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Loading all components at the same time</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"> C) Loading components only when needed</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Removing JavaScript</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. What is the main advantage of component-based architecture?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) More disorganized code</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B" data-correct="true"> B) Reusability and easier maintenance</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Lower performance</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Less flexibility</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. Which of these libraries is used for global state management?</p>
+                <label class="quiz-option"><input type="radio" name="q14" value="A" data-correct="true"> A) Redux</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Bootstrap</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C"> C) jQuery UI</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Sass</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. Frontend frameworks communicate with the backend through:</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) CSS Grid</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B" data-correct="true"> B) HTTP requests (Fetch/Axios)</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Pure HTML</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Media Queries</label>
+            </div>
+        </form>
+
+        <div class="quiz-controls" style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button id="submit-quiz" class="btn btn-primary">Submit Assessment</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback" class="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+class QuizManager {
+    constructor() {
+        this.questionsData = {
+            q1: { correct: 'B', exp: 'Frameworks are tools that structure the creation of modern UIs.' },
+            q2: { correct: 'C', exp: 'React, Vue and Angular are the main UI frameworks.' },
+            q3: { correct: 'B', exp: 'Components are the fundamental and reusable pieces of the interface.' },
+            q4: { correct: 'A', exp: 'Reactivity means the UI "reacts" and changes as soon as data changes.' },
+            q5: { correct: 'B', exp: 'State is the "brain" of the component, storing dynamic data.' },
+            q6: { correct: 'A', exp: 'Props allow components to communicate with each other (from parent to child).' },
+            q7: { correct: 'A', exp: 'SPA allows navigation without ever reloading the main HTML file.' },
+            q8: { correct: 'B', exp: 'Navigation in SPAs is instant because it only changes the DOM content.' },
+            q9: { correct: 'C', exp: 'React Router is the standard for navigation in React ecosystems.' },
+            q10: { correct: 'B', exp: 'Whenever state changes, the framework redraws the component (Re-render).' },
+            q11: { correct: 'A', exp: 'Vite is the current preferred tool for creating fast and optimized projects.' },
+            q12: { correct: 'C', exp: 'Lazy Loading saves resources by loading code only when the user needs it.' },
+            q13: { correct: 'B', exp: 'Dividing into components makes code modular, clean and easy to maintain.' },
+            q14: { correct: 'A', exp: 'Redux (or Pinia/Zustand) manages data that needs to be seen by the entire app.' },
+            q15: { correct: 'B', exp: 'The frontend requests data from the backend via JSON using the HTTP protocol.' }
+        };
+        this.init();
+    }
+
+    init() {
+        document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+        document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+    }
+
+    submitQuiz() {
+        const form = document.getElementById('quiz-form');
+        const formData = new FormData(form);
+        let score = 0;
+        let feedbackHTML = '';
+
+        Object.keys(this.questionsData).forEach((key, index) => {
+            const userAnswer = formData.get(key);
+            const isCorrect = userAnswer === this.questionsData[key].correct;
+            
+            if (isCorrect) score++;
+
+            feedbackHTML += `
+    <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+        <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+        <div>
+            <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+            ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+        </div>
+    </div>
+`;
+        });
+
+        this.displayResults(score, feedbackHTML);
+    }
+
+    displayResults(score, feedbackHTML) {
+        const total = Object.keys(this.questionsData).length;
+        const percent = Math.round((score / total) * 100);
+        const resultsDiv = document.getElementById('quiz-results');
+        
+        let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+        document.getElementById('quiz-score').innerHTML = `
+            <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+            <p style="color: var(--text-secondary)">${percent >= 70 ? 'Amazing! You master modern tools.' : 'Review Framework concepts and try again.'}</p>
+        `;
+
+        document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clearQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-results').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new QuizManager();
+});
+</script>
+            <div id="resources" class="tab-panel">
+                    <div class="content-card">
+                        <h3 class="content-title">Recommended Documents</h3>
+                        <p class="content-text">
+                            Here you have a curated list of essential resources to deepen your knowledge 
+                            in HTML and CSS. These documents will help you master the fundamental concepts.
+                        </p>
+                        
+                        <div class="resources-list">
+                            <div class="resource-category">
+                                <h4 class="category-title">Official Documentation</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">MDN Web Docs - HTML</a></li>
+                                    <li><a href="#" class="resource-link">MDN Web Docs - CSS</a></li>
+                                    <li><a href="#" class="resource-link">W3C HTML5 Specification</a></li>
+                                    <li><a href="#" class="resource-link">CSS Working Group Specifications</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Guides and Tutorials</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML5 Semantic Elements Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Flexbox Complete Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Grid Layout Tutorial</a></li>
+                                    <li><a href="#" class="resource-link">Web Accessibility Guidelines (WCAG)</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Tools and Validators</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">W3C HTML Validator</a></li>
+                                    <li><a href="#" class="resource-link">W3C CSS Validator</a></li>
+                                    <li><a href="#" class="resource-link">Can I Use - Browser Support</a></li>
+                                    <li><a href="#" class="resource-link">WebAIM Accessibility Checker</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Quick References</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML Elements Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Properties Cheat Sheet</a></li>
+                                    <li><a href="#" class="resource-link">HTML Entities Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Selectors Reference</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="resources-note">
+                            <p>💡 <strong>Note:</strong> You can edit this list in the future to add your own favorite resources.</p>
+                        </div>
+                    </div>
+            </div>
+
+            <div id="evaluation" class="tab-panel">
+    <div class="content-card">
+        <h3>🎯 Mastery Criteria: Frontend Frameworks</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            Here are the criteria organized by importance levels to assess your mastery in Frontend Frameworks (React, Vue or similar).
+        </p>
+        
+        <div class="evaluation-grid">
+            <div class="evaluation-column">
+                <h4 class="evaluation-title essential">
+                    <span>💠</span> Essential
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Component-based architecture</li>
+                    <li>Creating functional components</li>
+                    <li>Correct use of props</li>
+                    <li>State management (useState or equivalent)</li>
+                    <li>Conditional rendering</li>
+                    <li>List rendering (map / v-for)</li>
+                    <li>Events and user interaction handling</li>
+                    <li>Communication with APIs (fetch / axios)</li>
+                    <li>Creating SPA with Router</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title important">
+                    <span>⭐</span> Important
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Additional hooks (useEffect or equivalent)</li>
+                    <li>Separation of concerns (UI vs logic)</li>
+                    <li>Scalable project structure</li>
+                    <li>Controlled forms</li>
+                    <li>Input validation</li>
+                    <li>Global state management (Context API, Redux, Pinia, etc.)</li>
+                    <li>Component lazy loading</li>
+                    <li>Code splitting</li>
+                    <li>UI error handling</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title advanced">
+                    <span>🚀</span> Advanced
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Performance optimization (memoization and re-render control)</li>
+                    <li>Server-Side Rendering (Next.js / Nuxt)</li>
+                    <li>Static Site Generation (SSG)</li>
+                    <li>Hydration and hybrid rendering</li>
+                    <li>Micro-frontends</li>
+                    <li>Testing (Jest, Testing Library, Cypress)</li>
+                    <li>Advanced state management and caching (React Query, SWR)</li>
+                    <li>Accessibility (ARIA and WCAG best practices)</li>
+                    <li>Bundle optimization and performance analysis</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-panel");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            let progressMap = { 'learn': 25, 'lab': 50, 'quiz': 75, 'resources': 90, 'evaluation': 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executed successfully.</strong><br><br>Results (Top 3):<br>-----------------------<br>1. Carlos Alberto | €4,250.00<br>2. Beatriz Ramos | €2,100.50<br>3. Ricardo Jorge | €1,880.00<br><br><em>Tip: The WHERE filter worked correctly, eliminating records below €1500.</em>";
+        }
+    </script>
+</body>
+</html>

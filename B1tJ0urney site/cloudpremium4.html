@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Cloud Security</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #020d12;
+            --blue: #00d4ff; --purple: #00aacc; --cyan: #00e5ff;
+            --text-light: #e8f8fc; --text-secondary: #8cc8d8;
+            --card-bg: rgba(0,212,255,0.04); --border-color: rgba(0,212,255,0.15);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; overflow-x: hidden; }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0,212,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(0,180,220,0.07) 1px, transparent 1px);
+            background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1;
+        }
+        @keyframes gridMove { 0%{transform:translate(0,0)} 100%{transform:translate(50px,50px)} }
+        body::after {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(0,180,220,0.08) 0%, rgba(0,212,255,0.04) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(2,13,18,0.88); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(0,212,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: #001a20; font-weight: 700; box-shadow: 0 4px 15px rgba(0,212,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,212,255,0.45); }
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(to right, #00b8d4, #00e5ff, #00acc1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(0,212,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; font-family: 'Inter', sans-serif; }
+        .tab-button:hover { color: var(--text-light); background: rgba(0,212,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(0,212,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .content-card { background: rgba(0,212,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; color: #00b8d4; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+        pre { background: rgba(0,0,0,0.45); border: 1px solid var(--border-color); border-radius: 6px; padding: 1.1rem; overflow-x: auto; margin: 1rem 0; }
+        code { font-family: 'Courier New', monospace; font-size: 0.88rem; color: #a0e8f4; line-height: 1.6; }
+        .quiz-item { background: rgba(0,212,255,0.02); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .quiz-question { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(0,212,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all 0.3s ease; margin-bottom: 0.5rem; }
+        .quiz-option:hover { background: rgba(0,212,255,0.08); border-color: var(--blue); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); flex-shrink: 0; }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; font-family: 'Courier New', monospace; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,229,255,0.04)); border: 1px solid rgba(0,212,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; background: rgba(255,255,255,0.02); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer { color: #ef4444; font-weight: 600; }
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .evaluation-column { background: rgba(0,212,255,0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); }
+        .evaluation-title { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; font-size: 1rem; font-weight: 600; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .essential { color: var(--cyan); border-bottom-color: var(--cyan) !important; }
+        .important { color: #ffd700; border-bottom-color: #ffd700 !important; }
+        .advanced { color: #ff6b6b; border-bottom-color: #ff6b6b !important; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.875rem; color: var(--text-secondary); }
+        .evaluation-list li { padding-left: 1.2rem; position: relative; line-height: 1.4; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.6rem 0; font-size: 0.95rem; transition: opacity 0.2s; }
+        .resource-link:hover { text-decoration: underline; opacity: 0.85; }
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .lab-header { background: rgba(0,212,255,0.08); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.5px; }
+        .lab-textarea { flex: 1; background: #000d12; color: #00d4ff; font-family: 'Courier New', monospace; padding: 1rem; border: none; resize: none; outline: none; font-size: 0.88rem; line-height: 1.6; }
+        .lab-output { flex: 1; background: #001018; color: #a0e8f4; padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; }
+        .arch-diagram { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #a0e8f4; line-height: 1.8; overflow-x: auto; }
+        .tag-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.75rem 0; }
+        .tag { font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 999px; border: 1px solid rgba(0,212,255,0.25); color: #a0e8f4; background: rgba(0,212,255,0.06); }
+        .severity-critical { color: #ef4444; font-weight: 700; }
+        .severity-high { color: #f97316; font-weight: 600; }
+        .severity-medium { color: #f59e0b; font-weight: 600; }
+        .severity-low { color: #10b981; font-weight: 600; }
+        .compliance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .compliance-card { background: rgba(0,212,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .compliance-card h4 { color: var(--cyan); font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .compliance-card p { color: var(--text-secondary); font-size: 0.82rem; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <div class="logo">BitJourney</div>
+            <span class="premium-badge">Premium • Cloud</span>
+        </div>
+        <nav style="display:flex;gap:.75rem">
+            <a href="premium-cloud.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objective: Cloud Security</h1>
+        <p class="course-description">
+            Protect cloud workloads end-to-end — from identity and access control to encryption, threat detection, compliance frameworks, secrets management, and vulnerability analysis. Security is everyone's responsibility.
+        </p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>6–8h</span></div>
+            <div class="meta-item"><span>🎯</span><span>IAM · Zero Trust · Encryption · SIEM · SOC 2 · ISO 27001</span></div>
+            <div class="meta-item"><span>📌</span><span>Requires: Cloud Architecture basics</span></div>
+        </div>
+        <div class="tag-row">
+            <span class="tag">IAM</span>
+            <span class="tag">Zero Trust</span>
+            <span class="tag">mTLS</span>
+            <span class="tag">SIEM</span>
+            <span class="tag">Vault</span>
+            <span class="tag">SOC 2</span>
+            <span class="tag">ISO 27001</span>
+            <span class="tag">GDPR</span>
+            <span class="tag">Trivy</span>
+            <span class="tag">CSPM</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary)">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'learn')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'lab')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'resources')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'evaluation')">Evaluation</button>
+        </nav>
+
+        <!-- ══════════════════════════ LEARN ══════════════════════════ -->
+        <div id="learn" class="tab-panel active">
+
+            <div class="content-card">
+                <h3>🔐 4.1 The Shared Responsibility Model</h3>
+                <p>Cloud security is a joint responsibility between the provider and the customer. Understanding where the boundary lies is the foundation of everything else.</p>
+                <div class="arch-diagram">
+┌─────────────────────────────────────────────────────────────┐
+│              PROVIDER responsibility                        │
+│  Physical security · Hardware · Hypervisor · Global network │
+├────────────────────┬────────────────┬───────────────────────┤
+│       IaaS         │      PaaS      │         SaaS          │
+│  Customer manages: │ Provider mgmt: │  Provider manages:    │
+│  OS, middleware,   │ OS + runtime   │  Everything           │
+│  app, data, IAM,   │ Customer:      │  Customer:            │
+│  network config    │ app, data, IAM │  data + access only   │
+└────────────────────┴────────────────┴───────────────────────┘</div>
+                <div class="code-explanation">
+                    <strong>Key rule:</strong> The provider is responsible for security <span class="highlight">OF</span> the cloud (infrastructure). The customer is responsible for security <span class="highlight">IN</span> the cloud (data, identities, configurations).
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>🪪 4.2 IAM — Identity and Access Management</h3>
+                <p>IAM is the foundation of cloud security. It answers: <em>who can do what, on which resources, under what conditions.</em></p>
+                <ul class="styled-list">
+                    <li><strong>Users:</strong> Human identities. Avoid long-lived access keys — use roles and SSO instead.</li>
+                    <li><strong>Groups:</strong> Collections of users sharing the same permissions. Manage at group level, not individual user level.</li>
+                    <li><strong>Roles:</strong> Identities assumed by services, applications, or users temporarily. Issue short-lived credentials.</li>
+                    <li><strong>Policies:</strong> JSON documents defining allowed/denied actions on resources.</li>
+                    <li><strong>Service Accounts:</strong> Machine identities for automated workloads (Lambda, EC2, K8s pods).</li>
+                    <li><strong>MFA:</strong> Mandatory for all privileged accounts and the root account.</li>
+                    <li><strong>SSO / Identity Federation:</strong> Centralise identity via IdP (Okta, Azure AD, Google Workspace).</li>
+                </ul>
+                <pre><code># AWS IAM Policy — read-only S3 access (Principle of Least Privilege)
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadOnlyS3Access",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:GetObjectVersion"
+      ],
+      "Resource": [
+        "arn:aws:s3:::my-app-data",
+        "arn:aws:s3:::my-app-data/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-1"
+        }
+      }
+    }
+  ]
+}</code></pre>
+                <div class="code-explanation">
+                    <strong>Principle of Least Privilege (PoLP):</strong> Grant only the minimum permissions required to perform a task. Nothing more. Review and prune permissions regularly.
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>🛡️ 4.3 Zero Trust Architecture</h3>
+                <p>Traditional security assumed a trusted internal network. Zero Trust eliminates that assumption: <strong>never trust, always verify</strong> — regardless of where the request originates.</p>
+                <div class="arch-diagram">
+Old model:   [Internet] → FIREWALL → [Internal network: TRUSTED ✓]
+             "Trust but verify" — once inside, free movement
+
+Zero Trust:  [Internet] → [Identity check] → [Device check]
+             → [Context check] → [Resource] (every request verified)
+             No implicit trust. Even internal traffic is untrusted.</div>
+                <ul class="styled-list">
+                    <li><strong>Verify explicitly:</strong> Authenticate and authorise every request using identity, device health, location, and risk signals.</li>
+                    <li><strong>Least privilege access:</strong> Just-in-time (JIT) and just-enough-access (JEA) — grant permissions only when needed.</li>
+                    <li><strong>Assume breach:</strong> Design as if the attacker is already inside. Limit blast radius with micro-segmentation.</li>
+                    <li><strong>Micro-segmentation:</strong> Divide networks into small zones. A breach in one zone cannot easily spread to others.</li>
+                    <li><strong>Continuous validation:</strong> Re-verify trust at every step — session tokens expire, device health is re-checked.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>🔒 4.4 Encryption — At Rest</h3>
+                <p>Data at rest is stored data — in databases, object storage, disks, and backups. It must always be encrypted.</p>
+                <ul class="styled-list">
+                    <li><strong>AES-256:</strong> Industry standard for symmetric encryption. Used by AWS, Azure, and GCP by default.</li>
+                    <li><strong>AWS KMS (Key Management Service):</strong> Managed service for creating, rotating, and auditing encryption keys. Integrates with S3, EBS, RDS, Secrets Manager.</li>
+                    <li><strong>Azure Key Vault:</strong> Equivalent managed key and secrets store for Azure resources.</li>
+                    <li><strong>GCP Cloud KMS:</strong> Google's equivalent — also supports Cloud HSM for hardware-backed keys.</li>
+                    <li><strong>Customer-Managed Keys (CMK):</strong> You control key rotation and revocation. Higher responsibility, higher control.</li>
+                    <li><strong>Envelope encryption:</strong> Data is encrypted with a data key; the data key itself is encrypted with a master key in KMS.</li>
+                </ul>
+                <pre><code># Encrypt an S3 bucket with KMS (Terraform)
+resource "aws_s3_bucket_server_side_encryption_configuration" "example" {
+  bucket = aws_s3_bucket.data.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.app_key.arn
+    }
+    bucket_key_enabled = true  # reduces KMS API call costs
+  }
+}</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🔐 4.5 Encryption — In Transit</h3>
+                <p>Data in transit moves over networks. It must be encrypted to prevent interception and man-in-the-middle attacks.</p>
+                <ul class="styled-list">
+                    <li><strong>TLS 1.2+:</strong> Minimum standard. TLS 1.3 is preferred for new deployments — faster handshake, stronger ciphers.</li>
+                    <li><strong>TLS certificates:</strong> Use AWS Certificate Manager (ACM), Let's Encrypt, or Azure-managed certs. Auto-renew.</li>
+                    <li><strong>mTLS (Mutual TLS):</strong> Both client and server present certificates. Used for service-to-service authentication in microservices.</li>
+                    <li><strong>HSTS:</strong> HTTP Strict Transport Security — forces browsers to only connect via HTTPS.</li>
+                    <li><strong>Cipher suites:</strong> Disable weak ciphers (RC4, 3DES, MD5). Use AES-GCM, ChaCha20-Poly1305.</li>
+                    <li><strong>End-to-end encryption:</strong> Ensure traffic is not decrypted at load balancers unless required for inspection.</li>
+                </ul>
+                <pre><code># Enforce HTTPS-only on an AWS ALB (Terraform)
+resource "aws_lb_listener" "http_redirect" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = aws_acm_certificate.cert.arn
+}</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🗝️ 4.6 Secrets Management</h3>
+                <p>Secrets — passwords, API keys, certificates, tokens — must never be stored in code, environment variables, or logs.</p>
+                <div class="arch-diagram">
+BAD:   app/config.py → DB_PASSWORD = "super_secret_123"  ← in Git! ❌
+BAD:   docker run -e DB_PASSWORD=super_secret_123         ← in shell history ❌
+BAD:   kubectl create secret generic db --from-literal=pass=secret ← base64 ≠ encrypted ❌
+
+GOOD:  App → AWS Secrets Manager → retrieve at runtime     ✓
+GOOD:  App → HashiCorp Vault → dynamic secret (auto-expires) ✓
+GOOD:  K8s + External Secrets Operator → Vault/KMS → K8s Secret ✓</div>
+                <ul class="styled-list">
+                    <li><strong>AWS Secrets Manager:</strong> Store, rotate, and retrieve secrets programmatically. Auto-rotation for RDS, Redshift, and custom Lambda functions.</li>
+                    <li><strong>HashiCorp Vault:</strong> Open-source secrets management platform. Dynamic secrets — generate short-lived DB credentials on demand.</li>
+                    <li><strong>Azure Key Vault:</strong> Secrets, keys, and certificates in one managed service.</li>
+                    <li><strong>External Secrets Operator:</strong> Sync secrets from Vault/AWS/Azure into Kubernetes Secrets automatically.</li>
+                    <li><strong>Detect secrets in code:</strong> git-secrets, gitleaks, TruffleHog — scan commits before push.</li>
+                </ul>
+                <pre><code># Retrieve a secret from AWS Secrets Manager (Python)
+import boto3, json
+
+client = boto3.client('secretsmanager', region_name='eu-west-1')
+response = client.get_secret_value(SecretId='prod/db/credentials')
+secret = json.loads(response['SecretString'])
+db_password = secret['password']  # never logged or hardcoded
+
+# HashiCorp Vault — dynamic database credentials
+vault write database/roles/app-role \
+  db_name=my-postgres \
+  creation_statements="CREATE ROLE..." \
+  default_ttl="1h" \
+  max_ttl="24h"
+
+# Returns a unique username + password, expires in 1h automatically</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>📡 4.7 SIEM and Threat Detection</h3>
+                <p>SIEM (Security Information and Event Management) aggregates logs and events from across your environment and correlates them to detect threats.</p>
+                <ul class="styled-list">
+                    <li><strong>AWS CloudTrail:</strong> Logs every API call made in your AWS account — who did what, from where, and when. Essential for audit trails.</li>
+                    <li><strong>AWS GuardDuty:</strong> ML-powered threat detection. Analyses CloudTrail, VPC Flow Logs, and DNS logs to detect credential compromise, unusual API patterns, cryptomining, and port scanning.</li>
+                    <li><strong>AWS Security Hub:</strong> Aggregates findings from GuardDuty, Inspector, Macie, IAM Access Analyzer into a unified dashboard with compliance scores.</li>
+                    <li><strong>Azure Microsoft Sentinel:</strong> Cloud-native SIEM with AI-driven analytics and automation playbooks.</li>
+                    <li><strong>Splunk / Elastic SIEM:</strong> Popular enterprise SIEM solutions — ingest, index, and correlate logs at scale.</li>
+                    <li><strong>WAF (Web Application Firewall):</strong> Inspect HTTP/HTTPS traffic and block OWASP Top 10 threats (SQL injection, XSS, RFI, bot attacks).</li>
+                </ul>
+                <pre><code># CloudTrail alert — detect root account usage (Terraform)
+resource "aws_cloudwatch_metric_alarm" "root_account_usage" {
+  alarm_name          = "root-account-usage"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  metric_name         = "RootAccountUsage"
+  namespace           = "CloudTrailMetrics"
+  period              = 300
+  statistic           = "Sum"
+  threshold           = 1
+  alarm_description   = "ALERT: Root account used — investigate immediately"
+  alarm_actions       = [aws_sns_topic.security_alerts.arn]
+}</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🕵️ 4.8 Vulnerability Management</h3>
+                <p>Vulnerabilities must be found and remediated before attackers exploit them. This requires scanning at every layer of the stack.</p>
+                <ul class="styled-list">
+                    <li><strong>Container image scanning (Trivy):</strong> Scan Docker images for known CVEs in OS packages and application dependencies.</li>
+                    <li><strong>AWS Inspector / ECR scanning:</strong> Automated vulnerability assessment for EC2 instances and container images.</li>
+                    <li><strong>DAST (Dynamic Application Security Testing):</strong> Test running applications — OWASP ZAP, Burp Suite.</li>
+                    <li><strong>SAST (Static Application Security Testing):</strong> Scan source code before deployment — Snyk Code, SonarQube, Semgrep.</li>
+                    <li><strong>CSPM (Cloud Security Posture Management):</strong> Continuously scan cloud configs for misconfigurations — Wiz, Prisma Cloud, Orca Security.</li>
+                    <li><strong>Penetration testing:</strong> Red team exercises to find what scanners miss. AWS allows pen testing with prior notification.</li>
+                </ul>
+                <pre><code># Trivy — scan a container image in CI
+trivy image --severity HIGH,CRITICAL \
+  --exit-code 1 \
+  myregistry/api:v2.1.0
+
+# Output example:
+# myregistry/api:v2.1.0 (debian 12.0)
+# ═══════════════════════════════════════════
+# Total: 3 (HIGH: 2, CRITICAL: 1)
+#
+# ┌──────────┬──────────────┬──────────┬──────────────────────┐
+# │ Library  │ Vulnerability│ Severity │ Fixed Version        │
+# ├──────────┼──────────────┼──────────┼──────────────────────┤
+# │ openssl  │ CVE-2023-xxxx│ CRITICAL │ 3.0.8-1              │
+# └──────────┴──────────────┴──────────┴──────────────────────┘</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>📋 4.9 Compliance Frameworks</h3>
+                <p>Compliance frameworks define standards for how organisations must handle security, privacy, and data protection. Cloud providers offer compliance-ready infrastructure, but the customer must configure and operate it correctly.</p>
+                <div class="compliance-grid">
+                    <div class="compliance-card">
+                        <h4>SOC 2 Type II</h4>
+                        <p>Audits organisational controls over security, availability, processing integrity, confidentiality, and privacy. Type II covers a period of time (usually 6–12 months). Essential for B2B SaaS.</p>
+                    </div>
+                    <div class="compliance-card">
+                        <h4>ISO 27001</h4>
+                        <p>International standard for Information Security Management Systems (ISMS). Requires a formal risk assessment process, documented controls, and annual audits. Globally recognised.</p>
+                    </div>
+                    <div class="compliance-card">
+                        <h4>GDPR</h4>
+                        <p>EU regulation governing personal data. Requires data minimisation, consent, right to erasure, breach notification within 72h, and data residency controls. Fines up to 4% of global revenue.</p>
+                    </div>
+                    <div class="compliance-card">
+                        <h4>PCI DSS</h4>
+                        <p>Payment Card Industry Data Security Standard. Required for any organisation that stores, processes, or transmits cardholder data. 12 requirements covering network, access, monitoring, and testing.</p>
+                    </div>
+                    <div class="compliance-card">
+                        <h4>HIPAA</h4>
+                        <p>US Health Insurance Portability and Accountability Act. Protects Protected Health Information (PHI). Requires BAAs with cloud providers and strict access controls on health data.</p>
+                    </div>
+                    <div class="compliance-card">
+                        <h4>NIS2 / DORA</h4>
+                        <p>EU directives for critical infrastructure (NIS2) and financial sector resilience (DORA). Require incident reporting, supply chain security, and business continuity planning.</p>
+                    </div>
+                </div>
+                <div class="code-explanation" style="margin-top:1rem">
+                    <strong>Cloud provider compliance evidence:</strong> AWS Artifact, Azure Compliance Manager, and GCP Compliance Hub provide audit reports, certifications, and shared responsibility documentation for regulators.
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>🔍 4.10 IAM Security Best Practices</h3>
+                <pre><code># AWS: List all users with console access and no MFA
+aws iam generate-credential-report
+aws iam get-credential-report --query 'Content' --output text \
+  | base64 -d | csvtool col 1,4,8 - \
+  | awk -F',' '$2=="true" && $3=="false"'
+
+# Detect over-permissive policies (wildcard actions)
+aws iam list-policies --scope Local \
+  | jq '.Policies[].PolicyName' \
+  | xargs -I{} aws iam get-policy-version \
+    --policy-arn arn:aws:iam::123456789:policy/{} \
+    --version-id v1 \
+  | jq 'select(.PolicyVersion.Document.Statement[].Action == "*")'</code></pre>
+                <ul class="styled-list">
+                    <li>Enable MFA for all human users — especially privileged accounts and root.</li>
+                    <li>Never use root credentials for day-to-day operations. Lock root with MFA.</li>
+                    <li>Rotate access keys regularly. Use IAM Access Analyzer to detect unused permissions.</li>
+                    <li>Use IAM roles with AssumeRole — no long-lived keys on EC2 instances or Lambda.</li>
+                    <li>Enable IAM Access Analyzer — alerts when resources are shared outside your account.</li>
+                    <li>Use Service Control Policies (SCPs) in AWS Organizations to enforce guardrails across all accounts.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>🌐 4.11 Network Security in the Cloud</h3>
+                <ul class="styled-list">
+                    <li><strong>Security Groups:</strong> Stateful instance-level firewall — define inbound/outbound rules by port, protocol, and CIDR or security group source.</li>
+                    <li><strong>NACLs (Network ACLs):</strong> Stateless subnet-level firewall — evaluated in order, explicit deny is possible.</li>
+                    <li><strong>VPC Flow Logs:</strong> Capture metadata for all traffic in your VPC. Essential for detecting lateral movement and anomalous traffic.</li>
+                    <li><strong>AWS Network Firewall:</strong> Managed deep packet inspection with Suricata-compatible rules.</li>
+                    <li><strong>PrivateLink:</strong> Access services without exposing traffic to the public internet.</li>
+                    <li><strong>Shield / DDoS protection:</strong> AWS Shield Standard (free) + Shield Advanced for layer 3/4/7 DDoS mitigation.</li>
+                </ul>
+                <pre><code># Restrictive Security Group — allow HTTPS only from CloudFront
+resource "aws_security_group_rule" "https_from_cloudfront" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.alb.id
+  # Only allow traffic from CloudFront managed prefix list
+  prefix_list_ids   = ["pl-fab65393"]  # AWS CloudFront PL
+  description       = "HTTPS from CloudFront only"
+}</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>⚙️ 4.12 Security Automation and DevSecOps</h3>
+                <p>Security must be integrated into every stage of the development pipeline — "shift left" so issues are caught early and cheaply.</p>
+                <div class="arch-diagram">
+DevSecOps Pipeline:
+  Code    → SAST (Semgrep, SonarQube)        ← catch logic bugs
+  Commit  → Secret scanning (gitleaks)        ← stop credential leaks
+  Build   → Container scan (Trivy, Snyk)      ← patch CVEs before deploy
+  Deploy  → IaC scan (Checkov, tfsec)         ← fix misconfigs before apply
+  Runtime → CSPM + SIEM (Wiz, GuardDuty)     ← detect anomalies live
+  Audit   → CloudTrail + compliance reports   ← evidence for regulators</div>
+                <ul class="styled-list">
+                    <li><strong>Checkov / tfsec:</strong> Scan Terraform and CloudFormation for security misconfigurations before applying.</li>
+                    <li><strong>gitleaks / TruffleHog:</strong> Scan Git repositories for accidentally committed secrets.</li>
+                    <li><strong>OPA (Open Policy Agent):</strong> Policy-as-code engine — enforce custom security rules at any layer.</li>
+                    <li><strong>AWS Config:</strong> Continuously monitors AWS resource configurations against desired-state rules. Auto-remediation actions available.</li>
+                </ul>
+                <pre><code># Checkov — scan Terraform for security issues
+checkov -d . --framework terraform \
+  --check CKV_AWS_18,CKV_AWS_19,CKV_AWS_20
+
+# gitleaks — detect secrets in git history
+gitleaks detect --source . --verbose
+
+# tfsec — inline security scanning
+tfsec . --minimum-severity HIGH</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🔑 4.13 Certificate and PKI Management</h3>
+                <ul class="styled-list">
+                    <li><strong>ACM (AWS Certificate Manager):</strong> Provision, manage, and auto-renew TLS certificates. Free for ALB, CloudFront, and API Gateway.</li>
+                    <li><strong>Private CA:</strong> ACM Private CA or Vault PKI Secrets Engine — issue internal certificates for service-to-service mTLS.</li>
+                    <li><strong>Certificate rotation:</strong> Automate rotation — manually managed certs expire and cause outages.</li>
+                    <li><strong>Certificate Transparency (CT):</strong> Monitor CT logs (crt.sh) for unauthorised certificates issued for your domain.</li>
+                    <li><strong>SPIFFE/SPIRE:</strong> Open standard for workload identity — issues short-lived X.509 certificates to services automatically.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>🚨 4.14 Incident Response in the Cloud</h3>
+                <ul class="styled-list">
+                    <li><strong>Preparation:</strong> Define playbooks for common incidents (credential compromise, data breach, ransomware). Practice tabletop exercises.</li>
+                    <li><strong>Detection:</strong> GuardDuty + SIEM alerts. Tune thresholds — too many alerts = alert fatigue.</li>
+                    <li><strong>Containment:</strong> Isolate compromised resources — revoke credentials, quarantine EC2 instances, snapshot for forensics.</li>
+                    <li><strong>Eradication and recovery:</strong> Remove persistence mechanisms, rotate secrets, redeploy from clean IaC state.</li>
+                    <li><strong>Post-incident:</strong> Blameless postmortem, update runbooks, improve detection rules.</li>
+                    <li><strong>AWS:</strong> Use IAM policies to quarantine (attach deny-all policy). Use Systems Manager for forensic data collection without SSH.</li>
+                </ul>
+                <pre><code># Quarantine a compromised IAM user immediately
+aws iam put-user-policy \
+  --user-name compromised-user \
+  --policy-name QUARANTINE \
+  --policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Deny",
+      "Action": "*",
+      "Resource": "*"
+    }]
+  }'
+
+# Revoke all active sessions
+aws iam create-policy-version \
+  --policy-arn arn:aws:iam::123456789:policy/DenyAll \
+  --policy-document file://deny-all.json \
+  --set-as-default</code></pre>
+            </div>
+
+            <div class="content-card" style="border-left:5px solid var(--cyan)">
+                <h3>✅ 4.15 Module Summary</h3>
+                <p>After this module you should understand:</p>
+                <ul class="styled-list">
+                    <li>The Shared Responsibility Model and where your boundary begins.</li>
+                    <li>IAM fundamentals: users, roles, policies, and Principle of Least Privilege.</li>
+                    <li>Zero Trust: never trust, always verify, assume breach.</li>
+                    <li>Encryption at rest (KMS/AES-256) and in transit (TLS 1.3, mTLS).</li>
+                    <li>Secrets management: Vault, AWS Secrets Manager, dynamic secrets.</li>
+                    <li>SIEM and threat detection: CloudTrail, GuardDuty, WAF.</li>
+                    <li>Vulnerability management pipeline: Trivy, CSPM, DAST, SAST.</li>
+                    <li>Compliance frameworks: SOC 2, ISO 27001, GDPR, PCI DSS.</li>
+                    <li>DevSecOps: shift-left security integrated into every CI/CD stage.</li>
+                </ul>
+                <p style="margin-top:0.75rem"><strong>Next:</strong> Networking & Service Mesh — securing and managing inter-service traffic.</p>
+            </div>
+
+        </div>
+
+        <!-- ══════════════════════════ LAB ══════════════════════════ -->
+        <div id="lab" class="tab-panel">
+            <h3 style="margin-bottom:0.5rem">Lab: IAM Policy Analyser</h3>
+            <p style="color:var(--text-secondary);margin-bottom:1.25rem;font-size:0.9rem">
+                Write an AWS IAM policy JSON and click Run to analyse its permissions, detect security issues, and receive remediation recommendations.
+            </p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header">IAM POLICY JSON</div>
+                    <textarea class="lab-textarea" id="lab-input">{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AppS3Access",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::my-app-bucket",
+        "arn:aws:s3:::my-app-bucket/*"
+      ]
+    },
+    {
+      "Sid": "DynamoDBAccess",
+      "Effect": "Allow",
+      "Action": "dynamodb:*",
+      "Resource": "*"
+    }
+  ]
+}</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header">SECURITY ANALYSIS OUTPUT</div>
+                    <div class="lab-output" id="lab-output">Click "▶ Analyse" to scan the IAM policy for security issues...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem" onclick="runLab()">▶ Analyse Policy</button>
+        </div>
+
+        <!-- ══════════════════════════ QUIZ ══════════════════════════ -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: Cloud Security</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">
+                    15 questions covering IAM, Zero Trust, encryption, SIEM, secrets management, compliance, and vulnerability analysis. Read carefully — some options are intentionally close.
+                </p>
+                <form id="quiz-form">
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">1. In the AWS Shared Responsibility Model, which of the following is the CUSTOMER'S responsibility?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"><span class="option-text">A) Physical security of the data centre</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B"><span class="option-text">B) Security of the hypervisor and hardware</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C" data-correct="true"><span class="option-text">C) IAM configuration, data encryption, and OS patching (in IaaS)</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"><span class="option-text">D) Global network infrastructure and edge locations</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">2. What is the Principle of Least Privilege?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A"><span class="option-text">A) All users should share the same permissions to reduce complexity</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B" data-correct="true"><span class="option-text">B) Grant only the minimum permissions required to perform a specific task, nothing more</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C"><span class="option-text">C) Privileged users should only log in at specific times</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"><span class="option-text">D) Administrators should use read-only accounts by default</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">3. What is the core principle of Zero Trust architecture?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"><span class="option-text">A) Internal network traffic is always safe and trusted</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B"><span class="option-text">B) VPN access guarantees a user is authorised</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C" data-correct="true"><span class="option-text">C) Never trust, always verify — every request is authenticated and authorised regardless of origin</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"><span class="option-text">D) Trust is granted once per session and not re-verified</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">4. Which encryption algorithm is the industry standard for data at rest in cloud environments?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"><span class="option-text">A) RSA-2048</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B"><span class="option-text">B) MD5</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C" data-correct="true"><span class="option-text">C) AES-256</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"><span class="option-text">D) SHA-512</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">5. What is mTLS and what problem does it solve?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"><span class="option-text">A) Multi-tenancy TLS — allows multiple certificates per domain</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B" data-correct="true"><span class="option-text">B) Mutual TLS — both client and server present certificates, authenticating both sides of the connection</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C"><span class="option-text">C) Managed TLS — certificates are automatically issued by the cloud provider</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"><span class="option-text">D) Multi-layer TLS — encrypts data multiple times for extra security</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">6. Where should application secrets (database passwords, API keys) NEVER be stored?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"><span class="option-text">A) AWS Secrets Manager</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B"><span class="option-text">B) HashiCorp Vault</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C" data-correct="true"><span class="option-text">C) In source code or Git repositories</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"><span class="option-text">D) Azure Key Vault</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">7. What makes HashiCorp Vault's dynamic secrets feature powerful compared to static secrets?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"><span class="option-text">A) They are stored in plain text for faster retrieval</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B" data-correct="true"><span class="option-text">B) They are generated on demand, unique per request, and automatically expire — massively reducing compromise impact</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C"><span class="option-text">C) They can be shared across multiple services simultaneously</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"><span class="option-text">D) They do not require any IAM configuration</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">8. AWS CloudTrail is primarily used for?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"><span class="option-text">A) Monitoring application performance metrics</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B"><span class="option-text">B) Scanning container images for vulnerabilities</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C" data-correct="true"><span class="option-text">C) Recording all API calls and account activity for audit and forensic purposes</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"><span class="option-text">D) Blocking DDoS attacks at the network layer</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">9. What does AWS GuardDuty use to detect threats?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"><span class="option-text">A) Manual rule sets configured by the customer</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B" data-correct="true"><span class="option-text">B) Machine learning analysis of CloudTrail logs, VPC Flow Logs, and DNS queries</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C"><span class="option-text">C) Deep packet inspection of all network traffic</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"><span class="option-text">D) Signature-based antivirus scanning of EC2 instances</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">10. Which tool is used to scan Terraform infrastructure-as-code files for security misconfigurations?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"><span class="option-text">A) Trivy</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B"><span class="option-text">B) OWASP ZAP</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C" data-correct="true"><span class="option-text">C) Checkov / tfsec</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"><span class="option-text">D) Snyk Code</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">11. SOC 2 Type II differs from SOC 2 Type I because?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"><span class="option-text">A) Type II only covers security controls; Type I covers all five Trust Service Criteria</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B" data-correct="true"><span class="option-text">B) Type II audits the operating effectiveness of controls over a period of time (6–12 months), not just a point-in-time snapshot</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C"><span class="option-text">C) Type II is only required for companies with more than 500 employees</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"><span class="option-text">D) Type II is an ISO standard; Type I is an AICPA standard</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">12. Under GDPR, within how many hours must a data breach be reported to the supervisory authority?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"><span class="option-text">A) 24 hours</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B" data-correct="true"><span class="option-text">B) 72 hours</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C"><span class="option-text">C) 7 days</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"><span class="option-text">D) 30 days</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">13. What does CSPM stand for and what does it do?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"><span class="option-text">A) Cloud Service Provider Management — manages multi-cloud billing</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B"><span class="option-text">B) Container Security and Patch Manager — scans running containers for CVEs</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"><span class="option-text">C) Cloud Security Posture Management — continuously monitors cloud configurations for security misconfigurations and compliance violations</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"><span class="option-text">D) Compliance Scanning and Policy Monitor — generates compliance reports only</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">14. What is "envelope encryption" as used by AWS KMS?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"><span class="option-text">A) Encrypting data twice with two different algorithms</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"><span class="option-text">B) Wrapping encrypted data inside an HTTPS envelope for transit</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C" data-correct="true"><span class="option-text">C) Encrypting the data with a data key, then encrypting the data key itself with a master key stored in KMS</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"><span class="option-text">D) A method to encrypt and sign data simultaneously</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">15. In a DevSecOps pipeline, at which stage should container image vulnerability scanning (e.g., Trivy) run?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"><span class="option-text">A) Only in production, after deployment</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"><span class="option-text">B) Only on a weekly scheduled job</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"><span class="option-text">C) During the CI build phase — before the image is pushed to the registry or deployed</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D"><span class="option-text">D) After the image is deployed but before traffic is routed to it</span></label>
+                    </div>
+
+                </form>
+
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+
+                <div id="quiz-results" class="quiz-results" style="display:none">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback" class="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════ RESOURCES ══════════════════════════ -->
+        <div id="resources" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem">Support Materials</h3>
+            <div class="content-card">
+                <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem">Official documentation, frameworks, and tools:</p>
+                <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html" target="_blank" class="resource-link">→ AWS IAM Security Best Practices</a>
+                <a href="https://aws.amazon.com/architecture/security-identity-compliance/" target="_blank" class="resource-link">→ AWS Security Reference Architecture</a>
+                <a href="https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html" target="_blank" class="resource-link">→ AWS GuardDuty Documentation</a>
+                <a href="https://developer.hashicorp.com/vault/docs" target="_blank" class="resource-link">→ HashiCorp Vault Documentation</a>
+                <a href="https://aquasecurity.github.io/trivy/" target="_blank" class="resource-link">→ Trivy — Container Vulnerability Scanner</a>
+                <a href="https://www.checkov.io/" target="_blank" class="resource-link">→ Checkov — IaC Security Scanner</a>
+                <a href="https://owasp.org/www-project-top-ten/" target="_blank" class="resource-link">→ OWASP Top 10 Web Application Risks</a>
+                <a href="https://www.cisecurity.org/cis-benchmarks" target="_blank" class="resource-link">→ CIS Benchmarks — Cloud Security Hardening</a>
+                <a href="https://gdpr.eu/what-is-gdpr/" target="_blank" class="resource-link">→ GDPR Overview and Requirements</a>
+                <a href="https://www.aicpa.org/resources/landing/system-and-organization-controls-soc-suite-of-services" target="_blank" class="resource-link">→ AICPA SOC 2 Framework</a>
+                <a href="https://www.iso.org/isoiec-27001-information-security.html" target="_blank" class="resource-link">→ ISO/IEC 27001 Standard</a>
+                <a href="https://csrc.nist.gov/publications/detail/sp/800-207/final" target="_blank" class="resource-link">→ NIST Zero Trust Architecture (SP 800-207)</a>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════ EVALUATION ══════════════════════════ -->
+        <div id="evaluation" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Domain Criteria: Cloud Security</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">
+                    To successfully complete this module, demonstrate understanding across these three competency levels:
+                </p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>Shared Responsibility Model — provider vs customer boundary</li>
+                            <li>IAM: users, groups, roles, policies, and MFA</li>
+                            <li>Principle of Least Privilege (PoLP)</li>
+                            <li>Encryption at rest: AES-256 and KMS basics</li>
+                            <li>Encryption in transit: TLS 1.2+ and HTTPS enforcement</li>
+                            <li>Why secrets must never be stored in source code</li>
+                            <li>AWS CloudTrail purpose and scope</li>
+                            <li>Awareness of SOC 2, ISO 27001, and GDPR</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Zero Trust principles: verify explicitly, assume breach</li>
+                            <li>mTLS and service-to-service authentication</li>
+                            <li>AWS Secrets Manager and Vault dynamic secrets</li>
+                            <li>GuardDuty threat detection and finding types</li>
+                            <li>Security Groups vs NACLs — stateful vs stateless</li>
+                            <li>Container image scanning with Trivy in CI/CD</li>
+                            <li>CSPM tools (Wiz, Prisma) and what they detect</li>
+                            <li>DevSecOps shift-left pipeline stages</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>Envelope encryption and KMS key hierarchy</li>
+                            <li>SPIFFE/SPIRE workload identity for zero-trust</li>
+                            <li>AWS Service Control Policies (SCPs) in Organizations</li>
+                            <li>OPA/Gatekeeper for policy-as-code enforcement</li>
+                            <li>Incident response playbooks and quarantine automation</li>
+                            <li>SOC 2 Type II audit evidence preparation</li>
+                            <li>PCI DSS 12 requirements in a cloud context</li>
+                            <li>Supply chain security (SBOM, sigstore/cosign)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+/* ── Tab navigation ── */
+function openTab(evt, tabName) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
+    const map = { learn: 25, lab: 50, quiz: 75, resources: 90, evaluation: 100 };
+    document.getElementById('progress-fill').style.width = map[tabName] + '%';
+    document.getElementById('progress-text').innerText = map[tabName] + '%';
+    window.scrollTo({ top: 150, behavior: 'smooth' });
+}
+
+/* ── Lab — IAM Policy Analyser ── */
+function runLab() {
+    const input = document.getElementById('lab-input').value;
+    const out   = document.getElementById('lab-output');
+
+    let issues   = [];
+    let warnings = [];
+    let passed   = [];
+    let score    = 100;
+
+    // Check for wildcard actions
+    if (input.includes('"Action": "*"') || input.includes('"Action":"*"')) {
+        issues.push('🔴 CRITICAL — Wildcard Action "*" grants all AWS permissions. Replace with specific actions.');
+        score -= 40;
+    }
+    // Check for wildcard actions on specific services
+    const wildcardServiceMatch = input.match(/"Action":\s*"(\w+):\*"/g);
+    if (wildcardServiceMatch) {
+        wildcardServiceMatch.forEach(m => {
+            const svc = m.match(/"(\w+):\*"/)[1];
+            warnings.push(`🟡 HIGH — "${svc}:*" grants full access to ${svc.toUpperCase()}. Scope to specific actions (e.g., "${svc}:GetItem").`);
+            score -= 20;
+        });
+    }
+    // Check for wildcard resource
+    if (input.includes('"Resource": "*"') || input.includes('"Resource":"*"')) {
+        issues.push('🔴 CRITICAL — Wildcard Resource "*" applies permissions to ALL resources. Scope to specific ARNs.');
+        score -= 35;
+    }
+    // Check for missing Condition
+    if (!input.includes('"Condition"')) {
+        warnings.push('🟡 MEDIUM — No Condition block found. Consider adding conditions (aws:RequestedRegion, aws:SourceIp, MFA enforcement).');
+        score -= 10;
+    }
+    // Check for NotAction (dangerous)
+    if (input.includes('"NotAction"')) {
+        issues.push('🔴 HIGH — "NotAction" allows everything EXCEPT the listed actions. This is almost always overly permissive.');
+        score -= 30;
+    }
+    // Check for NotResource
+    if (input.includes('"NotResource"')) {
+        warnings.push('🟠 HIGH — "NotResource" is rarely appropriate. It applies the action to all resources except the listed ones.');
+        score -= 25;
+    }
+    // Good: specific ARNs
+    if (input.includes('arn:aws:s3:::') && !input.includes('"Resource": "*"')) {
+        passed.push('✅ Scoped S3 resource ARN detected — good practice.');
+    }
+    if (input.includes('arn:aws:dynamodb') || input.includes('arn:aws:rds')) {
+        passed.push('✅ Scoped database resource ARN detected.');
+    }
+    // Check for Deny statements
+    if (input.includes('"Effect": "Deny"') || input.includes('"Effect":"Deny"')) {
+        passed.push('✅ Explicit Deny statement found — good for security guardrails.');
+    }
+    // Count statements
+    const stmtCount = (input.match(/"Effect"/g) || []).length;
+    if (stmtCount > 0) {
+        passed.push(`✅ Policy contains ${stmtCount} statement(s).`);
+    }
+
+    score = Math.max(0, Math.min(100, score));
+    const rating = score >= 80 ? '🟢 GOOD' : score >= 50 ? '🟡 NEEDS IMPROVEMENT' : '🔴 INSECURE';
+
+    let result = `IAM Policy Security Analysis
+${'─'.repeat(44)}
+Security Score: ${score}/100  ${rating}
+
+`;
+    if (issues.length > 0) {
+        result += `CRITICAL / HIGH ISSUES (fix immediately):\n`;
+        issues.forEach(i => result += `  ${i}\n`);
+        result += '\n';
+    }
+    if (warnings.length > 0) {
+        result += `WARNINGS (should fix):\n`;
+        warnings.forEach(w => result += `  ${w}\n`);
+        result += '\n';
+    }
+    if (passed.length > 0) {
+        result += `PASSED CHECKS:\n`;
+        passed.forEach(p => result += `  ${p}\n`);
+        result += '\n';
+    }
+    result += `RECOMMENDATIONS:\n`;
+    result += `  → Use IAM Access Analyzer to find unused permissions.\n`;
+    result += `  → Add Condition blocks to restrict by region and MFA.\n`;
+    result += `  → Replace wildcard actions with specific ones.\n`;
+    result += `  → Scope Resource to specific ARNs, not "*".\n`;
+    result += `  → Use IAM roles instead of long-lived user access keys.\n`;
+
+    out.textContent = result;
+}
+
+/* ── Quiz ── */
+const questionsData = {
+    q1:  { correct: 'C', exp: 'In IaaS, the customer is responsible for IAM configuration, data encryption, OS patching, and application security. The provider manages physical security, hardware, and the hypervisor.' },
+    q2:  { correct: 'B', exp: 'Principle of Least Privilege means granting only the exact permissions needed for a specific task. Over-permissioned identities are one of the most common causes of cloud security incidents.' },
+    q3:  { correct: 'C', exp: 'Zero Trust\'s core principle is "never trust, always verify". Every request — regardless of whether it comes from inside or outside the network — must be authenticated and authorised.' },
+    q4:  { correct: 'C', exp: 'AES-256 (Advanced Encryption Standard with 256-bit keys) is the industry standard for encrypting data at rest. RSA-2048 is used for key exchange; MD5 and SHA-512 are hashing algorithms, not encryption.' },
+    q5:  { correct: 'B', exp: 'mTLS = Mutual TLS. In standard TLS only the server presents a certificate. mTLS requires both client and server to present and verify certificates, ensuring mutual authentication — critical for zero-trust microservices.' },
+    q6:  { correct: 'C', exp: 'Secrets in source code or Git are one of the most dangerous and common vulnerabilities. Even private repos get leaked or cloned. Use dedicated secrets managers like Vault or AWS Secrets Manager.' },
+    q7:  { correct: 'B', exp: 'Dynamic secrets in Vault are generated per request, are unique to the requesting service, and have a short TTL (time-to-live). If compromised, they expire quickly and cannot be reused — far safer than static shared credentials.' },
+    q8:  { correct: 'C', exp: 'CloudTrail logs every AWS API call — who made it, from which IP, at what time, and what the result was. It is the primary audit trail for security investigations, compliance evidence, and forensic analysis.' },
+    q9:  { correct: 'B', exp: 'GuardDuty uses machine learning to analyse CloudTrail API logs, VPC Flow Logs, and DNS query logs to detect threats like credential compromise, unusual API call patterns, and cryptomining activity.' },
+    q10: { correct: 'C', exp: 'Checkov and tfsec are purpose-built IaC security scanners. Trivy scans container images. OWASP ZAP does dynamic application testing. Snyk Code does static application code analysis.' },
+    q11: { correct: 'B', exp: 'SOC 2 Type I is a point-in-time assessment — "do the controls exist today?". Type II assesses whether controls operated effectively over a period (typically 6–12 months). Type II is far more valuable to customers.' },
+    q12: { correct: 'B', exp: 'GDPR Article 33 requires notifying the supervisory authority within 72 hours of becoming aware of a personal data breach. If the breach is high-risk, affected individuals must also be notified without undue delay.' },
+    q13: { correct: 'C', exp: 'CSPM = Cloud Security Posture Management. Tools like Wiz, Prisma Cloud, and Orca continuously scan cloud configurations (S3 bucket permissions, security group rules, IAM policies) for misconfigurations and compliance violations.' },
+    q14: { correct: 'C', exp: 'Envelope encryption: data is encrypted locally with a data encryption key (DEK); the DEK is then encrypted by a master key in KMS. The plaintext DEK never leaves the application — only the encrypted DEK is stored with the data.' },
+    q15: { correct: 'C', exp: 'Container image scanning should run during the CI build phase — before the image is pushed to the registry. This follows "shift-left" security: find and fix vulnerabilities early, when they are cheapest to fix.' }
+};
+
+document.getElementById('submit-quiz').addEventListener('click', () => {
+    const form = document.getElementById('quiz-form');
+    const data = new FormData(form);
+    let score = 0;
+    let feedbackHTML = '';
+
+    Object.keys(questionsData).forEach((key, index) => {
+        const userAnswer = data.get(key);
+        const isCorrect  = userAnswer === questionsData[key].correct;
+        if (isCorrect) score++;
+
+        feedbackHTML += `
+        <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+            <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+            <div>
+                <strong>Question ${index + 1}:</strong> ${questionsData[key].exp}
+                ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${questionsData[key].correct}</small>` : ''}
+            </div>
+        </div>`;
+    });
+
+    const total   = Object.keys(questionsData).length;
+    const percent = Math.round((score / total) * 100);
+    const cls     = percent >= 80 ? 'score-excellent' : percent >= 53 ? 'score-good' : 'score-poor';
+    const msg     = percent >= 80
+        ? '🎉 Excellent! You have a strong grasp of cloud security fundamentals. Move on to Networking & Service Mesh.'
+        : percent >= 53
+        ? '👍 Good progress. Review encryption concepts, compliance frameworks, and secrets management.'
+        : '📖 Security is critical — review the Learn section carefully, focusing on IAM, Zero Trust, and encryption.';
+
+    document.getElementById('quiz-score').innerHTML = `
+        <div class="${cls}">${score}/${total} (${percent}%)</div>
+        <p style="color:var(--text-secondary);margin-top:0.5rem">${msg}</p>`;
+    document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+
+    const results = document.getElementById('quiz-results');
+    results.style.display = 'block';
+    results.scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('clear-quiz').addEventListener('click', () => {
+    document.getElementById('quiz-form').reset();
+    document.getElementById('quiz-results').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>

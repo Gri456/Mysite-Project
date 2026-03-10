@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BitJourney — Artificial Intelligence</title>
+  <link rel="icon" href="favicon.ico">
+
+  <style>
+    :root{
+      --bg:#1a0a12; --panel:#2c0d1e; --panel-2:#280b1a;
+      --text:#f0e6ff; --muted:#d9a8c8;
+      --p1:#ff2d78; --p2:#ff85c2; --p3:#e0006e;
+      --ok:#22c55e; --ring:#ff4d9b;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background:radial-gradient(1000px 700px at 100% -10%,#5c1133 0%,transparent 60%),var(--bg);
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial
+    }
+    a{color:inherit;text-decoration:none}
+
+    /* Header */
+    header{
+      position:sticky;top:0;z-index:50;
+      background:linear-gradient(180deg,rgba(26,10,18,.9),rgba(26,10,18,.45));
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(255,45,120,.15)
+    }
+    .container{max-width:1100px;margin:0 auto;padding:0 1.25rem}
+    .row{display:flex;align-items:center;justify-content:space-between;padding:1rem 0}
+    .brand{display:flex;align-items:center;gap:.6rem}
+    .brand-logo{
+      width:36px;height:36px;border-radius:10px;
+      background:linear-gradient(135deg,var(--p1),var(--p2) 60%,var(--p3));
+      display:grid;place-items:center;color:#fff;font-weight:800;
+      box-shadow:0 8px 24px rgba(255,45,120,.35)
+    }
+    .chip{font-size:.8rem;padding:.25rem .6rem;border:1px solid rgba(255,255,255,.15);border-radius:999px;color:var(--muted)}
+    .btn{
+      display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.1rem;
+      border-radius:.75rem;border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;font-weight:600;
+      box-shadow:0 10px 30px rgba(255,45,120,.25);
+      transition:transform .15s ease, box-shadow .2s ease;cursor:pointer
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 16px 36px rgba(255,45,120,.4)}
+    .btn-ghost{background:transparent;border-color:rgba(255,255,255,.15);color:var(--text)}
+    .btn-ghost:hover{background:rgba(255,255,255,.05)}
+
+    /* Hero */
+    .hero{padding:3rem 0 1rem;text-align:center}
+    .title{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800}
+    .subtitle{color:var(--muted);max-width:760px;margin:.75rem auto 0;font-size:1.05rem}
+
+    /* Stage Panel */
+    .panel{
+      position:relative;
+      background:linear-gradient(180deg,rgba(44,13,30,.8),rgba(40,11,26,.8));
+      border:1px solid rgba(255,45,120,.15);border-radius:18px;padding:1rem;
+      box-shadow:inset 0 0 0 1px rgba(255,45,120,.05),0 10px 40px rgba(26,5,15,.6)
+    }
+
+    /* Vertical Road — altura fixa, SVG cobre tudo */
+    .road-wrap{position:relative;padding:0;height:3000px}
+    .road{position:absolute;top:0;left:0;width:100%;height:100%}
+
+    /* Milestones (cards) — sem translateY para controlo preciso */
+    .milestone{
+      position:absolute;
+      width:44%;max-width:420px;
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:16px;padding:1rem;backdrop-filter:blur(6px);
+      box-shadow:0 10px 28px rgba(26,5,15,.55)
+    }
+    .milestone h4{margin:0 0 .3rem;font-size:1rem}
+    .milestone p{margin:.2rem 0;color:var(--muted);font-size:.92rem;line-height:1.3}
+    .tags{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem}
+    .tag{font-size:.72rem;padding:.18rem .5rem;border-radius:999px;border:1px solid rgba(255,255,255,.18);color:#ffd6eb}
+    .actions{display:flex;gap:.5rem;margin-top:.7rem;flex-wrap:wrap}
+    .mini{padding:.45rem .65rem;border-radius:.6rem;font-size:.82rem}
+    .done{outline:2px solid rgba(34,197,94,.6);box-shadow:0 0 0 3px rgba(34,197,94,.15)}
+    .locked{opacity:.78;filter:grayscale(.25)}
+
+    .left {left:2%}
+    .right{right:2%}
+
+    /* 14 posições — espaçamento de 210px, começa em 20px */
+    .mv1 {top:  20px} .mv2 {top: 230px} .mv3 {top: 440px} .mv4 {top: 650px}
+    .mv5 {top: 860px} .mv6 {top:1070px} .mv7 {top:1280px} .mv8 {top:1490px}
+    .mv9 {top:1700px} .mv10{top:1910px} .mv11{top:2120px} .mv12{top:2330px}
+    .mv13{top:2540px} .mv14{top:2750px}
+
+    /* Troféu */
+    .trophy{
+      position:absolute;top:12px;right:12px;
+      display:flex;gap:.6rem;align-items:center;
+      background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.05));
+      border:1px solid rgba(255,255,255,.18);
+      padding:.5rem .7rem;border-radius:.7rem;z-index:10
+    }
+    .trophy .icon{
+      width:22px;height:22px;border-radius:50%;
+      background:radial-gradient(circle at 30% 30%,#ffe08a,#f59e0b);
+      box-shadow:0 0 0 2px rgba(255,255,255,.15),0 6px 16px rgba(245,158,11,.3)
+    }
+    .trophy small{color:var(--muted)}
+    .trophy.unlocked .icon{background:radial-gradient(circle at 30% 30%,#a7f3d0,#22c55e)}
+    .trophy.unlocked small{color:#a7f3d0}
+
+    .progressbar{display:flex;align-items:center;gap:.6rem;margin-top:.7rem}
+    .progress{
+      flex:1;height:10px;border-radius:999px;overflow:hidden;
+      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)
+    }
+    .progress>span{
+      display:block;height:100%;width:0%;
+      background:linear-gradient(90deg,var(--p1),var(--p2));
+      transition:width .35s ease
+    }
+
+    .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(26,5,15,.6);backdrop-filter:blur(6px);z-index:80}
+    .modal.active{display:grid}
+    .card{
+      background:linear-gradient(180deg,rgba(44,13,30,.95),rgba(40,11,26,.95));
+      border:1px solid rgba(255,45,120,.18);border-radius:16px;
+      padding:1.2rem 1.2rem 1rem;max-width:560px
+    }
+
+    .trophy-big{
+      width:120px;height:120px;margin:0 auto .4rem;border-radius:50%;
+      background:radial-gradient(circle at 35% 30%,#fff3b0,#f59e0b 60%,#b45309 100%);
+      box-shadow:0 10px 30px rgba(245,158,11,.35), inset 0 0 30px rgba(255,255,255,.35)
+    }
+    .confetti{position:absolute;inset:0;pointer-events:none;opacity:.8}
+
+    .cta{margin:1.25rem 0 3rem;display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+
+    #resetProgressBtn{
+      position:fixed;bottom:20px;left:20px;z-index:9999;
+      padding:.55rem .8rem;font-size:.9rem;border:none;border-radius:.65rem;
+      background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;
+      box-shadow:0 8px 22px rgba(255,45,120,.35);cursor:pointer;opacity:.9
+    }
+    #resetProgressBtn:hover{opacity:1}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container row">
+    <div class="brand">
+      <div class="brand-logo">BJ</div>
+      <div>
+        <div style="font-weight:800;letter-spacing:.3px">BitJourney</div>
+        <div class="chip">Premium • Artificial Intelligence</div>
+      </div>
+    </div>
+    <nav style="display:flex;gap:.6rem">
+      <a class="btn-ghost btn" href="index.html">Início</a>
+      <a class="btn-ghost btn" href="browse.html">Explorar</a>
+      <a class="btn" href="area-privada.html">Área Privada</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <h1 class="title">A tua Jornada Premium — <span style="background:linear-gradient(90deg,var(--p1),var(--p2));-webkit-background-clip:text;background-clip:text;color:transparent">Artificial Intelligence</span></h1>
+    <p class="subtitle">
+      Uma estrada <strong>vertical</strong> feita de <strong>bits (0 e 1)</strong> guia-te por vários temas — completa cada marco e ganha o troféu no final.
+    </p>
+  </section>
+
+  <section class="panel road-wrap">
+
+    <div id="trophy" class="trophy">
+      <div class="icon"></div>
+      <div>
+        <div style="font-weight:700;font-size:.92rem">Troféu da Jornada</div>
+        <small id="trophyStatus">Completa todos os objetivos</small>
+      </div>
+    </div>
+
+    <svg class="road" viewBox="0 0 1100 3000" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="gv" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff2d78"/>
+          <stop offset="60%" stop-color="#e0006e"/>
+          <stop offset="100%" stop-color="#7c0040"/>
+        </linearGradient>
+        <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="6" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <path id="vpath" d="
+          M 550 0
+          C 720 220, 720 440, 550 660
+          S 380 1100, 550 1320
+          S 720 1760, 550 1980
+          S 380 2420, 550 2640
+          S 720 2860, 550 3000" />
+      </defs>
+      <path d="M 525 0
+               C 695 220, 695 440, 525 660
+               S 405 1100, 525 1320
+               S 695 1760, 525 1980
+               S 405 2420, 525 2640
+               S 695 2860, 525 3000
+               L 575 3000
+               C 745 2860, 745 2640, 575 2420
+               S 455 1980, 575 1760
+               S 745 1320, 575 1100
+               S 455 660, 575 440
+               S 745 220, 575 0 Z"
+            fill="url(#gv)" opacity=".12" filter="url(#glow)"/>
+      <use href="#vpath" fill="none" stroke="url(#gv)" stroke-width="6" opacity=".55"/>
+      <text font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas" font-size="22" fill="#ff85c2" opacity=".45">
+        <textPath href="#vpath" startOffset="0%">
+          010101001101001110100101001011100101001000101101001011001010100110010101001101001010010101001101001001110001010100101101001011001010010010101001101001110100101001011100101001000101101001011001010100110010101001101001010010101001101001001110001010100101101001011001010010010101001101001001110001010100101101001011001010010010101001101001001110001010100101101001011001010010
+        </textPath>
+      </text>
+    </svg>
+
+    <div class="milestone mv1 left" data-key="ai-intro">
+      <h4>1) AI Foundations</h4>
+      <p>História da IA, tipos (narrow vs general), agentes inteligentes, aplicações reais e o impacto no mundo atual.</p>
+      <div class="tags"><span class="tag">história</span><span class="tag">agentes</span><span class="tag">aplicações</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium1.html">Ver conteúdos</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv2 right locked" data-key="ai-logic">
+      <h4>2) AI Logic & Search</h4>
+      <p>Lógica formal, sistemas baseados em regras, raciocínio dedutivo/indutivo e representação do conhecimento.</p>
+      <div class="tags"><span class="tag">lógica</span><span class="tag">conhecimento</span><span class="tag">raciocínio</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium2.html">Guia</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv3 left locked" data-key="ai-ml">
+      <h4>3) Advanced ML — Regression & Classification</h4>
+      <p>Supervised, unsupervised e reinforcement learning, overfitting, regularização, feature engineering e avaliação de modelos.</p>
+      <div class="tags"><span class="tag">ML</span><span class="tag">modelos</span><span class="tag">treino</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium3.html">Aprofundar</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv4 right locked" data-key="ai-dl">
+      <h4>4) Deep Learning Neural Networks</h4>
+      <p>Redes neuronais, CNNs, RNNs, Transformers, backpropagation, GPU training e frameworks como PyTorch/TensorFlow.</p>
+      <div class="tags"><span class="tag">redes neuronais</span><span class="tag">CNN</span><span class="tag">Transformers</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium4.html">Referências</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv5 left locked" data-key="ai-gen">
+      <h4>5) What Is Generative AI?</h4>
+      <p>LLMs, GANs, Diffusion Models, prompt engineering, RAG e as principais ferramentas generativas (GPT, Stable Diffusion, etc.).</p>
+      <div class="tags"><span class="tag">LLMs</span><span class="tag">GANs</span><span class="tag">prompts</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium5.html">Comparar</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv6 right locked" data-key="ai-ethics">
+      <h4>6) Why Ethics Matters in AI</h4>
+      <p>Bias, fairness, transparência, regulação (EU AI Act), privacidade (GDPR), uso responsável e alinhamento de IA.</p>
+      <div class="tags"><span class="tag">ética</span><span class="tag">bias</span><span class="tag">regulação</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium6.html">Guia</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv7 left locked" data-key="ai-impl">
+      <h4>7) How AI Is Implemented in Real Applications</h4>
+      <p>MLOps, pipelines de dados, deployment (APIs, cloud, edge), monitorização de modelos e integração em produtos reais.</p>
+      <div class="tags"><span class="tag">MLOps</span><span class="tag">deploy</span><span class="tag">cloud</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium7.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv8 right locked" data-key="ai-nlp">
+      <h4>8) Python for AI</h4>
+      <p>Tokenização, embeddings, modelos de linguagem, análise de sentimento, tradução automática e chatbots.</p>
+      <div class="tags"><span class="tag">NLP</span><span class="tag">embeddings</span><span class="tag">chatbots</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium8.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv9 left locked" data-key="ai-cv">
+      <h4>9) Model Context Protocol (MCP)</h4>
+      <p>Deteção de objetos, segmentação, reconhecimento facial, OCR e aplicações em tempo real com OpenCV e modelos YOLO.</p>
+      <div class="tags"><span class="tag">visão</span><span class="tag">YOLO</span><span class="tag">OpenCV</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium9.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv10 right locked" data-key="ai-rl">
+      <h4>10) Tokens & Tokenization</h4>
+      <p>Agentes, recompensas, políticas, Q-Learning, Deep RL, ambientes (OpenAI Gym) e casos de uso em jogos e robótica.</p>
+      <div class="tags"><span class="tag">RL</span><span class="tag">agentes</span><span class="tag">recompensas</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium10.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv11 left locked" data-key="ai-data">
+      <h4>11) AI Agents</h4>
+      <p>Recolha, limpeza e transformação de dados, feature stores, pipelines ETL, data lakes e governança de dados.</p>
+      <div class="tags"><span class="tag">dados</span><span class="tag">ETL</span><span class="tag">pipelines</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium11.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv12 right locked" data-key="ai-tools">
+      <h4>12) Big Data, ML & Deep Learning</h4>
+      <p>Ecossistema Python para IA: NumPy, Pandas, Scikit-learn, PyTorch, HuggingFace, LangChain e ferramentas de experimentação.</p>
+      <div class="tags"><span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">HuggingFace</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium12.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv13 left locked" data-key="ai-future">
+      <h4>13) LLM Engineering & RAG</h4>
+      <p>AGI, multimodal AI, AI agents autónomos, AI na ciência (AlphaFold), quantum ML e tendências para os próximos anos.</p>
+      <div class="tags"><span class="tag">AGI</span><span class="tag">multimodal</span><span class="tag">tendências</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium13.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv14 right locked" data-key="ai-career">
+      <h4>14) MLOps & AI at Scale</h4>
+      <p>Certificações (Google, DeepLearning.AI), construção de portfolio, contribuição open-source, Kaggle e como entrar na área.</p>
+      <div class="tags"><span class="tag">carreira</span><span class="tag">portfolio</span><span class="tag">Kaggle</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="AIpremium14.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+  </section>
+
+  <section class="cta">
+    <button id="btnStart" class="btn">Começar Jornada</button>
+    <a class="btn-ghost btn" href="browse.html">Voltar a explorar</a>
+  </section>
+</main>
+
+<!-- Modal: precisa de login -->
+<div id="loginModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="mlabel">
+  <div class="card">
+    <h3 id="mlabel" style="margin:0 0 .25rem;font-size:1.25rem">Acesso Premium</h3>
+    <p style="color:var(--muted);margin:.25rem 0 .9rem">
+      Precisas de iniciar sessão com o teu código para veres e gravares o teu progresso.
+    </p>
+    <div style="display:flex;gap:.6rem;justify-content:flex-end">
+      <button id="closeModal" class="btn-ghost btn">Agora não</button>
+      <a class="btn" href="login.html">Fazer Login</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Parabéns -->
+<div id="congratsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="glabel">
+  <div class="card" style="text-align:center;position:relative;overflow:hidden">
+    <div class="confetti" id="confetti"></div>
+    <div class="trophy-big"></div>
+    <h3 id="glabel" style="margin:.25rem 0 .25rem;font-size:1.35rem">Parabéns! Jornada concluída 🏆</h3>
+    <p style="color:var(--muted);margin:0 0 1rem">Completaste todos os objetivos da rota Artificial Intelligence.</p>
+    <div style="display:flex;gap:.6rem;justify-content:center">
+      <a class="btn" href="area-privada.html">Ver certificados</a>
+      <button id="closeCongrats" class="btn-ghost btn">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<button id="resetProgressBtn" title="Apagar só o progresso desta jornada">🗑 Reset progresso</button>
+
+<script>
+  const isLogged = !!localStorage.getItem('userCode');
+  const loginModal = document.getElementById('loginModal');
+  const closeLogin = document.getElementById('closeModal');
+  if (!isLogged) setTimeout(()=> loginModal.classList.add('active'), 450);
+  closeLogin?.addEventListener('click', ()=> loginModal.classList.remove('active'));
+
+  const MILESTONES = [
+    'ai-intro','ai-logic','ai-ml','ai-dl','ai-gen','ai-ethics','ai-impl',
+    'ai-nlp','ai-cv','ai-rl','ai-data','ai-tools','ai-future','ai-career'
+  ];
+  const KEY = 'bj_ai_progress_vertical';
+  const CONGRATS_FLAG = 'bj_ai_congrats_shown';
+
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ return {}; } };
+  const save = (state) => localStorage.setItem(KEY, JSON.stringify(state));
+  const state = load();
+
+  function updateGlobal(){
+    const completed = MILESTONES.filter(k => state[k]?.done).length;
+    const percent = Math.round(completed / MILESTONES.length * 100);
+    document.querySelectorAll('.progress > span').forEach((bar, i) => {
+      const k = MILESTONES[i];
+      bar.style.width = (state[k]?.done ? '100%' : (state[k]?.percent || 0)+'%');
+    });
+    const trophy = document.getElementById('trophy');
+    const status = document.getElementById('trophyStatus');
+    if (completed === MILESTONES.length){
+      trophy.classList.add('unlocked');
+      status.textContent = 'Jornada concluída — Parabéns! 🏆';
+      showCongratsOnce();
+    } else {
+      trophy.classList.remove('unlocked');
+      status.textContent = `Progresso: ${percent}%`;
+    }
+  }
+
+  function refreshLocks(){
+    const firstUndone = MILESTONES.findIndex(k => !state[k]?.done);
+    document.querySelectorAll('.milestone').forEach(ms=>{
+      const k = ms.dataset.key;
+      const idx = MILESTONES.indexOf(k);
+      ms.classList.toggle('locked', idx > firstUndone && firstUndone !== -1);
+      ms.classList.toggle('done', !!state[k]?.done);
+    });
+  }
+
+  document.querySelectorAll('[data-complete]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const ms = e.target.closest('.milestone');
+      const key = ms.dataset.key;
+      state[key] = {done: !(state[key]?.done), percent: state[key]?.done ? 100 : 0};
+      save(state);
+      refreshLocks();
+      updateGlobal();
+    });
+  });
+
+  document.getElementById('btnStart').addEventListener('click', ()=>{
+    if (!isLogged){ loginModal.classList.add('active'); return; }
+    const k = MILESTONES[0];
+    state[k] = state[k] || {done:false, percent:0};
+    let p = state[k].percent || 0;
+    const id = setInterval(()=>{
+      p += 8; state[k].percent = Math.min(p, 92); save(state); updateGlobal();
+      if (p>=92) clearInterval(id);
+    }, 80);
+    refreshLocks();
+  });
+
+  const congratsModal = document.getElementById('congratsModal');
+  const closeCongrats = document.getElementById('closeCongrats');
+  closeCongrats?.addEventListener('click', ()=> congratsModal.classList.remove('active'));
+
+  function showCongratsOnce(){
+    if (localStorage.getItem(CONGRATS_FLAG) === '1') return;
+    spawnConfetti();
+    congratsModal.classList.add('active');
+    localStorage.setItem(CONGRATS_FLAG, '1');
+  }
+
+  function spawnConfetti(){
+    const confetti = document.getElementById('confetti');
+    const frags = [];
+    for (let i=0;i<80;i++){
+      const d = document.createElement('div');
+      const size = 6 + Math.random()*6;
+      d.style.cssText = `position:absolute;left:${Math.random()*100}%;top:${-10+Math.random()*10}%;width:${size}px;height:${size}px;border-radius:2px;background:${['#ff2d78','#ff85c2','#a855f7','#06b6d4','#f59e0b'][Math.floor(Math.random()*5)]};opacity:.9;transform:translateY(0) rotate(${Math.random()*180}deg);transition:transform ${2+Math.random()*1.5}s cubic-bezier(.2,.8,.2,1), opacity 2.5s`;
+      frags.push(d);
+      confetti.appendChild(d);
+      requestAnimationFrame(()=>{
+        d.style.transform = `translateY(${180+Math.random()*220}px) rotate(${360+Math.random()*360}deg)`;
+        d.style.opacity = '0';
+      });
+    }
+    setTimeout(()=> frags.forEach(f=>f.remove()), 3000);
+  }
+
+  const resetBtn = document.getElementById('resetProgressBtn');
+  resetBtn.addEventListener('click', ()=>{
+    if (!confirm('Apagar o progresso desta jornada?')) return;
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(CONGRATS_FLAG);
+    for (const k of MILESTONES){ delete state[k]; }
+    document.querySelectorAll('.progress > span').forEach(b=> b.style.width='0%');
+    document.querySelectorAll('.milestone').forEach(ms=>{ ms.classList.remove('done','locked'); });
+    refreshLocks();
+    document.getElementById('trophy').classList.remove('unlocked');
+    document.getElementById('trophyStatus').textContent = 'Completa todos os objetivos';
+    alert('Progresso apagado!');
+  });
+
+  refreshLocks();
+  updateGlobal();
+</script>
+
+</body>
+</html>

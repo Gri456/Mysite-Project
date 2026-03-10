@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Defensive Security & SOC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --orange: #ff6200;
+            --yellow: #ffcc00;
+            --amber: #ff8c00;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(255, 98, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 98, 0, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255, 140, 0, 0.12) 0%, rgba(255, 204, 0, 0.06) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .premium-badge {
+            background: rgba(255, 140, 0, 0.15);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            color: var(--yellow);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 140, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            color: #0f172a;
+            box-shadow: 0 4px 15px rgba(255, 98, 0, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 140, 0, 0.45);
+        }
+
+        .main-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .course-header {
+            margin-bottom: 2rem;
+        }
+
+        .course-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--orange), var(--amber), var(--yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .course-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .progress-section {
+            margin-bottom: 2rem;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .tabs-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-button.active {
+            color: var(--text-light);
+            background: rgba(255, 98, 0, 0.1);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+        }
+
+        .tab-content {
+            padding: 2rem;
+            min-height: 400px;
+        }
+
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        .content-text {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--text-light);
+        }
+
+        .code-block .tag { color: #ff6b6b; }
+        .code-block .attr { color: #4ecdc4; }
+        .code-block .string { color: #95e1d3; }
+        .code-block .comment { color: #6c757d; font-style: italic; }
+
+        .learn-section { margin-bottom: 2rem; }
+
+        .learn-intro {
+            background: linear-gradient(135deg, rgba(255, 98, 0, 0.12), rgba(255, 204, 0, 0.06));
+            border: 1px solid rgba(255, 140, 0, 0.25);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .learn-intro h4 {
+            color: var(--yellow);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .learn-intro p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .code-explanation {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--orange);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .code-explanation h5 {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .code-explanation p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* Lab styles */
+        .lab-container {
+            display: flex;
+            gap: 1rem;
+            height: 600px;
+            margin-bottom: 1rem;
+        }
+
+        .lab-editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lab-preview {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lab-header {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .lab-textarea {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 1rem;
+            color: var(--text-light);
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+
+        .lab-textarea:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2);
+        }
+
+        .lab-iframe {
+            flex: 1;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            width: 100%;
+        }
+
+        .lab-controls {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-execute {
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+        }
+
+        .btn-execute:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4);
+        }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .lab-instructions {
+            background: rgba(40, 224, 255, 0.1);
+            border: 1px solid rgba(40, 224, 255, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Quiz styles */
+        .quiz-question {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--orange);
+        }
+
+        .quiz-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--orange);
+        }
+
+        .option-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        .quiz-option:hover .option-text { color: var(--text-light); }
+
+        .quiz-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(255, 140, 0, 0.12), rgba(255, 204, 0, 0.06));
+            border: 1px solid rgba(255, 140, 0, 0.25);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .results-title {
+            color: var(--yellow);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .quiz-score {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+
+        .feedback-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .feedback-correct { border-left: 3px solid #4caf50; }
+        .feedback-incorrect { border-left: 3px solid #f44336; }
+        .feedback-icon { font-size: 1.1rem; font-weight: bold; }
+        .feedback-correct .feedback-icon { color: #4caf50; }
+        .feedback-incorrect .feedback-icon { color: #f44336; }
+
+        .score-excellent { color: #4caf50; }
+        .score-good { color: #28e0ff; }
+        .score-fair { color: #ff9800; }
+        .score-poor { color: #f44336; }
+
+        /* Resources styles */
+        .resources-list { margin: 1.5rem 0; }
+        .resource-category { margin-bottom: 2rem; }
+
+        .category-title {
+            color: var(--yellow);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .resource-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .resource-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 0;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .resource-link::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--orange);
+            font-weight: bold;
+        }
+
+        .resource-link:hover {
+            color: var(--text-light);
+            padding-left: 2rem;
+        }
+
+        .resources-note {
+            background: rgba(255, 140, 0, 0.1);
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .resources-note p { color: var(--text-secondary); margin: 0; }
+
+        /* Evaluation styles */
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .evaluation-column {
+            background: rgba(255, 140, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .evaluation-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid;
+        }
+
+        .evaluation-title.essential { color: var(--yellow); border-bottom-color: var(--yellow); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+
+        .evaluation-icon { font-size: 1.1rem; }
+
+        .evaluation-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .evaluation-list li {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .evaluation-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: #28e0ff; }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content { padding: 1rem; flex-direction: column; gap: 1rem; }
+            .nav-buttons { width: 100%; justify-content: center; }
+            .course-title { font-size: 2rem; }
+            .course-meta { flex-direction: column; gap: 0.75rem; }
+            .main-content { padding: 1rem; }
+            .tab-nav { flex-direction: column; }
+            .tab-button { flex: none; text-align: left; }
+            .tab-content { padding: 1rem; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .lab-controls { justify-content: center; }
+            .evaluation-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav class="nav-buttons">
+                <a href="premium-cyber-progress.html" class="btn btn-back">
+                    ← Back to Journey
+                </a>
+                <a href="browse.html" class="btn btn-primary">
+                    Explore
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Defensive Security & SOC — Cybersecurity</h1>
+            <p class="course-description">
+                Learn the fundamentals of threat detection, log analysis, monitoring and incident response in a Security Operations Center.
+            </p>
+
+            <div class="course-meta">
+                <div class="meta-item">
+                    <span>⏱</span>
+                    <span>4–6h</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>Blue Team • SIEM • Logs • Detection</span>
+                </div>
+                <div class="meta-item">
+                    <span>📌</span>
+                    <span>Basic cyber defence concepts</span>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-label">Progress: <span id="progress-text">0%</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab system -->
+        <div class="tabs-container">
+            <nav class="tab-nav" role="tablist">
+                <button class="tab-button active" data-tab="learn" role="tab" aria-selected="true" aria-controls="panel-learn">
+                    Learn
+                </button>
+                <button class="tab-button" data-tab="lab" role="tab" aria-selected="false" aria-controls="panel-lab">
+                    Lab
+                </button>
+                <button class="tab-button" data-tab="quiz" role="tab" aria-selected="false" aria-controls="panel-quiz">
+                    Quiz
+                </button>
+                <button class="tab-button" data-tab="resources" role="tab" aria-selected="false" aria-controls="panel-resources">
+                    Resources
+                </button>
+                <button class="tab-button" data-tab="evaluation" role="tab" aria-selected="false" aria-controls="panel-evaluation">
+                    Evaluation
+                </button>
+            </nav>
+
+            <div class="tab-content">
+
+                <!-- Learn Tab -->
+                <div id="panel-learn" class="tab-panel active" role="tabpanel">
+                    <div class="learn-section">
+                        <div class="learn-intro">
+                            <h4>Defensive Security Fundamentals</h4>
+                            <p>Defensive security (Blue Team) focuses on protecting systems, detecting threats and responding to incidents before they cause real damage.</p>
+                            <p>In this module you will learn about SOC structure, log analysis, SIEM, IDS/IPS, incident response and system hardening — the core skills of any security analyst.</p>
+                        </div>
+
+                        <!-- WHAT IS A SOC -->
+                        <div class="content-card">
+                            <h3 class="content-title">🏢 What is a SOC?</h3>
+                            <p class="content-text">A <strong>Security Operations Center (SOC)</strong> is a team (and infrastructure) dedicated to monitoring, detecting, analysing and responding to security threats 24/7.</p>
+                            <div class="code-explanation">
+                                <h5>Tier 1 — Triage Analyst</h5>
+                                <p>Monitors alerts in real time, performs initial triage and decides whether it is a false positive or a real incident. This is the first response level — speed is essential.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Tier 2 — Incident Analyst</h5>
+                                <p>Investigates incidents escalated by Tier 1 in greater depth. Analyses correlated logs, timelines and indicators of compromise (IoCs).</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Tier 3 — Threat Hunter / Specialist</h5>
+                                <p>Proactively hunts for threats that have not yet generated alerts. Develops new detection rules and responds to critical incidents.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Alert vs Incident</h5>
+                                <p>An <strong>alert</strong> is an automatically generated notification (may be a false positive). An <strong>incident</strong> is an alert confirmed as a real threat that requires a response. Knowing how to distinguish the two saves hours of unnecessary work.</p>
+                            </div>
+                        </div>
+
+                        <!-- LINUX LOG ANALYSIS -->
+                        <div class="content-card">
+                            <h3 class="content-title">📋 Log Analysis — Linux</h3>
+                            <p class="content-text">Logs are the primary source of evidence in a SOC. Knowing where they are and how to read them is a fundamental skill.</p>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Essential log files on Linux</span>
+/var/log/auth.log        <span class="comment"># SSH auth, sudo, su (Debian/Ubuntu)</span>
+/var/log/secure          <span class="comment"># equivalent on CentOS/RHEL</span>
+/var/log/syslog          <span class="comment"># general system log</span>
+/var/log/messages        <span class="comment"># kernel and system messages</span>
+/var/log/kern.log        <span class="comment"># kernel events</span>
+/var/log/apache2/        <span class="comment"># Apache web server logs</span>
+/var/log/nginx/          <span class="comment"># Nginx web server logs</span>
+/var/log/dpkg.log        <span class="comment"># installed/removed packages</span>
+
+<span class="comment"># Essential analysis commands</span>
+cat /var/log/auth.log                          <span class="comment"># view everything (careful with large files)</span>
+tail -f /var/log/auth.log                      <span class="comment"># monitor in real time</span>
+tail -n 100 /var/log/auth.log                  <span class="comment"># last 100 lines</span>
+grep "Failed password" /var/log/auth.log       <span class="comment"># filter failed logins</span>
+grep "Accepted password" /var/log/auth.log     <span class="comment"># successful logins</span>
+grep "sudo" /var/log/auth.log                  <span class="comment"># sudo usage</span>
+
+<span class="comment"># Count failures per IP (brute force detection)</span>
+grep "Failed password" /var/log/auth.log | awk '{print $11}' | sort | uniq -c | sort -rn | head -20
+
+<span class="comment"># View recent logins</span>
+last                    <span class="comment"># login history</span>
+lastb                   <span class="comment"># failed login attempts</span>
+lastlog                 <span class="comment"># last login for each user</span>
+who                     <span class="comment"># who is currently logged in</span>
+w                       <span class="comment"># who is logged in and what they are doing</span></code></pre>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>journalctl — modern logs</h5>
+                                <p>On systems with systemd (most modern distros), use <code>journalctl</code> to access centralised logs:</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code>journalctl -xe                     <span class="comment"># latest events with details</span>
+journalctl -u ssh                  <span class="comment"># SSH service logs</span>
+journalctl --since "1 hour ago"    <span class="comment"># last hour</span>
+journalctl --since "2024-01-01" --until "2024-01-02"
+journalctl -p err                  <span class="comment"># errors only</span>
+journalctl -f                      <span class="comment"># follow mode (real time)</span></code></pre>
+                            </div>
+                        </div>
+
+                        <!-- THREAT DETECTION IN LOGS -->
+                        <div class="content-card">
+                            <h3 class="content-title">🚨 Threat Detection in Logs</h3>
+                            <p class="content-text">Recognising suspicious patterns in logs is the most important skill of a Tier 1/2 analyst.</p>
+                            <div class="code-block">
+                                <pre><code><span class="comment">## 1. SSH BRUTE FORCE — many failures from the same IP</span>
+grep "Failed password" /var/log/auth.log | grep "192.168.1.50" | wc -l
+<span class="comment"># If > 20 attempts in a short period → likely brute force</span>
+
+<span class="comment">## 2. LOGIN OUTSIDE HOURS — access at 3am</span>
+grep "Accepted" /var/log/auth.log | grep "03:"
+
+<span class="comment">## 3. LOGIN FROM GEOGRAPHICALLY UNLIKELY IP</span>
+grep "Accepted" /var/log/auth.log | awk '{print $11}'
+<span class="comment"># Check IPs at https://ipinfo.io or abuseipdb.com</span>
+
+<span class="comment">## 4. SUDO BY UNEXPECTED USER</span>
+grep "sudo" /var/log/auth.log | grep -v "root\|admin"
+
+<span class="comment">## 5. NEW USER CREATION (possible persistence)</span>
+grep "new user\|useradd" /var/log/auth.log
+
+<span class="comment">## 6. SUSPICIOUS RUNNING PROCESSES</span>
+ps aux                             <span class="comment"># all processes</span>
+ps aux | grep -i "nc\|netcat\|bash -i"   <span class="comment"># suspicious shells</span>
+top                                <span class="comment"># real-time processes</span>
+htop                               <span class="comment"># improved version of top</span>
+
+<span class="comment">## 7. SUSPICIOUS NETWORK CONNECTIONS</span>
+ss -tlnp                           <span class="comment"># open ports and processes</span>
+netstat -tulnp                     <span class="comment"># alternative to ss</span>
+ss -anp | grep ESTABLISHED         <span class="comment"># active connections</span></code></pre>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Indicators of Compromise (IoCs)</h5>
+                                <p>IoCs are evidence that a system has been compromised: malicious IPs, hashes of suspicious files, C2 (command and control) domains, or processes with unusual names. Public databases like <code>VirusTotal</code>, <code>AbuseIPDB</code> and <code>Shodan</code> help verify IoCs.</p>
+                            </div>
+                        </div>
+
+                        <!-- SIEM -->
+                        <div class="content-card">
+                            <h3 class="content-title">🖥️ SIEM — Security Information and Event Management</h3>
+                            <p class="content-text">SIEM is the heart of a SOC. It centralises logs from multiple sources, correlates events and generates automatic alerts when it detects suspicious patterns.</p>
+                            <div class="code-explanation">
+                                <h5>What does a SIEM do?</h5>
+                                <p><strong>Collects</strong> logs from firewalls, servers, endpoints, applications and network devices. <strong>Normalises</strong> the data into a common format. <strong>Correlates</strong> events from multiple sources to detect complex attacks. <strong>Alerts</strong> the team when rules are triggered.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Splunk — Query Example</h5>
+                                <p>Splunk uses its own search language (SPL). Example of brute force detection:</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Splunk SPL — detect SSH brute force</span>
+index=linux sourcetype=syslog "Failed password"
+| stats count by src_ip
+| where count > 20
+| sort -count
+
+<span class="comment"># ELK Stack — Kibana/Elasticsearch query (KQL)</span>
+message: "Failed password" and event.dataset: "system.auth"
+
+<span class="comment"># ELK — group by attacking IP</span>
+{
+  "aggs": {
+    "top_ips": {
+      "terms": { "field": "source.ip", "size": 10 }
+    }
+  }
+}</code></pre>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Most used SIEMs</h5>
+                                <p><strong>Splunk</strong> — market leader, very powerful but expensive. <strong>ELK Stack</strong> (Elasticsearch + Logstash + Kibana) — open source, widely used in labs and mid-sized companies. <strong>Microsoft Sentinel</strong> — native Azure cloud. <strong>QRadar</strong> (IBM) — common in large enterprises. For learning, use <strong>ELK Stack</strong> or <strong>Wazuh</strong> (open source with SIEM + EDR).</p>
+                            </div>
+                        </div>
+
+                        <!-- IDS / IPS -->
+                        <div class="content-card">
+                            <h3 class="content-title">🛡️ IDS vs IPS — Detection and Prevention</h3>
+                            <p class="content-text">IDS and IPS are systems that analyse network traffic looking for malicious patterns, with a critical difference in how they react.</p>
+                            <div class="code-explanation">
+                                <h5>IDS — Intrusion Detection System</h5>
+                                <p>Monitors traffic passively and <strong>alerts</strong> when it detects something suspicious. It does not block anything — it only observes and reports. Like an alarm without security.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>IPS — Intrusion Prevention System</h5>
+                                <p>Operates inline (in the middle of traffic) and can <strong>actively block</strong> malicious packets in real time. Like a guard who stops the attacker at the door.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>NIDS vs HIDS</h5>
+                                <p><strong>NIDS</strong> (Network-based) monitors network traffic — sees attacks at network level. <strong>HIDS</strong> (Host-based) runs on a specific server — monitors local files, processes and logs. Wazuh is an excellent open source HIDS.</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Snort — most popular open source IDS/IPS</span>
+snort -v                            <span class="comment"># verbose mode (shows packets)</span>
+snort -A console -c /etc/snort/snort.conf  <span class="comment"># with rules</span>
+
+<span class="comment"># Example Snort rule (detect port scan)</span>
+alert tcp any any -> $HOME_NET any (msg:"Port Scan Detected"; flags:S; threshold:type both, track by_src, count 20, seconds 5; sid:1000001; rev:1;)
+
+<span class="comment"># Suricata — modern alternative to Snort</span>
+suricata -c /etc/suricata/suricata.yaml -i eth0
+
+<span class="comment"># View generated alerts</span>
+tail -f /var/log/suricata/fast.log</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- INCIDENT RESPONSE -->
+                        <div class="content-card">
+                            <h3 class="content-title">🔥 Incident Response — PICERL Process</h3>
+                            <p class="content-text">Incident response follows a structured process to minimise impact and ensure the attacker is expelled and does not return.</p>
+                            <div class="code-explanation">
+                                <h5>1. Preparation</h5>
+                                <p>Have playbooks ready, tools installed, team trained and ticketing system configured <em>before</em> any incident. Preparation defines response speed.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>2. Identification</h5>
+                                <p>Confirm the alert is a real incident (not a false positive). Collect initial evidence: logs, timestamps, IPs involved, affected systems.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>3. Containment</h5>
+                                <p>Isolate the compromised system from the network to prevent spread. This may mean blocking an IP at the firewall, disconnecting a VM from the network, or revoking compromised credentials.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>4. Eradication</h5>
+                                <p>Remove the threat from the system: delete malware, close backdoors, remove users created by the attacker, fix the exploited vulnerability.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>5. Recovery</h5>
+                                <p>Restore the system to normal operation. Monitor actively in the following hours/days to ensure the attacker has not returned.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>6. Lessons Learned</h5>
+                                <p>Post-incident meeting to document what happened, what went well, what failed and how to improve. The final report is essential to prevent recurrence.</p>
+                            </div>
+                        </div>
+
+                        <!-- IMMEDIATE RESPONSE COMMANDS -->
+                        <div class="content-card">
+                            <h3 class="content-title">⚡ Immediate Response Commands</h3>
+                            <p class="content-text">When an incident is confirmed, these are the commands you use to investigate and contain quickly.</p>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># QUICK INVESTIGATION OF COMPROMISED SYSTEM</span>
+whoami && id                       <span class="comment"># confirm current user</span>
+ps aux --sort=-%cpu | head -20     <span class="comment"># highest CPU processes</span>
+ss -anp | grep ESTABLISHED         <span class="comment"># active connections and processes</span>
+netstat -tlnp                      <span class="comment"># open ports</span>
+lsof -i                            <span class="comment"># open files with connections</span>
+find /tmp /var/tmp -type f -newer /etc/passwd   <span class="comment"># recent suspicious files</span>
+crontab -l                         <span class="comment"># user scheduled tasks</span>
+cat /etc/crontab                   <span class="comment"># system scheduled tasks</span>
+ls /etc/cron.d/                    <span class="comment"># additional crons</span>
+
+<span class="comment"># CONTAINMENT — block attacking IP</span>
+iptables -A INPUT -s 192.168.1.50 -j DROP
+iptables -A OUTPUT -d 192.168.1.50 -j DROP
+ufw deny from 192.168.1.50         <span class="comment"># using UFW (simpler)</span>
+
+<span class="comment"># KILL SUSPICIOUS PROCESS</span>
+kill -9 PID                        <span class="comment"># terminate process by PID</span>
+pkill -f "process_name"            <span class="comment"># terminate by name</span>
+
+<span class="comment"># REVOKE ACTIVE SSH SESSION</span>
+who                                <span class="comment"># view active sessions and TTY</span>
+pkill -9 -t pts/1                  <span class="comment"># kill session on terminal pts/1</span>
+
+<span class="comment"># LOCK COMPROMISED USER</span>
+passwd -l username                 <span class="comment"># lock account</span>
+usermod -L username                <span class="comment"># alternative</span></code></pre>
+                            </div>
+                        </div>
+
+                        <!-- FALSE POSITIVES -->
+                        <div class="content-card">
+                            <h3 class="content-title">🎯 False Positives vs True Positives</h3>
+                            <p class="content-text">Managing the false positive rate is one of the biggest challenges in a SOC. Too many false alerts cause alert fatigue and make the team ignore real alerts.</p>
+                            <div class="code-explanation">
+                                <h5>False Positive (FP)</h5>
+                                <p>The system generated an alert, but <strong>there is no real threat</strong>. Example: the antivirus scanner detects a legitimate pentest tool as malware. Reducing FPs improves SOC efficiency.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>False Negative (FN)</h5>
+                                <p>There is a real threat, but <strong>no alert was generated</strong>. This is the most dangerous scenario — the attacker goes unnoticed. Outdated detection rules cause FNs.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>True Positive (TP)</h5>
+                                <p>The alert was generated and a real threat exists. The SOC's goal. Well-tuned rules and current threat intelligence increase the TP rate.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Triage — Triage Process</h5>
+                                <p>When receiving an alert, the Tier 1 analyst checks: (1) is this known legitimate activity? (2) Does the IP/user have history? (3) Is there correlation with other events? Based on this, classifies as FP or escalates as an incident.</p>
+                            </div>
+                        </div>
+
+                        <!-- HARDENING -->
+                        <div class="content-card">
+                            <h3 class="content-title">🔒 Hardening — Reducing the Attack Surface</h3>
+                            <p class="content-text">Hardening is the process of securing a system by reducing its vulnerabilities before it is attacked. It is the proactive side of defence.</p>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># SSH Hardening (/etc/ssh/sshd_config)</span>
+PermitRootLogin no              <span class="comment"># do not allow direct login as root</span>
+PasswordAuthentication no       <span class="comment"># use SSH keys only</span>
+Port 2222                       <span class="comment"># change default port (makes scanning harder)</span>
+MaxAuthTries 3                  <span class="comment"># maximum authentication attempts</span>
+AllowUsers alice bob            <span class="comment"># only these users via SSH</span>
+
+<span class="comment"># After editing, restart SSH</span>
+systemctl restart sshd
+
+<span class="comment"># Basic firewall with UFW</span>
+ufw enable
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow 22/tcp                <span class="comment"># SSH (or the port you chose)</span>
+ufw allow 80/tcp                <span class="comment"># HTTP</span>
+ufw allow 443/tcp               <span class="comment"># HTTPS</span>
+ufw status verbose
+
+<span class="comment"># Check unnecessary services running</span>
+systemctl list-units --type=service --state=running
+systemctl disable service_name  <span class="comment"># disable unnecessary service</span>
+
+<span class="comment"># Check permissions on sensitive files</span>
+ls -la /etc/shadow              <span class="comment"># should be 640 or 000</span>
+ls -la /etc/passwd              <span class="comment"># should be 644</span>
+chmod 640 /etc/shadow
+chown root:shadow /etc/shadow</code></pre>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Principle of Least Privilege</h5>
+                                <p>Every user and service should have only the permissions strictly necessary for their function. A database user does not need SSH access. A web server does not need to run as root.</p>
+                            </div>
+                        </div>
+
+                        <!-- THREAT HUNTING -->
+                        <div class="content-card">
+                            <h3 class="content-title">🔎 Threat Hunting — Proactive Threat Hunting</h3>
+                            <p class="content-text">Threat hunting is the proactive search for threats already inside the network that have not yet generated alerts. It assumes the system is already compromised.</p>
+                            <div class="code-explanation">
+                                <h5>Hypothesis-driven hunting</h5>
+                                <p>The threat hunter creates a hypothesis (e.g. "an attacker may be using cron jobs for persistence") and then searches for evidence that confirms or refutes it in the available logs and telemetry.</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Hunting for persistence via cron</span>
+find /var/spool/cron /etc/cron* -type f | xargs ls -la
+cat /etc/crontab
+crontab -l -u www-data    <span class="comment"># crons of the web server user</span>
+
+<span class="comment"># Hunting for suspicious SUID binaries (recently installed)</span>
+find / -perm -4000 -newer /etc/passwd 2>/dev/null
+
+<span class="comment"># Hunting for beaconing connections (regular outbound traffic)</span>
+<span class="comment"># Pattern: connections at fixed intervals to the same external IP</span>
+ss -anp | grep ESTABLISHED | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -rn
+
+<span class="comment"># Hunting via shell history (executed commands)</span>
+cat ~/.bash_history
+find /home -name ".bash_history" -exec cat {} \;
+cat /root/.bash_history
+
+<span class="comment"># Hunting for recently modified files in critical areas</span>
+find /etc /bin /usr/bin -newer /tmp -type f 2>/dev/null
+find /var/www -name "*.php" -newer /etc/passwd    <span class="comment"># webshells</span></code></pre>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Beaconing — C2 Signal</h5>
+                                <p>When a system is compromised, malware typically performs regular check-ins with the attacker's server (C2 — Command &amp; Control). These regular, periodic connections are called beaconing and can be identified by network traffic analysis over time.</p>
+                            </div>
+                        </div>
+
+                        <!-- NEXT STEPS -->
+                        <div class="content-card">
+                            <h3 class="content-title">✅ Next Steps</h3>
+                            <p class="content-text">
+                                Now that you have a solid foundation in defensive security, practise in the <strong>Lab</strong>, test your knowledge in the <strong>Quiz</strong> and check the <strong>Resources</strong>. For real practice, try <strong>TryHackMe</strong> (Blue Team and SOC Level 1 rooms), <strong>Wazuh</strong> (open source SIEM + HIDS) and <strong>LetsDefend</strong> — a platform dedicated to SOC analyst training.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lab Tab -->
+                <div id="panel-lab" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Code Lab</h3>
+                        <p class="content-text">
+                            Experiment with HTML and CSS in real time. Write your code in the editor on the left
+                            and see the result instantly in the preview panel.
+                        </p>
+
+                        <div class="lab-instructions">
+                            <strong>Instructions:</strong> Write HTML (with optional CSS and JavaScript) in the editor.
+                            Click <strong>"Run"</strong> or press <strong>Ctrl+Enter</strong> to see the result.
+                            Use <strong>"Reset"</strong> to clear the editor.
+                        </div>
+
+                        <div class="lab-controls">
+                            <button id="execute-btn" class="btn-execute">Run</button>
+                            <button id="reset-btn" class="btn-reset">Reset</button>
+                        </div>
+
+                        <div class="lab-container">
+                            <div class="lab-editor">
+                                <div class="lab-header">HTML Editor</div>
+                                <textarea id="code-editor" class="lab-textarea" placeholder="Write your HTML code here..."><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .highlight {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hello, HTML!</h1>
+    <div class="highlight">
+        <p>This is a basic HTML example with CSS.</p>
+        <p>Try changing the code and click "Run"!</p>
+    </div>
+
+    <script>
+        console.log('JavaScript works too!');
+    </script>
+</body>
+</html></textarea>
+                            </div>
+
+                            <div class="lab-preview">
+                                <div class="lab-header">Preview</div>
+                                <iframe id="preview-iframe" class="lab-iframe" sandbox="allow-scripts"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Tab -->
+                <div id="panel-quiz" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Defensive Security & SOC Knowledge Quiz</h3>
+                        <p class="content-text">
+                            Test your knowledge of defensive security and SOC operations. Answer all 15 questions and receive immediate feedback.
+                        </p>
+
+                        <div id="quiz-container">
+                            <form id="quiz-form">
+
+                                <!-- Question 1 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">1. What is the primary function of a SOC?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q1" value="a">
+                                            <span class="option-text">Monitor, detect and respond to security incidents</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q1" value="b">
+                                            <span class="option-text">Develop software applications</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q1" value="c">
+                                            <span class="option-text">Perform penetration testing</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q1" value="d">
+                                            <span class="option-text">Build and configure firewalls</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 2 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">2. Which file contains authentication logs on a Linux system?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q2" value="a">
+                                            <span class="option-text">/var/log/syslog</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q2" value="b">
+                                            <span class="option-text">/var/log/auth.log</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q2" value="c">
+                                            <span class="option-text">/etc/passwd</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q2" value="d">
+                                            <span class="option-text">/home/logins.txt</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 3 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">3. What does a high number of "Failed password" entries in a log suggest?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q3" value="a">
+                                            <span class="option-text">A possible brute force attack</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q3" value="b">
+                                            <span class="option-text">A system update in progress</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q3" value="c">
+                                            <span class="option-text">A normal login session</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q3" value="d">
+                                            <span class="option-text">A server restart</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 4 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">4. What is the difference between IDS and IPS?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q4" value="a">
+                                            <span class="option-text">IDS blocks threats; IPS only detects them</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q4" value="b">
+                                            <span class="option-text">IPS is only a logging system</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q4" value="c">
+                                            <span class="option-text">They are identical systems</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q4" value="d">
+                                            <span class="option-text">IDS detects threats; IPS detects and actively blocks them</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 5 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">5. What is a false positive in security monitoring?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q5" value="a">
+                                            <span class="option-text">A confirmed real attack</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q5" value="b">
+                                            <span class="option-text">A correctly triggered alert</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q5" value="c">
+                                            <span class="option-text">An alert that flags benign activity as a threat</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q5" value="d">
+                                            <span class="option-text">A type of malware</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 6 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">6. What does SIEM stand for?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q6" value="a">
+                                            <span class="option-text">Security Incident and Emergency Management</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q6" value="b">
+                                            <span class="option-text">System Integration and Event Monitoring</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q6" value="c">
+                                            <span class="option-text">Security Information and Event Management</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q6" value="d">
+                                            <span class="option-text">Secure Infrastructure and Endpoint Management</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 7 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">7. What Linux command shows recent login history including source IPs?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q7" value="a">
+                                            <span class="option-text">who</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q7" value="b">
+                                            <span class="option-text">last</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q7" value="c">
+                                            <span class="option-text">passwd</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q7" value="d">
+                                            <span class="option-text">id</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 8 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">8. What is a false negative in security monitoring?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q8" value="a">
+                                            <span class="option-text">An alert triggered by legitimate traffic</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q8" value="b">
+                                            <span class="option-text">A real attack that goes undetected by the security system</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q8" value="c">
+                                            <span class="option-text">A successful login from an authorised user</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q8" value="d">
+                                            <span class="option-text">A correctly blocked attack</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 9 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">9. Which of these is an example of a SIEM platform?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q9" value="a">
+                                            <span class="option-text">Metasploit</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q9" value="b">
+                                            <span class="option-text">Wireshark</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q9" value="c">
+                                            <span class="option-text">Splunk</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q9" value="d">
+                                            <span class="option-text">nmap</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 10 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">10. What does event correlation in a SIEM allow analysts to do?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q10" value="a">
+                                            <span class="option-text">Automatically patch vulnerabilities on all endpoints</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q10" value="b">
+                                            <span class="option-text">Link related events across multiple sources to identify attack patterns</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q10" value="c">
+                                            <span class="option-text">Encrypt logs before storing them</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q10" value="d">
+                                            <span class="option-text">Block all inbound network traffic automatically</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 11 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">11. What is threat hunting?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q11" value="a">
+                                            <span class="option-text">Waiting for automated alerts before investigating</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q11" value="b">
+                                            <span class="option-text">Proactively searching for hidden threats that have evaded automated detection</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q11" value="c">
+                                            <span class="option-text">Running vulnerability scans on external systems</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q11" value="d">
+                                            <span class="option-text">Reporting incidents to management</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 12 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">12. What is beaconing in the context of threat detection?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q12" value="a">
+                                            <span class="option-text">A legitimate network diagnostic signal</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q12" value="b">
+                                            <span class="option-text">Regular, periodic outbound communication from malware to its command-and-control server</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q12" value="c">
+                                            <span class="option-text">A type of firewall alert</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q12" value="d">
+                                            <span class="option-text">A method used to encrypt log files</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 13 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">13. Which command would you use to check active network connections on a Linux system during incident response?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q13" value="a">
+                                            <span class="option-text">ls -la</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q13" value="b">
+                                            <span class="option-text">grep</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q13" value="c">
+                                            <span class="option-text">netstat -anp or ss -anp</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q13" value="d">
+                                            <span class="option-text">chmod</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 14 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">14. What is the first step when responding to a confirmed security incident?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q14" value="a">
+                                            <span class="option-text">Immediately delete all suspicious files</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q14" value="b">
+                                            <span class="option-text">Containment — isolate affected systems to prevent the threat from spreading</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q14" value="c">
+                                            <span class="option-text">Reboot the affected servers</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q14" value="d">
+                                            <span class="option-text">Notify the press</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Question 15 -->
+                                <div class="quiz-question">
+                                    <h4 class="question-title">15. What does the Blue Team refer to in cybersecurity?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q15" value="a">
+                                            <span class="option-text">The team responsible for simulating attacks against the organisation</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q15" value="b">
+                                            <span class="option-text">The defensive team responsible for protecting, monitoring and responding to threats</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q15" value="c">
+                                            <span class="option-text">The team that manages network hardware</span>
+                                        </label>
+                                        <label class="quiz-option">
+                                            <input type="radio" name="q15" value="d">
+                                            <span class="option-text">The team that handles software development</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+
+                        <div class="quiz-controls">
+                            <button id="submit-quiz" class="btn-execute" type="button">Submit</button>
+                            <button id="clear-quiz" class="btn-reset" type="button">Clear</button>
+                        </div>
+
+                        <div id="quiz-results" class="quiz-results" style="display: none;">
+                            <h4 class="results-title">Quiz Results</h4>
+                            <div id="quiz-score" class="quiz-score"></div>
+                            <div id="quiz-feedback" class="quiz-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resources Tab -->
+                <div id="panel-resources" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Recommended Resources</h3>
+                        <p class="content-text">
+                            Here is a curated list of essential resources to deepen your knowledge
+                            of Defensive Security &amp; SOC operations. These documents will help you master the fundamental concepts.
+                        </p>
+
+                        <div class="resources-list">
+                            <div class="resource-category">
+                                <h4 class="category-title">Official Documentation</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">MDN Web Docs — HTML</a></li>
+                                    <li><a href="#" class="resource-link">MDN Web Docs — CSS</a></li>
+                                    <li><a href="#" class="resource-link">W3C HTML5 Specification</a></li>
+                                    <li><a href="#" class="resource-link">CSS Working Group Specifications</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Guides &amp; Tutorials</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML5 Semantic Elements Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Flexbox Complete Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Grid Layout Tutorial</a></li>
+                                    <li><a href="#" class="resource-link">Web Accessibility Guidelines (WCAG)</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Tools &amp; Validators</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">W3C HTML Validator</a></li>
+                                    <li><a href="#" class="resource-link">W3C CSS Validator</a></li>
+                                    <li><a href="#" class="resource-link">Can I Use — Browser Support</a></li>
+                                    <li><a href="#" class="resource-link">WebAIM Accessibility Checker</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Quick References</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML Elements Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Properties Cheat Sheet</a></li>
+                                    <li><a href="#" class="resource-link">HTML Entities Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Selectors Reference</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="resources-note">
+                            <p>💡 <strong>Note:</strong> You can edit this list in the future to add your own favourite resources.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Evaluation Tab -->
+                <div id="panel-evaluation" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Evaluation Criteria</h3>
+                        <p class="content-text">
+                            Here are the criteria organised by importance level to assess your mastery
+                            of Defensive Security &amp; SOC.
+                        </p>
+
+                        <div class="evaluation-grid">
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title essential">
+                                    <span class="evaluation-icon">💠</span>
+                                    Essential
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>What a SOC is and its role</li>
+                                    <li>Difference between an alert and an incident</li>
+                                    <li>Basic log reading (auth.log, syslog)</li>
+                                    <li>Identifying brute force attacks in logs</li>
+                                    <li>Basic understanding of SIEM</li>
+                                    <li>Concept of IDS and IPS</li>
+                                </ul>
+                            </div>
+
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title important">
+                                    <span class="evaluation-icon">⭐</span>
+                                    Important
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>Event correlation</li>
+                                    <li>False positives vs true positives</li>
+                                    <li>Investigating suspicious IP addresses</li>
+                                    <li>Analysing logins outside business hours</li>
+                                    <li>Process monitoring</li>
+                                    <li>Basic response commands (kill, ps, netstat)</li>
+                                </ul>
+                            </div>
+
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title advanced">
+                                    <span class="evaluation-icon">🚀</span>
+                                    Advanced
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>Basic threat hunting</li>
+                                    <li>Creating detection rules (e.g. multiple failed logins)</li>
+                                    <li>Analysis with SIEM tools (Splunk/ELK)</li>
+                                    <li>Detecting beaconing behaviour</li>
+                                    <li>Step-by-step incident response</li>
+                                    <li>Basic system hardening</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentProgress = 0;
+
+        function updateProgress(percentage) {
+            currentProgress = percentage;
+            document.getElementById('progress-text').textContent = percentage + '%';
+            document.getElementById('progress-fill').style.width = percentage + '%';
+        }
+
+        class TabSystem {
+            constructor() {
+                this.currentTab = 'learn';
+                this.tabs = ['learn', 'lab', 'quiz', 'resources', 'evaluation'];
+                this.init();
+            }
+
+            init() {
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        this.switchTab(e.target.dataset.tab);
+                    });
+                });
+
+                window.addEventListener('hashchange', () => this.handleHashChange());
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+                this.handleHashChange();
+            }
+
+            switchTab(tabId) {
+                if (!this.tabs.includes(tabId)) return;
+
+                this.currentTab = tabId;
+
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    const isActive = button.dataset.tab === tabId;
+                    button.classList.toggle('active', isActive);
+                    button.setAttribute('aria-selected', isActive);
+                });
+
+                document.querySelectorAll('.tab-panel').forEach(panel => {
+                    panel.classList.toggle('active', panel.id === `panel-${tabId}`);
+                });
+
+                history.replaceState(null, null, `#${tabId}`);
+                this.updateProgressForTab(tabId);
+            }
+
+            handleHashChange() {
+                const hash = window.location.hash.slice(1);
+                if (hash && this.tabs.includes(hash)) {
+                    this.switchTab(hash);
+                }
+            }
+
+            handleKeyboard(e) {
+                if (!e.target.classList.contains('tab-button')) return;
+
+                const currentIndex = this.tabs.indexOf(this.currentTab);
+                let newIndex = currentIndex;
+
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        newIndex = currentIndex > 0 ? currentIndex - 1 : this.tabs.length - 1;
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        newIndex = currentIndex < this.tabs.length - 1 ? currentIndex + 1 : 0;
+                        break;
+                    case 'Home':
+                        e.preventDefault();
+                        newIndex = 0;
+                        break;
+                    case 'End':
+                        e.preventDefault();
+                        newIndex = this.tabs.length - 1;
+                        break;
+                }
+
+                if (newIndex !== currentIndex) {
+                    this.switchTab(this.tabs[newIndex]);
+                    document.querySelector(`[data-tab="${this.tabs[newIndex]}"]`).focus();
+                }
+            }
+
+            updateProgressForTab(tabId) {
+                const progressMap = {
+                    'learn': 20,
+                    'lab': 40,
+                    'quiz': 60,
+                    'resources': 80,
+                    'evaluation': 100
+                };
+                const newProgress = Math.max(currentProgress, progressMap[tabId] || 0);
+                updateProgress(newProgress);
+            }
+        }
+
+        class LabEditor {
+            constructor() {
+                this.editor = document.getElementById('code-editor');
+                this.iframe = document.getElementById('preview-iframe');
+                this.executeBtn = document.getElementById('execute-btn');
+                this.resetBtn = document.getElementById('reset-btn');
+                this.defaultCode = this.editor.value;
+                this.init();
+            }
+
+            init() {
+                this.executeBtn.addEventListener('click', () => this.executeCode());
+                this.resetBtn.addEventListener('click', () => this.resetCode());
+
+                this.editor.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        this.executeCode();
+                    }
+                });
+
+                setTimeout(() => this.executeCode(), 500);
+            }
+
+            executeCode() {
+                const code = this.editor.value;
+                const blob = new Blob([code], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                this.iframe.src = url;
+
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                this.executeBtn.textContent = 'Executed!';
+                this.executeBtn.style.background = 'linear-gradient(135deg, #4caf50, #8bc34a)';
+
+                setTimeout(() => {
+                    this.executeBtn.textContent = 'Run';
+                    this.executeBtn.style.background = 'linear-gradient(135deg, var(--orange), var(--yellow))';
+                }, 1000);
+            }
+
+            resetCode() {
+                this.editor.value = this.defaultCode;
+                this.executeCode();
+
+                this.resetBtn.textContent = 'Cleared!';
+                setTimeout(() => { this.resetBtn.textContent = 'Reset'; }, 1000);
+            }
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questions = [
+                    { question: 1,  correct: 'a', explanation: 'A SOC (Security Operations Center) is dedicated to monitoring, detecting and responding to security threats and incidents in real time.' },
+                    { question: 2,  correct: 'b', explanation: '/var/log/auth.log stores all authentication events — login attempts, successes, failures, and sudo usage — making it critical for security analysis.' },
+                    { question: 3,  correct: 'a', explanation: 'Many consecutive failed password entries indicate someone is repeatedly trying to guess credentials — a classic sign of a brute force attack.' },
+                    { question: 4,  correct: 'd', explanation: 'IDS (Intrusion Detection System) detects and alerts; IPS (Intrusion Prevention System) detects and automatically takes action to block the threat.' },
+                    { question: 5,  correct: 'c', explanation: 'A false positive is an alert triggered by legitimate, harmless activity. SOC analysts must tune detection rules to reduce false positives and focus on real threats.' },
+                    { question: 6,  correct: 'c', explanation: 'SIEM stands for Security Information and Event Management — a platform that aggregates logs from across an environment and provides centralised alerting and analysis.' },
+                    { question: 7,  correct: 'b', explanation: 'The last command reads /var/log/wtmp to show a history of user logins, logouts, reboots and source IP addresses.' },
+                    { question: 8,  correct: 'b', explanation: 'A false negative is when a real attack occurs but is not detected — more dangerous than a false positive because the threat goes unnoticed.' },
+                    { question: 9,  correct: 'c', explanation: 'Splunk is one of the most widely used SIEM and log analysis platforms in enterprise security operations. ELK Stack (Elasticsearch, Logstash, Kibana) is another popular open-source option.' },
+                    { question: 10, correct: 'b', explanation: 'Event correlation connects related log entries across different systems and timeframes, helping analysts identify attack chains that would be invisible when looking at individual events.' },
+                    { question: 11, correct: 'b', explanation: 'Threat hunting is the proactive practice of searching through networks and systems to detect advanced threats that have evaded automated detection tools.' },
+                    { question: 12, correct: 'b', explanation: 'Beaconing is a tell-tale sign of malware infection — infected machines periodically "phone home" to a C2 server at regular intervals, which can be detected through network traffic analysis.' },
+                    { question: 13, correct: 'c', explanation: 'netstat -anp (or the modern equivalent ss -anp) lists all active network connections with their associated processes — essential for spotting unexpected outbound connections during incident response.' },
+                    { question: 14, correct: 'b', explanation: 'Containment is always the first priority when responding to a confirmed incident — isolating affected systems prevents lateral movement and limits the blast radius of the attack.' },
+                    { question: 15, correct: 'b', explanation: 'The Blue Team refers to the defensive security team responsible for protecting the organisation — monitoring, detecting threats, responding to incidents and hardening systems. The Red Team simulates attacks.' }
+                ];
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const form = document.getElementById('quiz-form');
+                const formData = new FormData(form);
+                let score = 0;
+                const feedback = [];
+
+                this.questions.forEach(q => {
+                    const userAnswer = formData.get(`q${q.question}`);
+                    const isCorrect = userAnswer === q.correct;
+                    if (isCorrect) score++;
+                    feedback.push({
+                        question: q.question,
+                        correct: isCorrect,
+                        explanation: q.explanation,
+                        correctAnswer: q.correct
+                    });
+                });
+
+                this.displayResults(score, feedback);
+            }
+
+            displayResults(score, feedback) {
+                const resultsDiv = document.getElementById('quiz-results');
+                const scoreDiv = document.getElementById('quiz-score');
+                const feedbackDiv = document.getElementById('quiz-feedback');
+
+                const percentage = Math.round((score / this.questions.length) * 100);
+
+                let scoreClass, message;
+                if (percentage >= 90) {
+                    scoreClass = 'score-excellent';
+                    message = 'Excellent! You have a strong grasp of Defensive Security & SOC!';
+                } else if (percentage >= 70) {
+                    scoreClass = 'score-good';
+                    message = 'Well done! You have a good understanding of defensive security fundamentals.';
+                } else if (percentage >= 50) {
+                    scoreClass = 'score-fair';
+                    message = 'Not bad, but there is room to improve. Review the concepts again.';
+                } else {
+                    scoreClass = 'score-poor';
+                    message = 'You need more study. Go back to the learning content.';
+                }
+
+                scoreDiv.innerHTML = `
+                    <div class="${scoreClass}">
+                        ${score}/${this.questions.length} (${percentage}%)
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
+                        ${message}
+                    </div>
+                `;
+
+                feedbackDiv.innerHTML = feedback.map(item => `
+                    <div class="feedback-item ${item.correct ? 'feedback-correct' : 'feedback-incorrect'}">
+                        <span class="feedback-icon">${item.correct ? '✓' : '✗'}</span>
+                        <span>
+                            <strong>Question ${item.question}:</strong> ${item.explanation}
+                            ${!item.correct
+                                ? `<br><span style="margin-top: 0.3rem; display: inline-block; font-size: 0.82rem; color: #c0392b; font-weight: 600;">Correct answer: ${item.correctAnswer.toUpperCase()}</span>`
+                                : ''}
+                        </span>
+                    </div>
+                `).join('');
+
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            clearQuiz() {
+                document.querySelectorAll('#quiz-form input[type="radio"]').forEach(input => {
+                    input.checked = false;
+                });
+
+                document.getElementById('quiz-results').style.display = 'none';
+
+                const clearBtn = document.getElementById('clear-quiz');
+                clearBtn.textContent = 'Cleared!';
+                setTimeout(() => { clearBtn.textContent = 'Clear'; }, 1000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new TabSystem();
+            new LabEditor();
+            new QuizManager();
+        });
+    </script>
+</body>
+</html>

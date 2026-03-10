@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney -  Preparation & Analysis (EDA)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+    --bg-dark: #0b0d14;
+
+    /* Nova paleta verde */
+    --green-primary: #22c55e;     /* verde principal */
+    --green-secondary: #4ade80;   /* verde claro */
+    --green-accent: #16a34a;      /* verde forte */
+    --green-cyan: #2dd4bf;        /* verde-água (mantém vibe tech) */
+    --cyan: #28e0ff;              /* ciano para detalhes e destaques */
+
+    --text-light: #e8ecf8;
+    --text-secondary: #b6c0de;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px; font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary {
+    background: linear-gradient(135deg, var(--green-primary), var(--green-cyan));
+    color: white;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente: from-lime-500 via-green-400 to-lime-400 */
+    background: linear-gradient(to right, #84cc16, #4ade80, #a3e635);
+
+    /* Faz o gradiente aplicar apenas ao texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback para browsers antigos */
+}
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill {
+    height: 100%;background: linear-gradient(90deg, var(--green-primary), var(--green-cyan));width: 0%; transition: width 0.3s ease;
+}
+
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active {
+    background: rgba(15, 155, 67, 0.3);
+} 
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--green-primary), var(--green-cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--green-primary);; display: flex; align-items: center; gap: 10px; }
+        .content-card h4 { margin: 1.2rem 0 0.6rem; color: var(--green-cyan);; font-size: 1rem; }
+        .code-explanation { border-left: 3px solid var(--green-primary);; padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--green-cyan);; font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Code block */
+        .code-block {
+            background: #0a0c12;
+            border: 1px solid rgba(91,124,255,0.3);
+            border-radius: 8px; padding: 1.2rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; }
+        .code-block code { font-family: 'Courier New', Consolas, monospace; font-size: 0.875rem; line-height: 1.7; color: #c9d1d9; }
+        .code-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: block; }
+
+        /* Tip / Warning boxes */
+        .tip-box { background: rgba(34, 197, 94, 0.08);
+    border-left: 4px solid var(--green-primary); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .tip-box strong { color: var(--green-primary); }
+        .warning-box { background: rgba(255, 165, 0, 0.07); border-left: 4px solid #ffa500; border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .warning-box strong { color: #ffa500; }
+
+        /* Two-column grid */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+        .mini-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mini-card h5 { color: var(--cyan); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .mini-card p, .mini-card li { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+
+        /* Chapter header */
+        .chapter-header {
+            background: linear-gradient(
+                135deg,
+                rgba(34, 197, 94, 0.15),
+                rgba(45, 212, 191, 0.08)
+            );
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; margin-top: 2.5rem;
+        }
+        .chapter-header:first-child { margin-top: 0; }
+        .chapter-header h2 { font-size: 1.4rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.4rem; }
+        .chapter-header p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-secondary); font-size: 0.88rem; }
+        .data-table thead tr { border-bottom: 2px solid var(--border-color); text-align: left; }
+        .data-table th { padding: 10px; font-weight: 600; color: var(--text-light); }
+        .data-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .data-table td { padding: 10px; }
+
+        /* Inline formula highlight */
+        .formula { font-family: monospace; background: rgba(40,224,255,0.1); padding: 2px 8px; border-radius: 4px; color: var(--cyan); font-size: 0.9rem; }
+
+        /* Quiz */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(40, 224, 255, 0.05)); border: 1px solid rgba(34, 197, 94, 0.08); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #0a0c12; color: #c9d1d9; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-data-science.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objective: Data Preparation & Exploratory Analysis (EDA)</h1>
+            <p class="course-description">
+                Understand your data before you predict. Learn how to clean, explore, and interpret real data, identifying patterns, errors, and opportunities that support reliable decisions and models.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item">
+                    <span>⏱</span>
+                    <span>6–8h</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>• Data Cleaning • EDA • Visualization</span>
+                </div>
+                <div class="meta-item">
+                    <span>📌</span>
+                    <span>Data Preparation, Exploration and Understanding</span>
+                </div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Laboratory</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Evaluation</button>
+            </nav>
+
+            <div id="aprender" class="tab-panel active">
+
+    <!-- 4.1 Intro -->
+    <div class="content-card">
+        <h3>🔍 4.1 Data Preparation & EDA — The Heart of Every Project</h3>
+        <p>After collecting and loading your data, the instinct is to jump straight into building a model. <strong>Resist that instinct.</strong> The most common cause of failed Data Science projects is not a bad algorithm — it is poorly understood data fed into a good algorithm.</p>
+        <br>
+        <p>This phase — <strong>Data Preparation and Exploratory Data Analysis (EDA)</strong> — is where you become a detective. You interrogate your data, question its assumptions, expose its flaws, and ultimately understand what story it tells. Only then are you ready to model.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1.5rem;">
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🧹</div>
+                <strong style="color:var(--cyan);">Data Cleaning</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Fix errors, nulls, types, duplicates, and inconsistencies</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">📊</div>
+                <strong style="color:var(--blue);">Descriptive Stats</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Summarize distributions, central tendency, spread, and shape</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.07);border:1px solid rgba(122,75,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">📈</div>
+                <strong style="color:var(--purple);">Visualization</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Charts that reveal what numbers alone cannot communicate</p>
+            </div>
+            <div style="background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🔗</div>
+                <strong style="color:#ffa500;">Relationships</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Discover correlations and patterns that guide feature engineering</p>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border-left:4px solid var(--cyan);padding:1rem;border-radius:0 8px 8px 0;margin-top:1.5rem;">
+            <strong>🕵️ EDA as Investigation:</strong>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.8rem;margin-top:0.8rem;font-size:0.82rem;color:var(--text-secondary);">
+                <div><strong style="color:var(--cyan);">1. Understand</strong><br>What does each column mean? What is the unit? What is the expected range?</div>
+                <div><strong style="color:var(--cyan);">2. Question</strong><br>Why does this column have 30% nulls? Are these customers inactive or just unrecorded?</div>
+                <div><strong style="color:var(--cyan);">3. Discover</strong><br>Is there a pattern? A trend? A suspicious cluster? An unexpected correlation?</div>
+                <div><strong style="color:var(--cyan);">4. Decide</strong><br>Based on evidence, make and document cleaning and engineering decisions.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4.2 The EDA Workflow -->
+    <div class="content-card">
+        <h3>🗺️ 4.2 The EDA Workflow — A Structured Approach</h3>
+        <p>EDA is not random exploration. The best Data Scientists follow a systematic structure that ensures nothing is missed before modeling. Here is the professional workflow:</p>
+
+        <div style="margin-top:1.2rem;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.8rem;">
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-top:3px solid var(--cyan);padding:1.2rem;border-radius:8px;">
+                    <strong style="color:var(--cyan);">Step 1 — Load & Audit</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Check shape, dtypes, memory usage, head/tail. Get a feel for what you have before touching anything.</p>
+                    <code style="font-size:0.72rem;color:#0f0;">df.info() · df.describe() · df.head()</code>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-top:3px solid var(--blue);padding:1.2rem;border-radius:8px;">
+                    <strong style="color:var(--blue);">Step 2 — Univariate Analysis</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Examine each column in isolation. Distributions, value counts, ranges. Identify anomalies early.</p>
+                    <code style="font-size:0.72rem;color:#0f0;">histograms · value_counts() · boxplots</code>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-top:3px solid var(--purple);padding:1.2rem;border-radius:8px;">
+                    <strong style="color:var(--purple);">Step 3 — Bivariate Analysis</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Explore relationships between pairs of variables. Correlations, group comparisons, scatter plots.</p>
+                    <code style="font-size:0.72rem;color:#0f0;">scatter · corr() · groupby + boxplot</code>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-top:3px solid #ffa500;padding:1.2rem;border-radius:8px;">
+                    <strong style="color:#ffa500;">Step 4 — Multivariate Analysis</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Look at multiple variables together. Heatmaps, pair plots, dimensionality reduction (PCA).</p>
+                    <code style="font-size:0.72rem;color:#0f0;">heatmap · pairplot · PCA</code>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-top:3px solid #10b981;padding:1.2rem;border-radius:8px;">
+                    <strong style="color:#10b981;">Step 5 — Clean & Document</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Apply cleaning decisions with justification. Every change must be documented — not just what you did, but <em>why</em>.</p>
+                    <code style="font-size:0.72rem;color:#0f0;">fillna · drop · astype · .copy()</code>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-top:3px solid var(--cyan);padding:1.2rem;border-radius:8px;">
+                    <strong style="color:var(--cyan);">Step 6 — Insights & Hypotheses</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Summarize discoveries. Formulate hypotheses that will guide feature engineering and model selection.</p>
+                    <code style="font-size:0.72rem;color:#0f0;">markdown cells · visualization summaries</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4.3 Descriptive Statistics -->
+    <div class="content-card">
+        <h3>📐 4.3 Descriptive Statistics — Summarizing Data Mathematically</h3>
+        <p>Before drawing any chart, descriptive statistics give you a quantitative summary of your data. They describe <em>where data is centred</em>, <em>how spread out it is</em>, and <em>what shape the distribution takes</em>.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">📍 Central Tendency</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Where is the "middle" of the data?</p>
+                <ul style="list-style:none;font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem;line-height:1.9;">
+                    <li><strong>Mean:</strong> Sum ÷ count. Sensitive to outliers.</li>
+                    <li><strong>Median:</strong> Middle value. Robust to outliers.</li>
+                    <li><strong>Mode:</strong> Most frequent value. Useful for categories.</li>
+                </ul>
+            </div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--blue);">📏 Dispersion / Spread</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">How spread out is the data?</p>
+                <ul style="list-style:none;font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem;line-height:1.9;">
+                    <li><strong>Variance:</strong> Average squared deviation from mean.</li>
+                    <li><strong>Std Dev (σ):</strong> Square root of variance. Same unit as data.</li>
+                    <li><strong>IQR:</strong> Q3 − Q1. Range of the middle 50%.</li>
+                    <li><strong>Range:</strong> Max − Min. Sensitive to outliers.</li>
+                </ul>
+            </div>
+            <div style="background:rgba(122,75,255,0.07);border:1px solid rgba(122,75,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--purple);">📊 Distribution Shape</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">What shape does the data take?</p>
+                <ul style="list-style:none;font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem;line-height:1.9;">
+                    <li><strong>Skewness:</strong> Asymmetry. Positive = right tail.</li>
+                    <li><strong>Kurtosis:</strong> Tail heaviness vs normal distribution.</li>
+                    <li><strong>Percentiles:</strong> Q1=25%, Q2=50%, Q3=75%.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">DESCRIPTIVE STATS IN PYTHON</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>import pandas as pd
+import numpy as np
+
+# One-line full summary
+df.describe()
+# Output: count, mean, std, min, 25%, 50%, 75%, max for each numeric column
+
+# Individual statistics
+df["salary"].mean()        # Arithmetic mean
+df["salary"].median()      # Median (50th percentile)
+df["salary"].mode()[0]     # Most frequent value
+df["salary"].std()         # Standard deviation
+df["salary"].var()         # Variance
+df["salary"].quantile(0.25) # Q1 — 25th percentile
+df["salary"].quantile(0.75) # Q3 — 75th percentile
+
+# IQR (Inter-Quartile Range)
+Q1 = df["salary"].quantile(0.25)
+Q3 = df["salary"].quantile(0.75)
+IQR = Q3 - Q1
+print(f"IQR: {IQR:.2f}")
+
+# Distribution shape
+df["salary"].skew()        # Skewness (0 = symmetric, +/- = skewed)
+df["salary"].kurt()        # Kurtosis (3 = normal, >3 = heavy tails)
+
+# Extend describe to all columns including categoricals
+df.describe(include="all")
+
+# For a categorical column
+df["category"].value_counts()            # Count per category
+df["category"].value_counts(normalize=True)  # Proportions (%)
+df["category"].nunique()                 # Number of unique values</code></pre>
+        </div>
+
+        <div style="background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.2);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>⚠️ Mean vs Median — Why it matters:</strong>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Imagine 10 employees earning €2,000/month and one CEO earning €500,000. The <strong>mean salary</strong> would be ~€47,000 — completely misleading. The <strong>median</strong> would be €2,000 — the true picture. Always compare mean and median. If they differ significantly, the distribution is skewed and the mean is not representative.</p>
+        </div>
+    </div>
+
+    <!-- 4.4 Univariate Visualization -->
+    <div class="content-card">
+    <h3 style="background: linear-gradient(90deg, #00ff88, #5fffaa); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700;">
+        📊 4.4 Univariate Visualization — Understanding Each Variable
+    </h3>
+    <p style="margin-bottom: 1.5rem;">A análise univariada examina uma variável de cada vez. Os gráficos revelam padrões que as estatísticas isoladas não conseguem transmitir — a forma de uma distribuição, a presença de outliers, a multimodalidade e lacunas nos dados.</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.2rem;">
+        
+        <div style="min-width: 0;">
+            <strong style="color: var(--cyan); display: block; margin-bottom: 0.5rem;">📊 Histogram & KDE</strong>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.8rem;">Mostra a distribuição de frequência de uma variável contínua e a sua curva de densidade suave.</p>
+            <div style="background: #000; padding: 1.2rem; border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+                <pre style="font-size: 0.75rem; color: #0f0; line-height: 1.7; white-space: pre-wrap; word-break: break-all; font-family: 'Courier New', monospace;"><code>import matplotlib.pyplot as plt
+import seaborn as sns
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+# Histograma Básico
+axes[0].hist(df["age"], bins=30, color="#5b7cff", edgecolor="white", alpha=0.8)
+axes[0].set_title("Age Distribution")
+axes[0].axvline(df["age"].mean(), color="red", linestyle="--", label=f"Mean: {df['age'].mean():.1f}")
+axes[0].axvline(df["age"].median(), color="orange", linestyle="--", label=f"Median: {df['age'].median():.1f}")
+axes[0].legend()
+
+# KDE (Kernel Density Estimate)
+sns.kdeplot(df["age"], ax=axes[1], fill=True, color="#28e0ff")
+axes[1].set_title("Age - Density Curve")
+plt.tight_layout()
+plt.show()</code></pre>
+            </div>
+        </div>
+
+        <div style="min-width: 0;">
+            <strong style="color: var(--cyan); display: block; margin-bottom: 0.5rem;">📦 Boxplot</strong>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.8rem;">Exibe o resumo de cinco números (min, Q1, mediana, Q3, max) e destaca outliers individuais.</p>
+            <div style="background: #000; padding: 1.2rem; border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+                <pre style="font-size: 0.75rem; color: #0f0; line-height: 1.7; white-space: pre-wrap; word-break: break-all; font-family: 'Courier New', monospace;"><code># Boxplot simples para detecção de outliers
+fig, ax = plt.subplots(figsize=(8, 4))
+sns.boxplot(x=df["salary"], color="#7a4bff", ax=ax)
+ax.set_title("Salary Distribution — Boxplot")
+plt.show()
+
+# Boxplot agrupado por categoria
+plt.figure(figsize=(10, 5))
+sns.boxplot(data=df, x="department", y="salary", palette="cool")
+plt.xticks(rotation=45)
+plt.title("Salary by Department")
+plt.tight_layout()
+plt.show()</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+        
+        <div style="min-width: 0;">
+            <strong style="color: var(--cyan); display: block; margin-bottom: 0.5rem;">📊 Bar Chart (Categorical)</strong>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.8rem;">Ideal para comparar frequências entre diferentes categorias ou grupos.</p>
+            <div style="background: #000; padding: 1.2rem; border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+                <pre style="font-size: 0.75rem; color: #0f0; line-height: 1.7; white-space: pre-wrap; word-break: break-all; font-family: 'Courier New', monospace;"><code># Gráfico de barras de frequências
+counts = df["category"].value_counts()
+counts.plot(kind="bar", color="#5b7cff", figsize=(10, 4))
+plt.title("Distribution by Category")
+plt.ylabel("Count")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+# Versão horizontal para rótulos longos
+counts.plot(kind="barh", color="#28e0ff")
+plt.show()</code></pre>
+            </div>
+        </div>
+
+        <div style="min-width: 0;">
+            <strong style="color: var(--cyan); display: block; margin-bottom: 0.5rem;">🥧 Pie Chart (Proportions)</strong>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.8rem;">Use com moderação: apenas para mostrar partes de um todo com poucas categorias.</p>
+            <div style="background: #000; padding: 1.2rem; border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+                <pre style="font-size: 0.75rem; color: #0f0; line-height: 1.7; white-space: pre-wrap; word-break: break-all; font-family: 'Courier New', monospace;"><code># Proporções de mercado/região
+proportions = df["region"].value_counts()
+plt.figure(figsize=(7, 7))
+plt.pie(
+    proportions,
+    labels=proportions.index,
+    autopct="%1.1f%%",
+    colors=sns.color_palette("cool", len(proportions))
+)
+plt.title("Revenue Share by Region")
+plt.show()
+
+# ⚠️ Dica Premium: Evite gráficos de pizza 
+# com mais de 5 categorias.</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; margin-top: 2rem;">
+        <strong style="color: #00ff88; font-size: 1rem; display: block; margin-bottom: 1rem;">📚 How to interpret distribution shapes:</strong>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; font-size: 0.82rem;">
+            <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cyan);">
+                <strong style="color: var(--text-light);">Normal (Bell Curve)</strong><br>
+                <span style="color: var(--text-secondary);">Simétrica. Média ≈ Mediana. Comum em fenómenos naturais.</span>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cyan);">
+                <strong style="color: var(--text-light);">Right-Skewed (+)</strong><br>
+                <span style="color: var(--text-secondary);">Cauda longa à direita. Média > Mediana. Comum em salários e preços.</span>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cyan);">
+                <strong style="color: var(--text-light);">Left-Skewed (−)</strong><br>
+                <span style="color: var(--text-secondary);">Cauda longa à esquerda. Média < Mediana. Comum em notas de exames fáceis.</span>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cyan);">
+                <strong style="color: var(--text-light);">Bimodal</strong><br>
+                <span style="color: var(--text-secondary);">Dois picos. Indica a presença de dois grupos distintos nos mesmos dados.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- 4.5 Outlier Detection -->
+    <div class="content-card">
+        <h3>🎯 4.5 Outlier Detection and Treatment</h3>
+        <p>An <strong>outlier</strong> is a data point that differs significantly from the rest of the data. But not all outliers are equal — some are errors to be removed, others are the most valuable data points in the entire dataset. The decision requires domain knowledge and business context.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ff6b6b;">🗑️ Remove the outlier when:</strong>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;line-height:1.9;">
+                    <li>→ It is clearly a data entry error (age = 999)</li>
+                    <li>→ It is physically impossible (negative height)</li>
+                    <li>→ It is a measurement malfunction (sensor spike)</li>
+                    <li>→ It is irrelevant to the business problem</li>
+                </ul>
+            </div>
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔍 Keep the outlier when:</strong>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;line-height:1.9;">
+                    <li>→ It represents a genuinely rare but real event</li>
+                    <li>→ It IS the signal you're looking for (fraud, failure, churn)</li>
+                    <li>→ Removing it would introduce bias</li>
+                    <li>→ It may carry important business insight</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">OUTLIER DETECTION METHODS</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">import numpy as np
+from scipy import stats
+
+col = df["salary"]
+
+# ── Method 1: IQR (Best for skewed distributions) ──────────────────────
+Q1, Q3 = col.quantile(0.25), col.quantile(0.75)
+IQR = Q3 - Q1
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+outliers_iqr = df[(col < lower) | (col > upper)]
+print(f"IQR method: {len(outliers_iqr)} outliers ({len(outliers_iqr)/len(df)*100:.1f}%)")
+
+# ── Method 2: Z-Score (Best for normal distributions) ──────────────────
+z_scores = np.abs(stats.zscore(col.dropna()))
+outliers_z = df[np.abs(stats.zscore(col.fillna(col.mean()))) > 3]
+print(f"Z-score method: {len(outliers_z)} outliers")
+
+# ── Method 3: Visual inspection ────────────────────────────────────────
+fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+
+# Histogram with boundaries
+axes[0].hist(col, bins=50, color="#5b7cff", alpha=0.8)
+axes[0].axvline(lower, color="red", linestyle="--", label=f"Lower: {lower:.0f}")
+axes[0].axvline(upper, color="red", linestyle="--", label=f"Upper: {upper:.0f}")
+axes[0].legend()
+axes[0].set_title("Histogram + IQR Boundaries")
+
+# Boxplot
+sns.boxplot(y=col, ax=axes[1], color="#7a4bff")
+axes[1].set_title("Boxplot")
+
+# Sorted scatter (shows all values)
+axes[2].scatter(range(len(col)), col.sort_values(), alpha=0.3, s=5, color="#28e0ff")
+axes[2].set_title("Sorted Values Scatter")
+plt.tight_layout()
+plt.show()
+
+# ── Treatment Options ───────────────────────────────────────────────────
+# Option 1: Remove outliers
+df_clean = df[(col >= lower) & (col <= upper)]
+
+# Option 2: Cap (Winsorize) — keeps row but limits extreme values
+df["salary_capped"] = col.clip(lower=lower, upper=upper)
+
+# Option 3: Log transform — compresses skewed distributions
+df["salary_log"] = np.log1p(col)  # log(1 + x) handles zeros</code></pre>
+        </div>
+    </div>
+
+    <!-- 4.6 Bivariate Analysis -->
+    <div class="content-card">
+        <h3>🔗 4.6 Bivariate Analysis — Exploring Relationships Between Variables</h3>
+        <p>Bivariate analysis studies how two variables relate to each other. This is where EDA becomes truly insightful — you start discovering which features might influence the target variable, and what correlations exist in your data.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">📉 Scatter Plot (Numerical vs Numerical)</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Reveals direction (positive/negative), strength, linearity, and outliers in the relationship between two continuous variables.</p>
+                <div style="background:#000;padding:0.8rem;border-radius:8px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>fig, ax = plt.subplots(figsize=(8, 5))
+# Color by a third variable
+scatter = ax.scatter(
+    df["experience"],
+    df["salary"],
+    c=df["age"],            # Color by age
+    cmap="viridis",
+    alpha=0.6, s=30
+)
+plt.colorbar(scatter, label="Age")
+
+# Add regression line
+sns.regplot(data=df, x="experience", y="salary",
+            scatter=False, color="red", ax=ax)
+ax.set_title("Salary vs Experience (colored by Age)")
+plt.show()</code></pre>
+                </div>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">📊 Boxplot by Category (Categorical vs Numerical)</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Compare the distribution of a numerical variable across different categories. Are salaries different across departments?</p>
+                <div style="background:#000;padding:0.8rem;border-radius:8px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Grouped boxplot
+plt.figure(figsize=(10, 5))
+sns.boxplot(data=df, x="department", y="salary",
+            palette="cool", order=df.groupby("department")["salary"]
+            .median().sort_values(ascending=False).index)
+plt.xticks(rotation=45)
+plt.title("Salary Distribution by Department")
+plt.tight_layout()
+plt.show()
+
+# Violin plot — richer than boxplot (shows density)
+sns.violinplot(data=df, x="department", y="salary",
+               palette="muted", inner="quartile")
+plt.title("Salary Density by Department")
+plt.show()</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">LINE CHART (Time Series) — Tracking variables over time</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">df_monthly = df.groupby("month")["revenue"].sum().reset_index()
+
+plt.figure(figsize=(12, 5))
+plt.plot(df_monthly["month"], df_monthly["revenue"],
+         marker="o", color="#5b7cff", linewidth=2, markersize=5)
+
+# Highlight peak month
+peak_idx = df_monthly["revenue"].idxmax()
+plt.scatter(df_monthly.loc[peak_idx, "month"],
+            df_monthly.loc[peak_idx, "revenue"],
+            color="red", s=100, zorder=5, label=f"Peak: {df_monthly.loc[peak_idx, 'revenue']:.0f}")
+
+# Add rolling average to smooth noise
+rolling_avg = df_monthly["revenue"].rolling(3).mean()
+plt.plot(df_monthly["month"], rolling_avg,
+         linestyle="--", color="orange", label="3-month rolling avg")
+
+plt.title("Monthly Revenue Trend")
+plt.legend()
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()</code></pre>
+        </div>
+    </div>
+
+    <!-- 4.7 Correlation Analysis -->
+    <div class="content-card">
+        <h3>🌡️ 4.7 Correlation Analysis and Heatmaps</h3>
+        <p>Correlation measures the <strong>strength and direction</strong> of the linear relationship between two numerical variables. It ranges from −1 (perfect negative) to +1 (perfect positive), with 0 meaning no linear relationship.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem;margin-top:1.2rem;text-align:center;font-size:0.82rem;">
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;">
+                <div style="font-size:1.5rem;color:var(--cyan);">+0.8 to +1</div>
+                <strong>Strong Positive</strong>
+                <p style="color:var(--text-secondary);margin-top:0.3rem;">As X increases, Y increases strongly. E.g., experience vs salary.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;">
+                <div style="font-size:1.5rem;color:var(--text-secondary);">-0.3 to +0.3</div>
+                <strong>Weak / None</strong>
+                <p style="color:var(--text-secondary);margin-top:0.3rem;">Little to no linear relationship. May still have non-linear correlation.</p>
+            </div>
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1rem;border-radius:8px;">
+                <div style="font-size:1.5rem;color:#ff6b6b;">-0.8 to -1</div>
+                <strong>Strong Negative</strong>
+                <p style="color:var(--text-secondary);margin-top:0.3rem;">As X increases, Y decreases strongly. E.g., price vs quantity sold.</p>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">CORRELATION MATRIX AND HEATMAP</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Select only numerical columns
+numeric_df = df.select_dtypes(include="number")
+
+# Compute correlation matrix (Pearson is default)
+corr_matrix = numeric_df.corr()
+
+# Plot heatmap
+plt.figure(figsize=(10, 8))
+mask = np.triu(np.ones_like(corr_matrix, dtype=bool))  # Hide upper triangle (redundant)
+sns.heatmap(
+    corr_matrix,
+    mask=mask,
+    annot=True,              # Show numbers on cells
+    fmt=".2f",               # 2 decimal places
+    cmap="coolwarm",         # Blue = negative, Red = positive
+    center=0,                # Center colormap at 0
+    vmin=-1, vmax=1,
+    linewidths=0.5,
+    square=True,
+    cbar_kws={"shrink": 0.8}
+)
+plt.title("Correlation Matrix — Numerical Variables", pad=20)
+plt.tight_layout()
+plt.show()
+
+# Find the strongest correlations (excluding self-correlation)
+corr_pairs = (corr_matrix
+    .unstack()
+    .reset_index()
+    .rename(columns={"level_0": "var1", "level_1": "var2", 0: "correlation"})
+    .query("var1 != var2")
+    .assign(abs_corr=lambda x: x["correlation"].abs())
+    .sort_values("abs_corr", ascending=False)
+    .drop_duplicates(subset=["abs_corr"])
+    .head(10)
+)
+print(corr_pairs)</code></pre>
+        </div>
+
+        <div style="background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.2);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>⚠️ Correlation ≠ Causation</strong>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">Ice cream sales and drowning incidents are strongly correlated — not because ice cream causes drowning, but because both increase in summer. Always ask: is there a logical <em>causal</em> mechanism, or is a third variable (a <strong>confounding variable</strong>) responsible? Also: Pearson correlation only detects <em>linear</em> relationships. Two variables may be strongly related in a non-linear way and show 0 correlation.</p>
+        </div>
+    </div>
+
+    <!-- 4.8 Multivariate Analysis -->
+    <div class="content-card">
+        <h3>🌐 4.8 Multivariate Analysis — The Big Picture</h3>
+        <p>Multivariate analysis looks at many variables simultaneously to discover complex patterns, clusters, and interactions that bivariate analysis would miss.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">PAIR PLOT — All combinations at once</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code"># Pair plot: scatter for every pair + histogram on diagonal
+sns.pairplot(
+    df[["age", "salary", "experience", "performance_score"]],
+    diag_kind="kde",         # KDE on diagonal instead of histogram
+    plot_kws={"alpha": 0.4, "s": 20},
+    corner=True              # Only show lower triangle (no redundancy)
+)
+plt.suptitle("Pair Plot — Numerical Variables", y=1.02)
+plt.show()
+
+# Add color by a categorical variable
+sns.pairplot(df, vars=["age", "salary", "experience"],
+             hue="department", diag_kind="kde", corner=True)
+plt.show()</code></pre>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">GROUPED ANALYSIS — Segmenting by multiple dimensions</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code"># Pivot table — mean salary by region and seniority level
+pivot = df.pivot_table(
+    values="salary",
+    index="region",
+    columns="seniority",
+    aggfunc="mean"
+)
+
+# Visualize as heatmap
+plt.figure(figsize=(10, 6))
+sns.heatmap(pivot, annot=True, fmt=".0f", cmap="YlOrRd", linewidths=0.5)
+plt.title("Average Salary by Region and Seniority")
+plt.tight_layout()
+plt.show()
+
+# Facet grid — same chart repeated per category
+g = sns.FacetGrid(df, col="region", row="gender", height=3, aspect=1.2)
+g.map(sns.histplot, "salary", bins=20, color="#5b7cff")
+g.add_legend()
+plt.suptitle("Salary Distribution by Region and Gender", y=1.02)
+plt.show()</code></pre>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">PCA — Dimensionality Reduction for High-Dimensional Data</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+# Standardize (required for PCA)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(df.select_dtypes("number").dropna())
+
+# Fit PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+# How much variance does each component explain?
+print(f"PC1 explains: {pca.explained_variance_ratio_[0]*100:.1f}%")
+print(f"PC2 explains: {pca.explained_variance_ratio_[1]*100:.1f}%")
+
+# Visualize in 2D
+plt.figure(figsize=(8, 6))
+plt.scatter(X_pca[:, 0], X_pca[:, 1],
+            c=df["cluster"].values, cmap="viridis", alpha=0.5)
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.title("PCA — 2D Projection")
+plt.colorbar(label="Cluster")
+plt.show()</code></pre>
+        </div>
+    </div>
+
+    <!-- 4.9 Feature Engineering -->
+    <div class="content-card">
+        <h3>⚙️ 4.9 Feature Engineering — Creating Variables That Models Can Learn From</h3>
+        <p>Raw data is rarely in the ideal format for a machine learning model. <strong>Feature engineering</strong> is the process of using domain knowledge and EDA insights to create, transform, or select variables that better represent the underlying problem.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">COMMON FEATURE ENGINEERING TECHNIQUES</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">import pandas as pd
+import numpy as np
+
+# ── 1. Date/Time Features ───────────────────────────────────────────────
+df["order_date"] = pd.to_datetime(df["order_date"])
+df["year"]        = df["order_date"].dt.year
+df["month"]       = df["order_date"].dt.month
+df["day_of_week"] = df["order_date"].dt.dayofweek      # 0=Monday, 6=Sunday
+df["is_weekend"]  = (df["day_of_week"] >= 5).astype(int)
+df["quarter"]     = df["order_date"].dt.quarter
+
+# Days since first purchase (recency)
+df["days_since_first"] = (df["order_date"] - df["order_date"].min()).dt.days
+
+# ── 2. Interaction Features ─────────────────────────────────────────────
+df["revenue_per_unit"]   = df["revenue"] / df["units_sold"]
+df["age_experience_ratio"] = df["age"] / (df["experience"] + 1)
+
+# ── 3. Encoding Categorical Variables ───────────────────────────────────
+# Label encoding (for ordinal categories: Low < Medium < High)
+size_map = {"Small": 1, "Medium": 2, "Large": 3}
+df["company_size_encoded"] = df["company_size"].map(size_map)
+
+# One-Hot Encoding (for nominal categories — no order)
+df_encoded = pd.get_dummies(df, columns=["region", "category"], drop_first=True)
+
+# ── 4. Normalization / Scaling ──────────────────────────────────────────
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+# Standard Scaler: mean=0, std=1 (for algorithms that assume normality)
+scaler = StandardScaler()
+df["salary_scaled"] = scaler.fit_transform(df[["salary"]])
+
+# MinMax Scaler: range [0, 1] (for neural networks, KNN)
+minmax = MinMaxScaler()
+df["salary_normalized"] = minmax.fit_transform(df[["salary"]])
+
+# ── 5. Binning Continuous Variables ─────────────────────────────────────
+df["age_group"] = pd.cut(df["age"],
+    bins=[0, 25, 35, 50, 65, 100],
+    labels=["Under 25", "25-35", "35-50", "50-65", "65+"])
+
+# ── 6. Log Transform (fixing right skew) ───────────────────────────────
+df["salary_log"] = np.log1p(df["salary"])   # log(1+x) handles 0 values
+df["revenue_log"] = np.log1p(df["revenue"])</code></pre>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>📏 When to Scale?</strong>
+            <table style="width:100%;border-collapse:collapse;margin-top:0.8rem;font-size:0.82rem;">
+                <thead><tr style="border-bottom:1px solid var(--border-color);">
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Algorithm</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Needs Scaling?</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Why?</th>
+                </tr></thead>
+                <tbody style="color:var(--text-secondary);">
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:0.5rem;">Linear/Logistic Regression</td><td style="padding:0.5rem;color:#10b981;">✅ Yes</td><td style="padding:0.5rem;">Coefficients are scale-dependent</td></tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:0.5rem;">KNN, SVM</td><td style="padding:0.5rem;color:#10b981;">✅ Yes</td><td style="padding:0.5rem;">Distance-based — scale dominates distances</td></tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:0.5rem;">Neural Networks</td><td style="padding:0.5rem;color:#10b981;">✅ Yes</td><td style="padding:0.5rem;">Gradient descent converges faster</td></tr>
+                    <tr><td style="padding:0.5rem;">Decision Trees, Random Forest, XGBoost</td><td style="padding:0.5rem;color:#ff6b6b;">❌ No</td><td style="padding:0.5rem;">Tree splits are scale-invariant</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 4.10 EDA Libraries -->
+    <div class="content-card">
+        <h3>📚 4.10 EDA Libraries — Your Full Toolkit</h3>
+        <p>The Python ecosystem offers both manual and automated tools for EDA. Each serves a different purpose:</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">📊 Matplotlib</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">The base library. Maximum control over every chart detail. Verbose but powerful. All other libs are built on it.</p>
+                <code style="font-size:0.72rem;color:#0f0;">import matplotlib.pyplot as plt</code>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🎨 Seaborn</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Beautiful statistical charts with minimal code. Built on Matplotlib. Best for heatmaps, pair plots, violin plots, regression plots.</p>
+                <code style="font-size:0.72rem;color:#0f0;">import seaborn as sns</code>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔀 Plotly</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Interactive charts. Hover tooltips, zoom, pan. Essential for dashboards and stakeholder presentations.</p>
+                <code style="font-size:0.72rem;color:#0f0;">import plotly.express as px</code>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">⚡ ydata-profiling</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Generates a full EDA report in one line. Distributions, correlations, missing values, alerts — all automated.</p>
+                <pre style="background:#000;padding:0.4rem;border-radius:4px;font-size:0.72rem;color:#0f0;margin-top:0.4rem;overflow-x:auto;"><code">from ydata_profiling import ProfileReport
+report = ProfileReport(df, title="EDA Report")
+report.to_file("eda_report.html")</code></pre>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">PLOTLY — INTERACTIVE CHARTS</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">import plotly.express as px
+
+# Interactive scatter plot
+fig = px.scatter(df, x="experience", y="salary",
+                 color="department",
+                 size="performance_score",
+                 hover_data=["name", "age"],
+                 title="Salary vs Experience")
+fig.show()
+
+# Interactive histogram
+fig = px.histogram(df, x="salary", nbins=50,
+                   color="region",
+                   marginal="box",   # Add boxplot on top
+                   title="Salary Distribution by Region")
+fig.show()
+
+# Interactive time series
+fig = px.line(df_monthly, x="month", y="revenue",
+              title="Monthly Revenue Trend",
+              markers=True)
+fig.add_hline(y=df_monthly["revenue"].mean(),
+              line_dash="dash", line_color="red",
+              annotation_text="Average")
+fig.show()</code></pre>
+        </div>
+    </div>
+
+    <!-- 4.11 EDA Report -->
+    <div class="content-card">
+        <h3>📋 4.11 Documenting EDA — The Analyst's Report</h3>
+        <p>An EDA without documentation is just a series of charts. A professional EDA report communicates your findings to others — data engineers, business stakeholders, other scientists — and serves as a reference for all future modelling decisions.</p>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;margin-top:1.2rem;">
+            <strong style="color:var(--cyan);">📝 Structure of a Professional EDA Report:</strong>
+            <div style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.8rem;line-height:2.2;font-family:monospace;">
+                <span style="color:var(--blue);">1. Executive Summary</span> — What data? What question? Key findings in 3 sentences.<br>
+                <span style="color:var(--blue);">2. Dataset Overview</span> — Shape, dtypes, memory, source, time range.<br>
+                <span style="color:var(--blue);">3. Data Quality</span> — Missing values %, duplicates, anomalies found, fixes applied.<br>
+                <span style="color:var(--blue);">4. Univariate Analysis</span> — Distribution of each variable. Skewness. Outliers.<br>
+                <span style="color:var(--blue);">5. Bivariate Analysis</span> — Key relationships. What correlates with the target?<br>
+                <span style="color:var(--blue);">6. Multivariate Analysis</span> — Segments, interactions, PCA if applicable.<br>
+                <span style="color:var(--blue);">7. Key Insights</span> — Numbered list of discoveries. What was surprising?<br>
+                <span style="color:var(--blue);">8. Recommendations</span> — Which features to use? What to engineer? What to investigate further?<br>
+                <span style="color:var(--blue);">9. Limitations</span> — What the data cannot answer. Potential biases.
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">EDA DOCUMENTATION TEMPLATE (Jupyter Notebook style)</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code"># Cell 1 — Metadata (Markdown)
+"""
+# EDA: [Dataset Name]
+**Author:** Ana Silva  **Date:** 2024-01-15  **Dataset:** Customer Sales 2023
+**Goal:** Understand sales patterns and identify drivers of customer churn.
+"""
+
+# Cell 2 — Setup
+import pandas as pd, numpy as np, matplotlib.pyplot as plt, seaborn as sns
+sns.set_theme(style="darkgrid", palette="cool")
+plt.rcParams["figure.dpi"] = 120
+df_raw = pd.read_csv("sales.csv")
+df = df_raw.copy()   # ← Always work on a copy!
+
+# Cell 3 — Overview
+print(f"Shape: {df.shape}")
+print(f"Memory: {df.memory_usage(deep=True).sum()/1e6:.2f} MB")
+display(df.head())
+display(df.info())
+
+# Cell 4 — Data Quality (document every decision)
+"""
+## Data Quality Findings:
+- `email` has 12% nulls → customers registered via social login (no email provided)
+  **Decision:** fill with 'no_email@unknown.com' to preserve rows
+- `age` has 3 impossible values (0 and >120) → data entry errors
+  **Decision:** replace with NaN then impute with median
+- `order_date` parsed as object → convert to datetime
+"""
+df["email"].fillna("no_email@unknown.com", inplace=True)
+df.loc[df["age"].isin([0]) | (df["age"] > 120), "age"] = np.nan
+df["age"].fillna(df["age"].median(), inplace=True)
+df["order_date"] = pd.to_datetime(df["order_date"])
+
+# Cell 5 — Key Insights (Markdown summary)
+"""
+## Key Insights:
+1. Revenue follows a strong right skew — top 10% of customers generate 67% of revenue
+2. Weekend orders have 23% higher average order value than weekday orders
+3. Strong positive correlation between `experience` and `salary` (r = 0.72)
+4. Customers who contacted support within 7 days of first purchase have 40% lower churn rate
+5. Region 'North' has bimodal salary distribution — likely two distinct job classes mixed together
+"""</code></pre>
+        </div>
+    </div>
+
+    <!-- 4.12 Common Errors -->
+    <div class="content-card">
+        <h3>⚠️ 4.12 Common Mistakes in EDA — And How to Avoid Them</h3>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ff6b6b;">🚫 Common Mistakes</strong>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ Skipping EDA entirely and jumping to modelling</li>
+                    <li>→ Trusting only the mean — ignoring std dev and distribution shape</li>
+                    <li>→ Removing all outliers without domain investigation</li>
+                    <li>→ Making cleaning decisions without documenting them</li>
+                    <li>→ Confusing correlation with causation</li>
+                    <li>→ Leaking future data into EDA (target leakage)</li>
+                    <li>→ Normalizing before the train/test split</li>
+                    <li>→ Overplotting — using color for every variable</li>
+                    <li>→ Choosing chart types based on aesthetics, not the data type</li>
+                    <li>→ Treating categorical NaN the same as numerical NaN</li>
+                </ul>
+            </div>
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">✅ Best Practices</strong>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ Always start with <code>df.info()</code> and <code>df.describe()</code></li>
+                    <li>→ Always work on a copy: <code>df = df_raw.copy()</code></li>
+                    <li>→ Document every decision with justification</li>
+                    <li>→ Compare mean vs median — large difference = skewed data</li>
+                    <li>→ Visualize before deciding how to treat outliers</li>
+                    <li>→ Use the right chart for the data type (histogram for continuous, bar for categorical)</li>
+                    <li>→ Check class balance in classification targets</li>
+                    <li>→ Scale features only after train/test split</li>
+                    <li>→ Never use <code>df.plot()</code> alone — always title, axes labels</li>
+                    <li>→ Ask "so what?" for every chart — if it has no insight, cut it</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4.13 Conclusion -->
+    <div class="content-card" style="background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.08)); border-color: rgba(40,224,255,0.3);">
+        <h3>🎓 4.13 Module Conclusion & Learning Path</h3>
+        <p>Mastering Data Preparation and EDA is what separates an average analyst from a senior Data Scientist. You now know not just how to clean data, but <em>why</em> to make each decision. You know how to look at a dataset from multiple angles — univariate, bivariate, multivariate — and extract meaningful patterns that guide everything that follows.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">✅ What you've covered:</strong>
+                <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>✔ The EDA workflow (6 structured steps)</li>
+                    <li>✔ Descriptive statistics: central tendency, dispersion, shape</li>
+                    <li>✔ Univariate analysis: histograms, KDE, boxplots, bar charts</li>
+                    <li>✔ Distribution shapes: normal, skewed, bimodal</li>
+                    <li>✔ Outlier detection (IQR, Z-Score) and treatment decisions</li>
+                    <li>✔ Bivariate analysis: scatter, grouped boxplots, line charts</li>
+                    <li>✔ Correlation analysis and heatmaps</li>
+                    <li>✔ Multivariate analysis: pair plots, facet grids, PCA</li>
+                    <li>✔ Feature engineering: encoding, scaling, date features, transforms</li>
+                    <li>✔ Full EDA toolkit: Matplotlib, Seaborn, Plotly, ydata-profiling</li>
+                    <li>✔ Professional EDA documentation and reporting</li>
+                    <li>✔ Common mistakes and best practices</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">🗺️ Your next steps:</strong>
+                <div style="margin-top:0.6rem;font-size:0.83rem;">
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">1️⃣ EDA on a real Kaggle dataset</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Download the Titanic, House Prices, or Iris dataset and conduct a full EDA following the 6-step workflow</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">2️⃣ Generate a ydata-profiling report</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Automated profiling then compare what it finds vs your manual analysis</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">3️⃣ Write a formal EDA report</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Document 5+ insights with supporting charts and business implications</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;">
+                        <strong style="color:var(--blue);">4️⃣ Next module: Machine Learning</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Feed your clean, engineered dataset into your first predictive models</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:1.2rem;margin-top:1.2rem;">
+            <strong>🏆 Challenge:</strong>
+            <p style="font-size:0.9rem;color:var(--text-secondary);margin-top:0.5rem;">Pick any dataset with at least 10 columns and 1,000 rows (Kaggle has hundreds). Follow the 6-step EDA workflow in a Jupyter Notebook. For each cleaning decision, write a one-sentence justification in a Markdown cell. At the end, write a "Key Insights" section with at least 5 findings, and a "Recommendations" section stating which features you would include in a model and why. This is exactly what a Data Scientist delivers to a team before modelling begins.</p>
+        </div>
+    </div>
+
+            </div>
+
+            <div id="laboratorio" class="tab-panel">
+                <h3>Consola SQL de Dados</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Pratica a extração de dados. Tenta filtrar clientes com gastos elevados.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">EDITOR SQL</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT cliente_nome, total_gasto 
+FROM vendas 
+WHERE total_gasto > 1500
+ORDER BY total_gasto DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">RESULTADO DA QUERY</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Clique em "Executar" para simular a consulta na base de dados...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Executar Query</button>
+            </div>
+
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>Quiz of Data Preparation & EDA</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge about Data Cleaning and Exploratory Data Analysis. Answer 15 questions and get immediate feedback.</p>
+        
+        <form id="quiz-form">
+    <div class="content-card quiz-item">
+        <p class="quiz-question">1. On average, what percentage of time does a Data Scientist dedicate to data preparation?</p>
+        <label class="quiz-option"><input type="radio" name="q1" value="A"> A) 10% to 20%</label>
+        <label class="quiz-option"><input type="radio" name="q1" value="B"> B) 40% to 50%</label>
+        <label class="quiz-option"><input type="radio" name="q1" value="C" data-correct="true"> C) 70% to 80%</label>
+        <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Less than 5%</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">2. What is the primary goal of Exploratory Data Analysis (EDA)?</p>
+        <label class="quiz-option"><input type="radio" name="q2" value="A" data-correct="true"> A) To understand patterns and relationships before modeling</label>
+        <label class="quiz-option"><input type="radio" name="q2" value="B"> B) To create the final website design</label>
+        <label class="quiz-option"><input type="radio" name="q2" value="C"> C) To replace data collection</label>
+        <label class="quiz-option"><input type="radio" name="q2" value="D"> D) To automate company marketing</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">3. What are Outliers?</p>
+        
+        <label class="quiz-option"><input type="radio" name="q3" value="A"> A) Values that repeat many times</label>
+        <label class="quiz-option"><input type="radio" name="q3" value="B" data-correct="true"> B) Extreme values that deviate from the general pattern</label>
+        <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Missing data in a table</label>
+        <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Column headers</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">4. Which chart is ideal for viewing the distribution and frequency of a variable?</p>
+        
+        <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Pie Chart</label>
+        <label class="quiz-option"><input type="radio" name="q4" value="B" data-correct="true"> B) Histogram</label>
+        <label class="quiz-option"><input type="radio" name="q4" value="C"> C) Gantt Chart</label>
+        <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Flowchart</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">5. What does the concept "Garbage In, Garbage Out" mean?</p>
+        <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Computers must be cleaned regularly</label>
+        <label class="quiz-option"><input type="radio" name="q5" value="B" data-correct="true"> B) Poor quality data generates useless results</label>
+        <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Old files need to be deleted</label>
+        <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Data should be stored in the trash</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">6. Which of these is an essential Data Cleaning technique?</p>
+        <label class="quiz-option"><input type="radio" name="q6" value="A" data-correct="true"> A) Handling null values (missing values)</label>
+        <label class="quiz-option"><input type="radio" name="q6" value="B"> B) Publishing data on social media</label>
+        <label class="quiz-option"><input type="radio" name="q6" value="C"> C) Increasing chart brightness</label>
+        <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Creating logos for the project</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">7. What is the purpose of a Boxplot in EDA?</p>
+        
+        <label class="quiz-option"><input type="radio" name="q7" value="A"> A) To write formatted text</label>
+        <label class="quiz-option"><input type="radio" name="q7" value="B" data-correct="true"> B) To visualize dispersion and identify outliers</label>
+        <label class="quiz-option"><input type="radio" name="q7" value="C"> C) To connect to a SQL database</label>
+        <label class="quiz-option"><input type="radio" name="q7" value="D"> D) To count the number of columns</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">8. Why is EDA considered a "bridge" in the pipeline?</p>
+        <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Because it connects two physical servers</label>
+        <label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"> B) Because it paves the way for Feature Engineering</label>
+        <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Because it is used only in civil engineering</label>
+        <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Because it connects Excel to PowerPoint</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">9. What is the use of Descriptive Statistics in exploration?</p>
+        <label class="quiz-option"><input type="radio" name="q9" value="A"> A) To complicate the final report</label>
+        <label class="quiz-option"><input type="radio" name="q9" value="B" data-correct="true"> B) To summarize the main characteristics of the data</label>
+        <label class="quiz-option"><input type="radio" name="q9" value="C"> C) To design the user interface</label>
+        <label class="quiz-option"><input type="radio" name="q9" value="D"> D) To replace data collection</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">10. What should be done when identifying an outlier?</p>
+        <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Always delete it without questioning</label>
+        <label class="quiz-option"><input type="radio" name="q10" value="B" data-correct="true"> B) Analyze the context to decide whether to remove or keep it</label>
+        <label class="quiz-option"><input type="radio" name="q10" value="C"> C) Ignore it and move straight to modeling</label>
+        <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Transform all data into outliers</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">11. In the context of EDA, what is a Heatmap used for?</p>
+        
+        <label class="quiz-option"><input type="radio" name="q11" value="A"> A) To measure server temperature</label>
+        <label class="quiz-option"><input type="radio" name="q11" value="B" data-correct="true"> B) To identify the strength of correlations between variables</label>
+        <label class="quiz-option"><input type="radio" name="q11" value="C"> C) To create geographic heat maps</label>
+        <label class="quiz-option"><input type="radio" name="q11" value="D"> D) To measure code execution time</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">12. Which is a common error mentioned in data preparation?</p>
+        <label class="quiz-option"><input type="radio" name="q12" value="A" data-correct="true"> A) Starting to model too early without understanding the data</label>
+        <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Cleaning data with too much care</label>
+        <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Documenting cleaning decisions</label>
+        <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Talking to business experts about the data</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">13. Which chart helps visualize the relationship between two numerical variables?</p>
+        
+        <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Bar Chart</label>
+        <label class="quiz-option"><input type="radio" name="q13" value="B" data-correct="true"> B) Scatter Plot</label>
+        <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Frequency Histogram</label>
+        <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Frequency Table</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">14. What does format normalization involve in Data Cleaning?</p>
+        <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Changing the company logo color</label>
+        <label class="quiz-option"><input type="radio" name="q14" value="B" data-correct="true"> B) Ensuring consistency (e.g., all dates in the same pattern)</label>
+        <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Deleting the original database</label>
+        <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Installing system drivers</label>
+    </div>
+
+    <div class="content-card quiz-item">
+        <p class="quiz-question">15. What is the focus of visualization specifically during EDA?</p>
+        <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Beautifying slides for the client</label>
+        <label class="quiz-option"><input type="radio" name="q15" value="B" data-correct="true"> B) Exploring, detecting errors, and confirming patterns</label>
+        <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Creating visual marketing campaigns</label>
+        <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Hiding data that does not interest the company</label>
+    </div>
+</form>
+                    <div class="quiz-controls" style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button id="submit-quiz" class="btn btn-primary" onclick="processQuiz()">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back" onclick="resetQuiz()">Clean Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display: none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+        <script>
+        // Quiz functionality
+class QuizManager {
+    constructor() {
+        this.questionsData = {
+            q1: { correct: 'C', exp: 'Data preparation is the longest phase, typically taking up 70% to 80% of the project time.' },
+            q2: { correct: 'A', exp: 'EDA is used to understand the data structure and patterns before building models.' },
+            q3: { correct: 'B', exp: 'Outliers are atypical values that deviate drastically from the behavior of the rest of the data.' },
+            q4: { correct: 'B', exp: 'A Histogram shows the shape of the distribution and where the data is concentrated.' },
+            q5: { correct: 'B', exp: 'If the input data is "garbage" (poor quality), the model output will also be "garbage".' },
+            q6: { correct: 'A', exp: 'Handling null values is a pillar of data cleaning to prevent errors in algorithms.' },
+            q7: { correct: 'B', exp: 'A Boxplot is the standard visual tool for detecting dispersion and outliers.' },
+            q8: { correct: 'B', exp: 'Exploration reveals the best features for the final model (Feature Engineering).' },
+            q9: { correct: 'B', exp: 'Measures like mean and standard deviation summarize the dataset quantitatively.' },
+            q10: { correct: 'B', exp: 'Not all outliers are errors; some may provide valuable business insights.' },
+            q11: { correct: 'B', exp: 'A Heatmap uses colors to show which variables have the strongest relationship (correlation).' },
+            q12: { correct: 'A', exp: 'Skipping exploration and going straight to modeling leads to low-accuracy models.' },
+            q13: { correct: 'B', exp: 'A Scatter Plot is the preferred chart to see how two numerical variables interact.' },
+            q14: { correct: 'B', exp: 'Normalizing formats prevents the system from treating the same information in different ways.' },
+            q15: { correct: 'B', exp: 'In EDA, charts are diagnostic tools for the analyst, not for aesthetic purposes.' }
+        };
+        this.init();
+    }
+
+    init() {
+        document.getElementById('submit-quiz').addEventListener('click', () => {
+            this.submitQuiz();
+        });
+
+        document.getElementById('clear-quiz').addEventListener('click', () => {
+            this.clearQuiz();
+        });
+    }
+
+    submitQuiz() {
+                    const form = document.getElementById('quiz-form');
+                    const formData = new FormData(form);
+                    let score = 0;
+                    let feedbackHTML = '';
+                    Object.keys(this.questionsData).forEach((key, index) => {
+                        const userAnswer = formData.get(key);
+                        const isCorrect = userAnswer === this.questionsData[key].correct;
+                        if (isCorrect) score++;
+                        feedbackHTML += `
+                            <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                                <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                                <div>
+                                    <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                    ${!isCorrect ? `<br><small class="correct-answer">
+                                            Correct answer: Option ${this.questionsData[key].correct}
+                                        </small>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    this.displayResults(score, feedbackHTML);
+                }
+
+    displayResults(score, feedbackHTML) {
+        const total = Object.keys(this.questionsData).length;
+        const percent = Math.round((score / total) * 100);
+        const resultsDiv = document.getElementById('quiz-results');
+        
+        let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+
+        document.getElementById('quiz-score').innerHTML = `
+            <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+            <p style="color: var(--text-secondary)">${percent >= 70 ? 'Amazing! You have mastered the fundamentals.' : 'Keep practicing to improve.'}</p>
+        `;
+
+        document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clearQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-results').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+// Start when document loads
+document.addEventListener('DOMContentLoaded', () => {
+    new QuizManager();
+});
+</script>
+
+            <div id="recursos" class="tab-panel">
+                <h3>Materiais de Apoio</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ Guia Definitivo: Python para Análise de Dados</a>
+                    <a href="#" class="resource-link">→ Cheat Sheet: Comandos SQL Essenciais</a>
+                    <a href="#" class="resource-link">→ Documentação Scikit-Learn: Escolhendo o Algoritmo Certo</a>
+                    <a href="#" class="resource-link">→ Workshop: Storytelling com Dados</a>
+                </div>
+            </div>
+
+            <div id="avaliacao" class="tab-panel">
+    <div class="content-card">
+        <h3>🎯 Critérios de Domínio: Preparação de Dados & Análise Exploratória (EDA)</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            Para completar este módulo com sucesso, deves demonstrar competência nos seguintes níveis de domínio na preparação, compreensão e exploração de dados em projetos de Data Science:
+        </p>
+        
+        <div class="evaluation-grid">
+            <div class="evaluation-column">
+                <h4 class="evaluation-title essential">
+                    <span>💠</span> Essential
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Understanding the role of data preparation in the Data Science pipeline</li>
+                    <li>Ability to identify common issues in real-world data (null values, duplicates, errors)</li>
+                    <li>Basic notions of data cleaning</li>
+                    <li>Use of basic descriptive statistics (mean, median, standard deviation)</li>
+                    <li>Simple interpretation of exploratory charts</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title important">
+                    <span>⭐</span> Important
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Application of practical data cleaning techniques in real datasets</li>
+                    <li>Ability to perform a structured Exploratory Data Analysis (EDA)</li>
+                    <li>Identification and interpretation of outliers</li>
+                    <li>Analysis of correlations and relationships between variables</li>
+                    <li>Use of Pandas for data exploration and transformation</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title advanced">
+                    <span>🚀</span> Advanced
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Conscious decision-making regarding outlier treatment</li>
+                    <li>Documentation of decisions made during data preparation and EDA</li>
+                    <li>Ability to generate insights that guide feature engineering</li>
+                    <li>Critical evaluation of data quality and representativeness</li>
+                    <li>Use of EDA to support business decisions and future modeling</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-panel");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            let progressMap = { 'aprender': 25, 'laboratorio': 50, 'quiz': 75, 'recursos': 90, 'avaliacao': 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executada com sucesso.</strong><br><br>Resultados (Top 3):<br>-----------------------<br>1. Carlos Alberto | 4.250,00€<br>2. Beatriz Ramos | 2.100,50€<br>3. Ricardo Jorge | 1.880,00€<br><br><em>Dica: O filtro WHERE funcionou corretamente eliminando registos abaixo de 1500€.</em>";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Mobile DevOps & CI/CD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14; --blue: #d000ff; --purple: #c266ff; --cyan: #a200ff;
+            --text-light: #e8ecf8; --text-secondary: #b6c0de;
+            --card-bg: rgba(255,255,255,0.05); --border-color: rgba(255,255,255,0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(91,124,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(91,124,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1; }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(207,75,255,0.1) 0%, rgba(217,91,255,0.05) 50%, transparent 100%); pointer-events: none; z-index: -1; }
+
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,20,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+
+        .section-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(91,124,255,0.15); border: 1px solid rgba(91,124,255,0.3); color: var(--purple); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.3rem 0.9rem; border-radius: 50px; margin-bottom: 1.25rem; text-transform: uppercase; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--purple); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--purple); }
+        .code-block { background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.6; color: #a8ff78; }
+        .info-box { background: rgba(162,0,255,0.07); border: 1px solid rgba(162,0,255,0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+        .info-box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--purple); }
+        .section-divider { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .concept-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .concept-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 0.35rem; }
+        .concept-title { font-weight: 600; font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.4rem; }
+        .concept-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+        .step-flow { display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0; }
+        .step-item { display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; }
+        .step-num { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; font-weight: 700; font-size: 0.8rem; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+        .step-content { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+        .step-content strong { color: var(--text-light); }
+
+        /* Pipeline flow */
+        .pipeline-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; }
+        .pipe-step { display: flex; flex-direction: column; align-items: center; gap: 5px; background: rgba(91,124,255,0.1); border: 1px solid rgba(91,124,255,0.3); border-radius: 8px; padding: 0.7rem 0.85rem; min-width: 90px; text-align: center; flex-shrink: 0; }
+        .pipe-step .ps-icon  { font-size: 1.2rem; }
+        .pipe-step .ps-label { font-size: 0.68rem; font-weight: 700; color: var(--purple); }
+        .pipe-step .ps-desc  { font-size: 0.6rem; color: var(--text-secondary); line-height: 1.3; }
+        .pipe-arrow { font-size: 1rem; color: var(--blue); padding: 0 0.35rem; align-self: center; margin-bottom: 16px; flex-shrink: 0; }
+
+        .compare-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .compare-table th { background: rgba(91,124,255,0.15); color: var(--purple); padding: 0.75rem 1rem; text-align: left; border: 1px solid var(--border-color); font-weight: 600; }
+        .compare-table td { padding: 0.65rem 1rem; border: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 440px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; }
+
+        .resource-link { color: var(--purple); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--purple); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05)); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--purple); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255,255,255,0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--purple); border-bottom-color: var(--purple); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--purple); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .concept-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .pipeline-row { gap: 0.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <div class="logo">BitJourney</div>
+            <span class="premium-badge">Premium</span>
+        </div>
+        <nav>
+            <a href="premium-data-science.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objetivo: Mobile DevOps & CI/CD</h1>
+        <p class="course-description">Learn to ship mobile apps reliably, repeatedly, and at speed. Master the full Mobile DevOps pipeline — automated testing, build automation, code signing, beta distribution, store deployment, and monitoring — for both iOS and Android.</p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>5–7h</span></div>
+            <div class="meta-item"><span>🎯</span><span>• GitHub Actions • Fastlane • Bitrise • Firebase • TestFlight • App Store • Play Store</span></div>
+            <div class="meta-item"><span>📌</span><span>Mobile Engineering · DevOps</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'aprender')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'laboratorio')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'recursos')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'avaliacao')">Assessment</button>
+        </nav>
+
+        <!-- ===================== LEARN ===================== -->
+        <div id="aprender" class="tab-panel active">
+
+            <div class="content-card">
+                <h3>Introduction: Why Mobile DevOps Is Different</h3>
+                <p>Mobile CI/CD is fundamentally harder than web CI/CD. Beyond the usual code-test-deploy cycle, mobile teams must deal with <span class="highlight">code signing</span> (certificates, provisioning profiles), <span class="highlight">app store review</span> (Apple review takes 1–3 days), <span class="highlight">device fragmentation</span> (thousands of Android devices), and <span class="highlight">over-the-air update limitations</span> (you can't force users to update).</p>
+                <p style="margin-top:0.75rem;">This module covers:</p>
+                <ul class="styled-list">
+                    <li>The mobile CI/CD pipeline end-to-end</li>
+                    <li>Automated testing: unit, integration, UI/E2E</li>
+                    <li>Code signing for iOS and Android</li>
+                    <li>Fastlane — automating builds, signing, and store uploads</li>
+                    <li>GitHub Actions for mobile</li>
+                    <li>Beta distribution: TestFlight and Firebase App Distribution</li>
+                    <li>App Store and Play Store automated deployment</li>
+                    <li>Mobile monitoring and crash reporting</li>
+                </ul>
+
+                <!-- NEW: Why Mobile DevOps fails -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">The four reasons mobile DevOps pipelines break in practice — and how to prevent each:</p>
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-label">Failure 1</div>
+                        <div class="concept-title">Certificate Expiry</div>
+                        <div class="concept-desc">iOS distribution certificates last 1 year. Provisioning profiles last 1 year. When they expire mid-pipeline at 3am before a release, the build fails with a cryptic codesign error. Prevention: Fastlane Match + calendar alerts at 60 and 30 days before expiry. Fastlane can auto-renew profiles.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Failure 2</div>
+                        <div class="concept-title">Build Number Collisions</div>
+                        <div class="concept-desc">TestFlight rejects builds with a build number Apple has seen before — even if rejected or deleted. CI must auto-increment the build number on every run. Fastlane's increment_build_number uses the latest App Store Connect number as the baseline. Never hardcode build numbers.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Failure 3</div>
+                        <div class="concept-title">Xcode Version Drift</div>
+                        <div class="concept-desc">A developer updates Xcode locally but CI still uses the old version. Swift 5.9 vs 5.10 can break builds silently. Apple mandates minimum Xcode versions for App Store submissions. Pin Xcode versions explicitly in CI with sudo xcode-select. Use .xcode-version file (Bitrise/Codemagic respect it).</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Failure 4</div>
+                        <div class="concept-title">Dependency Hell</div>
+                        <div class="concept-desc">CocoaPods, SPM, Gradle dependencies change between CI runs if not locked. A transitive dependency update can introduce a breaking API change. Lock everything: Podfile.lock committed to Git, Package.resolved committed, Gemfile.lock for Fastlane gems. Never run pod update or bundle update in CI without reviewing changes first.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== MOBILE DEVOPS ===== -->
+            <div class="content-card">
+                <div class="section-badge">📱 Mobile DevOps</div>
+                <h3>The Mobile CI/CD Pipeline</h3>
+                <p>Every production mobile team runs a continuous pipeline from commit to store. Here is the complete flow:</p>
+                <div class="pipeline-row">
+                    <div class="pipe-step"><div class="ps-icon">📝</div><div class="ps-label">COMMIT</div><div class="ps-desc">Push to branch</div></div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step"><div class="ps-icon">🧪</div><div class="ps-label">TEST</div><div class="ps-desc">Unit + UI tests</div></div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step"><div class="ps-icon">🔨</div><div class="ps-label">BUILD</div><div class="ps-desc">.ipa / .aab</div></div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step"><div class="ps-icon">🔐</div><div class="ps-label">SIGN</div><div class="ps-desc">Certs & profiles</div></div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step"><div class="ps-icon">✈️</div><div class="ps-label">BETA</div><div class="ps-desc">TestFlight / Firebase</div></div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step"><div class="ps-icon">🚀</div><div class="ps-label">RELEASE</div><div class="ps-desc">App Store / Play Store</div></div>
+                </div>
+                <div class="code-explanation">
+                    <p>On iOS, every build that leaves your machine must be cryptographically signed. A missing or expired certificate will break your entire pipeline silently. Code signing is the #1 pain point in mobile CI/CD.</p>
+                </div>
+
+                <!-- NEW: branching strategy -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Branching strategy — mapping Git branches to pipeline environments:</p>
+                <div class="code-block"><pre># ── Recommended Branching → Environment Mapping ──────────────────────
+
+# feature/* branches
+#   → Run: unit tests + lint
+#   → No build artifact
+#   → Triggered on: every push
+
+# develop branch
+#   → Run: unit + integration + UI tests
+#   → Build: debug .ipa / debug .aab
+#   → Distribute: Firebase App Distribution → QA team
+#   → Triggered on: merge to develop
+
+# release/* branches (e.g. release/2.4.0)
+#   → Run: full test suite
+#   → Build: release .ipa / release .aab (signed)
+#   → Distribute: TestFlight internal testers / Play Store internal track
+#   → Triggered on: branch creation
+
+# main (post-release)
+#   → Tag: v2.4.0
+#   → Build: production release
+#   → Submit: App Store for review / Play Store production staged rollout (1%)
+#   → Triggered on: version tag push (v*)
+
+# Example GitHub Actions trigger configuration:
+on:
+  push:
+    branches: [develop, 'release/*']
+    tags:     ['v*']
+  pull_request:
+    branches: [develop, main]</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">🏎️ Pipeline Speed Matters — Real Time Targets</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        Teams shipping daily need fast feedback loops. <strong style="color:var(--text-light);">PR check (unit tests only): under 5 minutes</strong>. <strong style="color:var(--text-light);">Full pipeline to TestFlight: under 15 minutes</strong>. <strong style="color:var(--text-light);">Nightly E2E suite: under 30 minutes</strong>. Anything slower discourages frequent commits. Key optimizations: cache DerivedData (iOS) and ~/.gradle (Android) between runs. Parallelize unit and UI test targets. Use incremental builds with derived data caching.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">📱 Mobile DevOps</div>
+                <h3>Automated Testing Strategy</h3>
+                <p>A robust mobile test suite has three layers — the testing pyramid applied to mobile:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Unit tests</span> — test pure business logic and ViewModels/Presenters in isolation. Fast, hundreds of them. No device needed. (<em>XCTest, JUnit, Jest for RN</em>)</li>
+                    <li><span class="highlight">Integration tests</span> — test interactions between components: ViewModel + Repository + DB. Still fast, no full UI. (<em>XCTest, Robolectric, Mockito</em>)</li>
+                    <li><span class="highlight">UI / E2E tests</span> — drive the real app on a device or simulator. Slow, expensive, keep them focused on critical flows only. (<em>XCUITest, Espresso, Detox for RN, Maestro</em>)</li>
+                </ul>
+                <div class="code-block"><pre># Maestro — cross-platform E2E testing with YAML (iOS + Android)
+# flows/login.yaml
+appId: com.myapp.ios
+---
+- launchApp
+- tapOn:
+    text: "Sign In"
+- inputText:
+    text: "user@example.com"
+- tapOn:
+    id: "password-field"
+- inputText:
+    text: "SecurePass123"
+- tapOn:
+    text: "Login"
+- assertVisible:
+    text: "Welcome back"   # ✓ login flow verified</pre></div>
+                <table class="compare-table">
+                    <thead><tr><th>Layer</th><th>Speed</th><th>Coverage</th><th>Run in CI?</th></tr></thead>
+                    <tbody>
+                        <tr><td>Unit</td><td>&lt;1s each</td><td>Pure logic</td><td>On every commit</td></tr>
+                        <tr><td>Integration</td><td>1–10s each</td><td>Component interaction</td><td>On every commit</td></tr>
+                        <tr><td>UI / E2E</td><td>30s–5min each</td><td>Full user flow</td><td>On PR merge / nightly</td></tr>
+                    </tbody>
+                </table>
+
+                <!-- NEW: XCTest + Espresso examples -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Unit and integration test patterns in production — iOS XCTest and Android JUnit:</p>
+                <div class="code-block"><pre>// ── iOS: Testing a ViewModel with XCTest ─────────────────────────────
+import XCTest
+@testable import MyApp
+
+class ProductViewModelTests: XCTestCase {
+
+    var sut: ProductViewModel!
+    var mockRepository: MockProductRepository!
+
+    override func setUp() {
+        super.setUp()
+        mockRepository = MockProductRepository()
+        sut = ProductViewModel(repository: mockRepository)
+    }
+
+    // ✓ Test success path
+    func testFetchProductsSuccess() async {
+        // Given
+        mockRepository.stubbedProducts = [
+            Product(id: "1", name: "Widget", price: 9.99, inStock: true),
+            Product(id: "2", name: "Gadget", price: 19.99, inStock: false)
+        ]
+
+        // When
+        await sut.loadProducts()
+
+        // Then
+        XCTAssertEqual(sut.state, .loaded)
+        XCTAssertEqual(sut.products.count, 2)
+        XCTAssertEqual(sut.products.first?.name, "Widget")
+    }
+
+    // ✓ Test that only in-stock items are shown when filter is active
+    func testFilterInStockOnly() async {
+        mockRepository.stubbedProducts = [
+            Product(id: "1", name: "Widget", price: 9.99, inStock: true),
+            Product(id: "2", name: "Gadget", price: 19.99, inStock: false)
+        ]
+        await sut.loadProducts()
+
+        sut.showInStockOnly = true   // toggle filter
+
+        XCTAssertEqual(sut.filteredProducts.count, 1)
+        XCTAssertEqual(sut.filteredProducts.first?.name, "Widget")
+    }
+
+    // ✓ Test error handling
+    func testFetchProductsNetworkError() async {
+        mockRepository.shouldThrowError = true
+
+        await sut.loadProducts()
+
+        XCTAssertEqual(sut.state, .error("Network unavailable"))
+        XCTAssertTrue(sut.products.isEmpty)
+    }
+}
+
+// ── Android: Testing a ViewModel with JUnit + Coroutines ─────────────
+@RunWith(MockitoJUnitRunner::class)
+class ProductViewModelTest {
+
+    @get:Rule val coroutineRule = MainCoroutineRule()
+
+    private val repository = mock(ProductRepository::class.java)
+    private lateinit var viewModel: ProductViewModel
+
+    @Before fun setUp() { viewModel = ProductViewModel(repository) }
+
+    @Test fun `fetch products emits success state`() = coroutineRule.runTest {
+        // Given
+        val products = listOf(Product("1", "Widget", 9.99, inStock = true))
+        whenever(repository.getProducts()).thenReturn(Result.success(products))
+
+        // When
+        viewModel.loadProducts()
+
+        // Then
+        val state = viewModel.uiState.value
+        assertThat(state).isInstanceOf(UiState.Success::class.java)
+        assertThat((state as UiState.Success).products).hasSize(1)
+    }
+
+    @Test fun `network error emits error state`() = coroutineRule.runTest {
+        whenever(repository.getProducts())
+            .thenReturn(Result.failure(IOException("Network error")))
+
+        viewModel.loadProducts()
+
+        assertThat(viewModel.uiState.value).isInstanceOf(UiState.Error::class.java)
+    }
+}</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">📱 Mobile DevOps</div>
+                <h3>iOS Code Signing — The Hard Part</h3>
+                <p>iOS code signing requires three things working together perfectly:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Certificate</span> — identifies the developer/team. Issued by Apple. Has an expiry date (1 year). Stored in the macOS Keychain.</li>
+                    <li><span class="highlight">Provisioning Profile</span> — binds the certificate + App ID + device list + entitlements (push notifications, iCloud, etc.) together. Created on developer.apple.com.</li>
+                    <li><span class="highlight">Keychain</span> — the CI machine must have the certificate installed and trusted in its keychain before building.</li>
+                </ul>
+                <div class="code-block"><pre># Manual keychain setup in CI (GitHub Actions)
+- name: Install Apple Certificate
+  env:
+    BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+    P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+    KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+  run: |
+    echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > certificate.p12
+    security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+    security set-keychain-settings -lut 21600 build.keychain
+    security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+    security import certificate.p12 -P "$P12_PASSWORD" \
+      -A -t cert -f pkcs12 -k build.keychain
+    security list-keychain -d user -s build.keychain</pre></div>
+                <div class="code-explanation">
+                    <p><strong>Better approach:</strong> use <span class="highlight">Fastlane Match</span> to manage all certificates and profiles in an encrypted Git repo. One command syncs everything to any CI machine automatically.</p>
+                </div>
+
+                <!-- NEW: Match deep dive -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Fastlane Match — complete setup for a team managing multiple apps and environments:</p>
+                <div class="code-block"><pre># ── Setting up Fastlane Match from scratch ───────────────────────────
+
+# 1. Create a private Git repo for certificates (e.g. github.com/myorg/ios-certs)
+# 2. Run match init — creates Matchfile
+fastlane match init
+
+# Matchfile
+git_url("git@github.com:myorg/ios-certs.git")
+storage_mode("git")
+type("appstore")   # or "adhoc", "development", "enterprise"
+
+# 3. Generate and store certificates for each environment
+fastlane match development   # dev certs for team members
+fastlane match adhoc         # for Firebase App Distribution / Ad Hoc
+fastlane match appstore      # for TestFlight + App Store
+
+# This encrypts and commits to your private repo:
+# certs/development/com.myapp.cer
+# certs/development/com.myapp.p12   (password protected)
+# profiles/development/AppStore_com.myapp.mobileprovision
+
+# 4. In Fastfile — use match before every build
+lane :beta do
+  match(
+    type: "appstore",
+    readonly: true,                         # CI never modifies certs
+    app_identifier: "com.myapp.ios",
+    git_basic_authorization: ENV["MATCH_GIT_TOKEN"]
+  )
+  increment_build_number(
+    build_number: latest_testflight_build_number + 1
+  )
+  build_app(
+    scheme: "MyApp",
+    export_method: "app-store",
+    xcargs: "-allowProvisioningUpdates"
+  )
+  upload_to_testflight
+end
+
+# 5. Adding a new team member — one command installs everything
+fastlane match development --readonly
+# → downloads + installs all dev certs and profiles
+# → team member can build immediately</pre></div>
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-label">Profile Type</div>
+                        <div class="concept-title">Development</div>
+                        <div class="concept-desc">Run on registered devices during development. Required for team members' personal iPhones. Expires after 1 year. Match generates one per developer or a shared profile for the team.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Profile Type</div>
+                        <div class="concept-title">Ad Hoc</div>
+                        <div class="concept-desc">Install on up to 100 specific registered devices. Used for Firebase App Distribution and internal QA. Must register every tester's device UDID on developer.apple.com before generating the profile.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Profile Type</div>
+                        <div class="concept-title">App Store</div>
+                        <div class="concept-desc">Required for TestFlight upload and App Store submission. Cannot install directly on devices without TestFlight. This is what CI uses for beta and production builds.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Profile Type</div>
+                        <div class="concept-title">Enterprise</div>
+                        <div class="concept-desc">For companies with Apple Developer Enterprise Program ($299/year). Distribute apps internally to all employees without App Store. Requires Apple approval. Not for external distribution.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">📱 Mobile DevOps</div>
+                <h3>Fastlane — The Mobile Automation Backbone</h3>
+                <p><span class="highlight">Fastlane</span> is the industry-standard open-source tool for automating iOS and Android workflows. It wraps complex Xcode, Gradle, and App Store API calls into simple Ruby-based actions.</p>
+                <div class="code-block"><pre># Fastfile — defines "lanes" (automated workflows)
+default_platform(:ios)
+
+platform :ios do
+
+  lane :test do
+    run_tests(
+      scheme: "MyApp",
+      devices: ["iPhone 15 Pro"],
+      code_coverage: true
+    )
+  end
+
+  lane :beta do
+    match(type: "appstore")
+    increment_build_number
+    build_app(scheme: "MyApp")
+    upload_to_testflight(skip_waiting_for_build_processing: true)
+    slack(message: "🚀 New beta build uploaded to TestFlight!")
+  end
+
+  lane :release do
+    match(type: "appstore")
+    build_app(scheme: "MyApp")
+    upload_to_app_store(
+      submit_for_review: true,
+      automatic_release: false,
+      metadata_path: "./metadata"
+    )
+  end
+
+end</pre></div>
+                <p style="margin-top:0.75rem;"><strong>Key Fastlane tools:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">match</span> — sync certificates and profiles from encrypted Git repo</li>
+                    <li><span class="highlight">gym</span> — build iOS .ipa files</li>
+                    <li><span class="highlight">pilot</span> — upload to TestFlight</li>
+                    <li><span class="highlight">deliver</span> — upload metadata + binary to App Store</li>
+                    <li><span class="highlight">supply</span> — upload APK/AAB + metadata to Play Store</li>
+                    <li><span class="highlight">scan</span> — run automated tests</li>
+                </ul>
+
+                <!-- NEW: Advanced Fastlane patterns -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Advanced Fastlane patterns used by production teams — multi-target apps, changelog automation, and error handling:</p>
+                <div class="code-block"><pre># ── Production-Grade Fastfile Patterns ───────────────────────────────
+
+platform :ios do
+
+  # Error handling — notify team if any lane fails
+  error do |lane, exception, options|
+    slack(
+      message: "❌ Lane '#{lane}' failed: #{exception.message}",
+      channel: "#mobile-alerts",
+      success: false,
+      payload: { "Lane" => lane.to_s, "Git Branch" => git_branch }
+    )
+  end
+
+  # Multi-environment lane — same code, different bundle IDs
+  lane :beta_staging do
+    ENV["APP_ENVIRONMENT"] = "staging"
+    build_and_distribute(
+      scheme: "MyApp-Staging",
+      bundle_id: "com.myapp.staging",
+      testflight_group: "Internal QA"
+    )
+  end
+
+  lane :beta_production do
+    ENV["APP_ENVIRONMENT"] = "production"
+    build_and_distribute(
+      scheme: "MyApp",
+      bundle_id: "com.myapp.ios",
+      testflight_group: "Beta Testers"
+    )
+  end
+
+  # Shared private action — avoids code duplication
+  private_lane :build_and_distribute do |options|
+    match(type: "appstore", app_identifier: options[:bundle_id])
+
+    # Auto-generate release notes from Git history
+    changelog = changelog_from_git_commits(
+      commits_count: 20,
+      pretty: "- %s",
+      date_format: "short",
+      merge_commit_filtering: "exclude_merges"
+    )
+
+    increment_build_number(
+      build_number: latest_testflight_build_number(
+        app_identifier: options[:bundle_id]
+      ) + 1
+    )
+
+    build_app(
+      scheme: options[:scheme],
+      export_method: "app-store",
+      output_name: "#{options[:scheme]}_#{get_build_number}.ipa"
+    )
+
+    upload_to_testflight(
+      app_identifier: options[:bundle_id],
+      groups: [options[:testflight_group]],
+      changelog: changelog,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  # App Extensions — build main app + Today Widget + Notification Extension
+  lane :beta_with_extensions do
+    match(type: "appstore", app_identifier: [
+      "com.myapp.ios",
+      "com.myapp.ios.widget",
+      "com.myapp.ios.notification-extension"
+    ])
+    build_app(scheme: "MyApp")   # Xcode builds all targets in scheme
+    upload_to_testflight
+  end
+
+end
+
+# Android platform — same Fastfile, different platform block
+platform :android do
+
+  lane :beta do
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      properties: {
+        "android.injected.signing.store.file" => ENV["KEYSTORE_PATH"],
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"]
+      }
+    )
+    supply(
+      track: "internal",
+      aab: lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
+    )
+  end
+
+end</pre></div>
+            </div>
+
+            <!-- ===== CI/CD ===== -->
+            <div class="content-card">
+                <div class="section-badge">⚙️ CI/CD</div>
+                <h3>GitHub Actions for Mobile</h3>
+                <p>GitHub Actions runs mobile CI/CD natively — <span class="highlight">macOS runners</span> for iOS (Xcode available), Ubuntu runners for Android. The YAML workflow defines triggers, jobs, and steps.</p>
+                <div class="code-block"><pre># .github/workflows/ios-ci.yml
+name: iOS CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app
+
+      - name: Install dependencies
+        run: bundle install
+
+      - name: Run unit tests
+        run: bundle exec fastlane test
+
+  deploy-beta:
+    runs-on: macos-14
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: bundle install
+
+      - name: Deploy to TestFlight
+        env:
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_TOKEN }}
+        run: bundle exec fastlane beta</pre></div>
+
+                <!-- NEW: Caching strategy for GitHub Actions -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Caching strategy — cutting iOS build time from 15 minutes to under 7 minutes:</p>
+                <div class="code-block"><pre># .github/workflows/ios-ci-optimized.yml — with aggressive caching
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Cache 1: Ruby gems (Fastlane + plugins) ─────────────────────
+      - name: Cache Ruby gems
+        uses: actions/cache@v4
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('Gemfile.lock') }}
+          restore-keys: ${{ runner.os }}-gems-
+
+      - name: Install gems
+        run: bundle install --path vendor/bundle
+
+      # ── Cache 2: CocoaPods ────────────────────────────────────────────
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            Pods
+            ~/.cocoapods
+          key: ${{ runner.os }}-pods-${{ hashFiles('Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
+
+      - name: Install CocoaPods
+        run: bundle exec pod install --repo-update
+        if: steps.cache-pods.outputs.cache-hit != 'true'
+
+      # ── Cache 3: SPM packages ─────────────────────────────────────────
+      - name: Cache SPM packages
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: ${{ runner.os }}-spm-${{ hashFiles('MyApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+
+      # ── Cache 4: DerivedData (incremental builds) ─────────────────────
+      - name: Cache DerivedData
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-xcode-${{ hashFiles('**/*.swift', '**/*.m', '**/*.h') }}
+          restore-keys: ${{ runner.os }}-xcode-
+
+      - name: Build and test
+        run: bundle exec fastlane test
+
+# Result: First run ~14min. Subsequent runs with cache hits: ~6min 30s</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚙️ CI/CD</div>
+                <h3>Android CI/CD — Build & Sign</h3>
+                <p>Android signing uses a <span class="highlight">keystore file</span> — a single file that holds your signing key. Unlike iOS, Android signing is simpler but losing the keystore means you can never update your app on the Play Store.</p>
+                <div class="code-block"><pre># GitHub Actions — Android build and sign
+jobs:
+  android-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with: { java-version: '17', distribution: 'temurin' }
+
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode \
+            > app/release.keystore
+
+      - name: Build release AAB
+        run: ./gradlew bundleRelease
+
+      - name: Sign AAB
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/bundle/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload to Play Store (internal track)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.myapp.android
+          releaseFiles: app/build/outputs/bundle/release/*.aab
+          track: internal</pre></div>
+
+                <!-- NEW: Android Gradle build variants -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Android build variants — managing dev/staging/prod from a single codebase:</p>
+                <div class="code-block"><pre>// ── build.gradle (app) — multi-environment configuration ─────────────
+
+android {
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.myapp.android"
+        minSdk 24; targetSdk 34
+        versionCode 1; versionName "1.0"
+    }
+
+    // Signing configurations (values from environment variables in CI)
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE_PATH") ?: "release.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: ""
+            keyAlias System.getenv("KEY_ALIAS") ?: ""
+            keyPassword System.getenv("KEY_PASSWORD") ?: ""
+        }
+    }
+
+    // Build types
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+            buildConfigField "String", "API_BASE_URL", '"https://api-dev.myapp.com"'
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "API_BASE_URL", '"https://api.myapp.com"'
+        }
+    }
+
+    // Product flavors — separate staging and production App IDs
+    flavorDimensions += "environment"
+    productFlavors {
+        staging {
+            dimension "environment"
+            applicationIdSuffix ".staging"
+            versionNameSuffix "-staging"
+            buildConfigField "String", "API_BASE_URL", '"https://api-staging.myapp.com"'
+            resValue "string", "app_name", "MyApp Staging"
+        }
+        production {
+            dimension "environment"
+            // applicationId stays as defaultConfig — no suffix
+            buildConfigField "String", "API_BASE_URL", '"https://api.myapp.com"'
+            resValue "string", "app_name", "MyApp"
+        }
+    }
+}
+
+// This produces 4 build variants:
+// stagingDebug   → com.myapp.android.staging.debug  (local dev)
+// stagingRelease → com.myapp.android.staging         (QA / Firebase)
+// productionDebug → com.myapp.android.debug          (rarely used)
+// productionRelease → com.myapp.android              (Play Store)</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚙️ CI/CD</div>
+                <h3>Beta Distribution</h3>
+                <p>Before shipping to production, every build should go through beta testing with real users. Two main channels:</p>
+                <table class="compare-table">
+                    <thead><tr><th>Platform</th><th>iOS</th><th>Android</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong style="color:var(--purple)">Apple TestFlight</strong></td><td>Up to 10,000 external testers. Apple processing: ~15min. Testers install from TestFlight app.</td><td>N/A</td></tr>
+                        <tr><td><strong style="color:var(--purple)">Google Play Internal</strong></td><td>N/A</td><td>Up to 100 testers. Instant availability. No review needed.</td></tr>
+                        <tr><td><strong style="color:var(--purple)">Firebase App Distribution</strong></td><td>Works for both iOS and Android. Install link via email. No app store needed.</td><td>Works for both platforms. Ideal for internal QA and stakeholders.</td></tr>
+                    </tbody>
+                </table>
+                <div class="code-block"><pre># Firebase App Distribution via Fastlane
+lane :firebase_beta do
+  build_app(scheme: "MyApp", export_method: "ad-hoc")
+  firebase_app_distribution(
+    app: "1:123456789:ios:abc123",
+    groups: "qa-team, stakeholders",
+    release_notes: "Build #{lane_context[SharedValues::BUILD_NUMBER]}\n#{last_git_commit[:message]}",
+    firebase_cli_token: ENV["FIREBASE_TOKEN"]
+  )
+end</pre></div>
+
+                <!-- NEW: Beta testing workflow -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Complete beta testing workflow — from QA to external testers to production:</p>
+                <div class="step-flow">
+                    <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Internal QA (Day 1–2).</strong> Firebase App Distribution to 5–10 QA engineers. No App Store involvement — instant distribution. QA runs test cases, records bugs in Jira/Linear. Crash reports flow to Crashlytics in real time. Goal: zero P0/P1 bugs before external beta.</div></div>
+                    <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Internal TestFlight / Play Internal (Day 2–3).</strong> Same build uploaded to TestFlight (iOS) and Play Store internal track (Android). Product managers, executives, and CS team install and validate from user perspective. Apple processing: ~15 min. Play Store: instant.</div></div>
+                    <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>External Beta (Day 3–7).</strong> TestFlight external group (up to 10,000 users) or Play Store open beta. Collect feedback via in-app prompts. Monitor D1 retention and crash-free rate. A crash-free rate below 99.5% triggers a hold and a new build.</div></div>
+                    <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Production (Staged Rollout).</strong> Submit App Store for review (1–2 days). Play Store: immediate release at 1% staged rollout. Monitor crash rate and ratings at each percentage increase (1% → 5% → 10% → 25% → 50% → 100%). Automated rollout halt if crash rate spikes above threshold.</div></div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚙️ CI/CD</div>
+                <h3>Dedicated Mobile CI Platforms</h3>
+                <p>While GitHub Actions works, dedicated mobile CI platforms offer pre-configured macOS runners, better Xcode management, and mobile-specific features:</p>
+                <table class="compare-table">
+                    <thead><tr><th>Platform</th><th>Best for</th><th>Key features</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong style="color:var(--purple)">Bitrise</strong></td><td>iOS & Android teams</td><td>Pre-built mobile steps, Xcode version management, Workflow Editor UI</td></tr>
+                        <tr><td><strong style="color:var(--purple)">Codemagic</strong></td><td>Flutter & React Native</td><td>Zero-config for Flutter, built-in code signing wizard, M-series Macs</td></tr>
+                        <tr><td><strong style="color:var(--purple)">CircleCI</strong></td><td>Cross-platform teams</td><td>Resource classes, parallelism, test splitting, Orbs for mobile</td></tr>
+                        <tr><td><strong style="color:var(--purple)">Xcode Cloud</strong></td><td>Pure iOS/macOS</td><td>Apple-native, deep Xcode integration, TestFlight auto-upload, free tier</td></tr>
+                        <tr><td><strong style="color:var(--purple)">GitHub Actions</strong></td><td>Teams already on GitHub</td><td>macos-14 runners, tight GitHub integration, free for public repos</td></tr>
+                    </tbody>
+                </table>
+
+                <!-- NEW: Codemagic Flutter YAML -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Codemagic for Flutter — zero-config pipeline that builds both iOS and Android in one YAML:</p>
+                <div class="code-block"><pre># codemagic.yaml — Flutter CI/CD for both platforms simultaneously
+
+workflows:
+  flutter-release:
+    name: Flutter Release Build
+    max_build_duration: 60
+
+    environment:
+      flutter: stable
+      xcode: latest
+      java: 17
+      groups:
+        - apple_credentials    # App Store Connect API key
+        - google_credentials   # Play Store service account
+        - keystore_credentials # Android keystore
+
+    triggering:
+      events: [tag]
+      tag_patterns:
+        - pattern: 'v*'
+          include: true
+
+    scripts:
+      - name: Install dependencies
+        script: flutter pub get
+
+      - name: Run tests
+        script: flutter test --coverage
+
+      - name: Build iOS IPA
+        script: |
+          find . -name "Podfile" -execdir pod install \;
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
+
+      - name: Build Android AAB
+        script: |
+          flutter build appbundle --release
+          # Sign with keystore
+          jarsigner -verbose -keystore $FCI_KEYSTORE_PATH \
+            -storepass $FCI_KEYSTORE_PASSWORD \
+            -keypass $FCI_KEY_PASSWORD \
+            build/app/outputs/bundle/release/app-release.aab $FCI_KEY_ALIAS
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/app/outputs/bundle/release/app-release.aab
+      - flutter_drive.log
+
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
+        beta_groups: ["Internal QA", "Beta Testers"]
+
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: false
+
+      email:
+        recipients: [mobile-team@mycompany.com]
+        notify: { success: true, failure: true }</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚙️ CI/CD</div>
+                <h3>App Store & Play Store Deployment</h3>
+                <p>Automated store submission eliminates the manual upload → fill metadata → submit cycle. Both stores expose APIs that Fastlane and CI tools use:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">App Store Connect API</span> — Apple's REST API for submitting builds, updating metadata, and managing TestFlight. Use JWT-based API Keys (never username/password in CI).</li>
+                    <li><span class="highlight">Google Play Developer API</span> — upload AABs to tracks (internal → alpha → beta → production) with staged rollouts.</li>
+                    <li><span class="highlight">Staged rollouts</span> — release to 1% → 5% → 10% → 50% → 100% of users on Android. Catch crashes before full release.</li>
+                    <li><span class="highlight">Phased release</span> — Apple's equivalent: 1% per day over 7 days automatically.</li>
+                </ul>
+                <div class="code-block"><pre># Fastlane — upload to Play Store with staged rollout
+lane :production do
+  supply(
+    track: 'production',
+    rollout: '0.1',
+    aab: 'app/build/outputs/bundle/release/app-release.aab',
+    json_key_data: ENV['PLAY_STORE_JSON_KEY'],
+    metadata_path: './fastlane/metadata/android'
+  )
+end</pre></div>
+
+                <!-- NEW: App Store metadata automation -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">App Store metadata automation with Fastlane deliver — managing 20+ languages without touching App Store Connect manually:</p>
+                <div class="code-block"><pre># fastlane/metadata/ directory structure (deliver manages all of this)
+# fastlane/metadata/
+#   en-US/
+#     name.txt              → "MyApp: Productivity Planner"
+#     subtitle.txt          → "Focus, Tasks & Habits"
+#     description.txt       → full App Store description
+#     keywords.txt          → "productivity,planner,habit,focus,tasks"
+#     release_notes.txt     → "What's New" for this version
+#     promotional_text.txt  → optional promotional text
+#   de-DE/
+#     name.txt              → "MyApp: Produktivitäts-Planer"
+#     ...
+#   fr-FR/
+#     ...
+
+# Fastfile deliver lane — automated metadata + binary submission
+lane :release do
+  match(type: "appstore")
+  build_app(scheme: "MyApp")
+
+  deliver(
+    app_identifier: "com.myapp.ios",
+
+    # Skip binary upload if just updating metadata
+    skip_binary_upload: false,
+
+    # Metadata from ./fastlane/metadata directory
+    metadata_path: "./fastlane/metadata",
+    screenshots_path: "./fastlane/screenshots",
+
+    # Submission options
+    submit_for_review: true,
+    automatic_release: false,
+    phased_release: true,              # enable phased release (7 days)
+
+    # Compliance answers (speeds up review)
+    export_compliance_uses_encryption: false,
+    content_rights_has_rights: true,
+
+    # Review information
+    app_review_information: {
+      first_name: "AppReview",
+      last_name: "Bot",
+      phone_number: "+1-555-0123",
+      email_address: "review@myapp.com",
+      demo_user: "demo@example.com",
+      demo_password: "Demo1234"
+    }
+  )
+end
+
+# Generating screenshots automatically — Snapshot + Frameit
+lane :screenshots do
+  capture_screenshots(
+    scheme: "MyAppUITests",
+    devices: ["iPhone 15 Pro Max", "iPhone SE (3rd generation)", "iPad Pro (12.9-inch)"],
+    languages: ["en-US", "de-DE", "fr-FR"],
+    clear_previous_screenshots: true
+  )
+  frame_screenshots(white: true)   # add device frames via Frameit
+end</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚙️ CI/CD</div>
+                <h3>Mobile Monitoring & Crash Reporting</h3>
+                <p>Shipping is not the end — monitoring production apps is critical. The tools every mobile team needs:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Firebase Crashlytics</span> — real-time crash reporting for iOS and Android. Groups similar crashes, shows stack traces, user impact. Free.</li>
+                    <li><span class="highlight">Sentry</span> — crash reporting + performance monitoring + session replay. Works across iOS, Android, React Native, Flutter.</li>
+                    <li><span class="highlight">Firebase Performance Monitoring</span> — app start time, network request latency, custom traces.</li>
+                    <li><span class="highlight">App Store Connect Analytics</span> — downloads, sessions, crashes, retention from Apple.</li>
+                    <li><span class="highlight">OTA updates (Expo / CodePush)</span> — for React Native: push JavaScript bundle updates without app store submission. Critical for hotfixes.</li>
+                </ul>
+                <div class="code-explanation">
+                    <p><strong>Crash-free rate goal:</strong> industry standard is <span class="highlight">&gt;99.5% crash-free sessions</span>. Alert on anything below 99%. A drop below 98% is a P0 incident — halt the rollout immediately.</p>
+                </div>
+
+                <!-- NEW: Sentry performance monitoring -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Sentry for mobile — custom performance traces that measure what matters to users:</p>
+                <div class="code-block"><pre>// ── iOS: Sentry Performance Monitoring with Custom Traces ─────────────
+import Sentry
+
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    func application(_ app: UIApplication,
+                     didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        SentrySDK.start { options in
+            options.dsn = "https://your-dsn@sentry.io/project"
+            options.tracesSampleRate = 0.2    // sample 20% of transactions
+            options.profilesSampleRate = 0.1  // profile 10% of sampled transactions
+            options.enableAutoPerformanceTracing = true
+            options.enableUIViewControllerTracing = true
+            options.enableNetworkTracking = true
+            options.enableFileIOTracing = true
+        }
+        return true
+    }
+}
+
+// Custom transaction — measure checkout flow end-to-end
+class CheckoutViewController: UIViewController {
+
+    func startCheckout() {
+        // Create a transaction for the entire checkout flow
+        let transaction = SentrySDK.startTransaction(
+            name: "checkout-flow",
+            operation: "navigation"
+        )
+
+        // Span 1: Load cart items
+        let cartSpan = transaction.startChild(
+            operation: "db.query",
+            description: "Load cart items from database"
+        )
+        let items = cartRepository.loadItems()
+        cartSpan.finish()
+
+        // Span 2: Validate payment method
+        let paymentSpan = transaction.startChild(
+            operation: "http.client",
+            description: "Validate payment method with Stripe"
+        )
+        paymentService.validate { result in
+            paymentSpan.finish(status: result.isValid ? .ok : .invalidArgument)
+
+            // Span 3: Process payment
+            if result.isValid {
+                let processSpan = transaction.startChild(
+                    operation: "http.client",
+                    description: "POST /payments/charge"
+                )
+                self.paymentService.charge(amount: self.total) { chargeResult in
+                    processSpan.finish()
+                    transaction.finish()   // ← marks transaction complete
+                }
+            }
+        }
+    }
+}
+
+// Android: Sentry performance monitoring equivalent
+class CheckoutViewModel : ViewModel() {
+    fun processCheckout() {
+        val transaction = Sentry.startTransaction("checkout-flow", "navigation")
+
+        viewModelScope.launch {
+            val cartSpan = transaction.startChild("db.query", "Load cart items")
+            val items = cartRepository.getItems()
+            cartSpan.finish()
+
+            val paymentSpan = transaction.startChild("http.client", "Validate payment")
+            val isValid = paymentService.validate()
+            paymentSpan.finish(if (isValid) SpanStatus.OK else SpanStatus.INVALID_ARGUMENT)
+
+            transaction.finish()
+        }
+    }
+}</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">🚨 Production Incident Runbook — Crash Rate Spike</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        When crash-free rate drops below 99%: <strong style="color:var(--text-light);">Step 1</strong> — check Crashlytics for new crash group, identify affected version and OS. <strong style="color:var(--text-light);">Step 2</strong> — halt Play Store staged rollout immediately (Play Console → Releases → Halt rollout). <strong style="color:var(--text-light);">Step 3</strong> — on iOS, if phased release, pause it in App Store Connect. <strong style="color:var(--text-light);">Step 4</strong> — identify the commit that introduced the crash via git bisect or Sentry release tracking. <strong style="color:var(--text-light);">Step 5</strong> — hotfix branch + emergency CI pipeline + expedited App Store review request. Time from detection to hotfix in store: target under 4 hours.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚙️ CI/CD</div>
+                <h3>Secrets & Environment Management</h3>
+                <p>Mobile CI pipelines are full of secrets: signing keys, API keys, service account JSONs. Managing them securely is critical:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Never commit secrets to Git</span> — keystore files, .p12 certificates, API keys. Use base64-encoded GitHub Secrets or CI platform secret stores.</li>
+                    <li><span class="highlight">Environment-specific configs</span> — separate dev, staging, and prod configurations. Use .xcconfig for iOS, build variants for Android, .env files for React Native.</li>
+                    <li><span class="highlight">Fastlane Match</span> — stores all iOS certificates in an encrypted private Git repo. One password unlocks everything, rotatable without changing CI configs.</li>
+                    <li><span class="highlight">Secret rotation</span> — App Store Connect API keys and service accounts should be rotated annually and use minimum required permissions.</li>
+                </ul>
+                <div class="code-block"><pre># Encode keystore to base64 for GitHub Secrets
+base64 -i release.keystore | pbcopy   # macOS — copies to clipboard
+
+# In CI, decode it back:
+echo "$KEYSTORE_BASE64" | base64 --decode > release.keystore
+
+# ❌ Never hardcode secrets:
+storePassword = "MyPassword123"
+
+# ✅ Always use environment variables:
+storePassword = System.getenv("KEYSTORE_PASSWORD") ?: ""</pre></div>
+
+                <!-- NEW: .xcconfig environment separation -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">iOS environment configuration with .xcconfig — no code changes needed between Dev/Staging/Production:</p>
+                <div class="code-block"><pre># ── .xcconfig files for iOS environment separation ───────────────────
+
+# Configs/Debug.xcconfig
+API_BASE_URL = https://api-dev.myapp.com
+BUNDLE_ID_SUFFIX = .debug
+DISPLAY_NAME = MyApp Debug
+ANALYTICS_KEY = dev_analytics_key_here
+FEATURE_FLAGS_ENABLED = YES
+
+# Configs/Staging.xcconfig
+API_BASE_URL = https://api-staging.myapp.com
+BUNDLE_ID_SUFFIX = .staging
+DISPLAY_NAME = MyApp Staging
+ANALYTICS_KEY = staging_analytics_key_here
+FEATURE_FLAGS_ENABLED = YES
+
+# Configs/Production.xcconfig  ← never commit API keys here
+API_BASE_URL = https://api.myapp.com
+BUNDLE_ID_SUFFIX =
+DISPLAY_NAME = MyApp
+ANALYTICS_KEY = $(PRODUCTION_ANALYTICS_KEY)   # inject from CI secret
+FEATURE_FLAGS_ENABLED = NO
+
+# Info.plist — reads from .xcconfig automatically
+# <key>API_BASE_URL</key>
+# <string>$(API_BASE_URL)</string>
+
+# Swift: access at runtime
+let apiURL = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as! String
+
+# ── CI pipeline selects configuration via scheme ──────────────────────
+# build_app(
+#   scheme: "MyApp-Staging",       # maps to Staging.xcconfig
+#   configuration: "Release"
+# )
+
+# ── React Native: .env files + react-native-config ───────────────────
+# .env.development
+API_BASE_URL=https://api-dev.myapp.com
+SENTRY_DSN=https://dev-dsn@sentry.io/project
+
+# .env.production
+API_BASE_URL=https://api.myapp.com
+SENTRY_DSN=https://prod-dsn@sentry.io/project
+
+# In JavaScript:
+import Config from 'react-native-config';
+const url = Config.API_BASE_URL;   // type-safe, no process.env
+
+# Build command:
+# ENVFILE=.env.production react-native run-ios --configuration Release</pre></div>
+            </div>
+
+            <div class="content-card" style="border-left: 5px solid var(--purple);">
+                <h3>Section Conclusion</h3>
+                <p>You now master the complete Mobile DevOps & CI/CD stack:</p>
+                <ul class="styled-list">
+                    <li>4 common pipeline failure modes: certificate expiry, build number collisions, Xcode version drift, dependency hell — and how to prevent each</li>
+                    <li>Branching strategy: feature/* → develop → release/* → main, each triggering a different pipeline environment</li>
+                    <li>iOS code signing: 4 provisioning profile types (Development, Ad Hoc, App Store, Enterprise), Fastlane Match full team setup</li>
+                    <li>Testing: XCTest ViewModel tests with mocks, Android JUnit + Coroutines, Maestro E2E flows</li>
+                    <li>GitHub Actions caching: gems + CocoaPods + SPM + DerivedData reducing build time from 14min to 6min 30s</li>
+                    <li>Advanced Fastlane: multi-environment lanes, error hooks with Slack, auto-changelog from Git, app extensions with multiple bundle IDs</li>
+                    <li>Android build variants: 4 combinations (stagingDebug, stagingRelease, productionDebug, productionRelease) from one Gradle config</li>
+                    <li>Codemagic Flutter YAML: builds iOS + Android in parallel, publishes to TestFlight + Play Store in one workflow</li>
+                    <li>Beta workflow: 4-stage process (internal QA → internal beta → external beta → staged production rollout)</li>
+                    <li>App Store metadata automation: deliver + Snapshot + Frameit managing 20+ languages without touching App Store Connect UI</li>
+                    <li>Sentry custom traces: transaction + child spans measuring checkout flow from cart load to payment processing</li>
+                    <li>Production incident runbook: detect → halt rollout → identify commit → hotfix → expedited review</li>
+                    <li>Secrets: .xcconfig for iOS, build variants for Android, .env for React Native — zero secrets in code</li>
+                </ul>
+                <p style="margin-top:1rem;">Mobile DevOps transforms releasing from a stressful manual process into a reliable, automated pipeline. Teams that master it ship 10× more frequently with dramatically fewer production incidents.</p>
+            </div>
+
+        </div>
+
+        <!-- ===================== LAB ===================== -->
+        <div id="laboratorio" class="tab-panel">
+            <h3 style="margin-bottom:1rem;">Mobile Pipeline Simulator</h3>
+            <p style="margin-bottom:1rem;font-size:0.9rem;color:var(--text-secondary);">Write your mobile CI/CD configuration — a GitHub Actions workflow, Fastfile lane, Android Gradle build, or Maestro test flow. The simulator detects your setup and returns a detailed execution log.</p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header">PIPELINE CONFIGURATION</div>
+                    <textarea class="lab-textarea" id="lab-input">default_platform(:ios)
+
+platform :ios do
+
+  lane :beta do
+    match(type: "appstore")
+    increment_build_number
+    build_app(
+      scheme: "MyApp",
+      export_method: "app-store"
+    )
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+    slack(
+      message: "🚀 New iOS beta uploaded to TestFlight!",
+      channel: "#mobile-releases"
+    )
+  end
+
+  lane :release do
+    match(type: "appstore")
+    build_app(scheme: "MyApp")
+    upload_to_app_store(
+      submit_for_review: true,
+      automatic_release: false
+    )
+  end
+
+end</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header">EXECUTION LOG</div>
+                    <div class="lab-output" id="lab-output">Click "Run Simulation" to execute your mobile pipeline...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="runLab()">▶ Run Simulation</button>
+        </div>
+
+        <!-- ===================== QUIZ ===================== -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: Mobile DevOps & CI/CD</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem;">15 questions covering mobile pipelines, code signing, Fastlane, beta distribution, store deployment, and monitoring. Answer all for instant feedback.</p>
+                <form id="quiz-form">
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">1. What is the #1 pain point that makes mobile CI/CD harder than web CI/CD?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Mobile apps are larger file sizes</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Code signing — certificates and provisioning profiles that must be correctly managed on every CI machine</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Mobile tests run slower than web tests</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"> D) The App Store has a monthly submission limit</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">2. What three things does iOS code signing require to work together?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A"> A) API key, bundle ID, and App Store Connect account</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Certificate, Provisioning Profile, and the certificate installed in the CI machine's Keychain</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Xcode, Fastlane, and a macOS runner</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"> D) App ID, team ID, and push notification entitlement</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">3. What does Fastlane Match do?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"> A) Runs automated UI tests on real devices</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B"> B) Syncs all iOS certificates and provisioning profiles from an encrypted Git repo to any machine with one command</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Matches the app version number to the build number automatically</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"> D) A testing tool that matches UI components to design specs</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">4. In the mobile testing pyramid, which layer should have the most tests?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"> A) UI / E2E tests — they test the full user experience</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Unit tests — fast, isolated, many of them</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C"> C) Integration tests — they cover the most ground per test</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"> D) All layers should have an equal number of tests</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">5. What is TestFlight used for?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Running automated UI tests in Apple's cloud</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Distributing beta builds of iOS apps to up to 10,000 external testers before App Store release</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C"> C) A testing framework for writing XCTest cases</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Apple's crash reporting dashboard</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">6. What is the Android equivalent of a .ipa file for Play Store submission?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"> A) .apk (Android Package)</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B"> B) .aab (Android App Bundle)</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C"> C) .dex (Dalvik Executable)</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"> D) .gradle (Gradle Build)</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">7. What is a "staged rollout" on the Google Play Store?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Releasing the app to different countries at different times</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Gradually releasing to an increasing percentage of users (e.g. 1% → 10% → 100%) to catch issues before full release</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Uploading the app in stages because of file size limits</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"> D) A feature that stages builds for QA review before release</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">8. Which CI platform is purpose-built for Flutter apps with zero-config setup?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Bitrise</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B"> B) Xcode Cloud</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Codemagic</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"> D) CircleCI</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">9. Why should you never commit a keystore file or .p12 certificate to Git?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"> A) They are too large for Git to handle efficiently</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B"> B) They are binary files that cause merge conflicts</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C"> C) They contain private signing keys — anyone with access to the repo could sign malicious versions of your app</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Apple and Google's terms of service prohibit it</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">10. What is Firebase Crashlytics used for?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Distributing beta builds to testers</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Real-time crash reporting — grouping crashes, showing stack traces, and measuring user impact</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C"> C) Running E2E tests on Firebase Test Lab</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Managing app store metadata and screenshots</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">11. What does Xcode Cloud offer that other CI platforms don't?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Support for Android builds alongside iOS</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Apple-native deep integration with Xcode, automatic TestFlight uploads, and a free tier for small teams</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C"> C) The fastest macOS runners in the industry</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Built-in support for React Native and Flutter</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">12. What is Firebase App Distribution's main advantage over TestFlight?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"> A) It supports larger file sizes than TestFlight</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B"> B) It works for both iOS and Android without app store involvement, ideal for internal QA teams</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C"> C) It has no tester limit while TestFlight caps at 10,000</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Testers don't need to install any app to receive builds</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">13. What is OTA (Over-the-Air) update capability in React Native used for?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Updating the app's native iOS/Android code without App Store review</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Pushing updated JavaScript bundles directly to users without a new app store submission — enabling hotfixes</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Syncing device orientation updates over WiFi</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Deploying backend API changes to production servers</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">14. What is the industry standard crash-free session rate target for production mobile apps?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Above 95%</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Above 99.5%</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Above 90%</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Above 99.99%</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple);font-weight:600;">15. In a GitHub Actions iOS workflow, which runner type must you use to build Xcode projects?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"> A) ubuntu-latest — it supports cross-compilation for iOS</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"> B) windows-latest — it has the fastest Xcode toolchain</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C"> C) macos-14 (or another macOS runner) — iOS builds require macOS and Xcode</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D"> D) self-hosted — GitHub Actions doesn't support iOS builds natively</label>
+                    </div>
+
+                </form>
+
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+
+                <div id="quiz-results" class="quiz-results" style="display:none;">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== RESOURCES ===================== -->
+        <div id="recursos" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem;">Support Materials</h3>
+            <div class="content-card">
+                <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.85rem;">FASTLANE & CODE SIGNING</p>
+                <a href="#" class="resource-link">→ Fastlane Documentation — docs.fastlane.tools</a>
+                <a href="#" class="resource-link">→ Fastlane Match — Code Signing Manager</a>
+                <a href="#" class="resource-link">→ Apple Code Signing Guide — developer.apple.com</a>
+                <a href="#" class="resource-link">→ Android App Signing — developer.android.com</a>
+                <p style="color:var(--text-secondary);margin:1.5rem 0 1rem;font-size:0.85rem;">CI/CD PLATFORMS</p>
+                <a href="#" class="resource-link">→ GitHub Actions — macOS runner documentation</a>
+                <a href="#" class="resource-link">→ Bitrise — Mobile CI/CD platform (bitrise.io)</a>
+                <a href="#" class="resource-link">→ Codemagic — Flutter & React Native CI (codemagic.io)</a>
+                <a href="#" class="resource-link">→ Xcode Cloud — Apple's native CI/CD</a>
+                <p style="color:var(--text-secondary);margin:1.5rem 0 1rem;font-size:0.85rem;">TESTING & MONITORING</p>
+                <a href="#" class="resource-link">→ Maestro — Cross-platform mobile E2E testing (maestro.mobile.dev)</a>
+                <a href="#" class="resource-link">→ Detox — E2E testing for React Native</a>
+                <a href="#" class="resource-link">→ Firebase Crashlytics — firebase.google.com/products/crashlytics</a>
+                <a href="#" class="resource-link">→ Sentry Mobile — sentry.io/for/mobile</a>
+                <a href="#" class="resource-link">→ Expo EAS — Build & submit for React Native (expo.dev/eas)</a>
+            </div>
+        </div>
+
+        <!-- ===================== ASSESSMENT ===================== -->
+        <div id="avaliacao" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Mastery Criteria: Mobile DevOps & CI/CD</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem;">To successfully complete this module, demonstrate understanding across the following competency levels:</p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>The six stages of the mobile CI/CD pipeline</li>
+                            <li>What iOS code signing requires (certificate, provisioning profile, keychain)</li>
+                            <li>The three layers of the mobile testing pyramid</li>
+                            <li>What Fastlane is and what problem it solves</li>
+                            <li>What TestFlight is and how many testers it supports</li>
+                            <li>The difference between .apk and .aab for Android</li>
+                            <li>What a staged rollout on the Play Store is</li>
+                            <li>The crash-free session rate target for production apps (&gt;99.5%)</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Writing a Fastfile with test, beta, and release lanes</li>
+                            <li>Setting up Fastlane Match for certificate management</li>
+                            <li>Writing a GitHub Actions workflow for iOS CI/CD</li>
+                            <li>Writing a GitHub Actions workflow for Android build and sign</li>
+                            <li>Safely managing signing secrets with base64 encoding in CI</li>
+                            <li>Distributing beta builds via Firebase App Distribution</li>
+                            <li>Uploading to Play Store internal track from CI</li>
+                            <li>Integrating Firebase Crashlytics into iOS and Android apps</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>Building a full multi-environment pipeline (dev / staging / production)</li>
+                            <li>Implementing Maestro E2E tests in CI with device cloud (BrowserStack)</li>
+                            <li>Setting up automated Play Store staged rollout with halt on crash threshold</li>
+                            <li>Implementing OTA updates with Expo EAS Update for hotfixes</li>
+                            <li>Building a custom Fastlane plugin for team-specific automation</li>
+                            <li>Managing multiple iOS targets (main app + widgets + extensions) in CI</li>
+                            <li>Setting up Sentry performance monitoring with custom traces</li>
+                            <li>Designing a release strategy with feature flags and phased releases</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+        const m = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+        document.getElementById('progress-fill').style.width  = m[tabName] + '%';
+        document.getElementById('progress-text').innerText    = m[tabName] + '%';
+        window.scrollTo({ top: 150, behavior: 'smooth' });
+    }
+
+    function runLab() {
+        const input  = document.getElementById('lab-input').value;
+        const output = document.getElementById('lab-output');
+        const hasFastlane  = input.includes('lane ') || input.includes('platform :') || input.includes('fastlane');
+        const hasGHA       = input.includes('runs-on') || input.includes('uses: actions/') || input.includes('jobs:');
+        const hasAndroid   = input.includes('gradlew') || input.includes('bundleRelease') || input.includes('supply') || input.includes('android');
+        const hasMaestro   = input.includes('maestro') || input.includes('appId:') || input.includes('tapOn:') || input.includes('launchApp');
+        const hasFirebase  = input.includes('firebase') || input.includes('crashlytics') || input.includes('firebase_app_distribution');
+        const hasMatch     = input.includes('match(');
+        const hasBeta      = input.includes('testflight') || input.includes('upload_to_testflight') || input.includes('beta');
+        const hasRelease   = input.includes('upload_to_app_store') || input.includes('release');
+        const hasSlack     = input.includes('slack(');
+        const hasIncrement = input.includes('increment_build_number');
+        const lanes = [...input.matchAll(/lane\s+:(\w+)/g)].map(m => m[1]);
+        const scheme = input.match(/scheme:\s*["']([^"']+)["']/)?.[1] || 'MyApp';
+        const buildNum = Math.floor(Math.random() * 100) + 200;
+
+        if (hasMaestro) {
+            const appId    = input.match(/appId:\s*([^\n]+)/)?.[1]?.trim() || 'com.myapp';
+            const tapTexts = [...input.matchAll(/text:\s*["']([^"']+)["']/g)].map(m => m[1]);
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Maestro Flow Execution</strong>\n\n  App ID    : ${appId}\n  Platform  : iOS Simulator (iPhone 15 Pro, iOS 17.2)\n\n<strong style="color:#28e0ff;">── Step Execution ──</strong>\n  [00:00] ✓ Launch app                     (1.2s)\n  [00:01] ✓ Wait for app to stabilize      (0.8s)\n${tapTexts.map((t, i) => `  [00:0${i+2}] ✓ Interact: "${t}"            (0.${3+i}s)`).join('\n')}\n  [00:0${tapTexts.length+2}] ✓ assertVisible              (0.4s)\n\n<strong style="color:#10b981;">✔ Flow PASSED — ${tapTexts.length + 3}/${tapTexts.length + 3} steps</strong>\n\n<em style="color:#b6c0de;">Tip: Run Maestro flows on BrowserStack App Automate for real device coverage.</em>`;
+        } else if (hasGHA && hasAndroid) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ GitHub Actions — Android Pipeline Run #23</strong>\n\n  Trigger   : push to main\n  Runner    : ubuntu-latest\n\n<strong style="color:#28e0ff;">── Job: android-build ──</strong>\n  ✓ Checkout code                          (3s)\n  ✓ Set up JDK 17                          (8s)\n  ✓ Decode keystore from secret            (1s)\n  ✓ Run unit tests (./gradlew test)        (1m 14s)  — 87/87 passed\n  ✓ Build release AAB (bundleRelease)      (2m 32s)\n  ✓ Sign AAB                               (4s)\n  ✓ Upload to Play Store (internal track)  (28s)\n\n<strong style="color:#10b981;">✔ Pipeline complete in 4m 30s</strong>\n  Version: 2.4.1 (${buildNum})\n\n<em style="color:#b6c0de;">Tip: Cache ~/.gradle/caches to shave 60-90s off build time.</em>`;
+        } else if (hasGHA) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ GitHub Actions — iOS Pipeline Run #47</strong>\n\n  Trigger   : push to main\n  Runner    : macos-14 (Apple M1, Xcode 15.2)\n\n<strong style="color:#28e0ff;">── Job: test ──</strong>\n  ✓ Checkout code                          (4s)\n  ✓ Select Xcode 15.2                      (1s)\n  ✓ Install gems (bundle install)          (18s)\n  ✓ fastlane test — 54/54 passed ✓        (3m 12s)\n\n<strong style="color:#28e0ff;">── Job: deploy-beta ──</strong>\n  ✓ fastlane beta — build ${buildNum} ✓     (6m 44s)\n    → match: certificates synced ✓\n    → increment_build_number: ${buildNum} ✓\n    → build_app: ${scheme}.ipa (24.1MB) ✓\n    → upload_to_testflight ✓\n\n<strong style="color:#10b981;">✔ Pipeline complete in 10m 31s</strong>\n\n<em style="color:#b6c0de;">Tip: Cache gems + DerivedData to speed up CI by 40%.</em>`;
+        } else if (hasFirebase) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Firebase App Distribution Upload</strong>\n\n  Build #: ${buildNum}  File: ${scheme}.ipa (22.7 MB)\n  Groups: qa-team (14 testers), stakeholders (6 testers)\n  Total: 20 testers notified via email\n\n<strong style="color:#10b981;">✔ Upload complete in 18s</strong>\n  Install link valid for 120 days\n\n<em style="color:#b6c0de;">Tip: Use Firebase App Distribution for internal QA; TestFlight for external beta.</em>`;
+        } else if (hasFastlane) {
+            const activeLane = hasBeta ? 'beta' : hasRelease ? 'release' : (lanes[0] || 'default');
+            const steps = [];
+            if (hasMatch)     steps.push({ step: 'match(appstore)',                        time: '4s',     note: 'certificates synced from encrypted repo' });
+            if (hasIncrement) steps.push({ step: 'increment_build_number',                 time: '1s',     note: `build number → ${buildNum}` });
+            steps.push(        { step: `build_app(scheme: "${scheme}")`,                    time: '4m 12s', note: `${scheme}.ipa — 24.1 MB` });
+            if (hasBeta)      steps.push({ step: 'upload_to_testflight',                   time: '48s',    note: 'processing started — available in ~15min' });
+            if (hasRelease)   steps.push({ step: 'upload_to_app_store',                    time: '1m 2s',  note: 'submitted for review' });
+            if (hasFirebase)  steps.push({ step: 'firebase_app_distribution',              time: '18s',    note: '20 testers notified' });
+            if (hasSlack)     steps.push({ step: 'slack(#mobile-releases)',                time: '1s',     note: 'notification sent ✓' });
+            const totalSecs = steps.reduce((acc, s) => {
+                const m2 = s.time.match(/(\d+)m (\d+)s/);
+                const s2 = s.time.match(/^(\d+)s$/);
+                if (m2) return acc + parseInt(m2[1]) * 60 + parseInt(m2[2]);
+                if (s2) return acc + parseInt(s2[1]);
+                return acc;
+            }, 0);
+            const tm = Math.floor(totalSecs / 60), ts = totalSecs % 60;
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Fastlane — Running lane: ${activeLane}</strong>\n\n  Platform: iOS  Scheme: ${scheme}  Lanes: ${lanes.join(', ') || activeLane}\n\n<strong style="color:#28e0ff;">── Step Execution ──</strong>\n${steps.map(s => `  ✓ ${s.step.padEnd(40)} (${s.time})\n    └─ ${s.note}`).join('\n')}\n\n<strong style="color:#10b981;">✔ Lane "${activeLane}" completed in ${tm}m ${ts}s</strong>\n\n<em style="color:#b6c0de;">Tip: Run \`fastlane ${lanes[1] || 'release'}\` to ship to the App Store after beta validation.</em>`;
+        } else {
+            output.innerHTML = `<strong style="color:#f59e0b;">⚠ No recognised mobile pipeline detected.</strong>\n\nTry one of these patterns:\n\n  • Fastfile lane  (lane :beta do ... end)\n  • GitHub Actions workflow  (runs-on: macos-14)\n  • Android Gradle + signing  (gradlew bundleRelease)\n  • Maestro E2E test flow  (appId:, tapOn:, launchApp)\n  • Firebase App Distribution  (firebase_app_distribution)\n\n<em style="color:#b6c0de;">Use the default Fastfile template as a starting point.</em>`;
+        }
+    }
+
+    class QuizManager {
+        constructor() {
+            this.questionsData = {
+                q1:  { correct: 'B', exp: 'Code signing is the #1 pain point. Every iOS build must be signed with a valid certificate and provisioning profile. A missing or expired cert breaks the entire pipeline.' },
+                q2:  { correct: 'B', exp: 'iOS code signing requires: (1) a Certificate from Apple, (2) a Provisioning Profile binding cert + App ID + entitlements, and (3) the certificate installed in the CI machine\'s Keychain.' },
+                q3:  { correct: 'B', exp: 'Fastlane Match stores all certificates and provisioning profiles in an encrypted Git repo. One password unlocks them, and match syncs everything to any CI machine automatically.' },
+                q4:  { correct: 'B', exp: 'Unit tests form the wide base of the testing pyramid. They are fast, isolated, and you should have hundreds of them. E2E tests are at the top — few of them, covering only critical flows.' },
+                q5:  { correct: 'B', exp: 'TestFlight is Apple\'s official beta distribution platform. Builds upload to App Store Connect and distribute to up to 10,000 external testers after a ~15 minute processing period.' },
+                q6:  { correct: 'B', exp: '.aab (Android App Bundle) is the modern Play Store format. Google generates optimized APKs for each device from the bundle. .apk is used for direct sideloading and Firebase App Distribution.' },
+                q7:  { correct: 'B', exp: 'A staged rollout gradually releases to an increasing percentage of users (1% → 5% → 10% → 50% → 100%), allowing you to catch crashes before they reach all users.' },
+                q8:  { correct: 'C', exp: 'Codemagic is purpose-built for Flutter and React Native — it auto-detects pubspec.yaml and package.json and pre-configures the pipeline with zero manual setup.' },
+                q9:  { correct: 'C', exp: 'Keystores and .p12 files contain private signing keys. Anyone with these files and the password can sign apps as your organization — a critical security breach if exposed.' },
+                q10: { correct: 'B', exp: 'Firebase Crashlytics provides real-time crash reporting — groups similar crashes, shows full stack traces, identifies the code line, and measures the percentage of affected users.' },
+                q11: { correct: 'B', exp: 'Xcode Cloud is Apple-native: built into Xcode, deep integration with App Store Connect, automatically uploads to TestFlight, and offers a free tier — none of which third-party platforms provide.' },
+                q12: { correct: 'B', exp: 'Firebase App Distribution works for both iOS AND Android without any app store involvement — testers receive an install link via email. Ideal for internal QA across both platforms simultaneously.' },
+                q13: { correct: 'B', exp: 'OTA updates push updated JavaScript bundles directly to users without a new app store submission — critical for React Native hotfixes that can\'t wait 1–2 days for App Store review.' },
+                q14: { correct: 'B', exp: 'The industry standard is greater than 99.5% crash-free sessions. Alert at anything below 99%. A drop below 98% should trigger an immediate halt of the current rollout.' },
+                q15: { correct: 'C', exp: 'iOS builds require Xcode, which only runs on macOS. GitHub Actions provides macos-14 runners (Apple M1, Xcode 15) specifically for this. Ubuntu or Windows runners cannot build iOS apps.' }
+            };
+            this.init();
+        }
+        init() {
+            document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+            document.getElementById('clear-quiz').addEventListener('click',  () => this.clearQuiz());
+        }
+        submitQuiz() {
+            const fd = new FormData(document.getElementById('quiz-form'));
+            let score = 0, html = '';
+            Object.keys(this.questionsData).forEach((k, i) => {
+                const ans = fd.get(k);
+                const ok  = ans === this.questionsData[k].correct;
+                if (ok) score++;
+                html += `<div class="feedback-item ${ok ? 'feedback-correct' : 'feedback-incorrect'}"><span class="feedback-icon">${ok ? '✓' : '✗'}</span><div><strong>Question ${i+1}:</strong> ${this.questionsData[k].exp}${!ok ? `<br><small style="color:var(--text-secondary)">Correct: Option ${this.questionsData[k].correct}</small>` : ''}</div></div>`;
+            });
+            const total = Object.keys(this.questionsData).length;
+            const pct   = Math.round((score / total) * 100);
+            const cls   = pct >= 80 ? 'score-excellent' : pct >= 50 ? 'score-good' : 'score-poor';
+            document.getElementById('quiz-score').innerHTML = `<div class="${cls}">${score}/${total} (${pct}%)</div><p style="color:var(--text-secondary)">${pct >= 70 ? 'Excellent! You are ready to build production mobile CI/CD pipelines.' : 'Review code signing, Fastlane lanes, and the store deployment flow — then try again.'}</p>`;
+            document.getElementById('quiz-feedback').innerHTML = html;
+            const r = document.getElementById('quiz-results');
+            r.style.display = 'block';
+            r.scrollIntoView({ behavior: 'smooth' });
+        }
+        clearQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-results').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+    document.addEventListener('DOMContentLoaded', () => new QuizManager());
+</script>
+</body>
+</html>

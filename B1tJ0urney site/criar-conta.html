@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Criar conta — BitJourney</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white">
+  <nav class="container mx-auto px-4 py-6 flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>
+      </svg>
+      <span class="text-2xl font-bold">BitJourney</span>
+    </div>
+    <a href="index.html" class="text-gray-300 hover:text-white">Voltar à página inicial</a>
+  </nav>
+
+  <main class="container mx-auto px-4 py-12">
+    <div class="max-w-lg mx-auto rounded-2xl border border-white/10 bg-white/5 p-8 shadow-xl backdrop-blur">
+      <!-- Banner com o código -->
+      <div class="rounded-xl border border-cyan-400/30 bg-cyan-500/10 p-4 mb-8">
+        <p class="text-cyan-200 font-semibold">
+          Guarda este código: é o teu <span class="text-white">código de acesso</span> 🔐
+        </p>
+        <div class="mt-3 flex items-center gap-3">
+          <code id="codeBox" class="px-3 py-2 bg-black/40 rounded-lg text-cyan-200 text-sm break-all">—</code>
+          <button id="copyBtn"
+                  class="text-xs px-3 py-2 rounded-lg border border-cyan-400/40 hover:bg-cyan-400/10">
+            Copiar
+          </button>
+        </div>
+      </div>
+
+      <form id="signupForm" class="space-y-6">
+        <div>
+          <label for="password" class="block mb-2 text-sm text-gray-300">Cria a tua palavra‑passe</label>
+          <div class="relative">
+            <input id="password" type="password" required minlength="6"
+                   placeholder="Mínimo 6 caracteres"
+                   class="w-full rounded-lg bg-gray-900/60 border border-gray-700 px-4 py-3 pr-12 outline-none focus:border-cyan-400"/>
+            <button type="button" id="togglePwd" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-300 hover:text-white">
+              Mostrar
+            </button>
+          </div>
+          <div class="mt-2 h-2 w-full bg-gray-800 rounded-full overflow-hidden">
+            <div id="strength" class="h-2 w-1/4 bg-red-400"></div>
+          </div>
+          <p id="strengthText" class="text-xs text-gray-400 mt-1">Força: fraca</p>
+        </div>
+
+        <div>
+          <label for="confirm" class="block mb-2 text-sm text-gray-300">Confirmar palavra‑passe</label>
+          <input id="confirm" type="password" required
+                 class="w-full rounded-lg bg-gray-900/60 border border-gray-700 px-4 py-3 outline-none focus:border-cyan-400"/>
+        </div>
+
+        <div id="msg" class="hidden text-sm"></div>
+
+        <button type="submit"
+                class="w-full h-12 rounded-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700">
+          Criar conta
+        </button>
+
+        <div class="text-center text-gray-300">
+          <span>Já tens conta?</span>
+          <a href="login.html" class="text-cyan-300 hover:text-cyan-200 font-semibold">Ir para Login</a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    // --- utils ---
+    function uuidv4(){
+      // RFC4122 v4
+      const b = crypto.getRandomValues(new Uint8Array(16));
+      b[6] = (b[6] & 0x0f) | 0x40;
+      b[8] = (b[8] & 0x3f) | 0x80;
+      const toHex = n => n.toString(16).padStart(2,'0');
+      const arr = [...b].map(toHex);
+      return `${arr.slice(0,4).join('')}-${arr.slice(4,6).join('')}-${arr.slice(6,8).join('')}-${arr.slice(8,10).join('')}-${arr.slice(10,16).join('')}`;
+    }
+    const enc = new TextEncoder();
+    async function sha256Hex(text){
+      const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(text));
+      return [...new Uint8Array(hashBuf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+    function setMsg(text, ok=false){
+      const el = document.getElementById('msg');
+      el.classList.remove('hidden','text-red-300','text-green-300');
+      el.classList.add(ok?'text-green-300':'text-red-300');
+      el.textContent = text;
+    }
+
+    // Gerar código único que não exista ainda
+    function generateUniqueCode(){
+      let code;
+      do {
+        code = uuidv4();
+      } while (localStorage.getItem(`bj:users:${code}`));
+      return code;
+    }
+
+    // Inicializar código no topo
+    let currentCode = generateUniqueCode();
+    const codeBox = document.getElementById('codeBox');
+    codeBox.textContent = currentCode;
+
+    // Copiar código
+    document.getElementById('copyBtn').addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(currentCode);
+        setMsg('Código copiado para a área de transferência ✅', true);
+      }catch{
+        setMsg('Não foi possível copiar. Copia manualmente.', false);
+      }
+    });
+
+    // Mostrar/ocultar palavra‑passe
+    document.getElementById('togglePwd').addEventListener('click', ()=>{
+      const ipt = document.getElementById('password');
+      const b = document.getElementById('togglePwd');
+      if(ipt.type === 'password'){ ipt.type='text'; b.textContent='Ocultar'; }
+      else { ipt.type='password'; b.textContent='Mostrar'; }
+    });
+
+    // Indicador de força simples
+    const strengthBar = document.getElementById('strength');
+    const strengthText = document.getElementById('strengthText');
+    document.getElementById('password').addEventListener('input', (e)=>{
+      const v = e.target.value;
+      let score = 0;
+      if(v.length >= 6) score++;
+      if(/[A-Z]/.test(v)) score++;
+      if(/[a-z]/.test(v)) score++;
+      if(/[0-9]/.test(v)) score++;
+      if(/[^A-Za-z0-9]/.test(v)) score++;
+      const pct = Math.min(100, (score/5)*100);
+      strengthBar.style.width = pct + '%';
+      strengthBar.className = 'h-2';
+      if(pct < 40){ strengthBar.classList.add('bg-red-400'); strengthText.textContent='Força: fraca'; }
+      else if(pct < 70){ strengthBar.classList.add('bg-yellow-400'); strengthText.textContent='Força: média'; }
+      else { strengthBar.classList.add('bg-green-400'); strengthText.textContent='Força: forte'; }
+    });
+
+    // Submeter criação de conta
+    document.getElementById('signupForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const pwd = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+
+      if(pwd !== confirm){
+        setMsg('As palavras‑passe não coincidem.');
+        return;
+      }
+      if(pwd.length < 6){
+        setMsg('A palavra‑passe deve ter pelo menos 6 caracteres.');
+        return;
+      }
+
+      try{
+        const passwordHash = await sha256Hex(pwd);
+        const userKey = `bj:users:${currentCode}`;
+        localStorage.setItem(userKey, JSON.stringify({
+          code: currentCode,
+          passwordHash,
+          createdAt: new Date().toISOString()
+        }));
+        setMsg('Conta criada com sucesso! Guarda o teu código. Podes fazer login agora.', true);
+      }catch(err){
+        console.error(err);
+        setMsg('Ocorreu um erro ao criar a conta. Tenta novamente.');
+        return;
+      }
+    });
+   </script src="js/criar-conta.js" defer></script>
+</html>

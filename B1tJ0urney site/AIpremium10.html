@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Tokens & Tokenization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14; --blue: #ff2d78; --purple: #ff85c2; --cyan: #e0006e;
+            --text-light: #e8ecf8; --text-secondary: #b6c0de;
+            --card-bg: rgba(255,255,255,0.05); --border-color: rgba(255,255,255,0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(91,124,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(91,124,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1; }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(255,0,191,0.168) 0%, rgba(255,0,128,0.185) 50%, transparent 100%); pointer-events: none; z-index: -1; }
+
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,20,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        .code-block { background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.6; color: #a8ff78; }
+
+        /* Token visualizer */
+        .token-visualizer { background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-family: 'Courier New', monospace; font-size: 0.85rem; line-height: 2; }
+        .token { padding: 2px 6px; border-radius: 3px; font-weight: 500; border: 1px solid transparent; }
+        .token-a { background: rgba(91,124,255,0.2); border-color: rgba(91,124,255,0.4); color: #a8c0ff; }
+        .token-b { background: rgba(122,75,255,0.2); border-color: rgba(122,75,255,0.4); color: #c8a8ff; }
+        .token-c { background: rgba(40,224,255,0.15); border-color: rgba(40,224,255,0.35); color: #28e0ff; }
+        .token-d { background: rgba(255,183,3,0.15); border-color: rgba(255,183,3,0.3); color: #ffb703; }
+        .token-e { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3); color: #10b981; }
+
+        /* New styles */
+        .info-box { background: rgba(91,124,255,0.07); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+        .info-box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--purple); }
+        .section-divider { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .concept-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .concept-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 0.35rem; }
+        .concept-title { font-weight: 600; font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.4rem; }
+        .concept-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+        .metrics-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .metrics-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; font-weight: 600; }
+        .metrics-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .metrics-table tr:hover td { background: rgba(255,255,255,0.03); color: var(--text-light); }
+        .bpe-step { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem; }
+        .bpe-num { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; font-weight: 700; font-size: 0.8rem; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+        .bpe-content { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4; }
+        .bpe-content strong { color: var(--text-light); }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 420px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Quiz */
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05)); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255,255,255,0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .concept-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-data-science.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: Tokens & Tokenization</h1>
+            <p class="course-description">Understand how language models read and process text. Master tokens — the fundamental unit of all LLMs — and learn how tokenization affects cost, context, performance, and prompt design.</p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>3–4h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• BPE • Context Window • Pricing • tiktoken • Prompt Design</span></div>
+                <div class="meta-item"><span>📌</span><span>AI Fundamentals</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size:0.8rem; margin-top:5px; color:var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event,'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event,'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event,'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event,'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- LEARN -->
+            <div id="aprender" class="tab-panel active">
+
+                <div class="content-card">
+                    <h3>Introduction: What Is a Token?</h3>
+                    <p>A <span class="highlight">token</span> is the basic unit of text that a language model processes. Models don't read words or characters — they read tokens. A token is roughly a word, part of a word, a punctuation mark, or a space, depending on the tokenizer.</p>
+                    <p style="margin-top:0.75rem;">As a rough rule of thumb:</p>
+                    <ul class="styled-list">
+                        <li>1 token ≈ 4 characters in English</li>
+                        <li>1 token ≈ ¾ of a word</li>
+                        <li>100 tokens ≈ 75 words</li>
+                        <li>1,000 tokens ≈ 750 words ≈ 1.5 pages of text</li>
+                    </ul>
+                    <p style="margin-top:1rem;">This module covers:</p>
+                    <ul class="styled-list">
+                        <li>How tokenization works under the hood</li>
+                        <li>Why tokens matter for cost and context limits</li>
+                        <li>The BPE algorithm that powers most LLM tokenizers</li>
+                        <li>How to count tokens with tiktoken</li>
+                        <li>Practical implications for prompt engineering</li>
+                    </ul>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Why the word→token gap matters in practice:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Intuition</div>
+                            <div class="concept-title">Tokens ≠ Words</div>
+                            <div class="concept-desc">The word "tokenization" is 2 tokens: <code style="color:#a8ff78;">Token</code> + <code style="color:#a8ff78;">ization</code>. The word "AI" is 1 token. "Hello!" is 2 tokens: <code style="color:#a8ff78;">Hello</code> + <code style="color:#a8ff78;">!</code>. You can't reason about model limits or costs using word count alone.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Impact</div>
+                            <div class="concept-title">Cost Is Always Tokens</div>
+                            <div class="concept-desc">Every LLM API invoice is in tokens, not words. A 10-word prompt might be 8 or 18 tokens depending on what those words are. Misjudging this can lead to unexpected bills and failed context limits in production.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Language</div>
+                            <div class="concept-title">English Is Privileged</div>
+                            <div class="concept-desc">English text averages ~1.3 tokens/word. Chinese averages ~2 tokens/character. Arabic ~1.7 tokens/word. A 500-word English document and its Chinese translation are not the same token count — the Chinese version costs significantly more.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Context</div>
+                            <div class="concept-title">Tokens Run Out</div>
+                            <div class="concept-desc">Every model has a finite context window. A GPT-4o call with 128K context sounds enormous — but a long codebase, system prompt, and conversation history can easily consume 100K+ tokens, leaving little room for the model to respond.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Visualizing Tokenization</h3>
+                    <p>The same sentence broken into tokens — each colour represents a different token:</p>
+
+                    <p style="margin-top:1rem; font-size:0.85rem; color:var(--text-secondary);">Example: <em>"Tokenization is how language models read text."</em></p>
+                    <div class="token-visualizer">
+                        <span class="token token-a">Token</span><span class="token token-b">ization</span><span class="token token-c"> is</span><span class="token token-d"> how</span><span class="token token-e"> language</span><span class="token token-a"> models</span><span class="token token-b"> read</span><span class="token token-c"> text</span><span class="token token-d">.</span>
+                    </div>
+                    <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.5rem;">→ 9 tokens total. Notice "Token" and "ization" are split — subword tokenization.</p>
+
+                    <p style="margin-top:1.25rem; font-size:0.85rem; color:var(--text-secondary);">Example: <em>"AI"</em> vs <em>"Artificial Intelligence"</em></p>
+                    <div class="token-visualizer">
+                        <span class="token token-c">AI</span>
+                        <span style="margin:0 1rem; color:var(--text-secondary);">vs</span>
+                        <span class="token token-a">Art</span><span class="token token-b">ificial</span><span class="token token-c"> Intelligence</span>
+                    </div>
+                    <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.5rem;">→ 1 token vs 3 tokens. Shorter words = fewer tokens = less cost.</p>
+
+                    <p style="margin-top:1.25rem; font-size:0.85rem; color:var(--text-secondary);">Example: Code and special characters</p>
+                    <div class="token-visualizer">
+                        <span class="token token-d">def</span><span class="token token-a"> calculate</span><span class="token token-b">(</span><span class="token token-c">x</span><span class="token token-d">,</span><span class="token token-e"> y</span><span class="token token-a">):</span><span class="token token-b"> return</span><span class="token token-c"> x</span><span class="token token-d"> +</span><span class="token token-e"> y</span>
+                    </div>
+                    <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.5rem;">→ Code tokenizes differently from prose — operators and brackets often become individual tokens.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-top:0.25rem; font-size:0.85rem; color:var(--text-secondary);">Example: Multilingual tokenization — the same meaning, very different token counts</p>
+                    <div class="token-visualizer">
+                        <span class="token token-e">Hello</span><span class="token token-a">,</span><span class="token token-b"> world</span><span class="token token-c">!</span>
+                        <span style="margin:0 0.75rem; color:var(--text-secondary); font-size:0.8rem;">English: 4 tokens</span>
+                    </div>
+                    <div class="token-visualizer" style="margin-top:0.25rem;">
+                        <span class="token token-a">Hola</span><span class="token token-b">,</span><span class="token token-c"> mundo</span><span class="token token-d">!</span>
+                        <span style="margin:0 0.75rem; color:var(--text-secondary); font-size:0.8rem;">Spanish: 4 tokens</span>
+                    </div>
+                    <div class="token-visualizer" style="margin-top:0.25rem;">
+                        <span class="token token-b">你</span><span class="token token-c">好</span><span class="token token-d">，</span><span class="token token-a">世</span><span class="token token-e">界</span><span class="token token-b">！</span>
+                        <span style="margin:0 0.75rem; color:var(--text-secondary); font-size:0.8rem;">Chinese: 6 tokens (each character = ~1 token here, but can be more)</span>
+                    </div>
+                    <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.5rem;">→ Similar meaning. Chinese uses more tokens per semantic unit because BPE was trained on more English data. This is why multilingual apps can cost more than English-only equivalents.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>How Tokenization Works — BPE</h3>
+                    <p>Most modern LLMs use <span class="highlight">Byte Pair Encoding (BPE)</span> — a compression algorithm adapted for text. It builds a vocabulary of common subword units by repeatedly merging the most frequent pairs of characters.</p>
+
+                    <p style="margin-top:1rem;"><strong>How BPE is trained:</strong></p>
+                    <div class="code-explanation">
+                        <p>1. Start with every character as its own token: <span class="highlight">['h','e','l','l','o']</span></p>
+                        <p>2. Find the most frequent pair: <span class="highlight">('l','l')</span> → merge into <span class="highlight">'ll'</span></p>
+                        <p>3. Repeat until vocabulary size is reached (e.g. 50,000 tokens)</p>
+                        <p style="margin-top:0.5rem;">Result: common words become single tokens. Rare words are split into known subwords.</p>
+                    </div>
+
+                    <p style="margin-top:1rem;"><strong>Why subword tokenization?</strong></p>
+                    <ul class="styled-list">
+                        <li>Handles unknown words by splitting them into known pieces</li>
+                        <li>Common words ("the", "is") get their own token — efficient</li>
+                        <li>Rare or made-up words are split into subparts — flexible</li>
+                        <li>Works across languages with the same vocabulary</li>
+                    </ul>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">BPE step-by-step — watching the algorithm merge pairs on a real example:</p>
+                    <div class="bpe-step"><div class="bpe-num">1</div><div class="bpe-content"><strong>Starting corpus (simplified)</strong>: "low low low lower lower newest newest widest" — split every word into characters with a word-end marker: <code style="color:#a8ff78;">l o w &lt;/w&gt;</code>, <code style="color:#a8ff78;">l o w e r &lt;/w&gt;</code>, <code style="color:#a8ff78;">n e w e s t &lt;/w&gt;</code>, <code style="color:#a8ff78;">w i d e s t &lt;/w&gt;</code></div></div>
+                    <div class="bpe-step"><div class="bpe-num">2</div><div class="bpe-content"><strong>Count all adjacent pairs</strong>: (l,o)=5, (o,w)=5, (w,&lt;/w&gt;)=3, (e,r)=2, (e,s)=2, (s,t)=2 … The most frequent is (l,o) and (o,w) tied at 5. Merge (o,w) → <code style="color:#a8ff78;">ow</code></div></div>
+                    <div class="bpe-step"><div class="bpe-num">3</div><div class="bpe-content"><strong>After merge</strong>: <code style="color:#a8ff78;">l ow &lt;/w&gt;</code>, <code style="color:#a8ff78;">l ow e r &lt;/w&gt;</code>, <code style="color:#a8ff78;">n e w e s t &lt;/w&gt;</code>. Now count again. (l,ow)=5 is the most frequent. Merge → <code style="color:#a8ff78;">low</code></div></div>
+                    <div class="bpe-step"><div class="bpe-num">4</div><div class="bpe-content"><strong>Continue</strong>: eventually (e,s)→<code style="color:#a8ff78;">es</code>, then (es,t)→<code style="color:#a8ff78;">est</code>, then (n,e)→<code style="color:#a8ff78;">ne</code>, then (ne,w)→<code style="color:#a8ff78;">new</code>, then (new,est)→<code style="color:#a8ff78;">newest</code>. After enough merges, "newest" becomes a single token — but "newish" (not in training data) gets split into <code style="color:#a8ff78;">new</code> + <code style="color:#a8ff78;">ish</code></div></div>
+                    <div class="bpe-step"><div class="bpe-num">5</div><div class="bpe-content"><strong>Final vocabulary</strong>: a mix of characters, common subwords, and frequent whole words. The vocabulary size (e.g. 50,257 for GPT-2, 100,277 for GPT-4) is a hyperparameter — larger = more efficient encoding but bigger embedding tables</div></div>
+
+                    <div class="info-box">
+                        <div class="info-box-title">🔢 BPE vs SentencePiece vs WordPiece</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            <strong style="color:var(--text-light);">BPE</strong> (GPT family, LLaMA 3, Mistral) — merges character pairs. Character-level fallback means it can tokenize any string.<br>
+                            <strong style="color:var(--text-light);">WordPiece</strong> (BERT, DistilBERT) — similar to BPE but merges maximize likelihood instead of frequency. Uses ## prefix for subword continuations: <code style="color:#a8ff78;">token ##ization</code>.<br>
+                            <strong style="color:var(--text-light);">SentencePiece</strong> (LLaMA 1/2, Gemini, T5) — language-agnostic, treats input as raw bytes. Works well for multilingual and low-resource languages. Adds ▁ for word boundaries.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Token Vocabularies by Model</h3>
+                    <p>Each model family uses a different tokenizer with a different vocabulary size. Larger vocabularies mean fewer tokens per sentence (more efficient), but require more memory.</p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">GPT-2</span> — 50,257 tokens (cl100k predecessor)</li>
+                        <li><span class="highlight">GPT-3.5 / GPT-4</span> — 100,277 tokens (cl100k_base via tiktoken)</li>
+                        <li><span class="highlight">GPT-4o</span> — 200,019 tokens (o200k_base — more efficient)</li>
+                        <li><span class="highlight">Claude</span> — uses its own internal tokenizer, similar density to cl100k</li>
+                        <li><span class="highlight">LLaMA / Mistral</span> — SentencePiece tokenizer, ~32,000 tokens</li>
+                        <li><span class="highlight">Gemini</span> — SentencePiece, ~256,000 vocabulary</li>
+                    </ul>
+                    <div class="code-explanation">
+                        <p>The same sentence will produce <span class="highlight">different token counts</span> depending on which model's tokenizer you use. Always count tokens using the correct tokenizer for your model.</p>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Full comparison of tokenizers across the major model families:</p>
+                    <table class="metrics-table">
+                        <thead><tr><th>Model Family</th><th>Tokenizer</th><th>Vocab Size</th><th>Avg Tokens/Word (EN)</th><th>Tool to Count</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>GPT-4 / GPT-3.5</strong></td><td>cl100k_base (BPE)</td><td>100,277</td><td>~1.3</td><td><code style="color:#a8ff78;">tiktoken</code></td></tr>
+                            <tr><td><strong>GPT-4o / o1 / o3</strong></td><td>o200k_base (BPE)</td><td>200,019</td><td>~1.2</td><td><code style="color:#a8ff78;">tiktoken</code></td></tr>
+                            <tr><td><strong>Claude 3.x / 4.x</strong></td><td>Anthropic internal</td><td>~100K+</td><td>~1.3</td><td>Anthropic API response</td></tr>
+                            <tr><td><strong>LLaMA 3 / Mistral</strong></td><td>tiktoken BPE</td><td>128,000</td><td>~1.3</td><td><code style="color:#a8ff78;">tiktoken</code></td></tr>
+                            <tr><td><strong>LLaMA 1/2</strong></td><td>SentencePiece</td><td>32,000</td><td>~1.6</td><td><code style="color:#a8ff78;">sentencepiece</code></td></tr>
+                            <tr><td><strong>Gemini</strong></td><td>SentencePiece</td><td>256,000</td><td>~1.1</td><td>Google AI Studio counter</td></tr>
+                            <tr><td><strong>BERT / DistilBERT</strong></td><td>WordPiece</td><td>30,522</td><td>~1.8</td><td><code style="color:#a8ff78;">transformers</code> library</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="info-box">
+                        <div class="info-box-title">⚠️ Never Mix Tokenizers</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            Using GPT-4's <code style="color:#a8ff78;">cl100k_base</code> to count tokens for a Claude API call will give you wrong numbers. Claude's tokenizer produces slightly different counts for the same text. For exact counts: use the model's own token counter. For estimates across providers: add a 15–20% safety margin to your calculations.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Counting Tokens with tiktoken</h3>
+                    <p>OpenAI's <span class="highlight">tiktoken</span> library lets you count tokens locally — before making an API call — so you can control costs and stay within context limits.</p>
+                    <div class="code-block"><pre>import tiktoken
+
+# Load the tokenizer for a specific model
+enc = tiktoken.encoding_for_model("gpt-4o")
+
+text = "Tokenization is the foundation of all language models."
+
+# Encode to tokens
+tokens = enc.encode(text)
+print(f"Token count : {len(tokens)}")   # → 10
+print(f"Token IDs   : {tokens}")
+
+# Decode back to text
+decoded = enc.decode(tokens)
+print(f"Decoded     : {decoded}")
+
+# Count tokens in a full chat message
+def count_tokens(messages, model="gpt-4o"):
+    enc = tiktoken.encoding_for_model(model)
+    total = 0
+    for msg in messages:
+        total += len(enc.encode(msg["content"])) + 4  # overhead per message
+    return total</pre></div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Production-grade token management — patterns used in real applications:</p>
+                    <div class="code-block"><pre>import tiktoken
+
+class TokenBudgetManager:
+    """Manages token budget for a multi-turn conversation."""
+
+    def __init__(self, model: str = "gpt-4o", context_limit: int = 128_000,
+                 max_output_reserve: int = 4_000):
+        self.enc = tiktoken.encoding_for_model(model)
+        self.context_limit = context_limit
+        self.max_input_tokens = context_limit - max_output_reserve
+        self.messages = []
+        self.system_tokens = 0
+
+    def set_system_prompt(self, system: str):
+        self.system_tokens = len(self.enc.encode(system)) + 4
+        self.system_prompt = system
+
+    def count_msg(self, role: str, content: str) -> int:
+        return len(self.enc.encode(content)) + 4  # 4 = per-message overhead
+
+    def add_message(self, role: str, content: str):
+        self.messages.append({"role": role, "content": content})
+
+    def get_total_tokens(self) -> int:
+        total = self.system_tokens + 3  # 3 = priming tokens
+        for msg in self.messages:
+            total += self.count_msg(msg["role"], msg["content"])
+        return total
+
+    def trim_to_budget(self):
+        """Remove oldest non-system messages until we're within budget."""
+        while self.get_total_tokens() > self.max_input_tokens and len(self.messages) > 1:
+            removed = self.messages.pop(0)
+            print(f"Trimmed: [{removed['role']}] {removed['content'][:40]}...")
+
+    def remaining_budget(self) -> int:
+        return self.max_input_tokens - self.get_total_tokens()
+
+# Usage
+manager = TokenBudgetManager("gpt-4o", context_limit=128_000, max_output_reserve=4_000)
+manager.set_system_prompt("You are a helpful assistant.")
+
+# Add messages and auto-trim if needed
+manager.add_message("user", "Explain quantum computing in detail...")
+manager.add_message("assistant", "Quantum computing uses qubits...")
+manager.trim_to_budget()
+
+print(f"Tokens used : {manager.get_total_tokens():,}")
+print(f"Budget left : {manager.remaining_budget():,}")</pre></div>
+                </div>
+
+                <div class="content-card">
+                    <h3>The Context Window</h3>
+                    <p>The <span class="highlight">context window</span> is the maximum number of tokens a model can process in a single call — including both the input (prompt) and the output (response).</p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">GPT-4o</span> — 128,000 tokens (~96,000 words)</li>
+                        <li><span class="highlight">Claude 3.5 Sonnet</span> — 200,000 tokens (~150,000 words)</li>
+                        <li><span class="highlight">Gemini 1.5 Pro</span> — 1,000,000 tokens (~750,000 words)</li>
+                        <li><span class="highlight">GPT-3.5</span> — 16,385 tokens</li>
+                        <li><span class="highlight">LLaMA 3 (8B)</span> — 8,192 tokens</li>
+                    </ul>
+                    <div class="code-explanation">
+                        <p><strong>Important:</strong> the context window is shared. Input tokens + output tokens ≤ context limit. <span class="highlight">Sending 100K input tokens leaves only 28K for the response on GPT-4o.</span></p>
+                    </div>
+                    <p style="margin-top:1rem;">Models have no memory between API calls — the entire conversation history must be resent every time.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">How context window size affects what you can do with a model:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">8K tokens</div>
+                            <div class="concept-title">Small Context</div>
+                            <div class="concept-desc">Can handle: a short article, a few pages of code, a brief conversation. Cannot handle: long codebases, full research papers, extended chat history. Typical of: GPT-3.5 (original), local models like LLaMA 2 (7B), older API tiers.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">128K tokens</div>
+                            <div class="concept-title">Large Context</div>
+                            <div class="concept-desc">Can handle: an entire book chapter, a full codebase, a long email thread. One GPT-4o call can process ~96,000 words — roughly the length of a novel. Requires careful prompt design to keep the model focused on the relevant section.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">200K tokens</div>
+                            <div class="concept-title">Very Large Context (Claude)</div>
+                            <div class="concept-desc">Claude 3.5 Sonnet's 200K context can hold ~150,000 words — a full legal contract, an entire codebase, or hours of transcripts. Anthropic reports strong performance throughout the window, not just at the start.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">1M tokens</div>
+                            <div class="concept-title">Extreme Context (Gemini)</div>
+                            <div class="concept-desc">Gemini 1.5 Pro's 1M context can hold ~750,000 words — an hour of video, a full software repository, or years of meeting notes. Cost and latency scale with context size; using maximum context on every call is expensive.</div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-box-title">📍 Lost in the Middle Problem</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            Research shows that LLMs retrieve information better from the <strong style="color:var(--text-light);">beginning and end</strong> of their context window — and worse from the middle. On a 128K context call, important instructions buried in the middle of 100K tokens of documents may be partially ignored. Best practice: put key instructions at the start and end of the prompt, and use retrieval (RAG) rather than dumping entire documents into context.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Tokens & Pricing</h3>
+                    <p>AI APIs charge by the token — separately for input (prompt) and output (completion). Understanding this is critical for building cost-effective applications.</p>
+                    <p style="margin-top:1rem;"><strong>Example pricing (approximate, mid-2025):</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">GPT-4o</span> — $2.50 / 1M input tokens · $10.00 / 1M output tokens</li>
+                        <li><span class="highlight">GPT-4o mini</span> — $0.15 / 1M input · $0.60 / 1M output</li>
+                        <li><span class="highlight">Claude Sonnet 4</span> — $3.00 / 1M input · $15.00 / 1M output</li>
+                        <li><span class="highlight">Claude Haiku</span> — $0.25 / 1M input · $1.25 / 1M output</li>
+                    </ul>
+                    <div class="code-explanation">
+                        <p>Output tokens are always more expensive than input tokens — generating text is more compute-intensive than reading it. <span class="highlight">Reducing output length saves more money than shortening prompts.</span></p>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Real cost scenarios — what popular use cases actually cost:</p>
+                    <table class="metrics-table">
+                        <thead><tr><th>Use Case</th><th>Approx Tokens/Call</th><th>GPT-4o Cost</th><th>GPT-4o mini Cost</th><th>Scale: 10K calls/day</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Chatbot response</strong><br><small>500 in + 300 out</small></td><td>800 tokens</td><td>$0.0042</td><td>$0.00026</td><td>GPT-4o: ~$42/day<br>mini: ~$2.60/day</td></tr>
+                            <tr><td><strong>Document summary</strong><br><small>3,000 in + 500 out</small></td><td>3,500 tokens</td><td>$0.0125</td><td>$0.00075</td><td>GPT-4o: ~$125/day<br>mini: ~$7.50/day</td></tr>
+                            <tr><td><strong>Code review</strong><br><small>2,000 in + 1,000 out</small></td><td>3,000 tokens</td><td>$0.015</td><td>$0.00095</td><td>GPT-4o: ~$150/day<br>mini: ~$9.50/day</td></tr>
+                            <tr><td><strong>RAG query</strong><br><small>5,000 in + 400 out</small></td><td>5,400 tokens</td><td>$0.017</td><td>$0.00108</td><td>GPT-4o: ~$170/day<br>mini: ~$10.80/day</td></tr>
+                            <tr><td><strong>Long doc analysis</strong><br><small>50,000 in + 2,000 out</small></td><td>52,000 tokens</td><td>$0.145</td><td>$0.0086</td><td>GPT-4o: ~$1,450/day<br>mini: ~$86/day</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="info-box">
+                        <div class="info-box-title">💡 Prompt Caching — Cut Input Costs by 90%</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            Both Anthropic and OpenAI offer <strong style="color:var(--text-light);">prompt caching</strong>: if you send the same prefix (system prompt, document, few-shot examples) repeatedly, the API caches the KV states from those tokens and charges a fraction of the normal rate for subsequent calls. Anthropic charges 10% of normal for cache hits. For apps with a fixed system prompt, this alone can reduce costs by 70–90%. Mark cacheable content with the <code style="color:#a8ff78;">cache_control</code> parameter in the API.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Token Quirks & Edge Cases</h3>
+                    <p>Tokenization behaves in surprising ways that every AI developer must know:</p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Capitalization matters</span> — "Token" and "token" may tokenize differently</li>
+                        <li><span class="highlight">Leading spaces matter</span> — " hello" and "hello" are different tokens</li>
+                        <li><span class="highlight">Numbers split strangely</span> — "1234567890" may become many tokens</li>
+                        <li><span class="highlight">Non-English is less efficient</span> — Chinese, Arabic, and code often use more tokens per character</li>
+                        <li><span class="highlight">Emoji</span> — a single emoji can be 1–3 tokens</li>
+                        <li><span class="highlight">Whitespace</span> — tabs, newlines, and extra spaces all consume tokens</li>
+                    </ul>
+                    <div class="code-block"><pre># Surprising token counts
+"hello"           → 1 token
+" hello"          → 1 token  (different token ID!)
+"HELLO"           → 1 token  (different again)
+"1234567890"      → 4 tokens
+"2024-01-15"      → 5 tokens
+"https://example.com/path?q=ai"  → 12+ tokens
+"中文"            → 4 tokens  (2 Chinese chars = 4 tokens)
+"🚀"              → 2 tokens</pre></div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Why tokenization quirks cause real bugs — and how to avoid them:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Bug: Arithmetic</div>
+                            <div class="concept-title">Numbers Are Unreliable</div>
+                            <div class="concept-desc">Large numbers are split across multiple tokens: <code style="color:#a8ff78;">1234567</code> → <code style="color:#a8ff78;">[123][45][67]</code>. This makes arithmetic hard — the model sees fragments, not a number. Reason GPT-3 famously failed at multi-digit multiplication. Use code execution (tools) for math, not raw generation.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Bug: Spelling</div>
+                            <div class="concept-title">Character Counting Breaks</div>
+                            <div class="concept-desc">Ask a model "how many letters in 'strawberry'?" — it often answers wrong because it reasons at token level, not character level. The word "strawberry" is 3 tokens: <code style="color:#a8ff78;">straw</code> + <code style="color:#a8ff78;">ber</code> + <code style="color:#a8ff78;">ry</code>. Character-level tasks require explicit instruction or tool use.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Bug: Encoding</div>
+                            <div class="concept-title">Special Characters & Formatting</div>
+                            <div class="concept-desc">HTML tags, markdown, JSON brackets, and code indentation all consume tokens. A prompt with 30 lines of Python indented with tabs uses 30+ extra tokens just for whitespace. Prefer spaces over tabs in code prompts. Strip unnecessary formatting from documents before sending.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Bug: URLs</div>
+                            <div class="concept-title">URLs Are Token Expensive</div>
+                            <div class="concept-desc">A single URL like <code style="color:#a8ff78;">https://api.example.com/v2/users?filter=active&sort=desc</code> can be 20+ tokens. In RAG systems with dozens of source URLs, link metadata alone can consume hundreds of tokens. Shorten or omit URLs when not needed for the model's reasoning.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Tokens & Prompt Engineering</h3>
+                    <p>Understanding tokens changes how you write prompts. Every token costs money and consumes context. Here are practical implications:</p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Be concise</span> — unnecessary filler words waste tokens with no benefit</li>
+                        <li><span class="highlight">Reuse system prompts</span> — many APIs cache system prompt tokens</li>
+                        <li><span class="highlight">Truncate context</span> — summarize old history instead of sending it all</li>
+                        <li><span class="highlight">Limit output length</span> — use max_tokens to cap response length</li>
+                        <li><span class="highlight">Choose the right model</span> — short tasks don't need a 200K context model</li>
+                        <li><span class="highlight">Structured outputs</span> — JSON can be more token-efficient than prose</li>
+                    </ul>
+                    <div class="code-block"><pre>response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": prompt}],
+    max_tokens=512,        # cap the output
+    temperature=0.2        # lower temp = more focused = sometimes shorter
+)</pre></div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Advanced token optimization techniques used in production LLM applications:</p>
+                    <div class="code-block"><pre>import tiktoken
+
+# ── Technique 1: Token-aware truncation ──────────────────────────────
+def truncate_to_tokens(text: str, max_tokens: int, model: str = "gpt-4o") -> str:
+    """Truncate text to at most max_tokens, cutting at word boundaries."""
+    enc = tiktoken.encoding_for_model(model)
+    tokens = enc.encode(text)
+    if len(tokens) <= max_tokens:
+        return text
+    truncated_tokens = tokens[:max_tokens]
+    return enc.decode(truncated_tokens)
+
+# ── Technique 2: Conversation summarization ──────────────────────────
+def summarize_history(messages: list, keep_last_n: int = 4) -> list:
+    """Keep recent messages, summarize older ones into a single message."""
+    if len(messages) <= keep_last_n:
+        return messages
+
+    old_messages = messages[:-keep_last_n]
+    recent = messages[-keep_last_n:]
+
+    # Summarize old context (call a cheaper/faster model)
+    summary_text = call_llm(
+        f"Summarize this conversation in 3 sentences:\n{format_messages(old_messages)}",
+        model="gpt-4o-mini"
+    )
+    summary_msg = {"role": "system", "content": f"[Prior context summary]: {summary_text}"}
+    return [summary_msg] + recent
+
+# ── Technique 3: Structured output for efficiency ────────────────────
+# Instead of: "Please extract the name, company, and email from this text and
+#              explain your reasoning in a few sentences before giving the answer."
+# Use: extract directly with structured output — no prose, fewer tokens
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": f"Extract entities from: {text}"}],
+    response_format={"type": "json_object"},   # forces JSON, no prose
+    max_tokens=200
+)
+
+# ── Technique 4: Measure compression ratio ───────────────────────────
+def token_efficiency(text: str, model: str = "gpt-4o") -> dict:
+    enc = tiktoken.encoding_for_model(model)
+    tokens = len(enc.encode(text))
+    chars = len(text)
+    words = len(text.split())
+    return {
+        "tokens": tokens,
+        "chars_per_token": round(chars / tokens, 2),
+        "words_per_token": round(words / tokens, 2),
+        "efficiency": "high" if chars / tokens > 4.5 else "low"
+    }</pre></div>
+                    <div class="info-box">
+                        <div class="info-box-title">🎯 The Token Optimization Hierarchy</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            In order of impact (biggest savings first):<br>
+                            <strong style="color:var(--text-light);">1. Use a smaller model</strong> — switching GPT-4o → GPT-4o mini cuts cost by ~94% if quality holds.<br>
+                            <strong style="color:var(--text-light);">2. Enable prompt caching</strong> — repeated system prompts cost 10% of normal after the first call.<br>
+                            <strong style="color:var(--text-light);">3. Reduce output tokens</strong> — set max_tokens, ask for concise responses, use JSON instead of prose.<br>
+                            <strong style="color:var(--text-light);">4. Use RAG instead of full context</strong> — retrieve 5 relevant chunks (500 tokens) instead of sending a 50K document.<br>
+                            <strong style="color:var(--text-light);">5. Shorten input prompts</strong> — removing filler words saves tokens but has less impact than the above.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                    <h3>Section Conclusion</h3>
+                    <p>You now understand tokens — the fundamental unit of all language models:</p>
+                    <ul class="styled-list">
+                        <li>Tokens ≠ words — and why this matters for cost, context, and multilingual apps</li>
+                        <li>BPE step-by-step: character pairs → subwords → vocabulary</li>
+                        <li>BPE vs WordPiece vs SentencePiece — which model uses which</li>
+                        <li>Tokenizer vocabularies across GPT, Claude, LLaMA, Gemini, BERT</li>
+                        <li>Production token management with tiktoken and a budget manager</li>
+                        <li>Context window sizes and the "lost in the middle" problem</li>
+                        <li>Real cost scenarios and prompt caching to cut costs by 90%</li>
+                        <li>Token quirks that cause real bugs: arithmetic, spelling, URLs, formatting</li>
+                        <li>The token optimization hierarchy — from model selection to prompt design</li>
+                    </ul>
+                    <p style="margin-top:1rem;">Every LLM application you build will depend on this knowledge to control cost, quality, and performance.</p>
+                </div>
+
+            </div>
+
+            <!-- LAB -->
+            <div id="laboratorio" class="tab-panel">
+                <h3 style="margin-bottom:1rem;">Token Counter & Estimator</h3>
+                <p style="margin-bottom:1rem; font-size:0.9rem; color:var(--text-secondary);">Type or paste any text below and run the simulation to see an estimated token breakdown, cost, and context analysis.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">INPUT TEXT / PROMPT</div>
+                        <textarea class="lab-textarea" id="lab-input">You are a helpful AI assistant specialized in data analysis.
+
+User: I have a dataset with 10,000 rows and 25 columns containing customer transaction data from 2020 to 2024. I need you to help me identify patterns in purchasing behavior, detect anomalies, and generate a summary report with visualizations.
+
+Please start by explaining what approach you would take, what Python libraries you would use, and write the initial code to load and explore the dataset.</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">TOKEN ANALYSIS</div>
+                        <div class="lab-output" id="lab-output">Click "Run Simulation" to analyse your text...</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:1rem;" onclick="runLab()">▶ Run Simulation</button>
+            </div>
+
+            <!-- QUIZ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Quiz: Tokens & Tokenization</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:2rem;">Test your understanding of tokens, tokenization algorithms, context windows, and pricing. Answer all 15 questions.</p>
+                    <form id="quiz-form">
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">1. What is a token in the context of LLMs?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) A single character</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) A whole sentence</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) The basic unit of text a model processes — roughly a word or subword</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) A paragraph of text</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">2. Approximately how many tokens is 1,000 words?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) 500 tokens</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) 750 tokens</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) 1,333 tokens</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) 2,000 tokens</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">3. What tokenization algorithm do most modern LLMs use?</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) One-Hot Encoding</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) Word2Vec</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Byte Pair Encoding (BPE)</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) TF-IDF</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">4. What is the context window?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) The size of the model's training dataset</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) The maximum number of tokens a model can process in a single call</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) The number of layers in the neural network</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) The memory allocated per GPU</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">5. How do AI APIs charge for usage?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Per API call, regardless of length</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Per character in the prompt</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Per token — separately for input and output tokens</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Per second of processing time</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">6. Why are output tokens more expensive than input tokens?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Output tokens are longer on average</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B"> B) Generating text requires more compute than reading it</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) Output tokens bypass the tokenizer</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) They are not — input tokens are more expensive</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">7. What Python library counts OpenAI tokens locally?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) tokenizers</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) spaCy</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) tiktoken</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) nltk</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">8. Do models retain memory of previous conversations between API calls?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Yes — models remember the last 10 turns automatically</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) No — the full conversation history must be resent every call</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Only if the same API key is used</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Yes — memory is stored server-side indefinitely</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">9. Why does non-English text often use more tokens per word than English?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Non-English models have smaller vocabularies</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Training data is predominantly English so subword merges favour English patterns</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Other languages have longer words on average</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Non-English characters don't compress</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">10. What does the max_tokens parameter in an API call control?</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) The maximum size of the input prompt</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) The maximum number of tokens the model can generate in its response</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) The total context window size</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) The number of API requests per minute</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">11. What is BPE's starting point before any merges?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Every word is its own token</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Every sentence is its own token</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Every individual character (or byte) is its own token</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Every syllable is its own token</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">12. Which of the following is a token-efficient prompt practice?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Adding "Please kindly note that..." before every request</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Sending the full conversation history on every call</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Summarizing old context instead of resending it verbatim</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Using a larger model for all tasks</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">13. Are "hello" and " hello" (with a leading space) the same token?</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Yes — whitespace is always stripped before tokenization</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) No — they are different tokens with different IDs</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Only in GPT-4, not in Claude</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) They are the same token but different embeddings</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">14. If a model has a 128,000 token context window and you send 120,000 input tokens, how many tokens are left for the output?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) 128,000 — context window resets for output</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B"> B) 8,000 tokens</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) 64,000 tokens</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Unlimited — output has no limit</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">15. What is the main advantage of subword tokenization over word-level tokenization?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) It produces fewer total tokens</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) It handles unknown or rare words by splitting them into known subparts</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C"> C) It is faster to compute</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) It works only for English text</label>
+                        </div>
+
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display:none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div id="recursos" class="tab-panel">
+                <h3 style="margin-bottom:1.5rem;">Support Materials</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ OpenAI Tokenizer – Interactive visualizer (platform.openai.com/tokenizer)</a>
+                    <a href="#" class="resource-link">→ tiktoken – OpenAI's fast tokenizer library (GitHub)</a>
+                    <a href="#" class="resource-link">→ Hugging Face Tokenizers – Fast tokenization library</a>
+                    <a href="#" class="resource-link">→ BPE Paper – "Neural Machine Translation of Rare Words with Subword Units" (Sennrich et al.)</a>
+                    <a href="#" class="resource-link">→ Andrej Karpathy – "Let's build the GPT Tokenizer" (YouTube)</a>
+                    <a href="#" class="resource-link">→ OpenAI Pricing Page – Token costs per model</a>
+                    <a href="#" class="resource-link">→ Anthropic Pricing – Claude token pricing</a>
+                    <a href="#" class="resource-link">→ tiktokenizer.vercel.app – Visual token explorer</a>
+                    <a href="#" class="resource-link">→ OpenAI Cookbook – Managing token usage</a>
+                    <a href="#" class="resource-link">→ SentencePiece – Google's tokenizer for LLaMA & Gemini</a>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: Tokens & Tokenization</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:2rem;">To successfully complete this module, you should demonstrate understanding across the following competency levels:</p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>What a token is and how it differs from a word or character</li>
+                                <li>The approximate ratio of words to tokens (~0.75)</li>
+                                <li>What BPE (Byte Pair Encoding) is</li>
+                                <li>What the context window is and how input/output share it</li>
+                                <li>How AI APIs price usage by token</li>
+                                <li>Why output tokens cost more than input tokens</li>
+                                <li>That different models use different tokenizers</li>
+                                <li>That models have no memory between API calls</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Using tiktoken to count tokens before API calls</li>
+                                <li>Understanding why non-English text uses more tokens</li>
+                                <li>Knowing tokenization quirks (spaces, caps, numbers)</li>
+                                <li>Using max_tokens to cap output and control costs</li>
+                                <li>Designing token-efficient prompts</li>
+                                <li>Managing long conversations within context limits</li>
+                                <li>Calculating estimated API call costs from token counts</li>
+                                <li>Choosing the right model size for the task's token needs</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Training a custom BPE tokenizer on a domain corpus</li>
+                                <li>Implementing token budget management in a production app</li>
+                                <li>Using prompt caching APIs to reduce repeated token costs</li>
+                                <li>Building a sliding-window context manager for long docs</li>
+                                <li>Comparing token efficiency across models for a use case</li>
+                                <li>Implementing token-aware summarization pipelines</li>
+                                <li>Understanding how tokenization affects model arithmetic ability</li>
+                                <li>Auditing and optimizing token usage in multi-turn agents</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+            document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function estimateTokens(text) {
+            const chars = text.length;
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+            const estimate = Math.round((chars / 4 + words * 1.33) / 2);
+            return Math.max(1, estimate);
+        }
+
+        function runLab() {
+            const input = document.getElementById('lab-input').value;
+            const output = document.getElementById('lab-output');
+
+            if (!input.trim()) {
+                output.innerHTML = '<strong style="color:#f59e0b;">⚠ Please enter some text to analyse.</strong>';
+                return;
+            }
+
+            const tokenCount = estimateTokens(input);
+            const charCount  = input.length;
+            const wordCount  = input.trim().split(/\s+/).filter(w => w.length > 0).length;
+            const lineCount  = input.split('\n').length;
+
+            const contexts = [
+                { model: 'GPT-4o',          limit: 128000 },
+                { model: 'Claude Sonnet 4', limit: 200000 },
+                { model: 'GPT-3.5 Turbo',   limit: 16385  },
+                { model: 'GPT-4o mini',      limit: 128000 },
+            ];
+
+            const pricing = [
+                { model: 'GPT-4o',        input: 2.50,  output: 10.00 },
+                { model: 'GPT-4o mini',   input: 0.15,  output: 0.60  },
+                { model: 'Claude Sonnet', input: 3.00,  output: 15.00 },
+                { model: 'Claude Haiku',  input: 0.25,  output: 1.25  },
+            ];
+
+            const contextRows = contexts.map(c => {
+                const pct = ((tokenCount / c.limit) * 100).toFixed(1);
+                const bar = '█'.repeat(Math.min(20, Math.round(pct / 5))) + '░'.repeat(Math.max(0, 20 - Math.round(pct / 5)));
+                return `  ${c.model.padEnd(20)} ${bar} ${pct}%`;
+            }).join('\n');
+
+            const pricingRows = pricing.map(p => {
+                const inputCost  = ((tokenCount / 1_000_000) * p.input).toFixed(6);
+                const outputCost = ((tokenCount / 1_000_000) * p.output).toFixed(6);
+                return `  ${p.model.padEnd(18)} $${inputCost} in  /  $${outputCost} out`;
+            }).join('\n');
+
+            const firstLine = input.split('\n')[0].substring(0, 60);
+            const sampleTokens = firstLine.match(/\S+|\s+/g) || [];
+            const colorCodes = ['color:#a8c0ff','color:#c8a8ff','color:#28e0ff','color:#ffb703','color:#10b981'];
+            const tokenDisplay = sampleTokens.slice(0, 12).map((t, i) =>
+                `<span style="${colorCodes[i % 5]};background:rgba(255,255,255,0.05);padding:1px 4px;border-radius:3px;margin:1px;">${t.replace(/</g,'&lt;')}</span>`
+            ).join('');
+
+            const charsPerToken = (charCount / tokenCount).toFixed(2);
+
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Token Analysis Complete</strong>
+
+<strong style="color:#28e0ff;">── Text Stats ──</strong>
+  Characters      : ${charCount.toLocaleString()}
+  Words           : ${wordCount.toLocaleString()}
+  Lines           : ${lineCount}
+  Est. Tokens     : <strong style="color:#28e0ff;">${tokenCount.toLocaleString()}</strong>
+  Chars/Token     : ${charsPerToken}
+  Efficiency      : ${parseFloat(charsPerToken) > 4.5 ? '✅ High (dense text)' : '⚠️ Low (code/special chars)'}
+
+<strong style="color:#28e0ff;">── Sample Tokenization (first line) ──</strong>
+${tokenDisplay}
+
+<strong style="color:#28e0ff;">── Context Window Usage ──</strong>
+${contextRows}
+
+<strong style="color:#28e0ff;">── Estimated Cost (input tokens only) ──</strong>
+${pricingRows}
+
+<strong style="color:#28e0ff;">── Cost with Prompt Caching (Anthropic) ──</strong>
+  Claude Sonnet (cache hit): $${((tokenCount / 1_000_000) * 3.00 * 0.10).toFixed(6)}  (90% discount)
+  Claude Haiku  (cache hit): $${((tokenCount / 1_000_000) * 0.25 * 0.10).toFixed(6)}  (90% discount)
+
+<em style="color:#b6c0de;">Note: Token count is an estimate. Use tiktoken for exact counts.
+Output tokens will add to the final cost.</em>`;
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questionsData = {
+                    q1:  { correct: 'C', exp: 'A token is the fundamental unit of text a language model processes — roughly a word, part of a word, punctuation, or whitespace, not a character or sentence.' },
+                    q2:  { correct: 'C', exp: '1 token ≈ ¾ of a word, so 1,000 words ÷ 0.75 ≈ 1,333 tokens. The rule of thumb: multiply word count by ~1.33 to get a token estimate.' },
+                    q3:  { correct: 'C', exp: 'Byte Pair Encoding (BPE) is the dominant tokenization algorithm. It builds a subword vocabulary by iteratively merging the most frequent character pairs.' },
+                    q4:  { correct: 'B', exp: 'The context window is the maximum number of tokens a model can process in one call. It is shared by both input (prompt) and output (response).' },
+                    q5:  { correct: 'C', exp: 'AI APIs charge per token — with separate rates for input tokens (cheaper) and output tokens (more expensive). Pricing is typically quoted per 1 million tokens.' },
+                    q6:  { correct: 'B', exp: 'Generating each output token requires a full forward pass through the model. Reading input tokens is processed in parallel. Generation is far more compute-intensive.' },
+                    q7:  { correct: 'C', exp: "tiktoken is OpenAI's open-source library for counting tokens locally. It supports cl100k_base, o200k_base, and other encodings without any API calls." },
+                    q8:  { correct: 'B', exp: 'LLMs are stateless. Every API call starts from scratch — the full conversation history must be included in each request, consuming context window tokens.' },
+                    q9:  { correct: 'B', exp: 'BPE tokenizers are trained predominantly on English text, so common English subwords get merged first. Non-English scripts require more individual byte tokens.' },
+                    q10: { correct: 'B', exp: 'max_tokens caps how many tokens the model can generate in its response — a critical cost-control parameter.' },
+                    q11: { correct: 'C', exp: 'BPE starts with every individual character (or byte) as its own token, then repeatedly merges the most frequent adjacent pairs until the vocabulary size is reached.' },
+                    q12: { correct: 'C', exp: 'Summarizing old conversation history is one of the most effective ways to manage long contexts. Verbatim history grows linearly; summaries stay compact.' },
+                    q13: { correct: 'B', exp: '"hello" and " hello" are different tokens with different IDs in most BPE tokenizers. Leading whitespace is part of the token — a common source of subtle prompt bugs.' },
+                    q14: { correct: 'B', exp: 'The context window is shared: input + output ≤ limit. 128,000 − 120,000 = 8,000 tokens remain for the model\'s response.' },
+                    q15: { correct: 'B', exp: 'Subword tokenization handles out-of-vocabulary words gracefully by decomposing them into known subparts. Pure word tokenizers fail entirely on unseen words.' }
+                };
+                this.init();
+            }
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0, feedbackHTML = '';
+                Object.keys(this.questionsData).forEach((key, index) => {
+                    const userAnswer = formData.get(key);
+                    const isCorrect = userAnswer === this.questionsData[key].correct;
+                    if (isCorrect) score++;
+                    feedbackHTML += `<div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}"><span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span><div><strong>Question ${index+1}:</strong> ${this.questionsData[key].exp}${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}</div></div>`;
+                });
+                this.displayResults(score, feedbackHTML);
+            }
+            displayResults(score, feedbackHTML) {
+                const total = Object.keys(this.questionsData).length;
+                const percent = Math.round((score / total) * 100);
+                const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+                document.getElementById('quiz-score').innerHTML = `<div class="${scoreClass}">${score}/${total} (${percent}%)</div><p style="color:var(--text-secondary)">${percent >= 70 ? 'Excellent! You understand tokens and how they affect LLM cost and behaviour.' : 'Review BPE, context windows, and pricing concepts — then try again.'}</p>`;
+                document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                const resultsDiv = document.getElementById('quiz-results');
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+            clearQuiz() {
+                document.getElementById('quiz-form').reset();
+                document.getElementById('quiz-results').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+</body>
+</html>

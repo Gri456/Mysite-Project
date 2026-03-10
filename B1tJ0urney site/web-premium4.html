@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Advanced JavaScript</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #5b7cff;
+            --purple: #7a4bff;
+            --cyan: #28e0ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 125, 230, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-buttons { display: flex; gap: 1rem; align-items: center; }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91, 124, 255, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91, 124, 255, 0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente baseado no Tailwind: from-blue-700 via-cyan-500 to-blue-600 */
+    background: linear-gradient(to right, #1d4ed8, #06b6d4, #2563eb);
+
+    /* Faz o gradiente aparecer apenas no texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback */
+}
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+        
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91, 124, 255, 0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .content-card h4 { margin: 1.2rem 0 0.6rem; color: var(--cyan); font-size: 1rem; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Code block */
+        .code-block {
+            background: #0a0c12;
+            border: 1px solid rgba(91,124,255,0.3);
+            border-radius: 8px;
+            padding: 1.2rem 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        .code-block pre { margin: 0; }
+        .code-block code {
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 0.875rem;
+            line-height: 1.7;
+            color: #c9d1d9;
+        }
+        .code-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Tip/Note/Warning boxes */
+        .tip-box {
+            background: rgba(40, 224, 255, 0.06);
+            border-left: 4px solid var(--cyan);
+            border-radius: 0 8px 8px 0;
+            padding: 1rem 1.2rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .tip-box strong { color: var(--cyan); }
+
+        .warning-box {
+            background: rgba(255, 165, 0, 0.07);
+            border-left: 4px solid #ffa500;
+            border-radius: 0 8px 8px 0;
+            padding: 1rem 1.2rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .warning-box strong { color: #ffa500; }
+
+        /* Section divider */
+        .section-divider {
+            text-align: center;
+            margin: 2rem 0;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .section-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 0;
+            width: 100%; height: 1px;
+            background: var(--border-color);
+        }
+        .section-divider span {
+            background: var(--bg-dark);
+            padding: 0 1rem;
+            position: relative;
+        }
+
+        /* Chapter header */
+        .chapter-header {
+            background: linear-gradient(135deg, rgba(91,124,255,0.15), rgba(40,224,255,0.08));
+            border: 1px solid rgba(91,124,255,0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            margin-top: 2.5rem;
+        }
+        .chapter-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 0.4rem;
+        }
+        .chapter-header p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; }
+
+        /* Two-column layout */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+        .mini-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .mini-card h5 { color: var(--cyan); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .mini-card p, .mini-card li { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+
+        /* Quiz Styles */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .question-title { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; font-family: 'Courier New', monospace; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91, 124, 255, 0.1), rgba(40, 224, 255, 0.05)); border: 1px solid rgba(91, 124, 255, 0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation section */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+
+        /* Lab Styles */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #fff; color: #333; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Inline tag */
+        .tag {
+            display: inline-block;
+            background: rgba(91,124,255,0.15);
+            border: 1px solid rgba(91,124,255,0.4);
+            color: var(--cyan);
+            font-size: 0.7rem;
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        .output-box {
+            background: #000d1a;
+            border: 1px solid rgba(40,224,255,0.2);
+            border-radius: 6px;
+            padding: 0.8rem 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #28e0ff;
+            margin-top: 0.5rem;
+        }
+        .output-box .comment { color: #666; }
+        .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium.html" class="btn btn-back">← Back</a>
+                <a href="browse.html" class="btn btn-primary">Browse</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Advanced JavaScript</h1>
+            <p class="course-description">
+                Deepen your knowledge in advanced JavaScript. Learn asynchronism, DOM manipulation, modules and best practices for more robust applications.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>8–10h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• async • perf • tooling</span></div>
+                <div class="meta-item"><span>📌</span><span>JavaScript Basics</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'learn')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'lab')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'resources')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'evaluation')">Evaluation</button>
+            </nav>
+
+            <!-- ===================== LEARN TAB ===================== -->
+            <div id="learn" class="tab-panel active">
+
+                <!-- ─────────────────── CHAPTER 1 ─────────────────── -->
+                <div class="chapter-header">
+                    <h2>📖 Chapter 1 — JavaScript Foundations Revisited</h2>
+                    <p>Before diving deep, we solidify the core pillars that everything else rests on: execution model, scope, types, and modern syntax.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🚀 1.1 How JavaScript Actually Runs</h3>
+                    <p>JavaScript is a <span class="highlight">single-threaded, non-blocking, asynchronous</span> language powered by an event-driven runtime. Understanding this model is the #1 key to writing good JS.</p>
+                    <div class="tip-box">
+                        <strong>💡 Mental model:</strong> Think of JavaScript as a chef with one stove (single thread) but a kitchen timer (async). The chef doesn't stand idle waiting for water to boil — they start other tasks and come back when the timer rings.
+                    </div>
+                    <h4>The JavaScript Engine</h4>
+                    <p>V8 (Chrome/Node), SpiderMonkey (Firefox), and JavaScriptCore (Safari) all follow the same process:</p>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>1. Parsing</h5>
+                            <p>Source code → Tokens → Abstract Syntax Tree (AST). Syntax errors are caught here.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>2. Compilation (JIT)</h5>
+                            <p>AST → Bytecode → Machine Code. Modern engines compile "hot" code paths for speed.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>3. Execution</h5>
+                            <p>Code runs inside an Execution Context on the Call Stack.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>4. Garbage Collection</h5>
+                            <p>The engine automatically frees memory no longer referenced (mark-and-sweep algorithm).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🧬 1.2 Execution Context & the Call Stack</h3>
+                    <p>Every time JavaScript runs code, it creates an <span class="highlight">Execution Context</span>. There are two main types:</p>
+                    <ul class="styled-list">
+                        <li><strong>Global Execution Context (GEC):</strong> Created once when the script starts. Contains the global object (<code>window</code> in browsers, <code>global</code> in Node).</li>
+                        <li><strong>Function Execution Context (FEC):</strong> Created every time a function is called. Each has its own <code>this</code>, <code>arguments</code>, and variable environment.</li>
+                    </ul>
+                    <p>Each Execution Context goes through two phases:</p>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>Creation Phase (Hoisting)</h5>
+                            <p><code>var</code> declarations are hoisted and set to <code>undefined</code>. Function declarations are fully hoisted. <code>let</code> and <code>const</code> exist in a "Temporal Dead Zone" until their line.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Execution Phase</h5>
+                            <p>Code runs line by line. Variables are assigned values. Functions are called, pushing new contexts onto the stack.</p>
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">JavaScript</span>
+                        <pre><code>console.log(a); // undefined (hoisted)
+// console.log(b); // ❌ ReferenceError (TDZ)
+
+var a = 10;
+let b = 20;
+
+function greet(name) {
+    // New FEC created here
+    let message = "Hello, " + name;
+    return message;
+}
+
+greet("Alice"); // FEC pushed, then popped after return</code></pre>
+                    </div>
+                    <div class="tip-box">
+                        <strong>The Call Stack</strong> is a data structure that records where in the program we are. When a function is called, it's pushed. When it returns, it's popped. If the stack overflows (infinite recursion), you get a <code>RangeError: Maximum call stack size exceeded</code>.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔭 1.3 Scope: Lexical, Block, and Module</h3>
+                    <p>Scope determines where variables are accessible. JavaScript uses <span class="highlight">lexical (static) scoping</span> — meaning scope is defined by where code is written, not where it's called.</p>
+                    <h4>The Scope Chain</h4>
+                    <p>When a variable isn't found in the current scope, the engine walks up the scope chain until it reaches the global scope.</p>
+                    <div class="code-block">
+                        <span class="code-label">Scope Chain Example</span>
+                        <pre><code>const globalVar = "I'm global";
+
+function outer() {
+    const outerVar = "I'm outer";
+    
+    function inner() {
+        const innerVar = "I'm inner";
+        // Can access all three:
+        console.log(innerVar);  // ✅
+        console.log(outerVar);  // ✅ (scope chain)
+        console.log(globalVar); // ✅ (scope chain)
+    }
+    
+    // console.log(innerVar); // ❌ innerVar not accessible here
+    inner();
+}
+
+outer();</code></pre>
+                    </div>
+                    <h4>var vs let vs const — The Full Picture</h4>
+                    <div class="code-block">
+                        <span class="code-label">Variable Comparison</span>
+                        <pre><code>// var — function-scoped, hoisted, re-declarable (avoid in modern JS)
+if (true) {
+    var x = 10;
+}
+console.log(x); // 10 (leaks out of block!)
+
+// let — block-scoped, not hoisted (TDZ), re-assignable
+if (true) {
+    let y = 20;
+}
+// console.log(y); // ❌ ReferenceError
+
+// const — block-scoped, not hoisted (TDZ), NOT re-assignable
+const PI = 3.14159;
+// PI = 3; // ❌ TypeError
+
+// ⚠️ const with objects — the binding is constant, not the value
+const user = { name: "Alice" };
+user.name = "Bob"; // ✅ This is fine
+// user = {}; // ❌ This fails</code></pre>
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ Rule of thumb:</strong> Always prefer <code>const</code>. Use <code>let</code> only when you need to reassign. Never use <code>var</code> in modern code.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🧠 1.4 Closures — Deep Understanding</h3>
+                    <p>A <span class="highlight">closure</span> is when a function "remembers" variables from its outer scope even after the outer function has finished executing. This is one of JavaScript's most powerful — and most misunderstood — features.</p>
+                    <div class="code-block">
+                        <span class="code-label">Basic Closure</span>
+                        <pre><code>function makeCounter() {
+    let count = 0; // This variable is "closed over"
+    
+    return function() {
+        count++;
+        return count;
+    };
+}
+
+const counter = makeCounter();
+console.log(counter()); // 1
+console.log(counter()); // 2
+console.log(counter()); // 3
+
+// count is private — nobody outside can access it directly!
+// console.log(count); // ❌ ReferenceError</code></pre>
+                    </div>
+                    <h4>Practical Uses of Closures</h4>
+                    <div class="code-block">
+                        <span class="code-label">Real-world Patterns</span>
+                        <pre><code>// 1. Data Privacy / Encapsulation
+function createBankAccount(initialBalance) {
+    let balance = initialBalance; // private
+    
+    return {
+        deposit(amount) { balance += amount; },
+        withdraw(amount) {
+            if (amount > balance) throw new Error("Insufficient funds");
+            balance -= amount;
+        },
+        getBalance() { return balance; }
+    };
+}
+
+const account = createBankAccount(100);
+account.deposit(50);
+console.log(account.getBalance()); // 150
+
+// 2. Function Factories
+function multiplier(factor) {
+    return (number) => number * factor;
+}
+
+const double = multiplier(2);
+const triple = multiplier(3);
+console.log(double(5));  // 10
+console.log(triple(5));  // 15
+
+// 3. Memoization (caching results)
+function memoize(fn) {
+    const cache = new Map();
+    return function(...args) {
+        const key = JSON.stringify(args);
+        if (cache.has(key)) return cache.get(key);
+        const result = fn.apply(this, args);
+        cache.set(key, result);
+        return result;
+    };
+}
+
+const expensiveCalc = memoize((n) => {
+    // Simulate heavy computation
+    return n * n;
+});
+
+console.log(expensiveCalc(10)); // Computed: 100
+console.log(expensiveCalc(10)); // From cache: 100</code></pre>
+                    </div>
+                    <div class="tip-box">
+                        <strong>💡 Famous "closure bug"</strong> with <code>var</code> in loops — and the <code>let</code> fix:
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Classic Closure Gotcha</span>
+                        <pre><code>// ❌ Bug with var (all print 5)
+for (var i = 0; i < 5; i++) {
+    setTimeout(() => console.log(i), 100);
+}
+// Output: 5 5 5 5 5 (because var is function-scoped, i is shared)
+
+// ✅ Fixed with let (each iteration creates new binding)
+for (let j = 0; j < 5; j++) {
+    setTimeout(() => console.log(j), 100);
+}
+// Output: 0 1 2 3 4</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔗 1.5 Prototypes & Prototype Chain</h3>
+                    <p>JavaScript is a <span class="highlight">prototype-based</span> language. Every object has an internal link to another object called its <strong>prototype</strong>. This chain continues until <code>null</code> is reached.</p>
+                    <div class="code-block">
+                        <span class="code-label">Prototype Chain</span>
+                        <pre><code>const animal = {
+    breathe() { return "breathing..."; }
+};
+
+const dog = Object.create(animal); // dog's prototype is animal
+dog.bark = function() { return "Woof!"; };
+
+console.log(dog.bark());    // "Woof!" — own property
+console.log(dog.breathe()); // "breathing..." — found on prototype
+console.log(dog.toString()); // found on Object.prototype
+
+// Check the chain
+console.log(Object.getPrototypeOf(dog) === animal); // true
+console.log(Object.getPrototypeOf(animal) === Object.prototype); // true
+console.log(Object.getPrototypeOf(Object.prototype)); // null</code></pre>
+                    </div>
+                    <h4>Constructor Functions (Old-style OOP)</h4>
+                    <div class="code-block">
+                        <span class="code-label">Constructor Pattern</span>
+                        <pre><code>function Person(name, age) {
+    this.name = name;
+    this.age = age;
+}
+
+// Methods on prototype (shared across all instances — memory efficient!)
+Person.prototype.greet = function() {
+    return `Hi, I'm ${this.name} and I'm ${this.age} years old.`;
+};
+
+Person.prototype.birthday = function() {
+    this.age++;
+};
+
+const alice = new Person("Alice", 30);
+const bob = new Person("Bob", 25);
+
+console.log(alice.greet()); // "Hi, I'm Alice..."
+alice.birthday();
+console.log(alice.age); // 31
+
+// Both share the same greet function in memory
+console.log(alice.greet === bob.greet); // true ✅</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🏛️ 1.6 Classes — Modern OOP in JavaScript</h3>
+                    <p>ES6 <span class="highlight">Classes</span> are syntactic sugar over prototypes. They make OOP patterns cleaner and more readable.</p>
+                    <div class="code-block">
+                        <span class="code-label">Full Class Example</span>
+                        <pre><code>class Animal {
+    // Private field (ES2022)
+    #energy = 100;
+    
+    constructor(name, species) {
+        this.name = name;
+        this.species = species;
+    }
+    
+    // Instance method
+    speak() {
+        return `${this.name} makes a sound.`;
+    }
+    
+    // Getter
+    get info() {
+        return `${this.name} (${this.species})`;
+    }
+    
+    // Static method (called on class, not instance)
+    static kingdom() {
+        return "Animalia";
+    }
+    
+    // Private method
+    #recharge() {
+        this.#energy = 100;
+    }
+}
+
+class Dog extends Animal {
+    #tricks = [];
+    
+    constructor(name) {
+        super(name, "Canis lupus familiaris"); // Call parent constructor
+        this.type = "dog";
+    }
+    
+    // Override parent method
+    speak() {
+        return `${this.name} barks: Woof!`;
+    }
+    
+    learn(trick) {
+        this.#tricks.push(trick);
+    }
+    
+    get knownTricks() {
+        return [...this.#tricks]; // Return a copy
+    }
+}
+
+const rex = new Dog("Rex");
+console.log(rex.speak());           // "Rex barks: Woof!"
+console.log(rex.info);              // "Rex (Canis lupus familiaris)"
+console.log(Animal.kingdom());      // "Animalia"
+rex.learn("sit");
+rex.learn("shake");
+console.log(rex.knownTricks);       // ["sit", "shake"]
+console.log(rex instanceof Animal); // true</code></pre>
+                    </div>
+                    <div class="tip-box">
+                        <strong>Private fields</strong> (<code>#field</code>) are truly private in JavaScript — they cannot be accessed or modified from outside the class, not even by subclasses.
+                    </div>
+                </div>
+
+                <!-- ─────────────────── CHAPTER 2 ─────────────────── -->
+                <div class="chapter-header">
+                    <h2>⚡ Chapter 2 — Asynchronous JavaScript (Complete Guide)</h2>
+                    <p>Async is where JavaScript truly shines — and where most bugs hide. This chapter covers every tool from callbacks to async/await, plus the Event Loop internals.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>⏳ 2.1 The Event Loop — In Depth</h3>
+                    <p>The Event Loop is JavaScript's mechanism for handling async operations while remaining single-threaded. It coordinates three components:</p>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>Call Stack</h5>
+                            <p>Where synchronous code executes. LIFO (Last In, First Out). When it's empty, the Event Loop checks the queues.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Web APIs / Node APIs</h5>
+                            <p>Browsers/Node handle async work here (timers, fetch, file I/O). When done, callbacks are sent to queues.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Microtask Queue</h5>
+                            <p>High priority. Contains Promise callbacks (.then, .catch) and queueMicrotask(). Emptied completely before macro tasks.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Task Queue (Macrotasks)</h5>
+                            <p>Lower priority. Contains setTimeout, setInterval, I/O callbacks. Processed one at a time per Event Loop cycle.</p>
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Event Loop — Execution Order</span>
+                        <pre><code>console.log("1: Script start");
+
+setTimeout(() => console.log("5: setTimeout"), 0); // Macrotask
+
+Promise.resolve()
+    .then(() => console.log("3: Promise .then #1")) // Microtask
+    .then(() => console.log("4: Promise .then #2")); // Microtask
+
+queueMicrotask(() => console.log("2.5: queueMicrotask")); // Microtask
+
+console.log("2: Script end");
+
+// Output:
+// 1: Script start
+// 2: Script end
+// 2.5: queueMicrotask   ← Microtask queue (before macrotasks)
+// 3: Promise .then #1   ← Microtask queue
+// 4: Promise .then #2   ← Microtask queue (chained)
+// 5: setTimeout          ← Macrotask queue (after ALL microtasks)</code></pre>
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ Important:</strong> The microtask queue must be <em>completely empty</em> before the next macrotask runs. This means a loop that keeps adding microtasks can starve the macrotask queue (and the UI rendering)!
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>📜 2.2 Callbacks — The Foundation</h3>
+                    <p>A callback is a function passed as an argument to another function, to be called later. It's the original async pattern in JavaScript.</p>
+                    <div class="code-block">
+                        <span class="code-label">Callbacks</span>
+                        <pre><code>// Simple callback
+function fetchUser(id, callback) {
+    setTimeout(() => {
+        const user = { id, name: "Alice" }; // simulated fetch
+        callback(null, user); // (error, data) convention
+    }, 1000);
+}
+
+fetchUser(1, (err, user) => {
+    if (err) return console.error(err);
+    console.log(user); // { id: 1, name: "Alice" }
+});
+
+// ❌ "Callback Hell" — nested callbacks become unmaintainable
+fetchUser(1, (err, user) => {
+    fetchPosts(user.id, (err, posts) => {
+        fetchComments(posts[0].id, (err, comments) => {
+            // Deeply nested, hard to read, error-prone
+        });
+    });
+});</code></pre>
+                    </div>
+                    <div class="tip-box">
+                        <strong>💡 Node.js Error-First Convention:</strong> Callbacks follow the pattern <code>callback(error, result)</code>. Always check the error first before using the result.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🤝 2.3 Promises — Complete Guide</h3>
+                    <p>A <span class="highlight">Promise</span> is an object representing the eventual completion or failure of an async operation. It's a more structured alternative to callbacks.</p>
+                    <h4>Promise States</h4>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>⏳ Pending</h5>
+                            <p>Initial state. The operation is still in progress.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>✅ Fulfilled</h5>
+                            <p>Operation completed successfully. The <code>.then()</code> handler runs.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>❌ Rejected</h5>
+                            <p>Operation failed. The <code>.catch()</code> handler runs.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>🔒 Settled</h5>
+                            <p>Either fulfilled or rejected. The <code>.finally()</code> handler always runs.</p>
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Creating and Chaining Promises</span>
+                        <pre><code>// Creating a Promise
+function fetchUser(id) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (id > 0) {
+                resolve({ id, name: "Alice", role: "admin" });
+            } else {
+                reject(new Error("Invalid user ID"));
+            }
+        }, 500);
+    });
+}
+
+// Consuming with .then() / .catch() / .finally()
+fetchUser(1)
+    .then(user => {
+        console.log("Got user:", user.name); // "Alice"
+        return user.role; // Pass data to next .then()
+    })
+    .then(role => {
+        console.log("Role:", role); // "admin"
+    })
+    .catch(error => {
+        console.error("Error:", error.message); // Catches ALL errors above
+    })
+    .finally(() => {
+        console.log("Done"); // Always runs
+    });</code></pre>
+                    </div>
+                    <h4>Promise Static Methods</h4>
+                    <div class="code-block">
+                        <span class="code-label">Promise.all, allSettled, race, any</span>
+                        <pre><code>const p1 = fetch("/api/users");
+const p2 = fetch("/api/posts");
+const p3 = fetch("/api/comments");
+
+// Promise.all — resolves when ALL succeed, rejects if ANY fail
+const [users, posts, comments] = await Promise.all([p1, p2, p3]);
+
+// Promise.allSettled — waits for ALL, never rejects
+const results = await Promise.allSettled([p1, p2, p3]);
+results.forEach(result => {
+    if (result.status === "fulfilled") {
+        console.log("Success:", result.value);
+    } else {
+        console.log("Failed:", result.reason);
+    }
+});
+
+// Promise.race — resolves/rejects with the FIRST settled promise
+const fastest = await Promise.race([p1, p2, p3]);
+
+// Promise.any — resolves with the FIRST fulfilled (ignores rejections)
+// Only rejects if ALL are rejected (AggregateError)
+const first = await Promise.any([p1, p2, p3]);</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>✨ 2.4 Async / Await — Modern Async Code</h3>
+                    <p><span class="highlight">async/await</span> is syntactic sugar over Promises that makes async code look and behave more like synchronous code. It's the preferred way to write async code today.</p>
+                    <div class="code-block">
+                        <span class="code-label">async/await Basics</span>
+                        <pre><code>// An async function ALWAYS returns a Promise
+async function getUser(id) {
+    // await pauses execution until the Promise resolves
+    const response = await fetch(`/api/users/${id}`);
+    
+    if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+    }
+    
+    const user = await response.json();
+    return user; // Auto-wrapped in Promise.resolve()
+}
+
+// Error handling with try/catch
+async function loadProfile(id) {
+    try {
+        const user = await getUser(id);
+        const posts = await fetch(`/api/posts?userId=${user.id}`);
+        const postsData = await posts.json();
+        
+        return { user, posts: postsData };
+    } catch (error) {
+        console.error("Failed to load profile:", error.message);
+        return null; // Graceful fallback
+    } finally {
+        console.log("Profile load attempt complete");
+    }
+}</code></pre>
+                    </div>
+                    <h4>Parallel vs Sequential Execution</h4>
+                    <div class="code-block">
+                        <span class="code-label">Avoiding the Sequential Trap</span>
+                        <pre><code>// ❌ Sequential (slow) — each waits for the previous
+async function slowLoad() {
+    const user = await fetchUser(1);    // 500ms
+    const posts = await fetchPosts(1);  // 500ms
+    const tags = await fetchTags(1);    // 500ms
+    // Total: ~1500ms
+}
+
+// ✅ Parallel (fast) — all start at the same time
+async function fastLoad() {
+    const [user, posts, tags] = await Promise.all([
+        fetchUser(1),
+        fetchPosts(1),
+        fetchTags(1)
+    ]);
+    // Total: ~500ms (limited by the slowest)
+}
+
+// ✅ Parallel with individual handling
+async function flexibleLoad() {
+    const userPromise = fetchUser(1);
+    const postsPromise = fetchPosts(1);
+    
+    const user = await userPromise;   // Start both, await separately
+    const posts = await postsPromise; // Already running!
+}</code></pre>
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ Common Mistake:</strong> Using <code>await</code> inside <code>.forEach()</code> does NOT work as expected. Use <code>for...of</code> for sequential async loops, or <code>Promise.all(arr.map(...))</code> for parallel ones.
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Async Loops</span>
+                        <pre><code>const ids = [1, 2, 3, 4, 5];
+
+// ❌ forEach doesn't await properly
+ids.forEach(async (id) => {
+    const user = await fetchUser(id); // These run concurrently but forEach doesn't wait
+    console.log(user); // Order unpredictable, errors swallowed
+});
+
+// ✅ Sequential with for...of
+for (const id of ids) {
+    const user = await fetchUser(id); // Truly sequential
+    console.log(user);
+}
+
+// ✅ Parallel with Promise.all + map
+const users = await Promise.all(ids.map(id => fetchUser(id)));
+console.log(users); // All users, order preserved</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🌊 2.5 Generators & Async Generators</h3>
+                    <p><span class="highlight">Generator functions</span> can pause and resume execution, yielding multiple values over time. They're the foundation of many async patterns.</p>
+                    <div class="code-block">
+                        <span class="code-label">Generators</span>
+                        <pre><code>// Generator function (note the *)
+function* numberGenerator() {
+    yield 1;
+    yield 2;
+    yield 3;
+    return "done"; // Final value
+}
+
+const gen = numberGenerator();
+console.log(gen.next()); // { value: 1, done: false }
+console.log(gen.next()); // { value: 2, done: false }
+console.log(gen.next()); // { value: 3, done: false }
+console.log(gen.next()); // { value: "done", done: true }
+
+// Generators are iterable!
+for (const num of numberGenerator()) {
+    console.log(num); // 1, 2, 3 (return value skipped)
+}
+
+// Infinite sequence generator
+function* fibonacci() {
+    let [a, b] = [0, 1];
+    while (true) {
+        yield a;
+        [a, b] = [b, a + b];
+    }
+}
+
+const fib = fibonacci();
+for (let i = 0; i < 8; i++) {
+    process.stdout.write(fib.next().value + " "); // 0 1 1 2 3 5 8 13
+}
+
+// Async Generator
+async function* fetchPages(url) {
+    let page = 1;
+    while (true) {
+        const res = await fetch(`${url}?page=${page}`);
+        const data = await res.json();
+        if (data.length === 0) return;
+        yield data;
+        page++;
+    }
+}
+
+for await (const page of fetchPages("/api/items")) {
+    process(page); // Handle each page as it arrives
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- ─────────────────── CHAPTER 3 ─────────────────── -->
+                <div class="chapter-header">
+                    <h2>🧩 Chapter 3 — Functional Programming in JavaScript</h2>
+                    <p>FP techniques make code more predictable, testable, and maintainable. JavaScript supports first-class functions, making it ideal for FP patterns.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🎯 3.1 Core FP Principles</h3>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>Pure Functions</h5>
+                            <p>Same input always produces same output. No side effects (no modifying external state, no I/O).</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Immutability</h5>
+                            <p>Don't mutate data. Create new values instead. Prevents subtle bugs from shared mutable state.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Higher-Order Functions</h5>
+                            <p>Functions that take other functions as arguments or return functions. Examples: map, filter, reduce.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Function Composition</h5>
+                            <p>Combine small functions into larger ones. Output of one becomes input of the next.</p>
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Pure Functions vs Impure</span>
+                        <pre><code>// ❌ Impure — modifies external state
+let total = 0;
+function addImpure(n) {
+    total += n; // Side effect!
+    return total;
+}
+
+// ✅ Pure — same input = same output, no side effects
+function addPure(currentTotal, n) {
+    return currentTotal + n;
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔧 3.2 Array Methods — The Core Toolkit</h3>
+                    <p>Master these and you'll write cleaner, more expressive code. These are the workhorses of modern JavaScript.</p>
+                    <div class="code-block">
+                        <span class="code-label">map, filter, reduce — Complete Examples</span>
+                        <pre><code>const products = [
+    { name: "Laptop", price: 1200, category: "Electronics", inStock: true },
+    { name: "Shirt", price: 30, category: "Clothing", inStock: false },
+    { name: "Phone", price: 800, category: "Electronics", inStock: true },
+    { name: "Book", price: 20, category: "Education", inStock: true },
+    { name: "Headphones", price: 150, category: "Electronics", inStock: true },
+];
+
+// .map() — transform each element
+const names = products.map(p => p.name);
+// ["Laptop", "Shirt", "Phone", "Book", "Headphones"]
+
+const withTax = products.map(p => ({
+    ...p,
+    priceWithTax: +(p.price * 1.23).toFixed(2)
+}));
+
+// .filter() — keep elements matching condition
+const inStock = products.filter(p => p.inStock);
+const electronics = products.filter(p => p.category === "Electronics");
+const affordable = products.filter(p => p.price < 500 && p.inStock);
+
+// .reduce() — aggregate into a single value
+const totalValue = products.reduce((sum, p) => sum + p.price, 0); // 2200
+
+// Group by category using reduce
+const byCategory = products.reduce((groups, product) => {
+    const key = product.category;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(product);
+    return groups;
+}, {});
+
+// Chain methods for complex queries
+const result = products
+    .filter(p => p.inStock && p.category === "Electronics")
+    .map(p => ({ name: p.name, price: p.price }))
+    .sort((a, b) => a.price - b.price);
+
+// .find() — first match, or undefined
+const laptop = products.find(p => p.name === "Laptop");
+
+// .some() / .every() — boolean checks
+const hasExpensive = products.some(p => p.price > 1000); // true
+const allInStock = products.every(p => p.inStock); // false
+
+// .flatMap() — map + flatten
+const tags = products.flatMap(p => [p.name.toLowerCase(), p.category]);
+
+// .at() — access with negative index
+const lastProduct = products.at(-1); // Headphones</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔀 3.3 Currying & Partial Application</h3>
+                    <div class="code-block">
+                        <span class="code-label">Currying</span>
+                        <pre><code>// Currying: transform f(a, b, c) into f(a)(b)(c)
+const add = a => b => a + b;
+const add5 = add(5);   // Returns a new function
+console.log(add5(3));  // 8
+console.log(add5(10)); // 15
+
+// Generic curry function
+function curry(fn) {
+    return function curried(...args) {
+        if (args.length >= fn.length) {
+            return fn.apply(this, args);
+        }
+        return function(...args2) {
+            return curried.apply(this, args.concat(args2));
+        };
+    };
+}
+
+const multiply = curry((a, b, c) => a * b * c);
+console.log(multiply(2)(3)(4)); // 24
+console.log(multiply(2, 3)(4)); // 24
+console.log(multiply(2)(3, 4)); // 24
+
+// Practical use: reusable validators
+const isLongerThan = minLength => str => str.length > minLength;
+const isValidEmail = email => email.includes("@") && email.includes(".");
+
+const isValidUsername = isLongerThan(3);
+console.log(isValidUsername("Jo"));     // false
+console.log(isValidUsername("Alice"));  // true</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🧩 3.4 Function Composition</h3>
+                    <div class="code-block">
+                        <span class="code-label">Compose and Pipe</span>
+                        <pre><code>// compose: right-to-left execution
+const compose = (...fns) => x => fns.reduceRight((acc, fn) => fn(acc), x);
+
+// pipe: left-to-right execution (more intuitive)
+const pipe = (...fns) => x => fns.reduce((acc, fn) => fn(acc), x);
+
+const trim = str => str.trim();
+const toLowerCase = str => str.toLowerCase();
+const removeSpaces = str => str.replace(/\s+/g, "-");
+const addPrefix = str => `slug-${str}`;
+
+const createSlug = pipe(trim, toLowerCase, removeSpaces, addPrefix);
+
+console.log(createSlug("  Hello World  ")); // "slug-hello-world"
+
+// Point-free style
+const users = [
+    { name: "Alice", score: 85 },
+    { name: "Bob", score: 92 },
+    { name: "Charlie", score: 78 }
+];
+
+const getScore = user => user.score;
+const isHighScore = score => score > 80;
+const formatScore = score => `${score}%`;
+
+const getHighScores = pipe(
+    arr => arr.map(getScore),
+    arr => arr.filter(isHighScore),
+    arr => arr.map(formatScore)
+);
+
+console.log(getHighScores(users)); // ["85%", "92%"]</code></pre>
+                    </div>
+                </div>
+
+                <!-- ─────────────────── CHAPTER 4 ─────────────────── -->
+                <div class="chapter-header">
+                    <h2>🌐 Chapter 4 — The DOM, Events & Browser APIs</h2>
+                    <p>JavaScript interacts with web pages through the DOM. Understanding events and modern browser APIs unlocks powerful UI capabilities.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🌳 4.1 DOM Manipulation — Modern Approach</h3>
+                    <p>The Document Object Model (DOM) is a tree of nodes representing the HTML document. JavaScript can query, create, modify, and delete these nodes.</p>
+                    <div class="code-block">
+                        <span class="code-label">Querying & Modifying the DOM</span>
+                        <pre><code>// Querying — prefer querySelector/querySelectorAll
+const header = document.querySelector("header");          // First match
+const buttons = document.querySelectorAll(".btn");        // All matches (NodeList)
+const form = document.getElementById("login-form");       // By ID
+
+// Reading properties
+console.log(header.textContent); // Text content (no HTML)
+console.log(header.innerHTML);   // HTML content
+console.log(header.getAttribute("class")); // Attribute
+
+// Modifying elements
+const card = document.querySelector(".card");
+card.textContent = "New content";
+card.classList.add("active");
+card.classList.remove("hidden");
+card.classList.toggle("expanded");
+card.classList.replace("old-class", "new-class");
+card.dataset.userId = "42"; // Sets data-user-id="42"
+card.style.backgroundColor = "#1a1a2e"; // Inline style (avoid — use classes)
+
+// Creating and inserting elements
+const newDiv = document.createElement("div");
+newDiv.className = "new-card";
+newDiv.innerHTML = `<h3>Title</h3><p>Content here</p>`;
+
+// Modern insertion methods (preferred)
+card.append(newDiv);              // Inside, at end
+card.prepend(newDiv);             // Inside, at start
+card.before(newDiv);              // Before card (sibling)
+card.after(newDiv);               // After card (sibling)
+card.replaceWith(newDiv);         // Replace card entirely
+
+// Efficient: DocumentFragment for multiple inserts
+const fragment = document.createDocumentFragment();
+for (let i = 0; i < 100; i++) {
+    const li = document.createElement("li");
+    li.textContent = `Item ${i}`;
+    fragment.appendChild(li);
+}
+document.querySelector("ul").appendChild(fragment); // Single DOM update!</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🎯 4.2 Events — Deep Dive</h3>
+                    <div class="code-block">
+                        <span class="code-label">Events, Delegation & Custom Events</span>
+                        <pre><code>// addEventListener — preferred over onclick="..."
+const btn = document.querySelector("#myBtn");
+
+function handleClick(event) {
+    event.preventDefault();  // Prevent default action (form submit, link)
+    event.stopPropagation(); // Stop bubbling up the DOM
+    
+    console.log(event.target);   // The element that was clicked
+    console.log(event.currentTarget); // The element the listener is on
+    console.log(event.type);     // "click"
+}
+
+btn.addEventListener("click", handleClick);
+btn.removeEventListener("click", handleClick); // Remove later
+
+// Options object
+btn.addEventListener("click", handleClick, {
+    once: true,      // Remove after first call
+    capture: true,   // Run during capture phase (top-down, not bubble)
+    passive: true    // Hints browser this won't preventDefault (scroll perf)
+});
+
+// Event Delegation — listen on parent, handle children
+// Efficient for dynamic lists (one listener instead of many)
+document.querySelector("#list").addEventListener("click", (event) => {
+    const item = event.target.closest(".list-item");
+    if (!item) return; // Click wasn't on a list item
+    
+    const id = item.dataset.id;
+    handleItemClick(id);
+});
+
+// Custom Events — communicate between components
+const myEvent = new CustomEvent("userLoggedIn", {
+    bubbles: true,       // Bubble up DOM
+    cancelable: true,
+    detail: { userId: 42, name: "Alice" } // Custom data
+});
+
+document.dispatchEvent(myEvent);
+
+document.addEventListener("userLoggedIn", (e) => {
+    console.log("User:", e.detail.name); // "Alice"
+});</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>📡 4.3 Fetch API & HTTP — Production Patterns</h3>
+                    <div class="code-block">
+                        <span class="code-label">API Service Layer</span>
+                        <pre><code>// Production-grade API wrapper
+class ApiService {
+    #baseUrl;
+    #headers;
+    
+    constructor(baseUrl, token = null) {
+        this.#baseUrl = baseUrl;
+        this.#headers = {
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+        };
+    }
+    
+    async #request(method, endpoint, body = null, options = {}) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+        
+        try {
+            const response = await fetch(`${this.#baseUrl}${endpoint}`, {
+                method,
+                headers: { ...this.#headers, ...options.headers },
+                body: body ? JSON.stringify(body) : null,
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeout);
+            
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new ApiError(response.status, error.message || "Request failed", error);
+            }
+            
+            // Handle 204 No Content
+            if (response.status === 204) return null;
+            return response.json();
+            
+        } catch (error) {
+            clearTimeout(timeout);
+            if (error.name === "AbortError") throw new Error("Request timeout");
+            throw error;
+        }
+    }
+    
+    get(endpoint, options) { return this.#request("GET", endpoint, null, options); }
+    post(endpoint, body, options) { return this.#request("POST", endpoint, body, options); }
+    put(endpoint, body, options) { return this.#request("PUT", endpoint, body, options); }
+    patch(endpoint, body, options) { return this.#request("PATCH", endpoint, body, options); }
+    delete(endpoint, options) { return this.#request("DELETE", endpoint, null, options); }
+}
+
+class ApiError extends Error {
+    constructor(status, message, data) {
+        super(message);
+        this.status = status;
+        this.data = data;
+    }
+}
+
+// Usage
+const api = new ApiService("https://api.example.com", "my-token");
+
+try {
+    const user = await api.get("/users/1");
+    const updated = await api.patch("/users/1", { name: "New Name" });
+} catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+        // Redirect to login
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>👁️ 4.4 Intersection Observer — Lazy Loading & Infinite Scroll</h3>
+                    <div class="code-block">
+                        <span class="code-label">Intersection Observer API</span>
+                        <pre><code>// Lazy load images when they enter the viewport
+const imageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        
+        const img = entry.target;
+        img.src = img.dataset.src;  // Load the real image
+        img.classList.add("loaded");
+        observer.unobserve(img);    // Stop watching once loaded
+    });
+}, {
+    root: null,          // Viewport
+    rootMargin: "200px", // Start loading 200px before entering viewport
+    threshold: 0.1       // Trigger when 10% visible
+});
+
+document.querySelectorAll("img[data-src]").forEach(img => {
+    imageObserver.observe(img);
+});
+
+// Infinite scroll implementation
+const loadMoreObserver = new IntersectionObserver(async ([entry]) => {
+    if (!entry.isIntersecting || isLoading) return;
+    
+    isLoading = true;
+    const newItems = await fetchMoreItems(currentPage++);
+    appendItems(newItems);
+    isLoading = false;
+    
+    // If no more items, stop observing
+    if (newItems.length === 0) loadMoreObserver.disconnect();
+}, { threshold: 1.0 }); // 100% visible
+
+loadMoreObserver.observe(document.querySelector("#load-trigger"));
+
+// Animate elements on scroll
+const animationObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        entry.target.classList.toggle("visible", entry.isIntersecting);
+    });
+}, { threshold: 0.2 });
+
+document.querySelectorAll(".animate-on-scroll").forEach(el => {
+    animationObserver.observe(el);
+});</code></pre>
+                    </div>
+                </div>
+
+                <!-- ─────────────────── CHAPTER 5 ─────────────────── -->
+                <div class="chapter-header">
+                    <h2>📦 Chapter 5 — Modules, Build Tools & Project Architecture</h2>
+                    <p>Modern JavaScript is built in modules. Understanding how to organize, bundle, and ship code is essential for professional development.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>📦 5.1 ES Modules — In & Out</h3>
+                    <div class="code-block">
+                        <span class="code-label">Export & Import Patterns</span>
+                        <pre><code>// ─── math.js ───
+export const PI = 3.14159;
+
+export function add(a, b) { return a + b; }
+export function subtract(a, b) { return a - b; }
+
+// Default export (one per module)
+export default class Calculator {
+    add(a, b) { return a + b; }
+}
+
+// ─── utils/string.js ───
+export const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
+export const trim = str => str.trim();
+
+// Re-export from another module
+export { add, subtract } from "./math.js"; // Re-export named
+export { default as MathUtils } from "./math.js"; // Re-export default as named
+export * from "./math.js"; // Re-export everything
+
+// ─── main.js ───
+import Calculator from "./math.js";         // Default import
+import { PI, add } from "./math.js";         // Named imports
+import { add as addNumbers } from "./math.js"; // Rename on import
+import * as MathModule from "./math.js";     // Namespace import
+
+console.log(MathModule.PI); // 3.14159
+console.log(addNumbers(2, 3)); // 5
+
+// Dynamic import — lazy loading
+async function loadChart() {
+    const { Chart } = await import("./chart.js");
+    return new Chart();
+}
+
+// Conditional import
+const module = await import(
+    isDev ? "./debug-tools.js" : "./prod-tools.js"
+);</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>⚡ 5.2 Vite — The Modern Build Tool</h3>
+                    <p><span class="highlight">Vite</span> is a next-generation build tool that uses native ES modules in development for near-instant startup, and Rollup for optimized production builds.</p>
+                    <div class="code-block">
+                        <span class="code-label">Vite Setup & Configuration</span>
+                        <pre><code># Create a project
+npm create vite@latest my-app -- --template vanilla
+npm create vite@latest my-react-app -- --template react
+npm create vite@latest my-vue-app -- --template vue
+
+cd my-app && npm install && npm run dev</code></pre>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">vite.config.js</span>
+                        <pre><code>import { defineConfig } from "vite";
+
+export default defineConfig({
+    // Alias for cleaner imports: import X from "@/components/X"
+    resolve: {
+        alias: {
+            "@": "/src",
+            "@components": "/src/components",
+        }
+    },
+    
+    // Development server
+    server: {
+        port: 3000,
+        open: true, // Open browser on start
+        proxy: {
+            "/api": {
+                target: "http://localhost:8080",
+                changeOrigin: true
+            }
+        }
+    },
+    
+    // Build optimization
+    build: {
+        outDir: "dist",
+        sourcemap: true, // For debugging
+        rollupOptions: {
+            output: {
+                // Manual chunk splitting
+                manualChunks: {
+                    "vendor": ["react", "react-dom"],
+                    "charts": ["chart.js"]
+                }
+            }
+        }
+    }
+});</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🏗️ 5.3 Project Architecture — Scalable Folder Structure</h3>
+                    <div class="code-block">
+                        <span class="code-label">Production Project Structure</span>
+                        <pre><code>src/
+├── assets/             # Static files (images, fonts, icons)
+│   ├── images/
+│   └── fonts/
+│
+├── components/         # Reusable UI components
+│   ├── ui/             # Generic (Button, Input, Modal)
+│   │   ├── Button/
+│   │   │   ├── Button.jsx
+│   │   │   ├── Button.module.css
+│   │   │   └── Button.test.js
+│   │   └── Modal/
+│   └── features/       # Domain-specific components
+│       ├── auth/
+│       └── dashboard/
+│
+├── pages/              # Route-level components
+│   ├── Home.jsx
+│   ├── Profile.jsx
+│   └── Settings.jsx
+│
+├── services/           # API calls and external services
+│   ├── api.js          # Base API client
+│   ├── userService.js
+│   └── productService.js
+│
+├── store/              # State management
+│   ├── index.js
+│   ├── userSlice.js
+│   └── cartSlice.js
+│
+├── hooks/              # Custom React/Vue hooks
+│   ├── useAuth.js
+│   ├── useLocalStorage.js
+│   └── useDebounce.js
+│
+├── utils/              # Pure utility functions
+│   ├── formatters.js   # Date, currency, number formatting
+│   ├── validators.js   # Input validation
+│   └── helpers.js
+│
+├── constants/          # App-wide constants
+│   ├── routes.js
+│   └── config.js
+│
+├── types/              # TypeScript types (if using TS)
+│   └── index.d.ts
+│
+├── styles/             # Global styles
+│   ├── variables.css
+│   └── global.css
+│
+└── main.js             # Entry point</code></pre>
+                    </div>
+                    <div class="tip-box">
+                        <strong>💡 Colocation principle:</strong> Keep related files close together. A component's test, styles, and helpers should live alongside it — not in a parallel folder structure far away.
+                    </div>
+                </div>
+
+                <!-- ─────────────────── CHAPTER 6 ─────────────────── -->
+                <div class="chapter-header">
+                    <h2>🚀 Chapter 6 — Performance, Patterns & Advanced Topics</h2>
+                    <p>This chapter covers what separates good developers from great ones: deep performance knowledge, design patterns, and modern JavaScript features.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>⚡ 6.1 Performance Optimization</h3>
+                    <div class="code-block">
+                        <span class="code-label">Debounce & Throttle</span>
+                        <pre><code>// Debounce — run after user STOPS doing something
+// Use for: search input, resize, scroll-end
+function debounce(fn, delay) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+
+const searchHandler = debounce(async (query) => {
+    const results = await searchAPI(query);
+    renderResults(results);
+}, 300); // Wait 300ms after user stops typing
+
+input.addEventListener("input", (e) => searchHandler(e.target.value));
+
+// Throttle — run at MOST once per interval
+// Use for: scroll, mousemove, rate-limiting
+function throttle(fn, interval) {
+    let lastTime = 0;
+    return function(...args) {
+        const now = Date.now();
+        if (now - lastTime >= interval) {
+            lastTime = now;
+            fn.apply(this, args);
+        }
+    };
+}
+
+const trackScroll = throttle(() => {
+    updateProgressBar(window.scrollY);
+}, 100); // At most once every 100ms
+
+window.addEventListener("scroll", trackScroll);</code></pre>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">requestAnimationFrame & Web Workers</span>
+                        <pre><code>// requestAnimationFrame — smooth animations synced with display refresh
+function animate(timestamp) {
+    const elapsed = timestamp - lastTimestamp;
+    lastTimestamp = timestamp;
+    
+    // Update animation state
+    element.style.transform = `translateX(${position}px)`;
+    position += speed * (elapsed / 16); // Frame-rate independent movement
+    
+    if (position < 500) {
+        requestAnimationFrame(animate); // Schedule next frame
+    }
+}
+
+requestAnimationFrame(animate);
+
+// Web Workers — move heavy computation off the main thread
+// worker.js
+self.addEventListener("message", (event) => {
+    const { data, chunkSize } = event.data;
+    const result = heavyComputation(data, chunkSize); // Runs without blocking UI
+    self.postMessage(result);
+});
+
+// main.js
+const worker = new Worker("worker.js");
+worker.postMessage({ data: bigDataset, chunkSize: 1000 });
+worker.onmessage = (event) => {
+    displayResults(event.data); // UI updates on main thread
+};
+worker.onerror = (error) => console.error("Worker error:", error);</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🎯 6.2 Design Patterns in JavaScript</h3>
+                    <div class="code-block">
+                        <span class="code-label">Observer Pattern</span>
+                        <pre><code>// Observer / Event Emitter Pattern
+class EventEmitter {
+    #listeners = new Map();
+    
+    on(event, callback) {
+        if (!this.#listeners.has(event)) {
+            this.#listeners.set(event, new Set());
+        }
+        this.#listeners.get(event).add(callback);
+        return () => this.off(event, callback); // Returns unsubscribe fn
+    }
+    
+    off(event, callback) {
+        this.#listeners.get(event)?.delete(callback);
+    }
+    
+    emit(event, data) {
+        this.#listeners.get(event)?.forEach(cb => cb(data));
+    }
+    
+    once(event, callback) {
+        const wrapper = (data) => {
+            callback(data);
+            this.off(event, wrapper);
+        };
+        this.on(event, wrapper);
+    }
+}
+
+// Usage
+const store = new EventEmitter();
+const unsubscribe = store.on("userUpdated", (user) => {
+    updateUserUI(user);
+});
+
+store.emit("userUpdated", { name: "Alice" }); // Triggers listener
+unsubscribe(); // Clean up</code></pre>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Singleton & Module Patterns</span>
+                        <pre><code>// Singleton — one instance shared everywhere
+class ConfigManager {
+    static #instance = null;
+    #config = {};
+    
+    constructor() {
+        if (ConfigManager.#instance) {
+            return ConfigManager.#instance;
+        }
+        ConfigManager.#instance = this;
+    }
+    
+    set(key, value) { this.#config[key] = value; }
+    get(key) { return this.#config[key]; }
+}
+
+const config1 = new ConfigManager();
+const config2 = new ConfigManager();
+console.log(config1 === config2); // true — same instance!
+
+// Module Pattern — using ES modules (preferred modern approach)
+// config.js
+let config = { env: "production", debug: false };
+
+export function getConfig() { return { ...config }; } // Return copy
+export function setConfig(updates) { config = { ...config, ...updates }; }</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔒 6.3 Security Best Practices</h3>
+                    <ul class="styled-list">
+                        <li><strong>XSS (Cross-Site Scripting):</strong> Never use <code>innerHTML</code> with user input. Use <code>textContent</code> or DOM methods. Sanitize with DOMPurify if HTML is needed.</li>
+                        <li><strong>CSRF:</strong> Use SameSite cookie attribute and CSRF tokens for state-changing requests.</li>
+                        <li><strong>Content Security Policy:</strong> Set CSP headers to control which scripts can run.</li>
+                        <li><strong>Sensitive Data:</strong> Never store tokens in localStorage (vulnerable to XSS). Use HttpOnly cookies or sessionStorage with care.</li>
+                        <li><strong>Dependencies:</strong> Regularly audit with <code>npm audit</code>. Use Snyk or Dependabot.</li>
+                    </ul>
+                    <div class="code-block">
+                        <span class="code-label">Safe DOM Manipulation</span>
+                        <pre><code>// ❌ DANGEROUS — executes any script in the string
+element.innerHTML = userInput; // XSS vulnerability!
+
+// ✅ SAFE — treats content as text only
+element.textContent = userInput;
+
+// ✅ SAFE — building DOM programmatically
+const p = document.createElement("p");
+p.textContent = userInput; // Automatically escaped
+container.appendChild(p);
+
+// ✅ If you MUST insert HTML — sanitize first
+import DOMPurify from "dompurify";
+element.innerHTML = DOMPurify.sanitize(userInput);</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🧪 6.4 Testing JavaScript Code</h3>
+                    <div class="code-block">
+                        <span class="code-label">Unit Testing with Jest</span>
+                        <pre><code">// ─── math.js ───
+export function add(a, b) { return a + b; }
+export function divide(a, b) {
+    if (b === 0) throw new Error("Cannot divide by zero");
+    return a / b;
+}
+
+// ─── math.test.js ───
+import { add, divide } from "./math.js";
+
+describe("Math utils", () => {
+    // Group related tests
+    
+    describe("add()", () => {
+        test("adds two positive numbers", () => {
+            expect(add(2, 3)).toBe(5);
+        });
+        
+        test("handles negative numbers", () => {
+            expect(add(-1, 5)).toBe(4);
+            expect(add(-3, -2)).toBe(-5);
+        });
+        
+        test("handles floats", () => {
+            expect(add(0.1, 0.2)).toBeCloseTo(0.3); // Use toBeCloseTo for floats!
+        });
+    });
+    
+    describe("divide()", () => {
+        test("divides correctly", () => {
+            expect(divide(10, 2)).toBe(5);
+        });
+        
+        test("throws on division by zero", () => {
+            expect(() => divide(10, 0)).toThrow("Cannot divide by zero");
+        });
+    });
+});
+
+// Mocking async calls
+import { fetchUser } from "./userService.js";
+jest.mock("./userService.js");
+
+test("loads user profile", async () => {
+    fetchUser.mockResolvedValue({ id: 1, name: "Alice" });
+    
+    const user = await fetchUser(1);
+    expect(user.name).toBe("Alice");
+    expect(fetchUser).toHaveBeenCalledWith(1);
+});</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔧 6.5 Modern JavaScript Features (ES2020–2024)</h3>
+                    <div class="code-block">
+                        <span class="code-label">Latest JS Features</span>
+                        <pre><code>// Optional Chaining (?.) — ES2020
+const city = user?.address?.city; // undefined if any step is null/undefined
+const firstTag = article?.tags?.[0];
+const result = obj?.method?.();   // Call only if method exists
+
+// Nullish Coalescing (??) — ES2020 — only for null/undefined (not 0 or "")
+const name = user.name ?? "Anonymous"; // "Anonymous" only if null/undefined
+const count = data.count ?? 0;         // vs (data.count || 0) which is wrong if count is 0
+
+// Logical Assignment — ES2021
+user.name ??= "Anonymous";   // Assign if null/undefined
+user.verified ||= false;     // Assign if falsy
+user.score &&= user.score + 10; // Assign only if truthy
+
+// Object.hasOwn() — ES2022 (safer than hasOwnProperty)
+if (Object.hasOwn(obj, "name")) { ... }
+
+// at() — ES2022 — access with negative index
+const last = arr.at(-1);      // Last element
+const secondLast = arr.at(-2);
+
+// structuredClone() — ES2022 — deep clone native
+const original = { a: 1, nested: { b: 2 } };
+const clone = structuredClone(original);
+clone.nested.b = 99;
+console.log(original.nested.b); // 2 — original untouched
+
+// Array grouping — ES2024
+const grouped = items.group(item => item.category);
+// { "fruits": [...], "veggies": [...] }
+
+// Promise.withResolvers() — ES2024
+const { promise, resolve, reject } = Promise.withResolvers();
+setTimeout(() => resolve("done"), 1000);
+const result = await promise;</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card" style="border-left: 5px solid var(--purple);">
+                    <h3>🔄 6.6 Destructuring & Spread — Complete Guide</h3>
+                    <div class="code-block">
+                        <span class="code-label">Destructuring Patterns</span>
+                        <pre><code>// Array Destructuring
+const [first, second, ...rest] = [1, 2, 3, 4, 5];
+// first=1, second=2, rest=[3,4,5]
+
+// Skip elements
+const [,, third] = [1, 2, 3];
+
+// Default values
+const [a = 10, b = 20] = [5];
+// a=5, b=20
+
+// Swap variables
+let x = 1, y = 2;
+[x, y] = [y, x]; // x=2, y=1
+
+// Object Destructuring
+const { name, age, address: { city } = {} } = user;
+
+// Rename
+const { name: userName, id: userId } = user;
+
+// Default values
+const { role = "user", permissions = [] } = user;
+
+// Rest
+const { name: n, ...rest } = user; // rest has all other props
+
+// Function parameters
+function displayUser({ name, age, role = "user" }) {
+    console.log(`${name} (${age}) — ${role}`);
+}
+displayUser({ name: "Alice", age: 30 }); // Alice (30) — user
+
+// Spread Operator
+// Arrays
+const merged = [...arr1, ...arr2];
+const copy = [...original];
+
+// Objects (shallow clone)
+const updated = { ...user, name: "New Name" }; // Override specific keys
+const merged2 = { ...defaults, ...userSettings }; // userSettings wins
+
+// Pass array as arguments
+Math.max(...numbers); // Instead of Math.max.apply(null, numbers)</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🗺️ 6.7 Map, Set, WeakMap & WeakSet</h3>
+                    <div class="code-block">
+                        <span class="code-label">Modern Collection Types</span>
+                        <pre><code">// Map — key-value pairs with any key type (unlike objects)
+const map = new Map();
+const keyObj = { id: 1 };
+
+map.set("string-key", "value1");
+map.set(42, "value2");
+map.set(keyObj, "value3");  // Object as key!
+
+console.log(map.get(keyObj));   // "value3"
+console.log(map.size);          // 3
+console.log(map.has("string-key")); // true
+
+for (const [key, value] of map) {
+    console.log(key, "→", value);
+}
+
+// Practical: cache with object keys
+const cache = new Map();
+function memoize(fn) {
+    return function(arg) {
+        if (cache.has(arg)) return cache.get(arg);
+        const result = fn(arg);
+        cache.set(arg, result);
+        return result;
+    };
+}
+
+// Set — unique values only
+const set = new Set([1, 2, 3, 2, 1]); // {1, 2, 3}
+set.add(4);
+set.has(3); // true
+set.delete(2);
+
+// Remove duplicates from array
+const unique = [...new Set(array)];
+
+// Set operations
+const a = new Set([1, 2, 3, 4]);
+const b = new Set([3, 4, 5, 6]);
+const union = new Set([...a, ...b]);        // {1,2,3,4,5,6}
+const intersection = new Set([...a].filter(x => b.has(x))); // {3,4}
+const difference = new Set([...a].filter(x => !b.has(x)));  // {1,2}
+
+// WeakMap — keys are weakly referenced (GC-friendly)
+// Keys MUST be objects. Not iterable. Auto-cleans when key is GC'd
+const weakMap = new WeakMap();
+let element = document.querySelector(".card");
+weakMap.set(element, { clicks: 0, lastSeen: Date.now() });
+element = null; // Element removed from DOM → WeakMap entry is GC'd automatically</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card" style="background: linear-gradient(45deg, rgba(91,124,255,0.1), rgba(40,224,255,0.1)); border-left: 5px solid var(--cyan);">
+                    <h3>🏆 Module Summary — You Are Now Advanced</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">If you've studied this module thoroughly, you now understand:</p>
+                    <div class="two-col">
+                        <div>
+                            <ul class="styled-list">
+                                <li>How JavaScript executes code internally</li>
+                                <li>Closures, scope, and the prototype chain</li>
+                                <li>Async programming from callbacks to generators</li>
+                                <li>The Event Loop and microtask/macrotask queues</li>
+                                <li>Functional programming techniques</li>
+                                <li>DOM, events, and browser APIs</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <ul class="styled-list">
+                                <li>ES Modules and modern build tools</li>
+                                <li>Scalable project architecture</li>
+                                <li>Performance optimization strategies</li>
+                                <li>Security best practices</li>
+                                <li>Design patterns for real applications</li>
+                                <li>Latest JavaScript features (ES2020–2024)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="tip-box" style="margin-top: 1rem;">
+                        <strong>🎯 Next Steps:</strong> Pick a framework (React, Vue, or Svelte), build a real project, explore TypeScript, and contribute to open source. The best way to cement this knowledge is to use it daily.
+                    </div>
+                </div>
+
+            </div><!-- end #learn -->
+
+            <!-- ===================== LAB TAB ===================== -->
+            <div id="lab" class="tab-panel">
+                <h3>JavaScript Console</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Practice data extraction. Try filtering customers with high spending.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">SQL EDITOR</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT customer_name, total_spent 
+FROM sales 
+WHERE total_spent > 1500
+ORDER BY total_spent DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">QUERY RESULT</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Click "Run" to simulate the database query...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Run Query</button>
+            </div>
+
+            <!-- ===================== QUIZ TAB ===================== -->
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>Quiz: Frontend Frameworks (React & Vue)</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge about components, state, directives and the differences between the main market technologies.</p>
+        
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What is JSX?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) A CSS preprocessor</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B"> B) A database query language</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C" data-correct="true"> C) A syntax extension that allows writing HTML-like code in JavaScript</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) A Vue template feature</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. What is a Vue directive?</p>
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) A JavaScript loop</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B" data-correct="true"> B) A built-in attribute that adds behavior to elements (ex: v-if, v-for)</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C"> C) A CSS selector</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) A component type</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. What problem do components solve?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) Browser compatibility</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B"> B) Network latency</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C" data-correct="true"> C) Code duplication and poor maintainability</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Security issues</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. What does the virtual DOM do?</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Stores data permanently</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B" data-correct="true"> B) Improves performance by minimizing direct DOM updates</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C"> C) Encrypts data</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Replaces the server</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. What hook manages state in React?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) useEffect</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B"> B) useRef</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C" data-correct="true"> C) useState</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) useContext</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. Which is a basic prop example?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A" data-correct="true"> A) &lt;Component prop="value" /&gt;</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) Component(prop: value)</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C"> C) &lt;Component = value /&gt;</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Component[value]</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. Why is Vue considered beginner-friendly?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) It replaces JavaScript</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B"> B) It uses only HTML</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"> C) It has clear syntax and a gentle learning curve</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) It does not use components</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. What's the difference between SPA and SSR?</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) SPA uses servers, SSR does not</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"> B) SPA renders on the client, SSR renders on the server</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C"> C) SSR is always slower than SPA</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) They are the same</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. What is a Single-File Component (SFC)?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) A JavaScript-only file</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B"> B) A CSS file</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"> C) A file with template, logic, and styles together (.vue)</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) A compiled output file</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. What is state management?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Managing browser tabs</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Handling CSS styles</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C" data-correct="true"> C) Controlling and sharing application data over time</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Handling server requests</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What are events in frameworks?</p>
+                <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Errors in code</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B" data-correct="true"> B) User or system actions that trigger code execution</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Styling rules</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Server responses</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. Why do large teams choose React?</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) It requires no tooling</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) It has strict styling rules</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"> C) It has a large ecosystem and predictable patterns</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) It replaces backend code</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. What is a reactive UI?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) A UI that refreshes manually</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B" data-correct="true"> B) A UI that responds automatically to data changes</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C"> C) A server-side UI</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) A static HTML page</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. What's the correct feature relationship?</p>
+                <label class="quiz-option"><input type="radio" name="q14" value="A"> A) React: directives / Vue: hooks</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B" data-correct="true"> B) React: hooks / Vue: directives</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C"> C) React: SFC / Vue: JSX</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Both use exactly the same</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. Why do frameworks need build tools like Vite?</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) To write HTML</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B"> B) To replace browsers</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"> C) To bundle, optimize, and speed up development</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) To store user data</label>
+            </div>
+        </form>
+
+        <div class="quiz-controls">
+            <button id="submit-quiz" class="btn btn-primary">Submit Assessment</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback" class="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+class QuizManager {
+    constructor() {
+        this.questionsData = {
+            q1: { correct: 'C', exp: 'JSX is a syntax extension that allows writing the UI skeleton inside JS (React).' },
+            q2: { correct: 'B', exp: 'Directives (v-) are special attributes that tell Vue how to manipulate the element.' },
+            q3: { correct: 'C', exp: 'Components allow code reuse, avoiding repetition and facilitating maintenance.' },
+            q4: { correct: 'B', exp: 'The Virtual DOM calculates changes and updates only what is necessary in the real DOM.' },
+            q5: { correct: 'C', exp: 'useState is the fundamental hook to create data that "reacts" to changes in React.' },
+            q6: { correct: 'A', exp: 'Props are passed as HTML attributes in components.' },
+            q7: { correct: 'C', exp: 'Vue has clear documentation and an easy transition for those coming from HTML/CSS.' },
+            q8: { correct: 'B', exp: 'SPAs generate the page in the browser; SSR sends the page already "drawn" by the server.' },
+            q9: { correct: 'C', exp: 'Single-File Components (.vue) organize HTML, JS, and CSS in a single file.' },
+            q10: { correct: 'C', exp: 'State is the set of application data at a given moment.' },
+            q11: { correct: 'B', exp: 'Events capture interactions like clicks, submissions, or screen touches.' },
+            q12: { correct: 'C', exp: 'The huge ecosystem and predictable patterns attract large teams.' },
+            q13: { correct: 'B', exp: 'Reactivity means that if the data changes, the screen updates automatically.' },
+            q14: { correct: 'B', exp: 'React uses Hooks (useState) while Vue uses directives (v-if).' },
+            q15: { correct: 'C', exp: 'Tools like Vite optimize code and manage the development server.' }
+        };
+        this.init();
+    }
+
+    init() {
+        document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+        document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+    }
+
+    submitQuiz() {
+        const form = document.getElementById('quiz-form');
+        const formData = new FormData(form);
+        let score = 0;
+        let feedbackHTML = '';
+
+        Object.keys(this.questionsData).forEach((key, index) => {
+            const userAnswer = formData.get(key);
+            const isCorrect = userAnswer === this.questionsData[key].correct;
+            if (isCorrect) score++;
+            feedbackHTML += `
+    <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+        <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+        <div>
+            <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+            ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+        </div>
+    </div>
+`;
+        });
+        this.displayResults(score, feedbackHTML);
+    }
+
+    displayResults(score, feedbackHTML) {
+        const total = Object.keys(this.questionsData).length;
+        const percent = Math.round((score / total) * 100);
+        const resultsDiv = document.getElementById('quiz-results');
+        let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+        document.getElementById('quiz-score').innerHTML = `
+            <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+            <p style="color: var(--text-secondary)">${percent >= 70 ? 'Amazing! You master modern tools.' : 'Review Framework concepts and try again.'}</p>`;
+        document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clearQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-results').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+document.addEventListener('DOMContentLoaded', () => { new QuizManager(); });
+</script>
+
+            <!-- ===================== RESOURCES TAB ===================== -->
+            <div id="resources" class="tab-panel">
+                <div class="content-card">
+                    <h3>Recommended Documents</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Curated list of essential resources to deepen your JavaScript knowledge.</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                        <div class="mini-card">
+                            <h5>Official Documentation</h5>
+                            <a href="#" class="resource-link">MDN Web Docs — JavaScript</a>
+                            <a href="#" class="resource-link">ECMAScript Specification</a>
+                            <a href="#" class="resource-link">Node.js Documentation</a>
+                            <a href="#" class="resource-link">V8 Blog</a>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Interactive Learning</h5>
+                            <a href="#" class="resource-link">JavaScript.info (free book)</a>
+                            <a href="#" class="resource-link">Exercism — JS Track</a>
+                            <a href="#" class="resource-link">CodeWars</a>
+                            <a href="#" class="resource-link">Frontend Mentor</a>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Deep Dives</h5>
+                            <a href="#" class="resource-link">You Don't Know JS (YDKJS)</a>
+                            <a href="#" class="resource-link">Eloquent JavaScript</a>
+                            <a href="#" class="resource-link">JavaScript Design Patterns</a>
+                            <a href="#" class="resource-link">Clean Code (Robert Martin)</a>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Tools & References</h5>
+                            <a href="#" class="resource-link">Can I Use — Browser Support</a>
+                            <a href="#" class="resource-link">Regex101</a>
+                            <a href="#" class="resource-link">npm — Package Registry</a>
+                            <a href="#" class="resource-link">Bundlephobia (bundle size)</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================== EVALUATION TAB ===================== -->
+            <div id="evaluation" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: Advanced JavaScript</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        Criteria organized by importance level to assess your mastery.
+                    </p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>Deep Array manipulation (map, filter, reduce)</li>
+                                <li>Robust error handling with try/catch/finally</li>
+                                <li>Lexical scope and Closures</li>
+                                <li>Working with JSON and data parsing</li>
+                                <li>Using Fetch API for GET/POST calls</li>
+                                <li>Understanding Promises and states</li>
+                                <li>Async/Await syntax for clean code</li>
+                                <li>ES6 Modules (import and export default)</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Knowledge of Event Loop and Task Queue</li>
+                                <li>Basic Functional Programming (Immutability)</li>
+                                <li>Debouncing and Throttling</li>
+                                <li>Complex date manipulation</li>
+                                <li>Concept of 'this' in different contexts</li>
+                                <li>Prototypes and Prototypal Inheritance</li>
+                                <li>Intersection Observer API for Lazy Loading</li>
+                                <li>Classes and OOP</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Performance optimization and Memory Leaks</li>
+                                <li>Web Workers for background processing</li>
+                                <li>Using Proxies and Reflect API</li>
+                                <li>Design Patterns (Singleton, Observer, Factory)</li>
+                                <li>Binary Data manipulation (Blobs, ArrayBuffers)</li>
+                                <li>WebSockets for real-time</li>
+                                <li>Advanced Regex</li>
+                                <li>Security (XSS and CSRF prevention)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end tabs-container -->
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+            document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            const progressMap = { learn: 25, lab: 50, quiz: 75, resources: 90, evaluation: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executed successfully.</strong><br><br>Results (Top 3):<br>-----------------------<br>1. Carlos Alberto | €4,250.00<br>2. Beatriz Ramos | €2,100.50<br>3. Ricardo Jorge | €1,880.00<br><br><em>Tip: The WHERE filter worked correctly, eliminating records below €1500.</em>";
+        }
+    </script>
+</body>
+</html>

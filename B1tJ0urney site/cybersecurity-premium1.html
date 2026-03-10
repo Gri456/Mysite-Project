@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Cybersecurity Fundamentals</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14; --orange: #ff6200; --yellow: #ffcc00; --amber: #ff8c00;
+            --text-light: #e8ecf8; --text-secondary: #b6c0de;
+            --card-bg: rgba(255,255,255,0.05); --border-color: rgba(255,255,255,0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,98,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,98,0,0.1) 1px, transparent 1px);
+            background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1;
+        }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        body::after {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255,140,0,0.12) 0%, rgba(255,204,0,0.06) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,20,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: .75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,140,0,.15); border: 1px solid rgba(255,140,0,.3); color: var(--yellow); padding: .25rem .75rem; border-radius: 50px; font-size: .75rem; font-weight: 500; }
+        .nav-buttons { display: flex; gap: 1rem; align-items: center; }
+        .btn { padding: .5rem 1.25rem; border-radius: 50px; font-size: .875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: .5rem; transition: all .3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,140,0,.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: #0f172a; box-shadow: 0 4px 15px rgba(255,98,0,.35); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.45); }
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--orange), var(--amber), var(--yellow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: .5rem; color: var(--text-secondary); font-size: .875rem; }
+        .progress-section { margin-bottom: 2rem; }
+        .progress-label { font-size: .875rem; color: var(--text-secondary); margin-bottom: .5rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--orange), var(--yellow)); width: 0%; transition: width .3s ease; }
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: .875rem; font-weight: 500; cursor: pointer; transition: all .3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(255,98,0,.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--orange), var(--yellow)); }
+        .tab-content { padding: 2rem; min-height: 400px; }
+        .tab-panel { display: none; animation: fadeIn .3s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content-card { background: rgba(255,255,255,.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .content-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-light); }
+        .content-text { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+        .code-block { background: rgba(0,0,0,.4); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: .875rem; line-height: 1.5; color: var(--text-light); }
+        .code-block .kw { color: #ff79c6; } .code-block .fn { color: #50fa7b; } .code-block .str { color: #f1fa8c; } .code-block .cm { color: #6272a4; font-style: italic; } .code-block .nb { color: #8be9fd; }
+        .code-explanation { background: rgba(255,255,255,.02); border-left: 3px solid var(--orange); padding: 1rem 1.5rem; margin: 1rem 0; border-radius: 0 8px 8px 0; }
+        .code-explanation h5 { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: .5rem; }
+        .code-explanation p { color: var(--text-secondary); font-size: .875rem; line-height: 1.5; }
+        .learn-intro { background: linear-gradient(135deg, rgba(255,98,0,.12), rgba(255,204,0,.06)); border: 1px solid rgba(255,140,0,.25); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .learn-intro h4 { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: .75rem; }
+        .learn-intro p { color: var(--text-secondary); line-height: 1.6; margin-bottom: .5rem; }
+        .section-divider { display: flex; align-items: center; gap: 1rem; margin: 2rem 0 1rem; color: var(--text-secondary); font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+        .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--border-color), transparent); }
+        .section-divider span { background: linear-gradient(90deg, var(--orange), var(--yellow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; white-space: nowrap; }
+        .triad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.25rem 0; }
+        .triad-card { border-radius: 8px; padding: 1.25rem; text-align: center; border: 1px solid var(--border-color); }
+        .triad-c { background: rgba(255,98,0,.08); border-color: rgba(255,98,0,.25); }
+        .triad-i { background: rgba(80,250,123,.08); border-color: rgba(80,250,123,.25); }
+        .triad-a { background: rgba(255,204,0,.08); border-color: rgba(255,204,0,.25); }
+        .triad-icon { font-size: 2rem; margin-bottom: .5rem; }
+        .triad-card h5 { color: var(--text-light); font-size: .95rem; font-weight: 600; margin-bottom: .5rem; }
+        .triad-card p { color: var(--text-secondary); font-size: .82rem; line-height: 1.4; }
+        .callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; display: flex; gap: .75rem; align-items: flex-start; }
+        .callout-icon { font-size: 1.25rem; flex-shrink: 0; margin-top: .1rem; }
+        .callout-body { flex: 1; color: var(--text-secondary); font-size: .875rem; line-height: 1.5; }
+        .callout-body strong { display: block; margin-bottom: .25rem; font-size: .9rem; }
+        .callout.tip    { background: rgba(80,250,123,.08);  border: 1px solid rgba(80,250,123,.2);  }
+        .callout.info   { background: rgba(40,224,255,.08);  border: 1px solid rgba(40,224,255,.2);  }
+        .callout.warn   { background: rgba(255,140,0,.08);   border: 1px solid rgba(255,140,0,.25);  }
+        .callout.danger { background: rgba(255,80,80,.08);   border: 1px solid rgba(255,80,80,.25);  }
+        .callout.tip    .callout-body strong { color: #50fa7b; }
+        .callout.info   .callout-body strong { color: #28e0ff; }
+        .callout.warn   .callout-body strong { color: var(--amber); }
+        .callout.danger .callout-body strong { color: #ff5050; }
+        .diagram { background: rgba(0,0,0,.25); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; }
+        .diagram-title { color: var(--text-secondary); font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .9rem; }
+        .flow { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
+        .flow-node { background: rgba(255,255,255,.06); border: 1px solid var(--border-color); border-radius: 6px; padding: .5rem .85rem; font-size: .8rem; line-height: 1.3; text-align: center; color: var(--text-light); }
+        .flow-node.blue   { border-color: rgba(40,224,255,.4);  background: rgba(40,224,255,.08); }
+        .flow-node.green  { border-color: rgba(80,250,123,.4);  background: rgba(80,250,123,.08); }
+        .flow-node.yellow { border-color: rgba(255,204,0,.4);   background: rgba(255,204,0,.08); }
+        .flow-arrow { color: var(--amber); font-size: .85rem; padding: 0 .2rem; }
+        .flow-node small { display: block; color: var(--text-secondary); font-size: .72rem; margin-top: .15rem; }
+        .visual-table { width: 100%; border-collapse: collapse; font-size: .875rem; margin: .5rem 0; }
+        .visual-table th { background: rgba(255,255,255,.05); color: var(--yellow); font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: .6rem .85rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .visual-table td { padding: .6rem .85rem; border-bottom: 1px solid rgba(255,255,255,.04); color: var(--text-secondary); vertical-align: top; line-height: 1.4; }
+        .visual-table tr:last-child td { border-bottom: none; }
+        .visual-table tr:hover td { background: rgba(255,255,255,.03); }
+        .pill { display: inline-block; padding: .15rem .55rem; border-radius: 50px; font-size: .75rem; font-weight: 600; }
+        .pill-green  { background: rgba(80,250,123,.15);  color: #50fa7b;     border: 1px solid rgba(80,250,123,.3); }
+        .pill-orange { background: rgba(255,140,0,.15);   color: var(--amber); border: 1px solid rgba(255,140,0,.3); }
+        .pill-red    { background: rgba(255,80,80,.15);   color: #ff5050;     border: 1px solid rgba(255,80,80,.3); }
+        .threat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .85rem; margin: 1.25rem 0; }
+        .threat-card { background: rgba(255,255,255,.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; text-align: center; transition: border-color .2s ease; }
+        .threat-card:hover { border-color: rgba(255,140,0,.4); }
+        .threat-icon { font-size: 1.75rem; margin-bottom: .5rem; }
+        .threat-card h6 { color: var(--text-light); font-size: .875rem; font-weight: 600; margin-bottom: .4rem; }
+        .threat-card p { color: var(--text-secondary); font-size: .78rem; line-height: 1.4; }
+        .lab-container { display: flex; gap: 1rem; height: 600px; margin-bottom: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; }
+        .lab-header { background: rgba(255,255,255,.05); border: 1px solid var(--border-color); border-bottom: none; border-radius: 8px 8px 0 0; padding: .75rem 1rem; font-size: .875rem; font-weight: 500; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: rgba(0,0,0,.4); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; padding: 1rem; color: var(--text-light); font-family: 'Courier New', monospace; font-size: .875rem; line-height: 1.5; resize: none; outline: none; }
+        .lab-textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 2px rgba(255,140,0,.2); }
+        .lab-iframe { flex: 1; background: white; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; width: 100%; }
+        .lab-controls { display: flex; gap: .75rem; margin-bottom: 1rem; }
+        .btn-execute { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: white; border: none; padding: .75rem 1.5rem; border-radius: 50px; font-size: .875rem; font-weight: 500; cursor: pointer; transition: all .3s ease; box-shadow: 0 4px 15px rgba(255,140,0,.3); }
+        .btn-execute:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.4); }
+        .btn-reset { background: rgba(255,255,255,.1); color: var(--text-light); border: 1px solid var(--border-color); padding: .75rem 1.5rem; border-radius: 50px; font-size: .875rem; font-weight: 500; cursor: pointer; transition: all .3s ease; }
+        .btn-reset:hover { background: rgba(255,255,255,.15); transform: translateY(-1px); }
+        .lab-instructions { background: rgba(40,224,255,.1); border: 1px solid rgba(40,224,255,.2); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; font-size: .875rem; color: var(--text-secondary); }
+        .quiz-question { background: rgba(255,255,255,.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .question-title { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-options { display: flex; flex-direction: column; gap: .75rem; }
+        .quiz-option { display: flex; align-items: center; gap: .75rem; padding: .75rem; background: rgba(255,255,255,.03); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all .3s ease; }
+        .quiz-option:hover { background: rgba(255,255,255,.08); border-color: var(--orange); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--orange); }
+        .option-text { color: var(--text-secondary); font-size: .875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(255,140,0,.12), rgba(255,204,0,.06)); border: 1px solid rgba(255,140,0,.25); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: .75rem; }
+        .feedback-item { display: flex; align-items: center; gap: .75rem; padding: .75rem; background: rgba(255,255,255,.05); border-radius: 6px; font-size: .875rem; }
+        .feedback-correct { border-left: 3px solid #4caf50; } .feedback-incorrect { border-left: 3px solid #f44336; }
+        .feedback-icon { font-size: 1.1rem; font-weight: bold; }
+        .feedback-correct .feedback-icon { color: #4caf50; } .feedback-incorrect .feedback-icon { color: #f44336; }
+        .score-excellent { color: #4caf50; } .score-good { color: #28e0ff; } .score-fair { color: #ff9800; } .score-poor { color: #f44336; }
+        .resources-list { margin: 1.5rem 0; } .resource-category { margin-bottom: 2rem; }
+        .category-title { color: var(--yellow); font-size: 1rem; font-weight: 600; margin-bottom: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border-color); }
+        .resource-links { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+        .resource-link { color: var(--text-secondary); text-decoration: none; padding: .5rem 0 .5rem 1.5rem; border-radius: 4px; transition: all .3s ease; font-size: .875rem; position: relative; }
+        .resource-link::before { content: '→'; position: absolute; left: 0; color: var(--orange); font-weight: bold; }
+        .resource-link:hover { color: var(--text-light); padding-left: 2rem; }
+        .resources-note { background: rgba(255,140,0,.1); border: 1px solid rgba(255,140,0,.2); border-radius: 8px; padding: 1rem; margin-top: 2rem; font-size: .875rem; }
+        .resources-note p { color: var(--text-secondary); margin: 0; }
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,140,0,.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: .5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: .75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--yellow); border-bottom-color: var(--yellow); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced  { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: .75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: .875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: #28e0ff; }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) {
+            .header-content { padding: 1rem; flex-direction: column; gap: 1rem; }
+            .nav-buttons { width: 100%; justify-content: center; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .tab-nav { flex-direction: column; }
+            .tab-button { flex: none; text-align: left; }
+            .tab-content { padding: 1rem; }
+            .triad-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .flow { flex-direction: column; align-items: flex-start; }
+            .evaluation-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <div class="logo">BitJourney</div>
+            <span class="premium-badge">Premium</span>
+        </div>
+        <nav class="nav-buttons">
+            <a href="premium-cyber-progress.html" class="btn btn-back">← Back to Journey</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Goal: Foundations — Cybersecurity</h1>
+        <p class="course-description">Master the essential fundamentals of cybersecurity. Learn how to protect systems, networks and data against digital attacks. Also how to detect, prevent and respond to threats such as malware, phishing and intrusions.</p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+            <div class="meta-item"><span>🎯</span><span>Authentication • Authorization • Encryption</span></div>
+            <div class="meta-item"><span>📌</span><span>Basic cyber concepts</span></div>
+        </div>
+        <div class="progress-section">
+            <div class="progress-label">Progress: <span id="progress-text">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        </div>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav" role="tablist">
+            <button class="tab-button active" data-tab="learn"      role="tab" aria-selected="true">Learn</button>
+            <button class="tab-button"         data-tab="lab"        role="tab" aria-selected="false">Lab</button>
+            <button class="tab-button"         data-tab="quiz"       role="tab" aria-selected="false">Quiz</button>
+            <button class="tab-button"         data-tab="resources"  role="tab" aria-selected="false">Resources</button>
+            <button class="tab-button"         data-tab="evaluation" role="tab" aria-selected="false">Evaluation</button>
+        </nav>
+
+        <div class="tab-content">
+
+            <!-- ═══ TAB: LEARN ═══ -->
+            <div id="panel-learn" class="tab-panel active">
+
+                <div class="learn-intro">
+                    <h4>🛡️ What is Cybersecurity?</h4>
+                    <p><strong>Cybersecurity</strong> is the set of practices, technologies and processes that protect systems, networks and data against attacks, damage or unauthorised access.</p>
+                    <p>We live in an increasingly digital world — banking, healthcare, transport, communications — everything depends on computer systems. Protecting them has become as important as locking your front door.</p>
+                </div>
+
+                <!-- CIA Triad -->
+                <div class="section-divider"><span>The 3 Pillars — CIA Triad</span></div>
+                <div class="content-card">
+                    <h3 class="content-title">The CIA Triad</h3>
+                    <p class="content-text">All information security rests on three fundamental principles known as the <strong>CIA Triad</strong>:</p>
+                    <div class="triad-grid">
+                        <div class="triad-card triad-c">
+                            <div class="triad-icon">🔒</div>
+                            <h5>Confidentiality</h5>
+                            <p>Only authorised parties can access the information. Ex: password to log into an account.</p>
+                        </div>
+                        <div class="triad-card triad-i">
+                            <div class="triad-icon">✅</div>
+                            <h5>Integrity</h5>
+                            <p>Information cannot be altered without authorisation. Ex: immutable system logs.</p>
+                        </div>
+                        <div class="triad-card triad-a">
+                            <div class="triad-icon">⚡</div>
+                            <h5>Availability</h5>
+                            <p>The system must be available when needed. Ex: a website that cannot afford downtime.</p>
+                        </div>
+                    </div>
+                    <div class="callout tip">
+                        <span class="callout-icon">💡</span>
+                        <div class="callout-body">
+                            <strong>Practical example</strong>
+                            A ransomware attack violates <em>availability</em> (blocks access) and may violate <em>confidentiality</em> (stolen data). That is why companies perform regular backups.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Authentication vs Authorisation -->
+                <div class="section-divider"><span>Authentication &amp; Authorisation</span></div>
+                <div class="content-card">
+                    <h3 class="content-title">Authentication vs. Authorisation</h3>
+                    <p class="content-text">These are two distinct but complementary concepts — many people confuse them.</p>
+                    <div class="diagram">
+                        <div class="diagram-title">System Access Flow</div>
+                        <div class="flow">
+                            <div class="flow-node">👤 User</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-node blue">🔑 Authentication<br><small>(Who are you?)</small></div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-node green">🛂 Authorisation<br><small>(What can you do?)</small></div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-node yellow">📁 Resources</div>
+                        </div>
+                    </div>
+                    <table class="visual-table">
+                        <thead><tr><th>Concept</th><th>Question answered</th><th>Example</th><th>Common technologies</th></tr></thead>
+                        <tbody>
+                            <tr><td>🔑 Authentication</td><td>Who are you?</td><td>Logging in with email + password</td><td>OAuth, SAML, JWT, 2FA</td></tr>
+                            <tr><td>🛂 Authorisation</td><td>What can you do?</td><td>Admin can delete data, regular user cannot</td><td>RBAC, ACL, IAM</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="callout info">
+                        <span class="callout-icon">ℹ️</span>
+                        <div class="callout-body">
+                            <strong>RBAC — Role-Based Access Control</strong>
+                            Access is defined by role. An HR employee can view salaries but not source code. A developer can see code but not payroll sheets.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passwords & Hashing -->
+                <div class="section-divider"><span>Passwords &amp; Hashing</span></div>
+                <div class="content-card">
+                    <h3 class="content-title">How does a Secure Password work?</h3>
+                    <p class="content-text">Passwords should never be stored as plain text in a database. If the database is compromised, all accounts are exposed. The solution is <strong>hashing</strong>.</p>
+                    <div class="diagram">
+                        <div class="diagram-title">Password Hashing Process</div>
+                        <div class="flow">
+                            <div class="flow-node">"MyPassword123!"</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-node blue">SHA-256 / bcrypt</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-node green">5e8f3a9c2b...</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-node yellow">💾 Database</div>
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <pre><code><span class="cm"># password_hash.py — Hashing example with Python</span>
+
+<span class="kw">import</span> hashlib
+
+<span class="kw">def</span> <span class="fn">create_hash</span>(password):
+    <span class="cm">"""Creates a SHA-256 hash of the given password."""</span>
+    hash_result = hashlib.sha256(password.<span class="fn">encode</span>()).<span class="fn">hexdigest</span>()
+    <span class="kw">return</span> hash_result
+
+<span class="kw">def</span> <span class="fn">verify_password</span>(password, stored_hash):
+    <span class="cm">"""Compares the entered password with the stored hash."""</span>
+    <span class="kw">return</span> <span class="fn">create_hash</span>(password) == stored_hash
+
+<span class="cm"># Registration flow</span>
+original_password = <span class="str">"MyPassword123!"</span>
+hash_in_db = <span class="fn">create_hash</span>(original_password)
+<span class="fn">print</span>(<span class="str">f"Stored hash: {hash_in_db}"</span>)
+
+<span class="cm"># Login flow</span>
+attempt = <span class="nb">input</span>(<span class="str">"Enter your password: "</span>)
+<span class="kw">if</span> <span class="fn">verify_password</span>(attempt, hash_in_db):
+    <span class="fn">print</span>(<span class="str">"✅ Access granted!"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"❌ Incorrect password."</span>)</code></pre>
+                    </div>
+                    <div class="code-explanation">
+                        <h5>Line by line:</h5>
+                        <p>
+                            <strong>import hashlib</strong> — imports Python's built-in cryptographic library.<br>
+                            <strong>password.encode()</strong> — converts the string to bytes (SHA-256 works with bytes, not text).<br>
+                            <strong>hashlib.sha256(...)</strong> — applies the SHA-256 algorithm (always produces 64 hex characters).<br>
+                            <strong>.hexdigest()</strong> — returns the result as a human-readable hexadecimal string.<br>
+                            <strong>verify_password()</strong> — in practice you never reverse the hash; you hash the attempt and compare.
+                        </p>
+                    </div>
+                    <table class="visual-table" style="margin-top:1.25rem">
+                        <thead><tr><th>Algorithm</th><th>Hash size</th><th>Secure today?</th><th>Recommended use</th></tr></thead>
+                        <tbody>
+                            <tr><td>MD5</td><td>128 bits / 32 chars</td><td><span class="pill pill-red">❌ No</span></td><td>Checksums only, never passwords</td></tr>
+                            <tr><td>SHA-1</td><td>160 bits / 40 chars</td><td><span class="pill pill-red">❌ No</span></td><td>Deprecated since 2017</td></tr>
+                            <tr><td>SHA-256</td><td>256 bits / 64 chars</td><td><span class="pill pill-orange">⚠️ Partial</span></td><td>Good for integrity, weak for passwords</td></tr>
+                            <tr><td>bcrypt</td><td>Variable + salt</td><td><span class="pill pill-green">✅ Yes</span></td><td>Ideal for storing passwords</td></tr>
+                            <tr><td>Argon2</td><td>Variable + salt</td><td><span class="pill pill-green">✅ Yes</span></td><td>Current best choice for passwords</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="callout warn">
+                        <span class="callout-icon">⚠️</span>
+                        <div class="callout-body">
+                            <strong>SHA-256 is not enough for passwords!</strong>
+                            SHA-256 is very fast — an attacker can test billions of combinations per second (brute force). Always use <strong>bcrypt</strong> or <strong>Argon2</strong> for passwords, as they are deliberately slow algorithms.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Common Threats -->
+                <div class="section-divider"><span>Common Threats</span></div>
+                <div class="content-card">
+                    <h3 class="content-title">Main Types of Attacks</h3>
+                    <p class="content-text">Knowing the enemy is the first step to defence. These are the most common attacks:</p>
+                    <div class="threat-grid">
+                        <div class="threat-card"><div class="threat-icon">🎣</div><h6>Phishing</h6><p>Fake email/SMS impersonating a legitimate entity to steal credentials.</p></div>
+                        <div class="threat-card"><div class="threat-icon">💣</div><h6>Malware</h6><p>Malicious software: viruses, trojans, spyware, ransomware.</p></div>
+                        <div class="threat-card"><div class="threat-icon">🔐</div><h6>Ransomware</h6><p>Encrypts your files and demands a ransom (usually in crypto).</p></div>
+                        <div class="threat-card"><div class="threat-icon">🌊</div><h6>DDoS</h6><p>Floods a server with traffic to make it unavailable.</p></div>
+                        <div class="threat-card"><div class="threat-icon">🕵️</div><h6>Man-in-the-Middle</h6><p>Intercepts communications between two parties without either knowing.</p></div>
+                        <div class="threat-card"><div class="threat-icon">💉</div><h6>SQL Injection</h6><p>Inserts malicious SQL code into an input field to manipulate the database.</p></div>
+                        <div class="threat-card"><div class="threat-icon">🎭</div><h6>Social Engineering</h6><p>Psychological manipulation to obtain information or access.</p></div>
+                        <div class="threat-card"><div class="threat-icon">🔓</div><h6>Brute Force</h6><p>Automatically tests millions of passwords until the correct one is found.</p></div>
+                    </div>
+                    <table class="visual-table" style="margin-top:1.25rem">
+                        <thead><tr><th>Attack</th><th>Target</th><th>How to defend</th></tr></thead>
+                        <tbody>
+                            <tr><td>Phishing</td><td>User (human)</td><td>Training, verify sender, 2FA</td></tr>
+                            <tr><td>Ransomware</td><td>File system</td><td>Offline backups, antivirus, don't open suspicious attachments</td></tr>
+                            <tr><td>DDoS</td><td>Infrastructure</td><td>CDN, rate limiting, WAF</td></tr>
+                            <tr><td>SQL Injection</td><td>Database</td><td>Prepared statements, ORM, input sanitisation</td></tr>
+                            <tr><td>Brute Force</td><td>Credentials</td><td>Rate limiting, CAPTCHA, lockout after failures, 2FA</td></tr>
+                            <tr><td>MitM</td><td>Network / Communication</td><td>HTTPS/TLS, VPN, digital certificates</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Encryption -->
+                <div class="section-divider"><span>Encryption</span></div>
+                <div class="content-card">
+                    <h3 class="content-title">Encryption: Symmetric vs. Asymmetric</h3>
+                    <p class="content-text">Encryption transforms readable data (plaintext) into unreadable data (ciphertext) without the correct key. There are two main types:</p>
+                    <table class="visual-table">
+                        <thead><tr><th>Type</th><th>How it works</th><th>Algorithms</th><th>Advantage</th><th>Disadvantage</th></tr></thead>
+                        <tbody>
+                            <tr><td>🔑 Symmetric</td><td>Same key to encrypt and decrypt</td><td>AES, DES, ChaCha20</td><td>Very fast</td><td>How do you share the key securely?</td></tr>
+                            <tr><td>🗝️ Asymmetric</td><td>Key pair: public (encrypts) + private (decrypts)</td><td>RSA, ECC, DSA</td><td>Public key can be shared freely</td><td>Much slower</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="diagram" style="margin-top:1rem">
+                        <div class="diagram-title">Asymmetric Encryption — HTTPS</div>
+                        <div class="flow">
+                            <div class="flow-node blue">🌐 Server<br><small>has private key</small></div>
+                            <div class="flow-arrow">→ public key →</div>
+                            <div class="flow-node green">💻 Browser</div>
+                            <div class="flow-arrow">→ encrypted data →</div>
+                            <div class="flow-node blue">🌐 Server<br><small>decrypts with private key</small></div>
+                        </div>
+                    </div>
+                    <div class="callout info">
+                        <span class="callout-icon">ℹ️</span>
+                        <div class="callout-body">
+                            <strong>HTTPS = HTTP + TLS</strong>
+                            The TLS protocol uses asymmetric encryption to exchange a session key, then uses symmetric encryption (AES) for the rest of the communication — leveraging the speed advantages of each type.
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <pre><code><span class="cm"># Simple symmetric encryption example with Python</span>
+<span class="cm"># (install with: pip install cryptography)</span>
+
+<span class="kw">from</span> cryptography.fernet <span class="kw">import</span> Fernet
+
+<span class="cm"># Generate a random key</span>
+key = Fernet.<span class="fn">generate_key</span>()
+cipher = <span class="fn">Fernet</span>(key)
+
+<span class="cm"># Encrypt</span>
+message = <span class="str">b"Confidential data"</span>
+encrypted = cipher.<span class="fn">encrypt</span>(message)
+<span class="fn">print</span>(<span class="str">f"Encrypted: {encrypted}"</span>)
+
+<span class="cm"># Decrypt</span>
+original = cipher.<span class="fn">decrypt</span>(encrypted)
+<span class="fn">print</span>(<span class="str">f"Original: {original.decode()}"</span>)</code></pre>
+                    </div>
+                    <div class="code-explanation">
+                        <h5>What happens here:</h5>
+                        <p>
+                            <strong>Fernet.generate_key()</strong> — generates a random AES-128 key of 256 bits encoded in base64.<br>
+                            <strong>cipher.encrypt()</strong> — encrypts the message; the result differs each time (due to random IV).<br>
+                            <strong>cipher.decrypt()</strong> — only works with the same key; without it, data is unreadable.<br>
+                            <strong>b"..."</strong> — byte strings; Fernet works with bytes, not regular strings.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 2FA -->
+                <div class="section-divider"><span>Two-Factor Authentication (2FA)</span></div>
+                <div class="content-card">
+                    <h3 class="content-title">2FA — An essential extra layer</h3>
+                    <p class="content-text">Two-factor authentication requires the user to prove their identity with two distinct elements. Even if a password is stolen, the attacker cannot access the account without the second factor.</p>
+                    <table class="visual-table">
+                        <thead><tr><th>Factor</th><th>Type</th><th>Example</th><th>Security</th></tr></thead>
+                        <tbody>
+                            <tr><td>Something you know</td><td>Knowledge</td><td>Password, PIN, secret question</td><td><span class="pill pill-orange">Medium</span></td></tr>
+                            <tr><td>Something you have</td><td>Possession</td><td>Phone (TOTP), hardware key (YubiKey)</td><td><span class="pill pill-green">High</span></td></tr>
+                            <tr><td>Something you are</td><td>Biometric</td><td>Fingerprint, Face ID, iris</td><td><span class="pill pill-green">High</span></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="diagram">
+                        <div class="diagram-title">Login Flow with 2FA (TOTP)</div>
+                        <div class="flow">
+                            <div class="flow-node">📧 Email + Password</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-node blue">✅ 1st Factor OK</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-node">📱 TOTP Code (6 digits)</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-node green">🔓 Access Granted</div>
+                        </div>
+                    </div>
+                    <div class="callout tip">
+                        <span class="callout-icon">💡</span>
+                        <div class="callout-body">
+                            <strong>TOTP — Time-based One-Time Password</strong>
+                            Apps like Google Authenticator or Authy generate a 6-digit code that changes every 30 seconds, based on an algorithm (HMAC-SHA1) and the current time. Even if someone intercepts the code, it expires in 30 seconds.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Best Practices -->
+                <div class="section-divider"><span>Essential Best Practices</span></div>
+                <div class="content-card">
+                    <h3 class="content-title">Digital Hygiene — What you should ALWAYS do</h3>
+                    <table class="visual-table">
+                        <thead><tr><th>Practice</th><th>Why it matters</th><th>How to implement</th></tr></thead>
+                        <tbody>
+                            <tr><td>✅ Unique passwords per service</td><td>If one service is compromised, others remain protected</td><td>Use a password manager (Bitwarden, 1Password)</td></tr>
+                            <tr><td>✅ Enable 2FA everywhere</td><td>Stolen password = account still protected</td><td>Google Authenticator, Authy, YubiKey</td></tr>
+                            <tr><td>✅ Regular updates</td><td>Patches fix known vulnerabilities</td><td>Enable automatic updates</td></tr>
+                            <tr><td>✅ Backups (3-2-1 rule)</td><td>Protection against ransomware and failures</td><td>3 copies, 2 different media, 1 off-site</td></tr>
+                            <tr><td>✅ VPN on public Wi-Fi</td><td>Prevents data interception (MitM)</td><td>Mullvad, ProtonVPN, WireGuard</td></tr>
+                            <tr><td>✅ Check HTTPS</td><td>Ensures the connection is encrypted</td><td>Look for 🔒 in the browser address bar</td></tr>
+                            <tr><td>✅ Don't click suspicious links</td><td>Main phishing vector</td><td>Verify sender, hover over link before clicking</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="callout danger">
+                        <span class="callout-icon">🚨</span>
+                        <div class="callout-body">
+                            <strong>Golden rule</strong>
+                            If you receive an urgent message asking for credentials, money or access — even if it appears to be from your bank, boss or Google — stop, breathe and verify through another channel (call, go to the website directly). Urgency is the main tactic of social engineering.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Glossary -->
+                <div class="section-divider"><span>Essential Glossary</span></div>
+                <div class="content-card">
+                    <h3 class="content-title">Terms you need to know</h3>
+                    <table class="visual-table">
+                        <thead><tr><th>Term</th><th>Simple definition</th></tr></thead>
+                        <tbody>
+                            <tr><td>Vulnerability</td><td>Weakness in a system that can be exploited</td></tr>
+                            <tr><td>Exploit</td><td>Code or technique that takes advantage of a vulnerability</td></tr>
+                            <tr><td>Patch</td><td>Update that fixes a vulnerability</td></tr>
+                            <tr><td>Firewall</td><td>System that filters network traffic (blocks unauthorised traffic)</td></tr>
+                            <tr><td>VPN</td><td>Encrypted tunnel between your device and the internet</td></tr>
+                            <tr><td>Zero-day</td><td>Discovered vulnerability with no patch available yet</td></tr>
+                            <tr><td>Payload</td><td>Malicious part of an attack (the actual "damage")</td></tr>
+                            <tr><td>Social Engineering</td><td>Manipulating people to obtain access (non-technical)</td></tr>
+                            <tr><td>CVE</td><td>Common Vulnerabilities and Exposures — unique ID for vulnerabilities</td></tr>
+                            <tr><td>Pentesting</td><td>Legitimate penetration testing to find security flaws</td></tr>
+                            <tr><td>IOC</td><td>Indicator of Compromise — evidence that a system has been compromised</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Next Steps -->
+                <div class="content-card" style="background:linear-gradient(135deg,rgba(255,98,0,.08),rgba(255,204,0,.04));border-color:rgba(255,140,0,.2)">
+                    <h3 class="content-title">🚀 Next Steps</h3>
+                    <p class="content-text">Now that you have mastered the fundamentals, practise in the <strong>Lab</strong>, test your knowledge in the <strong>Quiz</strong>, and check the <strong>Resources</strong> to deepen your understanding of each topic.</p>
+                    <p class="content-text">In <strong>Goal 2</strong> you will dive into Networks &amp; Protocols — the OSI model, TCP/IP, ports and much more.</p>
+                </div>
+
+            </div><!-- /panel-learn -->
+
+            <!-- ═══ TAB: LAB ═══ -->
+            <div id="panel-lab" class="tab-panel">
+                <div class="content-card">
+                    <h3 class="content-title">Code Lab</h3>
+                    <p class="content-text">Experiment with HTML and CSS in real time. Write your code in the editor on the left and see the result instantly in the preview panel.</p>
+                    <div class="lab-instructions"><strong>Instructions:</strong> Write HTML (with optional CSS and JavaScript) in the editor. Click <strong>"Run"</strong> or press <strong>Ctrl+Enter</strong> to see the result. Use <strong>"Reset"</strong> to clear the editor.</div>
+                    <div class="lab-controls">
+                        <button id="execute-btn" class="btn-execute">Run</button>
+                        <button id="reset-btn" class="btn-reset">Reset</button>
+                    </div>
+                    <div class="lab-container">
+                        <div class="lab-editor">
+                            <div class="lab-header">HTML Editor</div>
+                            <textarea id="code-editor" class="lab-textarea"><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        h1 { color: #333; text-align: center; }
+        .highlight { background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Hello, HTML!</h1>
+    <div class="highlight">
+        <p>This is a basic HTML example with CSS.</p>
+        <p>Try changing the code and click "Run"!</p>
+    </div>
+    <script>console.log('JavaScript works too!');</script>
+</body>
+</html></textarea>
+                        </div>
+                        <div class="lab-preview">
+                            <div class="lab-header">Preview</div>
+                            <iframe id="preview-iframe" class="lab-iframe" sandbox="allow-scripts"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ TAB: QUIZ ═══ -->
+            <div id="panel-quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3 class="content-title">Cybersecurity Knowledge Quiz</h3>
+                    <p class="content-text">Test your knowledge of cybersecurity. Answer the 15 questions and receive immediate feedback.</p>
+                    <div id="quiz-container">
+                        <form id="quiz-form">
+                            <div class="quiz-question"><h4 class="question-title">1. What is a strong password?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q1" value="a"><span class="option-text">A simple word that is easy to remember</span></label><label class="quiz-option"><input type="radio" name="q1" value="b"><span class="option-text">A long combination of letters, numbers and symbols</span></label><label class="quiz-option"><input type="radio" name="q1" value="c"><span class="option-text">Your name and date of birth</span></label><label class="quiz-option"><input type="radio" name="q1" value="d"><span class="option-text">The same password across all accounts</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">2. What does phishing mean?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q2" value="a"><span class="option-text">A type of antivirus</span></label><label class="quiz-option"><input type="radio" name="q2" value="b"><span class="option-text">An attack that tricks users into revealing their data</span></label><label class="quiz-option"><input type="radio" name="q2" value="c"><span class="option-text">A method for encrypting files</span></label><label class="quiz-option"><input type="radio" name="q2" value="d"><span class="option-text">An automatic backup system</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">3. What is the purpose of two-factor authentication (2FA)?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q3" value="a"><span class="option-text">Speed up the login process</span></label><label class="quiz-option"><input type="radio" name="q3" value="b"><span class="option-text">Eliminate the need for a password</span></label><label class="quiz-option"><input type="radio" name="q3" value="c"><span class="option-text">Add an extra layer of security</span></label><label class="quiz-option"><input type="radio" name="q3" value="d"><span class="option-text">Share access between users</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">4. What is malware?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q4" value="a"><span class="option-text">A secure operating system</span></label><label class="quiz-option"><input type="radio" name="q4" value="b"><span class="option-text">A type of network hardware</span></label><label class="quiz-option"><input type="radio" name="q4" value="c"><span class="option-text">Any software created to cause damage</span></label><label class="quiz-option"><input type="radio" name="q4" value="d"><span class="option-text">A legitimate productivity application</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">5. What is the best practice when using public Wi-Fi networks?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q5" value="a"><span class="option-text">Access bank accounts without concern</span></label><label class="quiz-option"><input type="radio" name="q5" value="b"><span class="option-text">Use a VPN to protect your connection</span></label><label class="quiz-option"><input type="radio" name="q5" value="c"><span class="option-text">Share files with other users</span></label><label class="quiz-option"><input type="radio" name="q5" value="d"><span class="option-text">Disable the firewall to improve speed</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">6. What does HTTPS mean in a website address?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q6" value="a"><span class="option-text">The website is faster than usual</span></label><label class="quiz-option"><input type="radio" name="q6" value="b"><span class="option-text">The connection between your browser and the site is encrypted</span></label><label class="quiz-option"><input type="radio" name="q6" value="c"><span class="option-text">The website requires a paid subscription</span></label><label class="quiz-option"><input type="radio" name="q6" value="d"><span class="option-text">The site is owned by a government</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">7. What is ransomware?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q7" value="a"><span class="option-text">A tool used to recover deleted files</span></label><label class="quiz-option"><input type="radio" name="q7" value="b"><span class="option-text">A type of firewall software</span></label><label class="quiz-option"><input type="radio" name="q7" value="c"><span class="option-text">Malware that encrypts your files and demands payment to restore them</span></label><label class="quiz-option"><input type="radio" name="q7" value="d"><span class="option-text">A legal software license model</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">8. What is a firewall used for?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q8" value="a"><span class="option-text">To speed up internet connections</span></label><label class="quiz-option"><input type="radio" name="q8" value="b"><span class="option-text">To monitor and control incoming and outgoing network traffic</span></label><label class="quiz-option"><input type="radio" name="q8" value="c"><span class="option-text">To store backup copies of files</span></label><label class="quiz-option"><input type="radio" name="q8" value="d"><span class="option-text">To compress large files for sharing</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">9. What does "social engineering" mean in cybersecurity?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q9" value="a"><span class="option-text">Building social media platforms</span></label><label class="quiz-option"><input type="radio" name="q9" value="b"><span class="option-text">A field of software engineering focused on collaboration</span></label><label class="quiz-option"><input type="radio" name="q9" value="c"><span class="option-text">Manipulating people psychologically to give up confidential information</span></label><label class="quiz-option"><input type="radio" name="q9" value="d"><span class="option-text">A method of securely sharing data between teams</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">10. Which hashing algorithm is considered most secure for storing passwords?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q10" value="a"><span class="option-text">MD5</span></label><label class="quiz-option"><input type="radio" name="q10" value="b"><span class="option-text">SHA-1</span></label><label class="quiz-option"><input type="radio" name="q10" value="c"><span class="option-text">bcrypt</span></label><label class="quiz-option"><input type="radio" name="q10" value="d"><span class="option-text">Base64</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">11. What is a DDoS attack?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q11" value="a"><span class="option-text">An attack that decrypts files without permission</span></label><label class="quiz-option"><input type="radio" name="q11" value="b"><span class="option-text">Flooding a server with traffic to make it unavailable</span></label><label class="quiz-option"><input type="radio" name="q11" value="c"><span class="option-text">Stealing credentials through fake login pages</span></label><label class="quiz-option"><input type="radio" name="q11" value="d"><span class="option-text">Installing spyware on a target device</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">12. What is the principle of "least privilege"?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q12" value="a"><span class="option-text">All users should have administrator access by default</span></label><label class="quiz-option"><input type="radio" name="q12" value="b"><span class="option-text">Users should only have access to the resources they strictly need to do their job</span></label><label class="quiz-option"><input type="radio" name="q12" value="c"><span class="option-text">Administrators should share their credentials with trusted colleagues</span></label><label class="quiz-option"><input type="radio" name="q12" value="d"><span class="option-text">New employees receive fewer privileges than managers</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">13. What does "encryption" protect against?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q13" value="a"><span class="option-text">Slow internet speeds</span></label><label class="quiz-option"><input type="radio" name="q13" value="b"><span class="option-text">Hardware failures</span></label><label class="quiz-option"><input type="radio" name="q13" value="c"><span class="option-text">Unauthorised reading of intercepted data</span></label><label class="quiz-option"><input type="radio" name="q13" value="d"><span class="option-text">Software bugs and crashes</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">14. What is a "zero-day" vulnerability?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q14" value="a"><span class="option-text">A vulnerability that was patched on the same day it was found</span></label><label class="quiz-option"><input type="radio" name="q14" value="b"><span class="option-text">A flaw unknown to the software vendor, with no patch available yet</span></label><label class="quiz-option"><input type="radio" name="q14" value="c"><span class="option-text">A bug that only appears at midnight</span></label><label class="quiz-option"><input type="radio" name="q14" value="d"><span class="option-text">A scheduled security audit with zero findings</span></label></div></div>
+                            <div class="quiz-question"><h4 class="question-title">15. Which of the following is NOT a good cybersecurity practice?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q15" value="a"><span class="option-text">Keeping software and systems updated</span></label><label class="quiz-option"><input type="radio" name="q15" value="b"><span class="option-text">Using a different password for each account</span></label><label class="quiz-option"><input type="radio" name="q15" value="c"><span class="option-text">Clicking links in unsolicited emails to check if they are safe</span></label><label class="quiz-option"><input type="radio" name="q15" value="d"><span class="option-text">Enabling 2FA on all important accounts</span></label></div></div>
+                        </form>
+                    </div>
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn-execute" type="button">Submit</button>
+                        <button id="clear-quiz" class="btn-reset" type="button">Clear</button>
+                    </div>
+                    <div id="quiz-results" class="quiz-results" style="display:none">
+                        <h4 class="results-title">Quiz Results</h4>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ TAB: RESOURCES ═══ -->
+            <div id="panel-resources" class="tab-panel">
+                <div class="content-card">
+                    <h3 class="content-title">Recommended Resources</h3>
+                    <p class="content-text">Here is a curated list of essential resources to deepen your cybersecurity knowledge.</p>
+                    <div class="resources-list">
+                        <div class="resource-category"><h4 class="category-title">Official Documentation</h4><ul class="resource-links"><li><a href="#" class="resource-link">NIST Cybersecurity Framework</a></li><li><a href="#" class="resource-link">OWASP Top 10 Security Risks</a></li><li><a href="#" class="resource-link">ISO/IEC 27001 Standard Overview</a></li><li><a href="#" class="resource-link">CISA Security Resources</a></li></ul></div>
+                        <div class="resource-category"><h4 class="category-title">Guides &amp; Tutorials</h4><ul class="resource-links"><li><a href="#" class="resource-link">Cryptography Fundamentals Guide</a></li><li><a href="#" class="resource-link">Network Security Basics</a></li><li><a href="#" class="resource-link">Ethical Hacking Introduction</a></li><li><a href="#" class="resource-link">Web Application Security Tutorial</a></li></ul></div>
+                        <div class="resource-category"><h4 class="category-title">Tools &amp; Validators</h4><ul class="resource-links"><li><a href="#" class="resource-link">Have I Been Pwned — Check Data Breaches</a></li><li><a href="#" class="resource-link">Wireshark Network Analyzer</a></li><li><a href="#" class="resource-link">VirusTotal File Scanner</a></li><li><a href="#" class="resource-link">SSL Labs Certificate Checker</a></li></ul></div>
+                        <div class="resource-category"><h4 class="category-title">Quick References</h4><ul class="resource-links"><li><a href="#" class="resource-link">Common Vulnerabilities &amp; Exposures (CVE)</a></li><li><a href="#" class="resource-link">Cybersecurity Glossary</a></li><li><a href="#" class="resource-link">Password Security Cheat Sheet</a></li><li><a href="#" class="resource-link">Incident Response Checklist</a></li></ul></div>
+                    </div>
+                    <div class="resources-note"><p>💡 <strong>Note:</strong> You can edit this list in the future to add your own favourite resources.</p></div>
+                </div>
+            </div>
+
+            <!-- ═══ TAB: EVALUATION ═══ -->
+            <div id="panel-evaluation" class="tab-panel">
+                <div class="content-card">
+                    <h3 class="content-title">Evaluation Criteria</h3>
+                    <p class="content-text">Here are the criteria organised by importance level to assess your mastery of IT Fundamentals &amp; Information Security.</p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span class="evaluation-icon">💠</span>Essential</h4>
+                            <ul class="evaluation-list"><li>What makes a strong password</li><li>Good digital security practices (updates, backups, antivirus)</li><li>Recognising phishing and social engineering</li><li>Difference between personal and sensitive data</li><li>Risks of public Wi-Fi</li><li>Malware: viruses, trojans, ransomware</li><li>Two-factor authentication (2FA)</li><li>Basics of online privacy and account protection</li></ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span class="evaluation-icon">⭐</span>Important</h4>
+                            <ul class="evaluation-list"><li>Identifying secure websites (HTTPS, certificates)</li><li>Managing permissions and privacy settings</li><li>Using VPNs and basic encryption</li><li>Good security practices on mobile devices</li><li>Recognising common attacks (DDoS, brute force, spoofing)</li><li>Home network security (router, WPA3, firewall)</li><li>Backup and recovery policies</li><li>Identity and access management (IAM)</li></ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span class="evaluation-icon">🚀</span>Advanced</h4>
+                            <ul class="evaluation-list"><li>Cryptography: symmetric, asymmetric, hashing</li><li>Web application security (OWASP Top 10)</li><li>Vulnerability analysis and penetration testing</li><li>Monitoring and incident response</li><li>System and server hardening</li><li>Cloud security (IAM, policies, isolation)</li><li>Zero Trust models</li><li>Log management and intrusion detection (IDS/IPS)</li></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<script>
+    let currentProgress = 0;
+    function updateProgress(p) {
+        currentProgress = p;
+        document.getElementById('progress-text').textContent = p + '%';
+        document.getElementById('progress-fill').style.width = p + '%';
+    }
+
+    class TabSystem {
+        constructor() { this.currentTab = 'learn'; this.tabs = ['learn','lab','quiz','resources','evaluation']; this.init(); }
+        init() {
+            document.querySelectorAll('.tab-button').forEach(b => b.addEventListener('click', e => this.switchTab(e.target.dataset.tab)));
+            window.addEventListener('hashchange', () => this.handleHashChange());
+            document.addEventListener('keydown', e => this.handleKeyboard(e));
+            this.handleHashChange();
+        }
+        switchTab(id) {
+            if (!this.tabs.includes(id)) return;
+            this.currentTab = id;
+            document.querySelectorAll('.tab-button').forEach(b => { const a = b.dataset.tab === id; b.classList.toggle('active', a); b.setAttribute('aria-selected', a); });
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${id}`));
+            history.replaceState(null, null, `#${id}`);
+            const map = {learn:20,lab:40,quiz:60,resources:80,evaluation:100};
+            updateProgress(Math.max(currentProgress, map[id]||0));
+        }
+        handleHashChange() { const h = window.location.hash.slice(1); if (h && this.tabs.includes(h)) this.switchTab(h); }
+        handleKeyboard(e) {
+            if (!e.target.classList.contains('tab-button')) return;
+            const i = this.tabs.indexOf(this.currentTab); let n = i;
+            if (e.key==='ArrowLeft')  { e.preventDefault(); n = i>0?i-1:this.tabs.length-1; }
+            if (e.key==='ArrowRight') { e.preventDefault(); n = i<this.tabs.length-1?i+1:0; }
+            if (e.key==='Home') { e.preventDefault(); n=0; }
+            if (e.key==='End')  { e.preventDefault(); n=this.tabs.length-1; }
+            if (n!==i) { this.switchTab(this.tabs[n]); document.querySelector(`[data-tab="${this.tabs[n]}"]`).focus(); }
+        }
+    }
+
+    class LabEditor {
+        constructor() {
+            this.editor = document.getElementById('code-editor');
+            this.iframe = document.getElementById('preview-iframe');
+            this.executeBtn = document.getElementById('execute-btn');
+            this.resetBtn = document.getElementById('reset-btn');
+            this.defaultCode = this.editor.value;
+            this.init();
+        }
+        init() {
+            this.executeBtn.addEventListener('click', () => this.run());
+            this.resetBtn.addEventListener('click', () => this.reset());
+            this.editor.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key==='Enter') { e.preventDefault(); this.run(); } });
+            setTimeout(() => this.run(), 500);
+        }
+        run() {
+            const blob = new Blob([this.editor.value], {type:'text/html'});
+            const url = URL.createObjectURL(blob);
+            this.iframe.src = url;
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            this.executeBtn.textContent = 'Executed!';
+            this.executeBtn.style.background = 'linear-gradient(135deg,#4caf50,#8bc34a)';
+            setTimeout(() => { this.executeBtn.textContent='Run'; this.executeBtn.style.background='linear-gradient(135deg,var(--orange),var(--yellow))'; }, 1000);
+        }
+        reset() { this.editor.value = this.defaultCode; this.run(); this.resetBtn.textContent='Cleared!'; setTimeout(()=>{this.resetBtn.textContent='Reset';},1000); }
+    }
+
+    class QuizManager {
+        constructor() {
+            this.questions = [
+                {question:1,  correct:'b', explanation:'A strong password uses a long combination of letters, numbers and symbols.'},
+                {question:2,  correct:'b', explanation:'Phishing is an attack that tricks users into revealing sensitive data.'},
+                {question:3,  correct:'c', explanation:'2FA adds an extra layer of security beyond just a password.'},
+                {question:4,  correct:'c', explanation:'Malware is any software designed to cause damage or gain unauthorized access.'},
+                {question:5,  correct:'b', explanation:'Using a VPN on public Wi-Fi encrypts your connection and protects your data.'},
+                {question:6,  correct:'b', explanation:'HTTPS means the data exchanged between your browser and the server is encrypted via TLS/SSL.'},
+                {question:7,  correct:'c', explanation:'Ransomware locks or encrypts your files and demands a ransom before the attacker restores access.'},
+                {question:8,  correct:'b', explanation:'A firewall filters traffic based on defined security rules between trusted and untrusted networks.'},
+                {question:9,  correct:'c', explanation:'Social engineering exploits human psychology — tricking people into revealing passwords or sensitive data.'},
+                {question:10, correct:'c', explanation:'bcrypt is purpose-built for password hashing — slow by design with salting, making brute-force attacks far harder.'},
+                {question:11, correct:'b', explanation:'A DDoS attack overwhelms a server with massive traffic from many sources, making it unavailable.'},
+                {question:12, correct:'b', explanation:'Least privilege limits each user\'s access to only what is necessary for their role.'},
+                {question:13, correct:'c', explanation:'Encryption converts data into an unreadable format without the decryption key.'},
+                {question:14, correct:'b', explanation:'A zero-day vulnerability is a flaw unknown to the vendor — no patch exists yet.'},
+                {question:15, correct:'c', explanation:'Clicking links in unsolicited emails is a classic phishing trap — always verify before clicking.'}
+            ];
+            this.init();
+        }
+        init() {
+            document.getElementById('submit-quiz').addEventListener('click', () => this.submit());
+            document.getElementById('clear-quiz').addEventListener('click',  () => this.clear());
+        }
+        submit() {
+            const fd = new FormData(document.getElementById('quiz-form'));
+            let score = 0; const fb = [];
+            this.questions.forEach(q => { const a = fd.get(`q${q.question}`); const ok = a===q.correct; if(ok) score++; fb.push({question:q.question,correct:ok,explanation:q.explanation,correctAnswer:q.correct}); });
+            this.display(score, fb);
+        }
+        display(score, fb) {
+            const pct = Math.round(score/this.questions.length*100);
+            let cls, msg;
+            if (pct>=90)      { cls='score-excellent'; msg='Excellent! You have a strong grasp of cybersecurity fundamentals!'; }
+            else if (pct>=70) { cls='score-good';      msg='Well done! You have a good understanding of cybersecurity.'; }
+            else if (pct>=50) { cls='score-fair';      msg='Not bad, but there is room to improve. Review the concepts again.'; }
+            else              { cls='score-poor';      msg='You need more study. Go back to the learning content.'; }
+            document.getElementById('quiz-score').innerHTML = `<div class="${cls}">${score}/${this.questions.length} (${pct}%)</div><div style="color:var(--text-secondary);font-size:.875rem;margin-top:.5rem">${msg}</div>`;
+            document.getElementById('quiz-feedback').innerHTML = fb.map(i=>`<div class="feedback-item ${i.correct?'feedback-correct':'feedback-incorrect'}"><span class="feedback-icon">${i.correct?'✓':'✗'}</span><span><strong>Question ${i.question}:</strong> ${i.explanation}${!i.correct?`<br><span style="margin-top:.3rem;display:inline-block;font-size:.82rem;color:#c0392b;font-weight:600">Correct answer: ${i.correctAnswer.toUpperCase()}</span>`:''}</span></div>`).join('');
+            const r = document.getElementById('quiz-results'); r.style.display='block'; r.scrollIntoView({behavior:'smooth',block:'nearest'});
+        }
+        clear() {
+            document.querySelectorAll('#quiz-form input[type="radio"]').forEach(i=>i.checked=false);
+            document.getElementById('quiz-results').style.display='none';
+            const b = document.getElementById('clear-quiz'); b.textContent='Cleared!'; setTimeout(()=>{b.textContent='Clear';},1000);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { new TabSystem(); new LabEditor(); new QuizManager(); });
+</script>
+</body>
+</html>

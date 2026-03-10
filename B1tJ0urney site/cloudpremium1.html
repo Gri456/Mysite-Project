@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Cloud Architecture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #020d12;
+            --blue: #00d4ff;
+            --purple: #00aacc;
+            --cyan: #00e5ff;
+            --text-light: #e8f8fc;
+            --text-secondary: #8cc8d8;
+            --card-bg: rgba(0, 212, 255, 0.04);
+            --border-color: rgba(0, 212, 255, 0.15);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 212, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 180, 220, 0.07) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(0,180,220,0.08) 0%, rgba(0,212,255,0.04) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(2,13,18,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge {
+            background: rgba(0,212,255,0.1); border: 1px solid var(--border-color);
+            color: var(--text-light); padding: 0.25rem 0.75rem;
+            border-radius: 50px; font-size: 0.75rem; font-weight: 500;
+        }
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem;
+            font-weight: 500; text-decoration: none; display: inline-flex;
+            align-items: center; gap: 0.5rem; transition: all 0.3s ease;
+            border: none; cursor: pointer;
+        }
+        .btn-back {
+            background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light);
+        }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--blue), var(--cyan)); color: #001a20;
+            box-shadow: 0 4px 15px rgba(0,212,255,0.3); font-weight: 700;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,212,255,0.45); }
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;
+            background: linear-gradient(to right, #00b8d4, #00e5ff, #00acc1);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+        .tabs-container {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .tab-nav {
+            display: flex; background: rgba(0,212,255,0.02);
+            border-bottom: 1px solid var(--border-color); overflow-x: auto;
+        }
+        .tab-button {
+            flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none;
+            border: none; color: var(--text-secondary); font-size: 0.875rem;
+            font-weight: 500; cursor: pointer; transition: all 0.3s ease;
+            position: relative; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text-light); background: rgba(0,212,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(0,212,255,0.1); }
+        .tab-button.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content-card {
+            background: rgba(0,212,255,0.03); padding: 1.5rem; border-radius: 8px;
+            border: 1px solid var(--border-color); margin-bottom: 1.5rem;
+        }
+        .content-card h3 { margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; color: #00b8d4; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+        pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
+        code { font-family: 'Courier New', monospace; font-size: 0.88rem; color: #a0e8f4; }
+        .quiz-item { background: rgba(0,212,255,0.02); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .quiz-question { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-option {
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem;
+            background: rgba(0,212,255,0.03); border: 1px solid var(--border-color);
+            border-radius: 6px; cursor: pointer; transition: all 0.3s ease; margin-bottom: 0.5rem;
+        }
+        .quiz-option:hover { background: rgba(0,212,255,0.08); border-color: var(--blue); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,229,255,0.04));
+            border: 1px solid rgba(0,212,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem;
+        }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255,255,255,0.02); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer { color: #ef4444; font-weight: 600; }
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .evaluation-column { background: rgba(0,212,255,0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); }
+        .evaluation-title { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; font-size: 1rem; font-weight: 600; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .essential { color: var(--cyan); border-bottom-color: var(--cyan) !important; }
+        .important { color: #ffd700; border-bottom-color: #ffd700 !important; }
+        .advanced { color: #ff6b6b; border-bottom-color: #ff6b6b !important; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.875rem; color: var(--text-secondary); }
+        .evaluation-list li { padding-left: 1.2rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+        .lab-container { display: flex; gap: 1rem; height: 360px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .lab-header { background: rgba(0,212,255,0.08); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000d12; color: #00d4ff; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; font-size: 0.88rem; }
+        .lab-output { flex: 1; background: #001018; color: #a0e8f4; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.88rem; line-height: 1.5; }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <div class="logo">BitJourney</div>
+            <span class="premium-badge">Premium • Cloud</span>
+        </div>
+        <nav style="display:flex;gap:.75rem">
+            <a href="premium-cloud.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objective: Cloud Architecture</h1>
+        <p class="course-description">Master the foundational concepts of cloud computing — service models, deployment types, major providers, architectural patterns, networking, IAM, storage, databases, auto scaling, CI/CD, cost management, security, and observability.</p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>8–12h</span></div>
+            <div class="meta-item"><span>🎯</span><span>IaaS · PaaS · SaaS · AWS · Azure · GCP</span></div>
+            <div class="meta-item"><span>📌</span><span>Foundation module</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary)">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'learn')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'lab')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'resources')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'evaluation')">Evaluation</button>
+        </nav>
+
+        <!-- LEARN -->
+        <div id="learn" class="tab-panel active">
+            <div class="content-card">
+                <h3>☁️ 1.1 What is Cloud Computing?</h3>
+                <p>Cloud computing is the delivery of computing services — servers, storage, databases, networking, software — over the internet ("the cloud") to offer faster innovation, flexible resources, and economies of scale.</p>
+                <div class="code-explanation">
+                    <strong>Core characteristics (NIST definition):</strong><br>
+                    • <span class="highlight">On-demand self-service</span> — provision resources without human interaction.<br>
+                    • <span class="highlight">Broad network access</span> — accessible over standard networks from any device.<br>
+                    • <span class="highlight">Resource pooling</span> — multi-tenant model serving multiple consumers.<br>
+                    • <span class="highlight">Rapid elasticity</span> — scale up/down quickly based on demand.<br>
+                    • <span class="highlight">Measured service</span> — pay only for what you use.
+                </div>
+            </div>
+            <div class="content-card">
+                <h3>🏗️ 1.2 Service Models: IaaS, PaaS, SaaS</h3>
+                <ul class="styled-list">
+                    <li><strong>IaaS (Infrastructure as a Service):</strong> Raw compute, storage, and network. You manage OS and above. Examples: AWS EC2, Azure VMs, GCP Compute Engine.</li>
+                    <li><strong>PaaS (Platform as a Service):</strong> Managed runtime for deploying applications. Provider manages infrastructure + OS. Examples: Heroku, AWS Elastic Beanstalk, Google App Engine.</li>
+                    <li><strong>SaaS (Software as a Service):</strong> Fully managed applications. You just use the software. Examples: Gmail, Salesforce, Slack.</li>
+                </ul>
+                <div class="code-explanation">
+                    A useful analogy: IaaS = renting land, PaaS = renting a kitchen, SaaS = ordering a meal.
+                </div>
+            </div>
+            <div class="content-card">
+                <h3>🌍 1.3 Deployment Models</h3>
+                <ul class="styled-list">
+                    <li><strong>Public Cloud:</strong> Resources owned and operated by a third-party provider. Shared infrastructure, pay-as-you-go. Best for scalable workloads.</li>
+                    <li><strong>Private Cloud:</strong> Dedicated infrastructure for a single organisation. Higher control and security, higher cost.</li>
+                    <li><strong>Hybrid Cloud:</strong> Combination of public and private. Workloads move between environments. Enables data sovereignty + cloud flexibility.</li>
+                    <li><strong>Multi-Cloud:</strong> Using multiple cloud providers. Avoids vendor lock-in, improves resilience.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>🗺️ 1.4 Regions, Availability Zones and Edge Locations</h3>
+                <p>Major providers divide their global infrastructure into geographic areas for fault tolerance and low latency.</p>
+                <ul class="styled-list">
+                    <li><strong>Region:</strong> A geographic area containing multiple data centers (e.g., eu-west-1, West Europe).</li>
+                    <li><strong>Availability Zone (AZ):</strong> Isolated data centers within a region. Deploying across AZs ensures high availability.</li>
+                    <li><strong>Edge Locations:</strong> CDN endpoints closer to end users to reduce latency (used by CloudFront, Azure CDN, etc.).</li>
+                </ul>
+                <div class="code-explanation">
+                    <strong>Best practice:</strong> Always deploy production workloads across at least 2 AZs for resilience.
+                </div>
+            </div>
+            <div class="content-card">
+                <h3>☁️ 1.5 Major Cloud Providers</h3>
+                <ul class="styled-list">
+                    <li><strong>AWS (Amazon Web Services):</strong> Market leader, widest service catalogue (~200+ services). Strong in compute, storage, serverless (Lambda).</li>
+                    <li><strong>Microsoft Azure:</strong> Strong enterprise adoption, deep Active Directory and .NET integration. Leader in hybrid cloud.</li>
+                    <li><strong>GCP (Google Cloud Platform):</strong> Strong in data analytics, Kubernetes (GKE originated here), and AI/ML services.</li>
+                    <li><strong>Others:</strong> Oracle Cloud, IBM Cloud, Alibaba Cloud — popular in specific industries or regions.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>📐 1.6 Cloud Architecture Patterns</h3>
+                <p>Modern cloud architectures are built around proven patterns for scalability, resilience, and cost efficiency.</p>
+                <ul class="styled-list">
+                    <li><strong>Monolithic vs Microservices:</strong> Monoliths are single deployable units. Microservices decompose an application into small, independently deployable services.</li>
+                    <li><strong>Event-Driven Architecture:</strong> Services communicate via events (Kafka, SQS, EventBridge). Decoupled and scalable.</li>
+                    <li><strong>Serverless:</strong> Execute code without managing servers. Pay per invocation (AWS Lambda, Azure Functions).</li>
+                    <li><strong>CQRS + Event Sourcing:</strong> Separate read and write models; store state changes as a sequence of events.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>🔩 1.7 Well-Architected Framework</h3>
+                <p>AWS, Azure, and GCP all publish well-architected frameworks. AWS's is the most widely referenced, built on 6 pillars:</p>
+                <ul class="styled-list">
+                    <li><strong>Operational Excellence</strong> — run and monitor systems effectively.</li>
+                    <li><strong>Security</strong> — protect data and systems.</li>
+                    <li><strong>Reliability</strong> — recover from failures automatically.</li>
+                    <li><strong>Performance Efficiency</strong> — use resources efficiently.</li>
+                    <li><strong>Cost Optimisation</strong> — avoid unnecessary costs.</li>
+                    <li><strong>Sustainability</strong> — minimise environmental impact.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>🔄 1.8 Shared Responsibility Model</h3>
+                <p>Security and compliance in the cloud is a shared responsibility between the provider and the customer.</p>
+                <div class="code-explanation">
+                    <strong>Provider is responsible for:</strong> Security OF the cloud (physical hardware, networking, hypervisor).<br>
+                    <strong>Customer is responsible for:</strong> Security IN the cloud (data, IAM, OS patching, encryption, network configuration).
+                </div>
+                <ul class="styled-list">
+                    <li>In IaaS — customer manages most of the stack.</li>
+                    <li>In PaaS — provider takes over more of the responsibility.</li>
+                    <li>In SaaS — customer is mainly responsible for data and access.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>⚡ 1.9 Elasticity, Scalability and High Availability</h3>
+                <ul class="styled-list">
+                    <li><strong>Scalability:</strong> The ability to handle growing workloads — vertically (bigger instances) or horizontally (more instances).</li>
+                    <li><strong>Elasticity:</strong> Automatically scale resources up and down in response to demand.</li>
+                    <li><strong>High Availability (HA):</strong> System remains operational despite component failures. Target: 99.9%+ uptime.</li>
+                    <li><strong>Fault Tolerance:</strong> System continues operating even when components fail. Uses redundancy and failover.</li>
+                    <li><strong>Disaster Recovery (DR):</strong> Plan for recovering systems after catastrophic failure. Key metrics: RPO and RTO.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>🗄️ 1.10 Core Cloud Services Overview</h3>
+                <ul class="styled-list">
+                    <li><strong>Compute:</strong> EC2 / Azure VMs / GCE — virtual machines to run workloads.</li>
+                    <li><strong>Object Storage:</strong> S3 / Azure Blob / GCS — store unstructured data at scale.</li>
+                    <li><strong>Managed Databases:</strong> RDS, DynamoDB / Azure SQL / Cloud Spanner.</li>
+                    <li><strong>Networking:</strong> VPC / VNet — isolated virtual networks.</li>
+                    <li><strong>IAM:</strong> Identity and Access Management — control who can do what.</li>
+                    <li><strong>CDN:</strong> CloudFront / Azure CDN / Cloud CDN — edge caching for performance.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>📦 1.11 Containers and Kubernetes</h3>
+                <p>Containers package applications and their dependencies into isolated units, ensuring consistent behaviour across environments.</p>
+                <pre><code># Build and run a container
+docker build -t myapp:1.0 .
+docker run -p 8080:80 myapp:1.0</code></pre>
+                <ul class="styled-list">
+                    <li><strong>Docker:</strong> The standard container runtime.</li>
+                    <li><strong>Kubernetes (K8s):</strong> Orchestrates containers at scale. Manages deployment, scaling, and self-healing.</li>
+                    <li><strong>Managed K8s:</strong> EKS (AWS), AKS (Azure), GKE (GCP) — removes the burden of managing the control plane.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>💡 1.12 Cloud-Native Principles</h3>
+                <ul class="styled-list">
+                    <li>Design for failure — assume components will fail.</li>
+                    <li>Immutable infrastructure — replace, don't patch.</li>
+                    <li>Stateless services where possible.</li>
+                    <li>Automate everything — infrastructure, testing, deployment.</li>
+                    <li>Observability built in from the start.</li>
+                </ul>
+                <div class="code-explanation">
+                    Cloud-native is not just "running in the cloud" — it's about leveraging cloud capabilities to build more resilient, scalable, and manageable systems.
+                </div>
+            </div>
+            <div class="content-card">
+                <h3>🌐 1.13 Networking in the Cloud — VPC, Subnets and Security Groups</h3>
+                <p>Every cloud workload lives inside a virtual network. Understanding how cloud networking is structured is essential for designing secure, well-connected systems.</p>
+                <ul class="styled-list">
+                    <li><strong>VPC / VNet:</strong> A Virtual Private Cloud (AWS) or Virtual Network (Azure) is a logically isolated network you control. You define the IP address range, subnets, route tables, and gateways.</li>
+                    <li><strong>Public subnet:</strong> Resources here can reach the internet via an Internet Gateway. Load balancers and bastion hosts live here.</li>
+                    <li><strong>Private subnet:</strong> No direct internet access. Application servers and databases live here for security.</li>
+                    <li><strong>Security Groups:</strong> Stateful firewall rules at the instance level — define what traffic is allowed in and out.</li>
+                    <li><strong>Network ACLs:</strong> Stateless firewall rules at the subnet level — an additional layer of control.</li>
+                    <li><strong>NAT Gateway:</strong> Allows instances in a private subnet to initiate outbound internet connections (e.g. software updates) without being reachable from the internet.</li>
+                </ul>
+                <div class="code-explanation">
+                    <strong>Classic 3-tier layout:</strong><br>
+                    • <span class="highlight">Public subnet</span> — Load Balancer (ALB / NLB)<br>
+                    • <span class="highlight">Private subnet (app)</span> — EC2 / ECS / Lambda<br>
+                    • <span class="highlight">Private subnet (data)</span> — RDS / ElastiCache / DynamoDB
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>🔐 1.14 Identity and Access Management (IAM)</h3>
+                <p>IAM is the foundation of cloud security. It controls who — humans and services — can perform what actions on which resources.</p>
+                <ul class="styled-list">
+                    <li><strong>Users:</strong> Individual identities for humans. Best practice: use SSO via an identity provider (Okta, Azure AD, Google Workspace) rather than managing IAM users directly.</li>
+                    <li><strong>Groups:</strong> Collections of users sharing the same permissions. Assign policies to groups, not individuals.</li>
+                    <li><strong>Roles:</strong> Identities assumed by services, Lambda functions, or EC2 instances. No long-lived credentials — roles issue temporary tokens via STS.</li>
+                    <li><strong>Policies:</strong> JSON documents defining what actions are allowed or denied on which resources. Follow the <span class="highlight">principle of least privilege</span> — grant only what is needed.</li>
+                    <li><strong>MFA:</strong> Multi-Factor Authentication is mandatory for all human access to production environments.</li>
+                </ul>
+                <pre><code>// IAM policy — allow read-only S3 access to a specific bucket
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["s3:GetObject", "s3:ListBucket"],
+    "Resource": [
+      "arn:aws:s3:::my-app-bucket",
+      "arn:aws:s3:::my-app-bucket/*"
+    ]
+  }]
+}</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🗄️ 1.15 Storage Types in the Cloud</h3>
+                <p>Cloud providers offer multiple storage types for different workload requirements. Choosing the right one affects performance, cost, and durability.</p>
+                <ul class="styled-list">
+                    <li><strong>Object Storage (S3 / Azure Blob / GCS):</strong> Unlimited flat storage for files, backups, static assets, and data lakes. Accessed via HTTP. 11 nines durability. Not mountable as a filesystem.</li>
+                    <li><strong>Block Storage (EBS / Azure Managed Disk):</strong> Persistent disk volumes attached to VMs. Low latency, suitable for databases and OS volumes. Tied to a single AZ.</li>
+                    <li><strong>File Storage (EFS / Azure Files / Filestore):</strong> Shared network filesystem (NFS / SMB). Mountable by multiple instances simultaneously — useful for shared content and CMS systems.</li>
+                    <li><strong>Ephemeral / Instance Storage:</strong> Physically attached to the host — extremely fast, but data is lost when the instance stops. Use for caches and temp files only.</li>
+                    <li><strong>Archive Storage (S3 Glacier / Azure Archive):</strong> Long-term cold storage at very low cost. Retrieval takes minutes to hours. Ideal for compliance archives.</li>
+                </ul>
+                <div class="code-explanation">
+                    <strong>Rule of thumb:</strong> Object storage for data at rest and distribution. Block storage for databases and VM disks. File storage for shared workloads needing concurrent access.
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>📊 1.16 Managed Databases — Relational and Non-Relational</h3>
+                <p>Managed database services eliminate patching, backups, and replication complexity — letting teams focus on application logic.</p>
+                <ul class="styled-list">
+                    <li><strong>Relational (SQL):</strong> Amazon RDS (MySQL, PostgreSQL, MariaDB), Aurora (MySQL/PostgreSQL-compatible, up to 5× faster than standard MySQL), Azure SQL Database, Cloud SQL. Best for structured data, ACID transactions, and complex joins.</li>
+                    <li><strong>Key-Value / Wide-Column:</strong> DynamoDB (AWS), Azure Cosmos DB, Bigtable. Single-digit millisecond reads at any scale. Best for sessions, carts, and leaderboards.</li>
+                    <li><strong>Document:</strong> MongoDB Atlas, Firestore. Flexible JSON schemas. Best for content management and product catalogues.</li>
+                    <li><strong>Time-Series:</strong> Amazon Timestream, InfluxDB Cloud. Optimised for metrics, IoT telemetry, and monitoring data with automatic downsampling.</li>
+                    <li><strong>Serverless databases:</strong> Aurora Serverless v2, DynamoDB on-demand — scale to zero, pay per request. Ideal for unpredictable or bursty workloads.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>🚀 1.17 Auto Scaling and Load Balancing</h3>
+                <p>Auto scaling and load balancing work together to handle variable traffic, maximise availability, and minimise cost by running only the capacity you need.</p>
+                <ul class="styled-list">
+                    <li><strong>Auto Scaling Group (ASG):</strong> Automatically adds or removes EC2 instances based on policies (CPU%, custom CloudWatch metrics, schedules). Defines min, desired, and max capacity.</li>
+                    <li><strong>Application Load Balancer (ALB):</strong> Layer 7 (HTTP/HTTPS). Routes traffic based on URL path, hostname, or headers. Supports WebSockets and gRPC. Best for microservices and web apps.</li>
+                    <li><strong>Network Load Balancer (NLB):</strong> Layer 4 (TCP/UDP). Ultra-low latency, static IPs, handles millions of requests per second. Best for gaming, VoIP, and financial systems.</li>
+                    <li><strong>Target Groups:</strong> Logical groups of backends (EC2 instances, ECS tasks, Lambda functions, or IPs) that ALB/NLB routes traffic to. Each target is health-checked independently.</li>
+                    <li><strong>Health checks:</strong> Load balancers probe targets on a defined interval. Unhealthy targets are automatically removed from rotation until they recover.</li>
+                </ul>
+                <pre><code># Target tracking scaling — maintain 70% average CPU
+aws autoscaling put-scaling-policy   --auto-scaling-group-name my-asg   --policy-name cpu-target-70   --policy-type TargetTrackingScaling   --target-tracking-configuration '{
+    "TargetValue": 70.0,
+    "PredefinedMetricSpecification": {
+      "PredefinedMetricType": "ASGAverageCPUUtilization"
+    }
+  }'</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🔄 1.18 CI/CD and DevOps in the Cloud</h3>
+                <p>Continuous Integration and Continuous Delivery are the engines that allow cloud teams to ship reliably and frequently without sacrificing quality.</p>
+                <ul class="styled-list">
+                    <li><strong>Continuous Integration (CI):</strong> Developers merge code frequently — every push triggers automated build, lint, and test pipelines. Catches bugs early, before they compound.</li>
+                    <li><strong>Continuous Delivery (CD):</strong> Every passing build is automatically deployable. Release to production is either automatic (deployment) or a single manual approval step (delivery).</li>
+                    <li><strong>Pipeline tools:</strong> GitHub Actions, GitLab CI/CD, AWS CodePipeline, Azure DevOps, CircleCI, Jenkins. Most teams today use GitHub Actions for its simplicity and ecosystem.</li>
+                    <li><strong>Deployment strategies:</strong>
+                        <ul style="margin-top:0.5rem;padding-left:1.5rem;color:var(--text-secondary)">
+                            <li style="margin-bottom:0.4rem"><strong>Blue/Green:</strong> Run two identical environments — switch traffic instantly. Easy rollback.</li>
+                            <li style="margin-bottom:0.4rem"><strong>Canary:</strong> Gradually route a percentage of traffic to the new version. Monitor, then expand or rollback.</li>
+                            <li><strong>Rolling:</strong> Replace instances one batch at a time. Zero downtime, slower rollback.</li>
+                        </ul>
+                    </li>
+                    <li><strong>GitOps:</strong> Git is the single source of truth for infrastructure and application config. ArgoCD and Flux automatically reconcile Kubernetes clusters to the desired state declared in Git.</li>
+                </ul>
+                <div class="code-explanation">
+                    <strong>The DevOps loop:</strong> Plan → Code → Build → Test → Release → Deploy → Operate → Monitor → (repeat)
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>🌩️ 1.19 Cloud Cost Management Fundamentals</h3>
+                <p>Cloud bills scale with usage — without visibility and discipline, costs grow quickly. Understanding the pricing model early prevents expensive surprises.</p>
+                <ul class="styled-list">
+                    <li><strong>On-Demand:</strong> Pay per second or minute with no commitment. Most flexible, highest unit price. Best for unpredictable or short-lived workloads.</li>
+                    <li><strong>Reserved Instances / Savings Plans:</strong> Commit to 1 or 3 years of usage in exchange for up to 72% discount. Best for stable, always-on workloads like production databases.</li>
+                    <li><strong>Spot Instances:</strong> Use unused cloud capacity at up to 90% discount. Can be interrupted with a 2-minute warning. Best for batch jobs, CI runners, and ML training.</li>
+                    <li><strong>Free Tier:</strong> AWS, Azure, and GCP all offer free tiers — useful for learning, prototyping, and small hobby projects.</li>
+                    <li><strong>Cost Explorer / Budgets:</strong> Native tools to visualise spend, identify top cost drivers, set budget thresholds, and receive alerts before overspending.</li>
+                    <li><strong>Right-sizing:</strong> Match instance type and size to actual workload demand. The most common source of waste is over-provisioned instances running at 10–20% CPU utilisation.</li>
+                </ul>
+                <div class="code-explanation">
+                    <strong>FinOps principle:</strong> Every engineer is responsible for cost. Tag all resources with team and environment, review Cost Explorer weekly, and treat cloud spend as an engineering metric.
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>🔒 1.20 Cloud Security Fundamentals</h3>
+                <p>Security in the cloud is a continuous practice. These are the non-negotiable basics every cloud practitioner must understand from day one.</p>
+                <ul class="styled-list">
+                    <li><strong>Encryption at rest:</strong> All storage (S3, EBS, RDS) must be encrypted using managed keys. AWS KMS, Azure Key Vault, and GCP Cloud KMS provide centralised key management. Often a compliance requirement.</li>
+                    <li><strong>Encryption in transit:</strong> All network communication must use TLS 1.2+. Use ACM (AWS Certificate Manager) for free, auto-renewing certificates.</li>
+                    <li><strong>Secrets management:</strong> Never hardcode passwords or API keys in code or IaC. Use AWS Secrets Manager, Azure Key Vault, or HashiCorp Vault — rotate secrets automatically on a schedule.</li>
+                    <li><strong>Cloud security posture:</strong> AWS Security Hub, Microsoft Defender for Cloud, and GCP Security Command Center continuously scan for misconfigurations and compliance violations.</li>
+                    <li><strong>Zero Trust:</strong> Never trust, always verify. Authenticate every request regardless of network origin. Apply least-privilege IAM everywhere — no wildcard permissions.</li>
+                    <li><strong>Compliance frameworks:</strong> SOC 2, ISO 27001, GDPR, HIPAA, PCI DSS — cloud providers publish shared responsibility documentation and compliance programmes for each standard.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>📈 1.21 Monitoring, Logging and Observability Basics</h3>
+                <p>You cannot manage what you cannot measure. Observability is built on three pillars — and cloud providers offer native tooling for all three out of the box.</p>
+                <ul class="styled-list">
+                    <li><strong>Metrics:</strong> Numeric measurements over time — CPU%, memory, request rate, error rate, p99 latency. AWS CloudWatch, Azure Monitor, GCP Cloud Monitoring. Set alarms on key thresholds to trigger alerts or auto-scaling.</li>
+                    <li><strong>Logs:</strong> Timestamped event records from applications and infrastructure. CloudWatch Logs, Azure Log Analytics, GCP Cloud Logging. Aggregate centrally, query with structured log formats (JSON).</li>
+                    <li><strong>Traces:</strong> Follow a single request as it traverses multiple services. AWS X-Ray, Azure Application Insights, GCP Cloud Trace. Essential for debugging latency and errors in distributed microservices.</li>
+                    <li><strong>Dashboards:</strong> Grafana (open-source, connects to any data source), CloudWatch Dashboards, Azure Workbooks — visualise all signals in one operational view.</li>
+                    <li><strong>Alerting:</strong> PagerDuty, OpsGenie, or native cloud alerting routes notifications to the right person or team when thresholds are breached. Design alerts to be actionable — every alert should require a human response.</li>
+                </ul>
+                <div class="code-explanation">
+                    <strong>The three pillars:</strong> <span class="highlight">Logs</span> tell you what happened. <span class="highlight">Metrics</span> tell you how the system is behaving over time. <span class="highlight">Traces</span> tell you where a specific request went wrong across services.
+                </div>
+            </div>
+
+            <div class="content-card" style="border-left:5px solid var(--cyan)">
+                <h3>✅ 1.22 Module Summary</h3>
+                <ul class="styled-list">
+                    <li>The 5 NIST characteristics of cloud computing</li>
+                    <li>Differences between IaaS, PaaS, and SaaS</li>
+                    <li>Public, private, hybrid, and multi-cloud deployment models</li>
+                    <li>Regions, Availability Zones, and edge locations</li>
+                    <li>AWS, Azure, and GCP positioning and strengths</li>
+                    <li>Core architectural patterns: microservices, event-driven, serverless</li>
+                    <li>AWS Well-Architected Framework — 6 pillars</li>
+                    <li>Shared Responsibility Model across IaaS / PaaS / SaaS</li>
+                    <li>VPC networking: subnets, Security Groups, NAT Gateway</li>
+                    <li>IAM: users, groups, roles, least-privilege policies</li>
+                    <li>Storage types: object, block, file, ephemeral, archive</li>
+                    <li>Managed databases: relational, key-value, document, time-series, serverless</li>
+                    <li>Auto Scaling (ASG) and Load Balancing (ALB vs NLB)</li>
+                    <li>CI/CD pipeline fundamentals and deployment strategies</li>
+                    <li>Cloud cost model: on-demand, reserved, Spot, and right-sizing</li>
+                    <li>Security essentials: encryption, secrets management, Zero Trust, posture tools</li>
+                    <li>Observability: metrics, logs, traces, dashboards, and alerting</li>
+                </ul>
+                <p style="margin-top:1rem"><strong>Next:</strong> Infrastructure as Code — provision and manage all of the above programmatically with Terraform, Pulumi, and Ansible.</p>
+            </div>
+        </div>
+
+        <!-- LAB -->
+        <div id="lab" class="tab-panel">
+            <h3 style="margin-bottom:1rem">Lab: Cloud Architecture Sizing</h3>
+            <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem">Simulate an architecture decision. Edit the config below to choose service model, provider and redundancy, then run to see the recommendation output.</p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header">ARCHITECTURE CONFIG</div>
+                    <textarea class="lab-textarea" id="lab-input">// Cloud Architecture Planner
+const config = {
+  workload: "web-application",
+  serviceModel: "PaaS",       // IaaS | PaaS | SaaS
+  provider: "AWS",            // AWS | Azure | GCP
+  availabilityZones: 2,
+  autoscaling: true,
+  region: "eu-west-1"
+};</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header">ARCHITECTURE OUTPUT</div>
+                    <div class="lab-output" id="lab-output">Click "Run" to generate your architecture recommendation...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem" onclick="runLab()">▶ Run</button>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: Cloud Architecture</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">Test your knowledge of cloud fundamentals. 10 questions — immediate feedback.</p>
+                <form id="quiz-form">
+                    <div class="quiz-item">
+                        <p class="quiz-question">1. Which NIST characteristic allows users to provision resources without human interaction from the provider?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"><span class="option-text">A) Resource pooling</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B"><span class="option-text">B) Rapid elasticity</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C" data-correct="true"><span class="option-text">C) On-demand self-service</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"><span class="option-text">D) Measured service</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">2. In which service model does the customer manage the operating system?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A" data-correct="true"><span class="option-text">A) IaaS</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B"><span class="option-text">B) PaaS</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C"><span class="option-text">C) SaaS</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"><span class="option-text">D) FaaS</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">3. What is an Availability Zone?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"><span class="option-text">A) A CDN edge location</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B" data-correct="true"><span class="option-text">B) An isolated data center within a region</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C"><span class="option-text">C) A geographic region</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"><span class="option-text">D) A VPN endpoint</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">4. Which cloud provider originated Kubernetes (GKE)?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"><span class="option-text">A) AWS</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B"><span class="option-text">B) Microsoft Azure</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C" data-correct="true"><span class="option-text">C) Google Cloud Platform</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"><span class="option-text">D) IBM Cloud</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">5. What does the Shared Responsibility Model define?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"><span class="option-text">A) How to share cloud costs between teams</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B"><span class="option-text">B) Multi-cloud load balancing rules</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C" data-correct="true"><span class="option-text">C) Which security tasks belong to the provider vs the customer</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"><span class="option-text">D) How billing is calculated</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">6. How many pillars does the AWS Well-Architected Framework have?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"><span class="option-text">A) 4</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B"><span class="option-text">B) 5</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C" data-correct="true"><span class="option-text">C) 6</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"><span class="option-text">D) 8</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">7. What is the key advantage of a multi-cloud strategy?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"><span class="option-text">A) Lower management complexity</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B" data-correct="true"><span class="option-text">B) Avoids vendor lock-in and improves resilience</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C"><span class="option-text">C) Always cheaper than single cloud</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"><span class="option-text">D) Provides automatic DR</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">8. What does RTO stand for in disaster recovery?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"><span class="option-text">A) Redundant Transfer Object</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B"><span class="option-text">B) Recovery Transfer Optimisation</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C" data-correct="true"><span class="option-text">C) Recovery Time Objective</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"><span class="option-text">D) Real-Time Operations</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">9. Which of these is an example of serverless compute?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"><span class="option-text">A) EC2 instance</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B"><span class="option-text">B) Azure Virtual Machine</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"><span class="option-text">C) AWS Lambda</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"><span class="option-text">D) Google Compute Engine</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">10. What is a core principle of cloud-native design?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"><span class="option-text">A) Use monolithic deployments for simplicity</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B"><span class="option-text">B) Avoid automation to reduce errors</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C" data-correct="true"><span class="option-text">C) Design for failure and automate everything</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"><span class="option-text">D) Prefer stateful services for reliability</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">11. What is the difference between elasticity and scalability in cloud computing?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"><span class="option-text">A) They are synonyms — both mean adding more servers</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B"><span class="option-text">B) Scalability is automatic; elasticity requires manual intervention</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C" data-correct="true"><span class="option-text">C) Elasticity automatically scales resources up AND down based on demand; scalability is the ability to handle increased load by adding resources</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"><span class="option-text">D) Elasticity applies only to storage; scalability applies to compute</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">12. In a hybrid cloud deployment model, what are the two environments that are connected?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"><span class="option-text">A) Two different public cloud providers (e.g. AWS + Azure)</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B" data-correct="true"><span class="option-text">B) An on-premises private infrastructure and a public cloud provider, connected to share data and workloads</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C"><span class="option-text">C) A development environment and a production environment in the same cloud</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"><span class="option-text">D) A CDN edge network and a cloud region</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">13. What does RPO (Recovery Point Objective) measure in a disaster recovery plan?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"><span class="option-text">A) How long it takes to restore a system after a failure</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B"><span class="option-text">B) The number of replicas needed to survive a failure</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"><span class="option-text">C) The maximum acceptable amount of data loss measured in time — e.g., RPO of 1 hour means you can afford to lose up to 1 hour of data</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"><span class="option-text">D) The percentage of uptime guaranteed by the SLA</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">14. Which of the following best describes the event-driven architecture pattern?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"><span class="option-text">A) Services communicate by calling each other's APIs synchronously in a chain</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"><span class="option-text">B) A single service handles all business logic to avoid network latency</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C" data-correct="true"><span class="option-text">C) Services produce and consume events asynchronously via a message broker — decoupling producers from consumers so they can scale and fail independently</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"><span class="option-text">D) An architecture where all requests are processed only during scheduled time windows</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">15. What is the primary purpose of a Content Delivery Network (CDN) in cloud architecture?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"><span class="option-text">A) To provide a private network connection between on-premises and the cloud</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"><span class="option-text">B) To encrypt all traffic between users and the origin server</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"><span class="option-text">C) To cache and serve static content from geographically distributed edge locations, reducing latency for end users regardless of where the origin server is hosted</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D"><span class="option-text">D) To automatically scale compute resources based on traffic patterns</span></label>
+                    </div>
+                </form>
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear</button>
+                </div>
+                <div id="quiz-results" class="quiz-results" style="display:none">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback" class="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESOURCES -->
+        <div id="resources" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem">Support Materials</h3>
+            <div class="content-card">
+                <a href="https://aws.amazon.com/architecture/well-architected/" target="_blank" class="resource-link">→ AWS Well-Architected Framework</a>
+                <a href="https://learn.microsoft.com/en-us/azure/architecture/" target="_blank" class="resource-link">→ Azure Architecture Center</a>
+                <a href="https://cloud.google.com/architecture" target="_blank" class="resource-link">→ Google Cloud Architecture Framework</a>
+                <a href="https://docs.aws.amazon.com/whitepapers/latest/aws-overview/introduction.html" target="_blank" class="resource-link">→ AWS Overview Whitepaper</a>
+                <a href="https://www.cncf.io/reports/cloud-native-survey-2023/" target="_blank" class="resource-link">→ CNCF Cloud Native Survey 2023</a>
+                <a href="https://12factor.net/" target="_blank" class="resource-link">→ The Twelve-Factor App Methodology</a>
+            </div>
+        </div>
+
+        <!-- EVALUATION -->
+        <div id="evaluation" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Domain Criteria: Cloud Architecture</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">To complete this module, demonstrate understanding across these competency levels:</p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>5 NIST characteristics of cloud computing</li>
+                            <li>Difference between IaaS, PaaS, SaaS</li>
+                            <li>Public vs private vs hybrid cloud</li>
+                            <li>Concepts of Region and Availability Zone</li>
+                            <li>Basic awareness of AWS, Azure, GCP</li>
+                            <li>Shared Responsibility Model</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Well-Architected Framework pillars</li>
+                            <li>Elasticity vs scalability vs HA</li>
+                            <li>Event-driven and serverless patterns</li>
+                            <li>Core services: compute, storage, networking, IAM</li>
+                            <li>Multi-cloud strategy trade-offs</li>
+                            <li>Containers and Kubernetes basics</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>CQRS and Event Sourcing patterns</li>
+                            <li>RPO / RTO and DR strategies</li>
+                            <li>Immutable infrastructure principles</li>
+                            <li>Cloud-native observability design</li>
+                            <li>Architecture cost trade-off analysis</li>
+                            <li>Provider-specific feature differentiation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function openTab(evt, tabName) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
+    const map = { learn:25, lab:50, quiz:75, resources:90, evaluation:100 };
+    document.getElementById('progress-fill').style.width = map[tabName] + '%';
+    document.getElementById('progress-text').innerText = map[tabName] + '%';
+    window.scrollTo({ top: 150, behavior: 'smooth' });
+}
+
+function runLab() {
+    const input = document.getElementById('lab-input').value;
+    const out = document.getElementById('lab-output');
+    let provider = 'AWS', model = 'PaaS', az = 2;
+    try {
+        const m1 = input.match(/provider:\s*["'](\w+)["']/);
+        const m2 = input.match(/serviceModel:\s*["'](\w+)["']/);
+        const m3 = input.match(/availabilityZones:\s*(\d+)/);
+        if (m1) provider = m1[1];
+        if (m2) model = m2[1];
+        if (m3) az = parseInt(m3[1]);
+    } catch(e) {}
+    const services = {
+        AWS: { IaaS: 'EC2 + EBS + VPC', PaaS: 'Elastic Beanstalk + RDS', SaaS: 'AWS Managed Services' },
+        Azure: { IaaS: 'Azure VMs + Managed Disks', PaaS: 'App Service + Azure SQL', SaaS: 'Microsoft 365 Integration' },
+        GCP: { IaaS: 'Compute Engine + Persistent Disk', PaaS: 'App Engine + Cloud SQL', SaaS: 'Google Workspace APIs' }
+    };
+    const svc = (services[provider] && services[provider][model]) || 'Custom configuration';
+    out.innerHTML = `✅ Architecture Recommendation
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Provider:        ${provider}
+Service Model:   ${model}
+AZ Redundancy:   ${az} zones
+HA Rating:       ${az >= 2 ? '✅ High Availability' : '⚠️ Single Point of Failure'}
+
+Recommended Services:
+  → ${svc}
+  → Load Balancer: ${provider === 'AWS' ? 'ALB/NLB' : provider === 'Azure' ? 'Azure Load Balancer' : 'Cloud Load Balancing'}
+  → Auto Scaling: ${provider === 'AWS' ? 'ASG' : provider === 'Azure' ? 'VMSS' : 'Managed Instance Groups'}
+  → Monitoring: ${provider === 'AWS' ? 'CloudWatch' : provider === 'Azure' ? 'Azure Monitor' : 'Cloud Monitoring'}
+
+Estimated SLA:   ${az >= 2 ? '99.99%' : '99.9%'}
+Cost Tier:       ${model === 'IaaS' ? 'Medium (more control)' : model === 'PaaS' ? 'Optimised (less ops)' : 'Usage-based'}`;
+}
+
+// Quiz
+const questionsData = {
+    q1: { correct: 'C', exp: 'On-demand self-service lets users provision resources without contacting the provider.' },
+    q2: { correct: 'A', exp: 'In IaaS, the customer manages the OS, middleware, and application. The provider manages hardware.' },
+    q3: { correct: 'B', exp: 'An AZ is an isolated data center (or cluster) within a region, connected by low-latency links.' },
+    q4: { correct: 'C', exp: 'Kubernetes was developed internally at Google and open-sourced. GKE was the first managed K8s service.' },
+    q5: { correct: 'C', exp: 'The Shared Responsibility Model divides security tasks: provider secures the cloud, customer secures what is in it.' },
+    q6: { correct: 'C', exp: 'AWS Well-Architected has 6 pillars: Operational Excellence, Security, Reliability, Performance, Cost, Sustainability.' },
+    q7: { correct: 'B', exp: 'Multi-cloud avoids dependency on a single provider and improves resilience, at the cost of higher complexity.' },
+    q8: { correct: 'C', exp: 'RTO (Recovery Time Objective) is the maximum acceptable time to restore a system after failure.' },
+    q9: { correct: 'C', exp: 'AWS Lambda is serverless — you deploy code and AWS manages all the underlying infrastructure.' },
+    q10: { correct: 'C', exp: 'Cloud-native design assumes failure will happen and automates resilience, scaling, and deployment.' },
+    q11: { correct: 'C', exp: 'Elasticity means the system automatically scales resources both up and down in response to demand. Scalability is the capacity to handle growth but does not imply automatic or bidirectional adjustment.' },
+    q12: { correct: 'B', exp: 'A hybrid cloud connects on-premises private infrastructure with a public cloud provider, letting organisations keep sensitive workloads local while leveraging cloud for scale, DR, or burst capacity.' },
+    q13: { correct: 'C', exp: 'RPO (Recovery Point Objective) defines the maximum acceptable data loss measured in time. An RPO of 1 hour means replication must occur at least hourly so you never lose more than 60 minutes of data.' },
+    q14: { correct: 'C', exp: 'In event-driven architecture, services publish events to a broker (SQS, Kafka, EventBridge) and consumers subscribe independently. Producers have no knowledge of consumers, enabling loose coupling and independent scaling.' },
+    q15: { correct: 'C', exp: 'A CDN (e.g. CloudFront, Cloudflare) caches static assets at edge PoPs worldwide. Requests are served from the nearest location rather than the origin server, reducing latency from hundreds of milliseconds to single digits.' }
+};
+
+document.getElementById('submit-quiz').addEventListener('click', () => {
+    const form = document.getElementById('quiz-form');
+    const data = new FormData(form);
+    let score = 0, html = '';
+    Object.keys(questionsData).forEach((key, i) => {
+        const ans = data.get(key);
+        const ok = ans === questionsData[key].correct;
+        if (ok) score++;
+        html += `<div class="feedback-item ${ok ? 'feedback-correct' : 'feedback-incorrect'}">
+            <span class="feedback-icon">${ok ? '✓' : '✗'}</span>
+            <div><strong>Q${i+1}:</strong> ${questionsData[key].exp}
+            ${!ok ? `<br><small class="correct-answer">Correct: Option ${questionsData[key].correct}</small>` : ''}</div>
+        </div>`;
+    });
+    const total = Object.keys(questionsData).length;
+    const pct = Math.round(score/total*100);
+    const cls = pct >= 80 ? 'score-excellent' : pct >= 50 ? 'score-good' : 'score-poor';
+    document.getElementById('quiz-score').innerHTML = `<div class="${cls}">${score}/${total} (${pct}%)</div>
+        <p style="color:var(--text-secondary)">${pct >= 80 ? 'Great work! Move on to Infrastructure as Code.' : pct >= 53 ? 'Good progress. Review the weaker areas and try again.' : 'Review the material carefully and try again.'}</p>`;
+    document.getElementById('quiz-feedback').innerHTML = html;
+    const r = document.getElementById('quiz-results');
+    r.style.display = 'block';
+    r.scrollIntoView({ behavior: 'smooth' });
+});
+document.getElementById('clear-quiz').addEventListener('click', () => {
+    document.getElementById('quiz-form').reset();
+    document.getElementById('quiz-results').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>

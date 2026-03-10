@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>B1tJ0urney • Merch</title>
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ----- RESET & VARIÁVEIS (futurismo + graffiti) ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --deep-purple: #2b0f3a;
+      --electric-blue: #00f0ff;
+      --cyber-cyan: #0ff;
+      --neon-cyan: #00ffff;
+      --dark-bg: #0a0512;
+      --card-bg: rgba(18, 25, 45, 0.7);
+      --glow-blue: rgba(0, 240, 255, 0.5);
+      --glow-purple: rgba(138, 43, 226, 0.6);
+      --text-primary: #f0f4ff;
+      --text-secondary: #b0c0e0;
+      --gradient-1: linear-gradient(145deg, #00f0ff, #8a2be2, #b300ff);
+      --gradient-2: linear-gradient(45deg, #0ff, #a020f0);
+      --graffiti-font: 'Permanent Marker', cursive;
+      --main-font: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: var(--dark-bg);
+      color: var(--text-primary);
+      font-family: var(--main-font);
+      line-height: 1.6;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ----- BACKGROUND GRAFITADO + FUTURISTA (camadas) ----- */
+    .graffiti-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* gradiente base */
+    .graffiti-layer::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 40%, #1a0b2e 0%, #050208 90%);
+      opacity: 0.95;
+    }
+
+    /* grelha digital (linhas subtis) */
+    .graffiti-layer::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: 
+        repeating-linear-gradient(0deg, rgba(0, 255, 255, 0.03) 0px, transparent 1px, transparent 3px, rgba(0, 255, 255, 0.02) 4px),
+        repeating-linear-gradient(90deg, rgba(170, 0, 255, 0.03) 0px, transparent 1px, transparent 3px, rgba(170, 0, 255, 0.02) 4px);
+      background-size: 40px 40px;
+    }
+
+    /* splashes graffiti (spray) */
+    .splatter {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 0, 200, 0.08) 0px, transparent 15%),
+        radial-gradient(circle at 85% 70%, rgba(0, 255, 255, 0.1) 0px, transparent 25%),
+        radial-gradient(circle at 23% 80%, rgba(170, 0, 255, 0.12) 0px, transparent 30%),
+        radial-gradient(circle at 70% 15%, rgba(255, 200, 0, 0.07) 0px, transparent 20%),
+        radial-gradient(circle at 40% 50%, rgba(0, 255, 200, 0.05) 0px, transparent 40%),
+        radial-gradient(circle at 90% 40%, #ff00ff15 0px, transparent 35%),
+        radial-gradient(circle at 5% 90%, #00ffff15 0px, transparent 28%);
+      pointer-events: none;
+      z-index: 1;
+      mix-blend-mode: overlay;
+    }
+
+    /* pequenas partículas flutuantes (tech) */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(2px 2px at 15% 35%, var(--electric-blue), transparent),
+        radial-gradient(3px 3px at 72% 58%, var(--cyber-cyan), transparent),
+        radial-gradient(2px 2px at 88% 22%, #b300ff, transparent),
+        radial-gradient(4px 4px at 43% 91%, #ff66cc, transparent),
+        radial-gradient(3px 3px at 6% 68%, #0ff, transparent);
+      background-repeat: no-repeat;
+      background-size: 200px 200px, 300px 300px, 150px 150px, 400px 400px, 250px 250px;
+      opacity: 0.5;
+      animation: floatParticles 24s infinite alternate ease-in-out;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes floatParticles {
+      0% { background-position: 15% 35%, 72% 58%, 88% 22%, 43% 91%, 6% 68%; }
+      100% { background-position: 18% 40%, 75% 50%, 85% 25%, 40% 88%, 10% 65%; }
+    }
+
+    /* container principal (acima das camadas) */
+    .wrapper {
+      position: relative;
+      z-index: 10;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ----- HEADER (clean, futurista) ----- */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-size: 2rem;
+      font-weight: 800;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+      text-shadow: 0 0 15px var(--glow-blue);
+    }
+
+    .logo span {
+      font-family: var(--graffiti-font);
+      font-size: 2.4rem;
+      background: none;
+      -webkit-text-fill-color: initial;
+      color: #ff66ff;
+      text-shadow: 0 0 10px magenta;
+      margin-left: 5px;
+    }
+
+    nav a {
+      color: var(--text-secondary);
+      margin-left: 32px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.3s;
+      font-size: 1.1rem;
+      position: relative;
+    }
+
+    nav a:hover {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px var(--glow-blue);
+    }
+
+    nav a.active {
+      color: white;
+      border-bottom: 2px solid var(--neon-cyan);
+      padding-bottom: 5px;
+    }
+
+    /* ----- HERO (estilo graffiti + tech) ----- */
+    .hero {
+      text-align: center;
+      margin-bottom: 80px;
+      position: relative;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 15vw, 8rem);
+      font-family: var(--graffiti-font);
+      letter-spacing: 8px;
+      line-height: 1.1;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ff66cc, #00ffff, #cc66ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 25px #ff00c8) drop-shadow(0 0 45px #00b7ff);
+      margin-bottom: 16px;
+      transform: rotate(-0.5deg) scale(1.02);
+      animation: glitch 3s infinite;
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: skew(0deg, 0deg); opacity: 1; }
+      95% { transform: skew(2deg, 0.5deg); opacity: 0.9; text-shadow: -3px 0 cyan, 3px 0 magenta; }
+      96% { transform: skew(-2deg, -0.5deg); }
+      97% { transform: skew(0deg, 0deg); }
+    }
+
+    .hero p {
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto 30px;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(4px);
+      padding: 12px 24px;
+      border-radius: 60px;
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      display: inline-block;
+    }
+
+    .hero .cta-button {
+      display: inline-block;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      border: 2px solid transparent;
+      border-image: var(--gradient-2);
+      border-image-slice: 1;
+      padding: 16px 48px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: white;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      border-radius: 60px;
+      box-shadow: 0 0 30px var(--glow-purple);
+      transition: 0.3s;
+      margin-top: 20px;
+      font-family: var(--graffiti-font);
+    }
+
+    .hero .cta-button:hover {
+      box-shadow: 0 0 60px #ff00ff;
+      background: black;
+      border-color: cyan;
+      transform: scale(1.05);
+    }
+
+    /* ----- SECÇÃO PRODUTOS (cards com glow / graffiti suave) ----- */
+    .section-title {
+      font-size: 3rem;
+      font-family: var(--graffiti-font);
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+      margin-bottom: 40px;
+      border-left: 6px solid cyan;
+      padding-left: 20px;
+      filter: drop-shadow(0 0 10px magenta);
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+      margin-bottom: 80px;
+    }
+
+    .product-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 255, 255, 0.25);
+      border-radius: 32px;
+      padding: 24px 18px 30px;
+      text-align: center;
+      transition: all 0.25s ease;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 0, 255, 0.2) inset;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* graffiti tag nos cards (pormenor artistico) */
+    .product-card::before {
+      content: '⚡ BIT⚡';
+      font-family: var(--graffiti-font);
+      position: absolute;
+      bottom: -10px;
+      right: -10px;
+      font-size: 3rem;
+      color: rgba(255, 0, 255, 0.1);
+      transform: rotate(-10deg);
+      pointer-events: none;
+      z-index: 0;
+      white-space: nowrap;
+    }
+
+    .product-card:hover {
+      transform: translateY(-12px) rotate(0.2deg);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 40px var(--glow-blue), 0 0 20px magenta;
+      background: rgba(20, 30, 55, 0.9);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 240px;
+      background: linear-gradient(145deg, #1e1a3a, #0f0c24);
+      border-radius: 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      border: 2px dashed rgba(0, 255, 255, 0.3);
+      transition: 0.2s;
+      color: rgba(255, 255, 255, 0.4);
+      position: relative;
+      z-index: 2;
+    }
+
+    .product-card:hover .product-image {
+      border-color: cyan;
+      color: cyan;
+      text-shadow: 0 0 15px cyan;
+    }
+
+    .product-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .product-price {
+      font-size: 2rem;
+      font-weight: 800;
+      background: var(--gradient-2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 16px 0;
+      text-shadow: 0 0 15px magenta;
+    }
+
+    .product-btn {
+      background: transparent;
+      border: 2px solid;
+      border-image: var(--gradient-1);
+      border-image-slice: 1;
+      padding: 12px 32px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: white;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: 0.3s;
+      width: fit-content;
+      margin: 0 auto;
+      display: inline-block;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .product-btn:hover {
+      background: rgba(0, 255, 255, 0.2);
+      box-shadow: 0 0 30px cyan;
+      border-color: cyan;
+    }
+
+    /* ----- SEÇÃO DE COMUNIDADE / STREET CODE ----- */
+    .community-strip {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      border-radius: 80px;
+      padding: 40px 32px;
+      margin: 80px 0;
+      border: 1px solid magenta;
+      box-shadow: 0 0 40px purple;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      background-image: repeating-linear-gradient(45deg, rgba(255, 0, 255, 0.02) 0px, rgba(255, 0, 255, 0.02) 10px, transparent 10px, transparent 20px);
+    }
+
+    .community-strip h2 {
+      font-size: 2.6rem;
+      font-family: var(--graffiti-font);
+      background: linear-gradient(135deg, #ff66b2, #66ffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      max-width: 500px;
+    }
+
+    .community-strip p {
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+    }
+
+    .community-strip .social-icons a {
+      color: white;
+      font-size: 2.5rem;
+      margin: 0 15px;
+      transition: 0.2s;
+      display: inline-block;
+    }
+
+    .community-strip .social-icons a:hover {
+      color: cyan;
+      transform: scale(1.2) rotate(5deg);
+      text-shadow: 0 0 25px magenta;
+    }
+
+    /* ----- FOOTER (limpo) ----- */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 32px 0;
+      border-top: 1px solid rgba(255, 0, 255, 0.3);
+      margin-top: 40px;
+      flex-wrap: wrap;
+      color: var(--text-secondary);
+    }
+
+    footer .legal a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      margin-left: 24px;
+      transition: 0.2s;
+    }
+
+    footer .legal a:hover {
+      color: cyan;
+    }
+
+    /* ----- RESPONSIVIDADE (mobile first refinado) ----- */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+
+      nav a {
+        margin: 0 12px;
+      }
+
+      .hero h1 {
+        font-size: 4.5rem;
+        letter-spacing: 3px;
+      }
+
+      .hero p {
+        font-size: 1.2rem;
+        padding: 10px 20px;
+      }
+
+      .hero .cta-button {
+        font-size: 1.3rem;
+        padding: 14px 30px;
+      }
+
+      .section-title {
+        font-size: 2.5rem;
+      }
+
+      .community-strip {
+        flex-direction: column;
+        text-align: center;
+        gap: 30px;
+        border-radius: 40px;
+        padding: 40px 20px;
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+
+      footer .legal a {
+        margin: 0 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .product-grid {
+        gap: 20px;
+      }
+
+      .product-card {
+        padding: 18px 12px;
+      }
+
+      .product-image {
+        height: 180px;
+        font-size: 4rem;
+      }
+
+      .hero h1 {
+        font-size: 3.2rem;
+      }
+    }
+
+    /* micro interações extras */
+    .product-card, .cta-button, .product-btn {
+      transition: all 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    }
+  </style>
+</head>
+<body>
+  <!-- camadas de fundo: graffiti + digital -->
+  <div class="graffiti-layer"></div>
+  <div class="splatter"></div>
+  <div class="particles"></div>
+
+  <div class="wrapper">
+    <!-- header -->
+    <header>
+      <div class="logo">B1tJ0urney <span>✦</span></div>
+      <nav>
+        <a href="#">Início</a>
+        <a href="#">Jornada</a>
+        <a href="#" class="active">Merch</a>
+        <a href="#">Comunidade</a>
+      </nav>
+    </header>
+
+    <!-- hero com estilo street + neon -->
+    <section class="hero">
+      <h1>STREET CODE</h1>
+      <p>roupa, arte e tecnologia • edição limitada</p>
+      <a href="#" class="cta-button"> 🔥 DROP 01 🔥 </a>
+    </section>
+
+    <!-- grid de produtos -->
+    <h2 class="section-title">› MERCH FUTURISTA ‹</h2>
+    <div class="product-grid">
+      <!-- card 1 -->
+      <div class="product-card">
+        <div class="product-image"><i class="fas fa-robot"></i></div>
+        <h3 class="product-title">Hoodie BIT</h3>
+        <div class="product-price">€49,90</div>
+        <a href="#" class="product-btn">Grab</a>
+      </div>
+
+      <!-- card 2 -->
+      <div class="product-card">
+        <div class="product-image"><i class="fas fa-spray-can"></i></div>
+        <h3 class="product-title">TAG t-shirt</h3>
+        <div class="product-price">€29,90</div>
+        <a href="#" class="product-btn">Grab</a>
+      </div>
+
+      <!-- card 3 -->
+      <div class="product-card">
+        <div class="product-image"><i class="fas fa-microchip"></i></div>
+        <h3 class="product-title">Cap CYBER</h3>
+        <div class="product-price">€24,90</div>
+        <a href="#" class="product-btn">Grab</a>
+      </div>
+
+      <!-- card 4 -->
+      <div class="product-card">
+        <div class="product-image"><i class="fas fa-paint-brush"></i></div>
+        <h3 class="product-title">Mochila GRAFF</h3>
+        <div class="product-price">€59,90</div>
+        <a href="#" class="product-btn">Grab</a>
+      </div>
+    </div>
+
+    <!-- faixa comunidade / call to action -->
+    <div class="community-strip">
+      <h2>#WEARTHECODE</h2>
+      <p>junta-te à crew • veste o futuro</p>
+      <div class="social-icons">
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-tiktok"></i></a>
+        <a href="#"><i class="fab fa-discord"></i></a>
+        <a href="#"><i class="fab fa-github"></i></a>
+      </div>
+    </div>
+
+    <!-- footer -->
+    <footer>
+      <div>© 2025 B1tJ0urney • todos os drops são arte</div>
+      <div class="legal">
+        <a href="#">Termos</a>
+        <a href="#">Privacidade</a>
+        <a href="#">tamanhos</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- pequeno script para efeito de fade-in nos cards (opcional) -->
+  <script>
+    (function() {
+      // apenas para dar um micro-efeito de entrada - os cards aparecem com fade-in suave
+      const cards = document.querySelectorAll('.product-card');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = 1;
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, { threshold: 0.2 });
+
+      cards.forEach(card => {
+        card.style.opacity = 0;
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.5s ease';
+        observer.observe(card);
+      });
+    })();
+  </script>
+</body>
+</html>

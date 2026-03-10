@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inteligência Artificial — BitJourney</title>
+    <meta name="description" content="O papel do profissional de IA, competências essenciais, processo de desenvolvimento, responsabilidade, saídas profissionais e tendências futuras. Página dinâmica e acessível com design premium para BitJourney." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui']
+                    },
+                    colors: {
+                        brand: {
+                            50:'#ecfeff',100:'#cffafe',200:'#a5f3fc',300:'#67e8f9',400:'#22d3ee',
+                            500:'#06b6d4',600:'#0891b2',700:'#0e7490',800:'#155e75',900:'#164e63'
+                        }
+                    },
+                    boxShadow: {
+                        glow: '0 0 0 6px rgb(34 211 238 / 0.08), 0 10px 40px -10px rgb(59 130 246 / 0.45)'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%,100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' }
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '100%': { backgroundPosition: '200% 50%' }
+                        },
+                    },
+                    animation: {
+                        float: 'float 6s ease-in-out infinite',
+                        shimmer: 'shimmer 3s linear infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Decorative gradient orbs */
+        .orb {
+            filter: blur(64px);
+            opacity:.4;
+            pointer-events:none
+        }
+        .scroll-reveal {
+            opacity:0;
+            transform: translateY(12px);
+            transition: all .6s ease;
+        }
+        .scroll-reveal.revealed {
+            opacity:1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-pink-950 via-rose-950 to-fuchsia-950 text-white selection:bg-cyan-300 selection:text-slate-900">
+    <!-- Background Orbs -->
+    <div aria-hidden="true" class="fixed inset-0 overflow-hidden -z-10">
+        <div class="orb absolute -top-20 -left-10 w-96 h-96 rounded-full bg-pink-700/50"></div>
+        <div class="orb absolute top-40 -right-20 w-[30rem] h-[30rem] rounded-full bg-rose-600/40"></div>
+        <div class="orb absolute bottom-[-6rem] left-1/3 w-[28rem] h-[28rem] rounded-full bg-fuchsia-400/40"></div>
+    </div>
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-slate-950/60 border-b border-white/10">
+        <nav class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between gap-4">
+                <a href="index.html" class="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>
+                    </svg>
+                    <span class="text-xl font-extrabold tracking-tight">BitJourney</span>
+                </a>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="browse.html" class="text-slate-300 hover:text-white">Explorar</a>
+                    <a href="contacts.html" class="text-slate-300 hover:text-white">Contactos</a>
+                    <a href="quiz.html" class="inline-flex items-center gap-2 text-slate-900 bg-cyan-300 hover:bg-cyan-200 font-semibold px-3 py-1.5 rounded-xl transition-shadow shadow-glow">
+                        <span>Quiz</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </a>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="login.html" class="text-slate-300 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10">Entrar</a>
+                    <a href="criar-conta.html" class="bg-white/10 hover:bg-white/20 border border-white/10 px-3 py-1.5 rounded-lg">Criar Conta</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="container mx-auto px-4 pt-12 pb-10 md:pt-16 md:pb-16">
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+            <div class="scroll-reveal">
+                <p class="inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-pink-300/90 bg-pink-300/10 ring-1 ring-pink-300/30 px-2 py-1 rounded-full">
+                    <span class="h-2 w-2 bg-pink-300 rounded-full animate-pulse"></span>
+                    Área Temática
+                </p>
+                <h1 class="mt-4 text-4xl md:text-5xl font-extrabold leading-tight">
+                    Inteligência Artificial: <span class="bg-gradient-to-r from-pink-700 via-rose-400 to-pink-600 bg-clip-text text-transparent">O Arquiteto do Futuro Digital</span>
+                </h1>
+                <p class="mt-4 text-slate-300 max-w-prose">Um especialista em Inteligência Artificial é muito mais do que um programador ou cientista de dados. É um estratega digital que projeta, constrói e mantém sistemas inteligentes capazes de aprender, raciocinar e tomar decisões.</p>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <a href="#competencias" class="px-4 py-2 rounded-xl bg-pink-500 text-slate-900 font-semibold hover:bg-rose-300 focus:outline-none focus:ring-4 focus:ring-cyan-400/40">Ver Competências</a>
+                    <a href="#saidas" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10">Saídas Profissionais</a>
+                </div>
+                <div class="mt-6 flex items-center gap-6 text-sm text-slate-400">
+                    <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-pink-400"></span>Alta Procura</div>
+                    <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-rose-400"></span>Carreira Dinâmica</div>
+                    <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-fuchsia-300"></span>Aprendizagem Contínua</div>
+                </div>
+            </div>
+            <div class="relative scroll-reveal md:justify-self-end">
+                <div class="absolute -inset-4 bg-gradient-to-r from-pink-500/20 via-pink-500/10 to-pink-500/20 rounded-2xl blur-2xl"></div>
+                <div class="relative bg-slate-900/60 border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2 bg-gradient-to-r from-fuchsia-300 via-rose-500 to-pink-600 bg-[length:200%_100%] animate-shimmer text-slate-900 rounded-xl p-4">
+                            <p class="text-sm font-semibold">Impacto Real</p>
+                            <p class="text-2xl font-extrabold">Saúde • Negócios • Educação • Mobilidade</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">Programação</p>
+                            <p class="mt-1 text-lg font-bold">Python • R • Julia</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">ML/DL</p>
+                            <p class="mt-1 text-lg font-bold">TensorFlow • PyTorch</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">Dados</p>
+                            <p class="mt-1 text-lg font-bold">SQL • Spark • Hadoop</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">Cloud</p>
+                            <p class="mt-1 text-lg font-bold">AWS • Azure • GCP</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impacto Invisível -->
+    <section class="container mx-auto px-4 py-12" id="impacto">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">🌍 O Impacto Invisível da IA no Nosso Dia a Dia</h2>
+            <p class="mt-2 text-slate-300 max-w-3xl">O impacto da Inteligência Artificial é profundo e, muitas vezes, passa despercebido. Eis algumas áreas em que a sua influência já é indispensável:</p>
+            <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Saúde</h3>
+                    <p class="mt-1 text-sm text-slate-300">Algoritmos de IA ajudam médicos a detetar doenças, prever riscos e personalizar tratamentos.</p>
+                </article>
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Negócios e Marketing</h3>
+                    <p class="mt-1 text-sm text-slate-300">Sistemas de recomendação, análise de sentimentos e chatbots otimizam a experiência do cliente.</p>
+                </article>
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Mobilidade e Logística</h3>
+                    <p class="mt-1 text-sm text-slate-300">IA guia veículos autónomos, otimiza rotas de entrega e melhora o transporte público.</p>
+                </article>
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Educação</h3>
+                    <p class="mt-1 text-sm text-slate-300">Plataformas adaptativas ajustam o ritmo e o conteúdo conforme as necessidades individuais.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Competências -->
+    <section class="container mx-auto px-4 py-12" id="competencias">
+        <div class="scroll-reveal">
+            <div class="flex items-end justify-between gap-4 flex-wrap">
+                <h2 class="text-3xl font-extrabold">🛠 Competências Essenciais para o Sucesso em IA</h2>
+                <div class="flex items-center gap-2 text-xs text-slate-300">
+                    <span class="inline-block px-2 py-1 rounded bg-white/10">Hard Skills</span>
+                    <span class="inline-block px-2 py-1 rounded bg-white/10">Soft Skills</span>
+                </div>
+            </div>
+            <div class="mt-6 grid lg:grid-cols-2 gap-6">
+                <!-- Hard Skills -->
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                    <h3 class="font-bold text-xl">Competências Técnicas (Hard Skills)</h3>
+                    <ul class="mt-4 space-y-3 text-slate-300">
+                        <li><span class="font-semibold text-white">Programação:</span> Domínio de linguagens como Python, R ou Julia.</li>
+                        <li><span class="font-semibold text-white">Machine Learning & Deep Learning:</span> Conhecimento de frameworks como TensorFlow, PyTorch e Scikit-learn.</li>
+                        <li><span class="font-semibold text-white">Matemática & Estatística:</span> Sólida base em álgebra linear, cálculo e probabilidade.</li>
+                        <li><span class="font-semibold text-white">Gestão de Dados:</span> Experiência com SQL, NoSQL e ferramentas de Big Data (Hadoop, Spark).</li>
+                        <li><span class="font-semibold text-white">Cloud & Deploy:</span> Conhecimento em plataformas como AWS, Azure e Google Cloud.</li>
+                    </ul>
+                </div>
+                <!-- Soft Skills -->
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                    <h3 class="font-bold text-xl">Competências Pessoais (Soft Skills)</h3>
+                    <ul class="mt-4 space-y-3 text-slate-300">
+                        <li><span class="font-semibold text-white">Resolução de Problemas:</span> Capacidade de decompor desafios complexos em hipóteses testáveis.</li>
+                        <li><span class="font-semibold text-white">Pensamento Crítico:</span> Avaliar resultados de modelos de forma imparcial, questionando vieses e limitações.</li>
+                        <li><span class="font-semibold text-white">Aprendizagem Contínua:</span> A IA evolui muito rapidamente, exigindo atualização constante.</li>
+                        <li><span class="font-semibold text-white">Comunicação:</span> Traduzir termos técnicos em linguagem clara para gestores e clientes.</li>
+                        <li><span class="font-semibold text-white">Ética e Responsabilidade:</span> Considerar impacto social, privacidade e justiça algorítmica.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Processo (Timeline) -->
+    <section class="container mx-auto px-4 py-12" id="processo">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">🧩 O Processo de Desenvolvimento em IA: Da Ideia à Solução</h2>
+            <ol class="relative mt-8 border-l border-white/10 ml-2">
+                <!-- Step -->
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-pink-300 text-slate-900 font-bold">1</span>
+                    <h3 class="font-bold">Definição do Problema</h3>
+                    <p class="text-slate-300">Identificação clara do objetivo e das métricas de sucesso.</p>
+                </li>
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-pink-300 text-slate-900 font-bold">2</span>
+                    <h3 class="font-bold">Recolha e Preparação de Dados</h3>
+                    <p class="text-slate-300">Limpeza, organização e transformação de dados brutos em formatos utilizáveis.</p>
+                </li>
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-pink-300 text-slate-900 font-bold">3</span>
+                    <h3 class="font-bold">Modelação</h3>
+                    <p class="text-slate-300">Seleção, treino e validação de modelos de Machine Learning ou Deep Learning.</p>
+                </li>
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-pink-300 text-slate-900 font-bold">4</span>
+                    <h3 class="font-bold">Avaliação</h3>
+                    <p class="text-slate-300">Testes de desempenho, identificação de vieses e ajustes de parâmetros.</p>
+                </li>
+                <li class="mb-2 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-pink-300 text-slate-900 font-bold">5</span>
+                    <h3 class="font-bold">Implementação</h3>
+                    <p class="text-slate-300">Integração do modelo em aplicações reais (APIs, sistemas embebidos, dashboards).</p>
+                </li>
+                <li class="mb-2 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-pink-300 text-slate-900 font-bold">6</span>
+                    <h3 class="font-bold">Monitorização e Manutenção</h3>
+                    <p class="text-slate-300">Verificação contínua para corrigir falhas, atualizar dados e melhorar resultados.</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- Responsabilidade -->
+    <section class="container mx-auto px-4 py-12" id="responsabilidade">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">⚡ A Responsabilidade do Profissional de IA</h2>
+            <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Justiça e Inclusão</h3>
+                    <p class="text-slate-300 text-sm">Evitar discriminação algorítmica, garantindo que os sistemas funcionem de forma equitativa.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Privacidade</h3>
+                    <p class="text-slate-300 text-sm">Proteger dados sensíveis dos utilizadores com rigorosas práticas de segurança.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Transparência</h3>
+                    <p class="text-slate-300 text-sm">Explicar como e por que os modelos tomam determinadas decisões.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Confiabilidade</h3>
+                    <p class="text-slate-300 text-sm">Garantir resultados consistentes e robustos, mesmo em cenários imprevisíveis.</p>
+                </div>
+            </div>
+            <p class="mt-4 text-slate-300">A IA traz consigo uma enorme responsabilidade técnica e ética, exigindo inovação responsável que melhore a sociedade, evitando abusos ou aplicações nocivas.</p>
+        </div>
+    </section>
+
+    <!-- Saídas Profissionais (Tabs) -->
+    <section class="container mx-auto px-4 py-12" id="saidas">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">💼 Saídas Profissionais em Inteligência Artificial</h2>
+            <div class="mt-6 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                <!-- Tab list -->
+                <div role="tablist" aria-label="Perfis" class="flex flex-wrap">
+                    <button data-tab="ml" role="tab" aria-selected="true" class="tab-btn flex-1 px-4 py-3 text-left font-semibold bg-white/10 hover:bg-white/20 focus:outline-none">1) ML Engineer</button>
+                    <button data-tab="ds" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">2) Data Scientist</button>
+                    <button data-tab="research" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">3) Research Scientist</button>
+                    <button data-tab="nlp" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">4) NLP Engineer</button>
+                    <button data-tab="ethics" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">5) AI Ethics</button>
+                </div>
+                <!-- Panels -->
+                <div class="p-6 space-y-10">
+                    <!-- Machine Learning Engineer -->
+                    <section data-panel="ml">
+                        <h3 class="text-2xl font-bold">Machine Learning Engineer</h3>
+                        <p class="text-slate-300">Especialista na construção e implementação de modelos preditivos e sistemas de machine learning.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Desenvolver e implementar algoritmos de machine learning</li>
+                                    <li>Otimizar modelos para produção</li>
+                                    <li>Colaborar com equipas de engenharia de software</li>
+                                    <li>Manter e melhorar modelos existentes</li>
+                                    <li>Monitorizar desempenho de sistemas em produção</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">Python, TensorFlow, PyTorch, Scikit-learn, Apache Spark, Docker, Kubernetes, AWS/GCP/Azure.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="80000" data-max="100000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$80,000 – $100,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="110000" data-max="140000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$110,000 – $140,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="150000" data-max="200000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$150,000 – $200,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Data Scientist -->
+                    <section data-panel="ds" hidden>
+                        <h3 class="text-2xl font-bold">Data Scientist</h3>
+                        <p class="text-slate-300">Especialista em extrair insights acionáveis a partir de grandes volumes de dados.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Analisar e interpretar dados complexos</li>
+                                    <li>Desenvolver modelos estatísticos</li>
+                                    <li>Criar visualizações de dados</li>
+                                    <li>Comunicar resultados a stakeholders</li>
+                                    <li>Colaborar com equipas de negócio</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">Python, R, SQL, Pandas, NumPy, Scikit-learn, Jupyter, Tableau, Power BI.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="75000" data-max="95000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$75,000 – $95,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="100000" data-max="130000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$100,000 – $130,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="140000" data-max="180000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$140,000 – $180,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Research Scientist -->
+                    <section data-panel="research" hidden>
+                        <h3 class="text-2xl font-bold">Research Scientist (IA/ML)</h3>
+                        <p class="text-slate-300">Focado em avanços teóricos em algoritmos, NLP e visão computacional.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Conduzir pesquisa em IA e machine learning</li>
+                                    <li>Desenvolver novos algoritmos e técnicas</li>
+                                    <li>Publicar artigos científicos</li>
+                                    <li>Colaborar com académicos e investigadores</li>
+                                    <li>Explorar aplicações inovadoras de IA</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">PyTorch, JAX, TensorFlow, bibliotecas de investigação, ambientes de computação de alto desempenho.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="100000" data-max="130000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$100,000 – $130,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="140000" data-max="170000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$140,000 – $170,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="180000" data-max="250000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$180,000 – $250,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- NLP Engineer -->
+                    <section data-panel="nlp" hidden>
+                        <h3 class="text-2xl font-bold">NLP Engineer (Processamento de Linguagem Natural)</h3>
+                        <p class="text-slate-300">Especialista em desenvolvimento de chatbots, tradutores automáticos e análise de texto.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Desenvolver sistemas de processamento de linguagem natural</li>
+                                    <li>Treinar e otimizar modelos de linguagem</li>
+                                    <li>Implementar chatbots e assistentes virtuais</li>
+                                    <li>Realizar análise de sentimentos e extração de informação</li>
+                                    <li>Otimizar modelos para diferentes idiomas</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">Transformers, Hugging Face, spaCy, NLTK, BERT, GPT, Python, PyTorch/TensorFlow.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="85000" data-max="110000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$85,000 – $110,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="120000" data-max="150000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$120,000 – $150,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="160000" data-max="200000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$160,000 – $200,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- AI Ethics Specialist -->
+                    <section data-panel="ethics" hidden>
+                        <h3 class="text-2xl font-bold">AI Ethics Specialist</h3>
+                        <p class="text-slate-300">Especialista em avaliar impacto social, justiça algorítmica e regulação de sistemas de IA.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Avaliar impactos éticos de sistemas de IA</li>
+                                    <li>Desenvolver frameworks de ética para IA</li>
+                                    <li>Realizar auditorias de algoritmos</li>
+                                    <li>Colaborar com equipas de desenvolvimento</li>
+                                    <li>Assegurar conformidade com regulamentos</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">Ferramentas de auditoria de modelos, frameworks de ética em IA, técnicas de deteção de bias, regulamentações GDPR e outras.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="70000" data-max="90000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$70,000 – $90,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="95000" data-max="120000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$95,000 – $120,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="130000" data-max="160000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">$130,000 – $160,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <!-- Currency Toggle -->
+                <div class="flex items-center justify-between gap-4 px-6 pb-6">
+                    <p class="text-xs text-slate-400">Estimativas globais (Glassdoor, Payscale, Levels.fyi). Variam por região, empresa e experiência.</p>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-slate-300">Moeda:</span>
+                        <button id="currencyUSD" class="px-2 py-1 rounded-lg bg-white/10 border border-white/10 font-semibold">USD</button>
+                        <button id="currencyEUR" class="px-2 py-1 rounded-lg hover:bg-white/10 border border-white/10">EUR*</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Importância -->
+    <section class="container mx-auto px-4 py-12" id="importancia">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">📊 A Importância Crucial da Inteligência Artificial</h2>
+            <p class="mt-2 text-slate-300 max-w-3xl">Vivemos na era da IA, e ela já é tão fundamental quanto a eletricidade foi no século passado. A sua relevância vai além da automação — trata-se de criar sistemas que ampliam as capacidades humanas e transformam setores inteiros.</p>
+            <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Educação</h3><p class="text-slate-300 text-sm">Sistemas adaptativos e tutores virtuais democratizam o acesso ao conhecimento.</p></div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Saúde</h3><p class="text-slate-300 text-sm">Algoritmos apoiam diagnósticos, pesquisas genómicas e medicina personalizada.</p></div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Economia</h3><p class="text-slate-300 text-sm">Empresas orientadas por IA tomam decisões mais rápidas e precisas.</p></div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Entretenimento</h3><p class="text-slate-300 text-sm">Motores de recomendação personalizam a experiência de cada utilizador.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tendências -->
+    <section class="container mx-auto px-4 py-12" id="futuro">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">🎯 O Futuro da Inteligência Artificial: Tendências e Evolução</h2>
+            <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">IA Generativa</h3>
+                    <p class="text-slate-300 text-sm">Modelos como GPT e DALL·E criam texto, imagens, código e música.</p>
+                </div>
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">IA Explicável (XAI)</h3>
+                    <p class="text-slate-300 text-sm">Transparência nos processos de decisão para reduzir riscos e aumentar confiança.</p>
+                </div>
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">IA Descentralizada</h3>
+                    <p class="text-slate-300 text-sm">Processamento em dispositivos locais (Edge AI) sem depender da cloud.</p>
+                </div>
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">Integração Multimodal</h3>
+                    <p class="text-slate-300 text-sm">Sistemas que entendem e geram informação em texto, áudio, vídeo e sensores.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recursos -->
+    <section class="container mx-auto px-4 py-12" id="recursos">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">📚 O que Precisas de Saber para te Iniciares na Área</h2>
+            <ul class="mt-4 space-y-3">
+                <li><span class="font-semibold text-white">Aprender Programação:</span> Começa com Python, a linguagem mais usada em IA.</li>
+                <li><span class="font-semibold text-white">Dominar Conceitos Matemáticos:</span> Álgebra linear, estatística e probabilidade são a base.</li>
+                <li><span class="font-semibold text-white">Explorar Machine Learning:</span> Inicia-te com bibliotecas como Scikit-learn antes de avançar para redes neurais.</li>
+                <li><span class="font-semibold text-white">Praticar com Dados Reais:</span> Participa em desafios no Kaggle ou utiliza datasets públicos.</li>
+                <li><span class="font-semibold text-white">Entender Cloud e Deploy:</span> Aprende a colocar modelos em produção.</li>
+                <li><span class="font-semibold text-white">Construir Projetos Pessoais:</span> Cria pequenos projetos (um chatbot, um sistema de recomendação) para ganhar experiência prática.</li>
+                <li><span class="font-semibold text-white">Seguir Tendências:</span> Acompanha blogs, cursos online e conferências de IA para estar sempre atualizado.</li>
+            </ul>
+            <div class="mt-6 text-sm text-slate-400">Quer aprender mais? Explora os nossos conteúdos gratuitos e prepara‑te para a área premium.</div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="container mx-auto px-4 pb-10 pt-6 text-sm text-slate-400">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+            <p>© <span id="year"></span> BitJourney • <a class="text-cyan-300 hover:underline" href="index.html">Home</a></p>
+            <a href="browse.html" class="inline-flex items-center gap-2 text-purple-300 hover:underline">⬅ Voltar à Exploração</a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries)=>{
+            entries.forEach(e=>{
+                if(e.isIntersecting){
+                    e.target.classList.add('revealed');
+                    observer.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.12 });
+        document.querySelectorAll('.scroll-reveal').forEach(el=>observer.observe(el));
+
+        // Tabs
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const panels = document.querySelectorAll('[data-panel]');
+        tabButtons.forEach(btn => btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-tab');
+            tabButtons.forEach(b=>{
+                b.setAttribute('aria-selected', b===btn);
+                b.classList.toggle('bg-white/10', b===btn);
+            });
+            panels.forEach(p=>{
+                p.hidden = p.getAttribute('data-panel')!==id;
+            });
+        }));
+
+        // Currency toggle (simple client-side conversion, rate hint)
+        const rate = 0.9; // ~EUR conversion (aproximado)
+        const usdBtn = document.getElementById('currencyUSD');
+        const eurBtn = document.getElementById('currencyEUR');
+        const updateCurrency = (toEUR) => {
+            document.querySelectorAll('.salary-card').forEach(card => {
+                const min = Number(card.dataset.min), max = Number(card.dataset.max);
+                const val = toEUR ? [min*rate, max*rate] : [min, max];
+                const formatted = toEUR ? `€${val[0].toLocaleString(undefined,{maximumFractionDigits:0})} – €${val[1].toLocaleString(undefined,{maximumFractionDigits:0})}` : `$${val[0].toLocaleString()} – $${val[1].toLocaleString()}`;
+                card.querySelector('.salary-value').textContent = formatted;
+            });
+            usdBtn.classList.toggle('bg-white/10', !toEUR);
+            usdBtn.classList.toggle('font-semibold', !toEUR);
+            eurBtn.classList.toggle('bg-white/10', toEUR);
+            eurBtn.classList.toggle('font-semibold', toEUR);
+        }
+        usdBtn.addEventListener('click', ()=>updateCurrency(false));
+        eurBtn.addEventListener('click', ()=>updateCurrency(true));
+    </script>
+</body>
+</html>

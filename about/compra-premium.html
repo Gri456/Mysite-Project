@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B1tJ0urney | [NOME_DO_CURSO] Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 10% 20%, #0a1f3b, #030614);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Fundo digital */
+        .digital-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00aaff, #6a0dad, #00ffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .btn-wrapper {
+            position: relative;
+            padding: 3px;
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            border-radius: 0.9em;
+            transition: all 0.4s ease;
+            display: inline-block;
+        }
+
+        .btn-wrapper:hover::before {
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            filter: blur(1.2em);
+        }
+
+        .btn-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            border-radius: 0.9em;
+            z-index: -10;
+            filter: blur(0);
+            transition: filter 0.4s ease;
+        }
+
+        .btn-wrapper .nav-btn {
+            font-size: 1.1em;
+            padding: 0.6em 1.2em;
+            border-radius: 0.7em;
+            border: none;
+            background-color: #000;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 2px 2px 3px #000000b4;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 2rem 0;
+            color: #808080;
+        }
+
+        .breadcrumb a {
+            color: #00ffff;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            gap: 4rem;
+            align-items: center;
+            margin: 2rem 0 5rem;
+            flex-wrap: wrap;
+        }
+
+        .hero-content {
+            flex: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid gold;
+            color: gold;
+            padding: 0.3rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-title .gradient {
+            background: linear-gradient(135deg, #00aaff, #00ffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: #b0e0ff;
+            margin-bottom: 2rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat .number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #00ffff;
+            display: block;
+        }
+
+        .hero-stat .label {
+            font-size: 0.9rem;
+            color: #808080;
+        }
+
+        .hero-image {
+            flex: 1;
+            min-width: 300px;
+            height: 400px;
+            background: linear-gradient(135deg, #00aaff, #6a0dad, #00ffff);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8rem;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.3);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Secção de preço */
+        .pricing-card {
+            background: rgba(10, 20, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+            border-radius: 40px;
+            padding: 3rem;
+            margin: 3rem 0;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            border-image: linear-gradient(135deg, #00aaff, #6a0dad, #00ffff) 1;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00aaff, #6a0dad, #00ffff);
+            border-radius: 40px;
+            z-index: -1;
+            animation: borderRotate 4s linear infinite;
+        }
+
+        @keyframes borderRotate {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .price-tag {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #00ffff;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .price-tag span {
+            font-size: 1.5rem;
+            color: #808080;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            border: none;
+            padding: 1.5rem 4rem;
+            border-radius: 60px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 2rem 0;
+            border: 2px solid transparent;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(0, 170, 255, 0.5);
+            border-color: #00ffff;
+        }
+
+        .guarantee {
+            color: #808080;
+            font-size: 0.9rem;
+        }
+
+        .guarantee i {
+            color: gold;
+            margin-right: 0.3rem;
+        }
+
+        /* Secção de vantagens */
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #00aaff, #00ffff);
+            border-radius: 2px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .feature-card {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .feature-desc {
+            color: #b0c0d0;
+        }
+
+        /* Curriculum */
+        .curriculum {
+            margin: 4rem 0;
+        }
+
+        .module {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .module-header {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .module-header:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .module-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #00ffff;
+        }
+
+        .module-lessons {
+            color: #808080;
+        }
+
+        .module-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .module.active .module-content {
+            max-height: 500px;
+        }
+
+        .lesson-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .lesson-item i {
+            color: #00ffff;
+            width: 20px;
+        }
+
+        /* Mentores */
+        .mentors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .mentor-card {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .mentor-card:hover {
+            transform: translateY(-10px);
+            border-color: #00ffff;
+        }
+
+        .mentor-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .mentor-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: #fff;
+        }
+
+        .mentor-role {
+            color: #00ffff;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .mentor-bio {
+            color: #b0c0d0;
+            font-size: 0.9rem;
+        }
+
+        /* Depoimentos */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .testimonial-card {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 2rem;
+        }
+
+        .testimonial-text {
+            font-size: 1rem;
+            font-style: italic;
+            color: #e0e0e0;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .author-info h4 {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .author-info p {
+            color: #808080;
+            font-size: 0.8rem;
+        }
+
+        /* FAQ */
+        .faq-grid {
+            margin: 3rem 0;
+        }
+
+        .faq-item {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .faq-question i {
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            padding: 0 1.5rem;
+            color: #b0c0d0;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .hero { flex-direction: column; }
+            .price-tag { font-size: 3rem; }
+            .cta-button { padding: 1rem 2rem; font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="digital-bg"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">B1tJ0urney</div>
+        <div class="nav-links">
+            <div class="btn-wrapper"><a href="index.html" class="nav-btn">Início</a></div>
+            <div class="btn-wrapper"><a href="cursos.html" class="nav-btn">Cursos</a></div>
+            <div class="btn-wrapper"><a href="comprar.html" class="nav-btn">Comprar</a></div>
+            <div class="btn-wrapper"><a href="equipa.html" class="nav-btn">Equipa</a></div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="index.html">Início</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="cursos.html">Cursos</a>
+            <i class="fas fa-chevron-right"></i>
+            <span style="color: #00ffff;">[NOME_DO_CURSO] Premium</span>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <span class="hero-badge"><i class="fas fa-crown"></i> CURSO PREMIUM</span>
+                <h1 class="hero-title">
+                    Domina <span class="gradient">[NOME_DO_CURSO]</span><br>
+                    ao nível profissional
+                </h1>
+                <p class="hero-subtitle">
+                    [DESCRIÇÃO_CURTA: 2-3 frases sobre o curso e o que vais aprender]
+                </p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="number">40+</span>
+                        <span class="label">horas de conteúdo</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="number">15</span>
+                        <span class="label">projetos práticos</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="number">4.9</span>
+                        <span class="label">rating (500+ alunos)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                
+            </div>
+        </section>
+
+        <!-- Pricing CTA -->
+        <section class="pricing-card">
+            <h2 style="font-size: 2rem; margin-bottom: 1rem;">Começa a tua jornada hoje</h2>
+            <div class="price-tag">
+                €[PREÇO] <span>EUR</span>
+            </div>
+            <p style="color: #b0e0ff; margin: 1rem 0;">Acesso vitalício • Certificado incluído • Atualizações gratuitas</p>
+            <button class="cta-button" onclick="window.location.href='comprar.html'">
+                <i class="fas fa-rocket"></i> Quero este curso
+            </button>
+            <div class="guarantee">
+                <i class="fas fa-shield-alt"></i> Garantia de 30 dias • Pagamento seguro
+            </div>
+        </section>
+
+        <!-- Vantagens / Benefícios -->
+        <section>
+            <h2 class="section-title">Porquê escolher o Premium?</h2>
+            <div class="features-grid">
+                <!-- Feature 1 -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+                    <h3 class="feature-title">Acelera a tua carreira</h3>
+                    <p class="feature-desc">Conteúdo desenhado para te tornar profissional em 3 meses, com projetos reais.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
+                    <h3 class="feature-title">Mentoria ao vivo</h3>
+                    <p class="feature-desc">Sessões semanais com especialistas da indústria para tirares todas as dúvidas.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-certificate"></i></div>
+                    <h3 class="feature-title">Certificação reconhecida</h3>
+                    <p class="feature-desc">Certificado validado por empresas parceiras, pronto para o teu LinkedIn.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-code"></i></div>
+                    <h3 class="feature-title">Projetos reais</h3>
+                    <p class="feature-desc">Constrói um portfólio com 15+ projetos práticos para mostrar a recrutadores.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-infinity"></i></div>
+                    <h3 class="feature-title">Acesso vitalício</h3>
+                    <p class="feature-desc">Compra uma vez, acede para sempre. Inclui todas as atualizações futuras.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-comments"></i></div>
+                    <h3 class="feature-title">Comunidade exclusiva</h3>
+                    <p class="feature-desc">Acesso ao Discord premium com outros alunos e mentores 24/7.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Curriculum / O que vais aprender -->
+        <section class="curriculum">
+            <h2 class="section-title">📚 O que vais aprender</h2>
+            
+            <!-- Módulo 1 -->
+            <div class="module active">
+                <div class="module-header" onclick="toggleModule(this)">
+                    <span class="module-title">Módulo 1: Fundamentos</span>
+                    <span class="module-lessons">8 aulas • 2h30</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="module-content">
+                    <div class="lesson-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Introdução ao [Curso]</span>
+                    </div>
+                    <div class="lesson-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Configuração do ambiente</span>
+                    </div>
+                    <div class="lesson-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Primeiros passos práticos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Módulo 2 -->
+            <div class="module">
+                <div class="module-header" onclick="toggleModule(this)">
+                    <span class="module-title">Módulo 2: Conceitos intermédios</span>
+                    <span class="module-lessons">12 aulas • 4h</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="module-content">
+                    <div class="lesson-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Aprofundando conceitos</span>
+                    </div>
+                    <div class="lesson-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Projeto 1: Aplicação prática</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mentores -->
+        <section>
+            <h2 class="section-title">👨‍🏫 Quem te vai guiar</h2>
+            <div class="mentors-grid">
+                <!-- Mentor 1 -->
+                <div class="mentor-card">
+                    <div class="mentor-avatar">👩‍💻</div>
+                    <h3 class="mentor-name">Ana Silva</h3>
+                    <div class="mentor-role">Lead Mentor · [Área]</div>
+                    <p class="mentor-bio">10+ anos de experiência na indústria. Já formou mais de 2000 alunos.</p>
+                </div>
+
+                <!-- Mentor 2 -->
+                <div class="mentor-card">
+                    <div class="mentor-avatar">👨‍💻</div>
+                    <h3 class="mentor-name">Bruno Santos</h3>
+                    <div class="mentor-role">Especialista · [Área]</div>
+                    <p class="mentor-bio">Engenheiro na Google, traz casos reais e boas práticas da indústria.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Depoimentos -->
+        <section>
+            <h2 class="section-title">💬 O que dizem os alunos</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"Este curso mudou a minha carreira. Em 3 meses consegui a minha primeira vaga como júnior. A mentoria fez toda a diferença!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">👤</div>
+                        <div class="author-info">
+                            <h4>Maria Costa</h4>
+                            <p>Aluna · Turma 2024</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"Conteúdo atualizado, projetos práticos e comunidade ativa. Recomendo a qualquer pessoa que queira entrar na área."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">👤</div>
+                        <div class="author-info">
+                            <h4>João Mendes</h4>
+                            <p>Aluno · Turma 2023</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section>
+            <h2 class="section-title">❓ Perguntas frequentes</h2>
+            <div class="faq-grid">
+                <div class="faq-item active">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Preciso de experiência prévia?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Não! O curso começa do zero e vai avançando gradualmente. Se já tiveres alguma base, consegues acelerar nos primeiros módulos.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Quanto tempo dura o acesso?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        O acesso é vitalício. Compraste, é teu para sempre, incluindo todas as atualizações futuras.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Recebo certificado?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Sim! No final do curso recebes um certificado reconhecido pelas nossas empresas parceiras, pronto para partilhares no LinkedIn.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+</body>
+</html>

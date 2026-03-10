@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Architecture & State Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #d000ff;
+            --purple: #c266ff;
+            --cyan: #a200ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(91, 124, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(207, 75, 255, 0.1) 0%, rgba(217, 91, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255,255,255,0.1); border: 1px solid var(--border-color);
+            color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+
+        .tab-button {
+            flex: 1; min-width: 120px; padding: 1rem 1.5rem;
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.3s ease; position: relative; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card {
+            background: rgba(255,255,255,0.03); padding: 1.5rem;
+            border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;
+        }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); }
+
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 0.75rem 0; }
+        .styled-list li { margin-bottom: 0.6rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Architecture pattern cards */
+        .arch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .arch-card {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1rem;
+        }
+        .arch-title { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--cyan); }
+        .arch-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
+
+        /* State flow visual */
+        .lifecycle { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; align-items: center; }
+        .lifecycle-step {
+            background: rgba(91,124,255,0.1); border: 1px solid rgba(91,124,255,0.3);
+            padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.78rem; color: var(--cyan);
+        }
+        .lifecycle-arrow { color: var(--blue); font-size: 0.9rem; }
+
+        /* Metrics-style cards for state solutions */
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .metric-card {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1rem; text-align: center;
+        }
+        .metric-abbr { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .metric-name { font-size: 0.72rem; color: var(--text-secondary); line-height: 1.3; }
+        .m-mvvm .metric-abbr { color: var(--cyan); }
+        .m-redux .metric-abbr { color: #10b981; }
+        .m-bloc .metric-abbr { color: #f59e0b; }
+        .m-clean .metric-abbr { color: #ff6b6b; }
+        .m-viper .metric-abbr { color: var(--purple); }
+        .m-tca .metric-abbr { color: #ff79c6; }
+
+        /* Code block */
+        .code-block {
+            background: rgba(0,0,0,0.5); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.6; color: #a8ff78; }
+
+        /* Compare table */
+        .compare-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .compare-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; border: 1px solid var(--border-color); font-weight: 600; }
+        .compare-table td { padding: 0.65rem 1rem; border: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 440px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header-bar { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); border-radius: 8px 8px 0 0; }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.82rem; border-radius: 0 0 8px 8px; line-height: 1.6; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; font-size: 0.9rem; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Quiz */
+        .quiz-option {
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem;
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;
+            margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05));
+            border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem;
+        }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+
+        .feedback-item {
+            display: flex; align-items: flex-start; gap: 1rem; padding: 1rem;
+            border-radius: 8px; background: rgba(255,255,255,0.03);
+        }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 1rem; font-weight: 600; margin-bottom: 1rem;
+            padding-bottom: 0.75rem; border-bottom: 2px solid;
+        }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .metrics-grid, .arch-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 280px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .compare-table { font-size: 0.78rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <div class="logo">BitJourney</div>
+            <span class="premium-badge">Premium</span>
+        </div>
+        <nav>
+            <a href="premium-mobile.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objective: Architecture & State Management</h1>
+        <p class="course-description">
+            Great apps aren't built by accident — they're engineered with deliberate architectural decisions. Master the patterns that make apps testable, scalable, and maintainable: MVC, MVVM, Clean Architecture, Redux, BLoC, TCA, and the state management strategies that power production-grade mobile apps.
+        </p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+            <div class="meta-item"><span>🎯</span><span>• MVC • MVVM • Clean Architecture • Redux • BLoC • TCA • Dependency Injection • Unidirectional Flow</span></div>
+            <div class="meta-item"><span>📌</span><span>Prerequisite: Native Mobile Programming</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+            <button class="tab-button" onclick="openTab(event, 'laboratorio')">Lab</button>
+            <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+            <button class="tab-button" onclick="openTab(event, 'avaliacao')">Assessment</button>
+        </nav>
+
+        <!-- ===================== LEARN ===================== -->
+        <div id="aprender" class="tab-panel active">
+
+            <div class="content-card">
+                <h3>Why Architecture Matters</h3>
+                <p>Architecture is the set of decisions that determine how code is organized, how components communicate, and how state flows through the application. Bad architecture doesn't fail immediately — it accumulates as technical debt until the codebase becomes unmaintainable.</p>
+                <ul class="styled-list">
+                    <li>Separating concerns — UI, business logic, and data should never be mixed</li>
+                    <li>Testability — well-architected code can be unit tested without a simulator</li>
+                    <li>Scalability — new features should not require rewriting existing ones</li>
+                    <li>Predictable state — knowing exactly what your app will display at any moment</li>
+                    <li>Team collaboration — clear boundaries allow parallel development without conflicts</li>
+                    <li>Maintainability — future developers (and your future self) can understand the code</li>
+                    <li>Debuggability — when things go wrong, you can trace state changes and find the cause</li>
+                </ul>
+                <div class="lifecycle" style="margin-top: 1rem;">
+                    <div class="lifecycle-step">User Action</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">Event / Intent</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">Business Logic</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">State Update</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">UI Render</div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>Core Architectural Patterns — An Overview</h3>
+                <p>The mobile ecosystem uses several battle-tested architectural patterns. Each solves the same problem — separating concerns — but with different tradeoffs in complexity, testability, and boilerplate.</p>
+                <div class="metrics-grid" style="margin-top: 0.75rem;">
+                    <div class="metric-card m-mvvm">
+                        <div class="metric-abbr">MVVM</div>
+                        <div class="metric-name">Model–View–ViewModel</div>
+                    </div>
+                    <div class="metric-card m-redux">
+                        <div class="metric-abbr">Redux</div>
+                        <div class="metric-name">Unidirectional State Store</div>
+                    </div>
+                    <div class="metric-card m-bloc">
+                        <div class="metric-abbr">BLoC</div>
+                        <div class="metric-name">Business Logic Component</div>
+                    </div>
+                    <div class="metric-card m-clean">
+                        <div class="metric-abbr">Clean</div>
+                        <div class="metric-name">Clean Architecture</div>
+                    </div>
+                    <div class="metric-card m-viper">
+                        <div class="metric-abbr">VIPER</div>
+                        <div class="metric-name">View–Interactor–Presenter</div>
+                    </div>
+                    <div class="metric-card m-tca">
+                        <div class="metric-abbr">TCA</div>
+                        <div class="metric-name">The Composable Architecture</div>
+                    </div>
+                </div>
+                <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">Other patterns in use: MVI (Model-View-Intent) · MVP (Model-View-Presenter) · Flux · MVC (Model-View-Controller, the original iOS default)</p>
+            </div>
+
+            <div class="content-card">
+                <h3>MVC vs MVVM — The Most Important Transition</h3>
+                <p>MVC is where iOS development started. MVVM is where serious iOS development lives today.</p>
+                <div class="code-explanation" style="margin-top: 1rem;">
+                    <p><span class="highlight">MVC (Model-View-Controller):</span> The Controller handles everything — UI events, business logic, networking, and state updates. In practice, this creates "Massive View Controllers" that are impossible to test.</p>
+                </div>
+                <div class="code-explanation">
+                    <p><span class="highlight">MVVM (Model-View-ViewModel):</span> The ViewModel contains all business logic and state. The View only observes and renders. The ViewModel has no UIKit/SwiftUI imports — it's plain Swift, 100% unit-testable.</p>
+                </div>
+                <table class="compare-table" style="margin-top: 1rem;">
+                    <thead><tr><th>Aspect</th><th>MVC</th><th>MVVM</th></tr></thead>
+                    <tbody>
+                        <tr><td>Business logic location</td><td>View Controller (mixed with UI)</td><td>ViewModel (isolated)</td></tr>
+                        <tr><td>Testability</td><td>Difficult — requires UI layer</td><td>Easy — ViewModel is plain Swift/Kotlin</td></tr>
+                        <tr><td>Boilerplate</td><td>Low</td><td>Moderate</td></tr>
+                        <tr><td>SwiftUI / Compose fit</td><td>Poor</td><td>Excellent (native pattern)</td></tr>
+                        <tr><td>Data binding</td><td>Manual / delegates</td><td>Reactive (@Published, StateFlow)</td></tr>
+                        <tr><td>Ideal for</td><td>Small, simple screens</td><td>Any production-grade app</td></tr>
+                    </tbody>
+                </table>
+                <div class="code-block"><pre>// MVVM in SwiftUI — ViewModel holds all logic
+class CounterViewModel: ObservableObject {
+    @Published var count: Int = 0
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String? = nil
+
+    func increment() { count += 1 }
+    func decrement() { count = max(0, count - 1) }
+
+    func fetchCount() async {
+        isLoading = true
+        do {
+            count = try await CounterService.shared.getCount()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
+    }
+}
+
+// View only observes — zero business logic here
+struct CounterView: View {
+    @StateObject var vm = CounterViewModel()
+
+    var body: some View {
+        VStack {
+            if vm.isLoading { ProgressView() }
+            else { Text("\(vm.count)").font(.largeTitle) }
+            HStack {
+                Button("-") { vm.decrement() }
+                Button("+") { vm.increment() }
+            }
+        }
+        .task { await vm.fetchCount() }
+    }
+}</pre></div>
+            </div>
+
+            <div class="content-card">
+                <h3>Clean Architecture — Separation in Layers</h3>
+                <p>Clean Architecture, popularized by Robert C. Martin ("Uncle Bob"), organizes code into concentric layers where <span class="highlight">dependencies only point inward</span> — outer layers can depend on inner layers, but inner layers must never know about outer layers.</p>
+                <div class="arch-grid" style="margin-top: 1rem;">
+                    <div class="arch-card">
+                        <div class="arch-title">🎨 Presentation Layer</div>
+                        <div class="arch-desc">ViewModels, Views, UI components. Observes state. Calls use cases. No business logic.</div>
+                    </div>
+                    <div class="arch-card">
+                        <div class="arch-title">⚙️ Domain Layer</div>
+                        <div class="arch-desc">Use Cases (Interactors), Entities, Repository interfaces. Pure business logic. Zero framework dependencies.</div>
+                    </div>
+                    <div class="arch-card">
+                        <div class="arch-title">💾 Data Layer</div>
+                        <div class="arch-desc">Repository implementations, API clients, database DAOs. Implements interfaces defined in Domain.</div>
+                    </div>
+                </div>
+                <div class="code-explanation" style="margin-top: 1rem;">
+                    <p><span class="highlight">The Dependency Rule:</span> Source code dependencies must always point toward higher-level policies. A ViewModel can call a UseCase; a UseCase cannot import UIKit or Retrofit.</p>
+                </div>
+                <div class="code-block"><pre>// Clean Architecture — Repository Pattern
+// Domain layer: defines the interface (no implementation detail)
+protocol UserRepository {
+    func getUser(id: String) async throws -> User
+    func saveUser(_ user: User) async throws
+}
+
+// Domain layer: use case (pure business logic)
+class GetUserProfileUseCase {
+    private let repository: UserRepository  // depends on protocol, not concrete type
+
+    init(repository: UserRepository) { self.repository = repository }
+
+    func execute(userId: String) async throws -> UserProfile {
+        let user = try await repository.getUser(id: userId)
+        return UserProfile(user: user, isVerified: user.email.contains("@"))
+    }
+}
+
+// Data layer: concrete implementation (hidden from domain)
+class RemoteUserRepository: UserRepository {
+    func getUser(id: String) async throws -> User {
+        return try await APIClient.shared.get("/users/\(id)")
+    }
+    func saveUser(_ user: User) async throws {
+        try await APIClient.shared.post("/users", body: user)
+    }
+}</pre></div>
+            </div>
+
+            <div class="content-card">
+                <h3>Unidirectional Data Flow — Redux & MVI</h3>
+                <p>Unidirectional Data Flow (UDF) solves one of the hardest problems in app development: state that can be mutated from multiple places becomes unpredictable. UDF enforces a single, predictable cycle.</p>
+                <div class="lifecycle" style="margin-top: 1rem;">
+                    <div class="lifecycle-step">Action / Intent</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">Reducer</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">New State</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">View Renders</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">User Interacts</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">Action / Intent</div>
+                </div>
+                <div class="code-explanation" style="margin-top: 1rem;">
+                    <p><span class="highlight">Redux core principles:</span> (1) Single source of truth — one Store holds all app state. (2) State is read-only — the only way to change state is to dispatch an Action. (3) Changes via pure functions — Reducers are pure functions: (State, Action) → NewState.</p>
+                </div>
+                <div class="code-block"><pre>// Redux-style state management in Swift
+// 1. Define state
+struct AppState {
+    var posts: [Post] = []
+    var isLoading: Bool = false
+    var error: String? = nil
+}
+
+// 2. Define actions (what CAN happen)
+enum AppAction {
+    case fetchPosts
+    case postsLoaded([Post])
+    case fetchFailed(String)
+}
+
+// 3. Pure reducer: (State, Action) → NewState
+func appReducer(state: inout AppState, action: AppAction) {
+    switch action {
+    case .fetchPosts:
+        state.isLoading = true
+        state.error = nil
+    case .postsLoaded(let posts):
+        state.posts = posts
+        state.isLoading = false
+    case .fetchFailed(let msg):
+        state.error = msg
+        state.isLoading = false
+    }
+}
+
+// 4. Store dispatches actions, reducer updates state
+class Store: ObservableObject {
+    @Published private(set) var state = AppState()
+    func dispatch(_ action: AppAction) { appReducer(state: &state, action: action) }
+}</pre></div>
+            </div>
+
+            <div class="content-card">
+                <h3>BLoC Pattern — Flutter's State Solution</h3>
+                <p><span class="highlight">BLoC (Business Logic Component)</span> is Flutter's dominant state management pattern. It separates UI from business logic using streams: the UI sends <span class="highlight">Events</span> in, and receives <span class="highlight">States</span> out. The bloc_library package makes this ergonomic.</p>
+                <div class="arch-grid" style="margin-top: 1rem;">
+                    <div class="arch-card">
+                        <div class="arch-title">📤 Events</div>
+                        <div class="arch-desc">User actions or external triggers. Sent from UI to BLoC. Examples: LoginButtonPressed, FetchDataRequested.</div>
+                    </div>
+                    <div class="arch-card">
+                        <div class="arch-title">⚙️ BLoC</div>
+                        <div class="arch-desc">Receives events, runs business logic (async calls, validation), emits new states via streams.</div>
+                    </div>
+                    <div class="arch-card">
+                        <div class="arch-title">📥 States</div>
+                        <div class="arch-desc">UI representation of data. Examples: Initial, Loading, Success, Failure. UI rebuilds on each new state.</div>
+                    </div>
+                </div>
+                <div class="code-block"><pre>// Flutter BLoC — Counter example
+// Events
+abstract class CounterEvent {}
+class IncrementPressed extends CounterEvent {}
+class DecrementPressed extends CounterEvent {}
+
+// States
+abstract class CounterState { final int count; const CounterState(this.count); }
+class CounterInitial extends CounterState { const CounterInitial() : super(0); }
+class CounterUpdated extends CounterState { const CounterUpdated(int count) : super(count); }
+
+// BLoC — pure business logic, no Flutter imports needed
+class CounterBloc extends Bloc&lt;CounterEvent, CounterState&gt; {
+  CounterBloc() : super(const CounterInitial()) {
+    on&lt;IncrementPressed&gt;((event, emit) {
+      emit(CounterUpdated(state.count + 1));
+    });
+    on&lt;DecrementPressed&gt;((event, emit) {
+      emit(CounterUpdated(state.count > 0 ? state.count - 1 : 0));
+    });
+  }
+}
+
+// UI — just sends events and reacts to states
+BlocBuilder&lt;CounterBloc, CounterState&gt;(
+  builder: (context, state) {
+    return Column(
+      children: [
+        Text('${state.count}', style: TextStyle(fontSize: 48)),
+        ElevatedButton(
+          onPressed: () => context.read&lt;CounterBloc&gt;().add(IncrementPressed()),
+          child: Text('+'),
+        ),
+      ],
+    );
+  },
+)</pre></div>
+            </div>
+
+            <div class="content-card">
+                <h3>The Composable Architecture (TCA) — SwiftUI's Power Pattern</h3>
+                <p>TCA, created by Point-Free, is the most structured Swift architecture available. It brings Redux-style unidirectional flow to SwiftUI with composability, testability, and side effect management built in.</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">State</span> — a struct describing the full state of a feature or screen</li>
+                    <li><span class="highlight">Action</span> — an enum of all possible user interactions and effects for that feature</li>
+                    <li><span class="highlight">Reducer</span> — a function taking State + Action → updated State + Effects to run</li>
+                    <li><span class="highlight">Store</span> — holds State, receives Actions, runs the Reducer, and drives the View</li>
+                    <li><span class="highlight">Effect</span> — async operations (API calls, timers) that return Actions back into the system</li>
+                </ul>
+                <div class="code-block"><pre>import ComposableArchitecture
+
+// TCA — Feature definition
+@Reducer
+struct CounterFeature {
+    struct State: Equatable {
+        var count = 0
+        var isLoading = false
+    }
+
+    enum Action {
+        case incrementButtonTapped
+        case decrementButtonTapped
+        case fetchCount
+        case countResponse(Int)
+    }
+
+    var body: some Reducer&lt;State, Action&gt; {
+        Reduce { state, action in
+            switch action {
+            case .incrementButtonTapped:
+                state.count += 1
+                return .none
+            case .decrementButtonTapped:
+                state.count -= 1
+                return .none
+            case .fetchCount:
+                state.isLoading = true
+                return .run { send in          // side effects are explicit
+                    let count = try await CounterClient.live.fetch()
+                    await send(.countResponse(count))
+                }
+            case .countResponse(let count):
+                state.count = count
+                state.isLoading = false
+                return .none
+            }
+        }
+    }
+}
+
+// View — minimal, just sends actions and reads state
+struct CounterView: View {
+    let store: StoreOf&lt;CounterFeature&gt;
+    var body: some View {
+        WithViewStore(store, observe: { $0 }) { viewStore in
+            VStack {
+                Text("\(viewStore.count)")
+                Button("+") { viewStore.send(.incrementButtonTapped) }
+            }
+        }
+    }
+}</pre></div>
+            </div>
+
+            <div class="content-card">
+                <h3>Dependency Injection — Testable Architecture</h3>
+                <p>Dependency Injection (DI) is the practice of providing dependencies to an object from the outside rather than creating them inside. It is the foundation of testable architecture — without it, you cannot swap real implementations for mocks in tests.</p>
+                <div class="code-explanation" style="margin-top: 1rem;">
+                    <p><span class="highlight">Without DI (tightly coupled):</span> The ViewModel creates its own NetworkService, making it impossible to test without a real network. Any test will fire real API calls.</p>
+                </div>
+                <div class="code-explanation">
+                    <p><span class="highlight">With DI (loosely coupled):</span> The ViewModel receives a protocol-typed dependency. In tests, inject a MockNetworkService. In production, inject the RealNetworkService. Zero code change needed in the ViewModel.</p>
+                </div>
+                <div class="code-block"><pre>// Protocol-based DI — makes mocking trivial
+protocol PostService {
+    func fetchPosts() async throws -> [Post]
+}
+
+class PostViewModel: ObservableObject {
+    @Published var posts: [Post] = []
+    private let service: PostService
+
+    // Dependency injected via initializer
+    init(service: PostService) { self.service = service }
+
+    func load() async {
+        posts = (try? await service.fetchPosts()) ?? []
+    }
+}
+
+// Production: inject real implementation
+let vm = PostViewModel(service: RealPostService())
+
+// Tests: inject fast, controlled mock
+class MockPostService: PostService {
+    var stubbedPosts: [Post] = [Post(title: "Test")]
+    func fetchPosts() async throws -> [Post] { return stubbedPosts }
+}
+let testVM = PostViewModel(service: MockPostService())
+
+// Android Kotlin — Hilt DI (industry standard)
+@HiltViewModel
+class PostViewModel @Inject constructor(
+    private val repository: PostRepository   // Hilt injects this
+) : ViewModel() {
+    fun loadPosts() = viewModelScope.launch {
+        _posts.value = repository.getPosts()
+    }
+}</pre></div>
+                <p style="margin-top: 0.75rem;"><strong>Popular DI frameworks:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Hilt</span> (Android) — Google's recommended DI, built on Dagger 2. Compile-time verification.</li>
+                    <li><span class="highlight">Koin</span> (Android/KMP) — lightweight, runtime DI with a DSL. Easier to learn than Hilt.</li>
+                    <li><span class="highlight">Swinject</span> (iOS) — DI container for Swift projects.</li>
+                    <li><span class="highlight">TCA's DependencyValues</span> — TCA's built-in DI system for SwiftUI, globally overridable in tests.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>State Management Strategies — Choosing the Right Scope</h3>
+                <p>Not all state is equal. A common mistake is putting all state in a global store when most state should be local. Choose the narrowest scope that works.</p>
+                <table class="compare-table">
+                    <thead><tr><th>State Type</th><th>Examples</th><th>iOS Solution</th><th>Android/Flutter Solution</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong style="color:var(--cyan)">Ephemeral / Local</strong></td><td>TextField focus, button press animation, dropdown open</td><td>@State, @FocusState</td><td>remember {}, MutableState</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">Screen-level</strong></td><td>Loading flag, form data, displayed list</td><td>@StateObject ViewModel</td><td>ViewModel + StateFlow</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">Shared / Feature</strong></td><td>Logged-in user, shopping cart, current theme</td><td>@EnvironmentObject, TCA Store</td><td>Shared ViewModel, Hilt scoped</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">Global / App</strong></td><td>Auth state, navigation stack, global config</td><td>App-level TCA Store / singleton</td><td>Application-scoped ViewModel / Redux</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">Persistent</strong></td><td>User preferences, cached data, offline state</td><td>UserDefaults, Core Data, SwiftData</td><td>DataStore, Room, SharedPreferences</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                <h3>Section Conclusion</h3>
+                <p>You now understand the full Architecture & State Management landscape for mobile apps:</p>
+                <ul class="styled-list">
+                    <li>Why architecture matters — testability, scalability, maintainability</li>
+                    <li>The transition from MVC to MVVM — separating UI from business logic</li>
+                    <li>Clean Architecture — domain, data, and presentation layers with inward dependencies</li>
+                    <li>Unidirectional Data Flow (Redux/MVI) — predictable state via actions and reducers</li>
+                    <li>BLoC — Flutter's event-driven state management with streams</li>
+                    <li>The Composable Architecture — TCA's composable, testable SwiftUI pattern</li>
+                    <li>Dependency Injection — decoupling code for testability with protocols</li>
+                    <li>State scope — ephemeral, screen-level, shared, global, and persistent</li>
+                </ul>
+                <p style="margin-top: 1rem;">Architecture is invisible when it's good and painful when it's bad. The patterns you choose now determine whether your codebase thrives or collapses at scale.</p>
+            </div>
+
+        </div>
+
+        <!-- ===================== LAB ===================== -->
+        <div id="laboratorio" class="tab-panel">
+            <h3 style="margin-bottom: 1rem;">Architecture Pattern Analyzer</h3>
+            <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">Describe your app's architecture configuration and get an instant analysis of your pattern choices, state management strategy, and actionable recommendations.</p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header-bar">ARCHITECTURE CONFIGURATION</div>
+                    <textarea class="lab-textarea" id="lab-input">// Describe your app's architecture
+
+const appArchitecture = {
+  pattern: "mvvm",          // mvc | mvvm | clean | tca | bloc | redux | viper
+  platform: "ios",          // ios | android | flutter | kmp
+  stateManagement: "combine", // combine | rxswift | tca | redux | bloc | stateflow | provider
+  usesDependencyInjection: true,
+  hasRepository: true,       // data layer abstraction?
+  domainLayer: false,        // isolated use cases / interactors?
+  hasUnitTests: true,
+  teamSize: 3                // 1 | 2-5 | 6-15 | 15+
+};
+
+// Click "Analyze Architecture" to evaluate your choices!</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header-bar">ARCHITECTURE ANALYSIS</div>
+                    <div class="lab-output" id="lab-output">
+                        Click "Analyze Architecture" to evaluate your architecture choices...
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runLab()">▶ Analyze Architecture</button>
+        </div>
+
+        <!-- ===================== QUIZ ===================== -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: Architecture & State Management</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge of architectural patterns, state management strategies, dependency injection, and clean code principles. Answer all 15 questions.</p>
+
+                <form id="quiz-form">
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">1. What is the core problem that MVVM solves compared to MVC?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"> A) MVVM removes the need for a data layer entirely</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B"> B) MVVM separates business logic from UI into a testable ViewModel, avoiding "Massive View Controllers"</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C"> C) MVVM eliminates the need for networking code</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"> D) MVVM replaces the Model with a direct database connection</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">2. What is the Dependency Rule in Clean Architecture?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A"> A) All layers must depend on the database layer</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Source code dependencies must always point inward toward higher-level business logic</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C"> C) The View can call the Data layer directly for performance</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"> D) All dependencies must be injected at compile time</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">3. In Redux / Unidirectional Data Flow, what is a Reducer?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"> A) A function that compresses app data to reduce memory usage</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B"> B) A pure function that takes the current state and an action, and returns the new state</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C"> C) A UI component that renders lists efficiently</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"> D) A database query optimizer</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">4. What does "BLoC" stand for in Flutter architecture?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Backend Logic and Cache</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Business Logic Component</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C"> C) Base Layout Controller</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Binary Layer of Code</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">5. Why is Dependency Injection essential for testable architecture?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"> A) It automatically generates unit tests</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B"> B) It allows real implementations to be replaced with mocks in tests without changing the class being tested</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C"> C) It reduces app launch time</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"> D) It eliminates the need for networking code</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">6. In Clean Architecture, which layer should contain Use Cases (Interactors)?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Presentation Layer (alongside the ViewModel)</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B"> B) Domain Layer — the innermost, framework-free layer</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C"> C) Data Layer (alongside the Repository implementation)</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Network Layer (as part of the API client)</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">7. What is the Repository Pattern used for?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Storing UI components in a reusable library</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Abstracting data sources (API, database, cache) behind an interface so the rest of the app doesn't care where data comes from</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Managing Git version control in the codebase</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"> D) A pattern for storing user preferences</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">8. In SwiftUI MVVM, what property wrapper declares a ViewModel that the View owns and manages?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"> A) @ObservedObject</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B"> B) @StateObject</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C"> C) @EnvironmentObject</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"> D) @Binding</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">9. What are the three core Redux principles?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Single store · Immutable state · Pure reducers</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Multi-store · Mutable state · Async reducers</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Single store · Direct mutation · Event emitters</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Layered stores · Distributed state · Middleware-only mutations</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">10. In the BLoC pattern, what flows INTO a BLoC from the UI?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"> A) States</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Events</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C"> C) Models</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Reducers</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">11. What is "ephemeral state" and how should it be managed?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Permanent user data stored in a database</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Short-lived, local UI state like focus or animations — managed with @State or remember{}, not a global store</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Network cache that expires after a set time</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"> D) App state that persists across app restarts</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">12. What is the primary DI framework recommended for Android development?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Swinject</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Hilt (built on Dagger 2)</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Provider</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"> D) RxSwift</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">13. In The Composable Architecture (TCA), what are "Effects"?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"> A) UI animations defined in the View</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Async side effects (API calls, timers) that run outside the reducer and feed their results back as Actions</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Computed properties on the State struct</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Layout modifiers applied to SwiftUI views</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">14. What is "Massive View Controller" (MVC) syndrome?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Using too many view controllers in an app's navigation stack</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"> B) When a View Controller grows to thousands of lines by mixing UI, networking, business logic, and state — making it untestable and unmaintainable</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C"> C) A memory leak caused by strong reference cycles in UIViewController</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Using too many child view controllers in a single screen</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">15. Why should global state be minimized in favor of screen-level state?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Global state is not supported on Android</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Global state increases coupling, makes debugging harder, and creates unexpected side effects across unrelated screens</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Screen-level state is faster to render</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Global state is deprecated in iOS 17+</label>
+                    </div>
+
+                </form>
+
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+
+                <div id="quiz-results" class="quiz-results" style="display: none;">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback" class="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== RESOURCES ===================== -->
+        <div id="recursos" class="tab-panel">
+            <h3 style="margin-bottom: 1.5rem;">Support Materials</h3>
+            <div class="content-card">
+                <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.85rem;">ARCHITECTURE FUNDAMENTALS</p>
+                <a href="#" class="resource-link">→ Clean Architecture — Robert C. Martin (Uncle Bob)</a>
+                <a href="#" class="resource-link">→ MVVM in SwiftUI — Apple Developer Documentation</a>
+                <a href="#" class="resource-link">→ Android Architecture Guide — developer.android.com</a>
+                <a href="#" class="resource-link">→ Guide to App Architecture — Android Developers</a>
+
+                <p style="color:var(--text-secondary);margin:1.5rem 0 1rem;font-size:0.85rem;">STATE MANAGEMENT</p>
+                <a href="#" class="resource-link">→ The Composable Architecture — Point-Free (github.com/pointfreeco/swift-composable-architecture)</a>
+                <a href="#" class="resource-link">→ BLoC Library — bloclibrary.dev</a>
+                <a href="#" class="resource-link">→ Redux Fundamentals — redux.js.org</a>
+                <a href="#" class="resource-link">→ Kotlin StateFlow & SharedFlow — Kotlin Docs</a>
+
+                <p style="color:var(--text-secondary);margin:1.5rem 0 1rem;font-size:0.85rem;">DEPENDENCY INJECTION</p>
+                <a href="#" class="resource-link">→ Hilt for Android — developer.android.com/training/dependency-injection/hilt-android</a>
+                <a href="#" class="resource-link">→ Koin — insert-koin.io</a>
+                <a href="#" class="resource-link">→ Swinject — github.com/Swinject/Swinject</a>
+            </div>
+        </div>
+
+        <!-- ===================== ASSESSMENT ===================== -->
+        <div id="avaliacao" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Mastery Criteria: Architecture & State Management</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    To successfully complete this module, demonstrate understanding across the following competency levels:
+                </p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>The difference between MVC and MVVM</li>
+                            <li>What the three layers of Clean Architecture are</li>
+                            <li>What the Dependency Rule means</li>
+                            <li>What Unidirectional Data Flow is and why it matters</li>
+                            <li>What a Reducer is in Redux / TCA</li>
+                            <li>What BLoC is and what platform it's native to</li>
+                            <li>What Dependency Injection is and why it enables testing</li>
+                            <li>The difference between local, screen-level, and global state</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Building a screen with MVVM using @StateObject and @Published</li>
+                            <li>Implementing a Repository protocol and concrete data source</li>
+                            <li>Writing a pure Reducer function for a counter or auth feature</li>
+                            <li>Using @EnvironmentObject to share state between views</li>
+                            <li>Injecting a mock service in a unit test via protocol</li>
+                            <li>Implementing a BLoC with Events and States in Flutter</li>
+                            <li>Setting up Hilt DI in an Android ViewModel</li>
+                            <li>Structuring a feature into Domain, Data, and Presentation layers</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>Implementing a full TCA feature with Effects and async actions</li>
+                            <li>Building composable TCA child features that communicate via parent store</li>
+                            <li>Implementing a multi-module Clean Architecture across Gradle modules</li>
+                            <li>Building a Redux middleware for logging and analytics</li>
+                            <li>Designing a state normalization strategy for relational data</li>
+                            <li>Writing integration tests for a BLoC with real async effects</li>
+                            <li>Building a reactive caching strategy with StateFlow + Room</li>
+                            <li>Migrating a Massive View Controller to MVVM + Clean Architecture</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+        const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+        document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+        document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+        window.scrollTo({ top: 150, behavior: 'smooth' });
+    }
+
+    function runLab() {
+        const input = document.getElementById('lab-input').value;
+        const output = document.getElementById('lab-output');
+
+        const patternMatch = input.match(/pattern:\s*["'](\w+)["']/);
+        const platformMatch = input.match(/platform:\s*["'](\w+)["']/);
+        const stateMatch = input.match(/stateManagement:\s*["'](\w+)["']/);
+        const teamMatch = input.match(/teamSize:\s*(\d+)/);
+
+        const pattern = patternMatch ? patternMatch[1].toLowerCase() : 'mvvm';
+        const platform = platformMatch ? platformMatch[1].toLowerCase() : 'ios';
+        const state = stateMatch ? stateMatch[1].toLowerCase() : 'combine';
+        const teamSize = teamMatch ? parseInt(teamMatch[1]) : 1;
+
+        const hasDI = input.includes('usesDependencyInjection: true') || input.includes('usesDependencyInjection:true');
+        const hasRepo = input.includes('hasRepository: true') || input.includes('hasRepository:true');
+        const hasDomain = input.includes('domainLayer: true') || input.includes('domainLayer:true');
+        const hasTests = input.includes('hasUnitTests: true') || input.includes('hasUnitTests:true');
+
+        let score = 0;
+        const wins = [];
+        const issues = [];
+        const tips = [];
+
+        // Pattern score
+        const patternScores = { tca: 20, clean: 20, mvvm: 18, bloc: 18, redux: 16, mvi: 16, viper: 14, mvc: 6 };
+        score += patternScores[pattern] || 10;
+        if (['tca','clean','mvvm','bloc'].includes(pattern)) wins.push(`✓ ${pattern.toUpperCase()} — solid architectural choice`);
+        else if (pattern === 'mvc') issues.push('✗ MVC leads to Massive View Controllers — migrate to MVVM');
+
+        // State management score
+        const stateScores = { tca: 20, combine: 18, stateflow: 18, bloc: 18, redux: 16, provider: 14, rxswift: 12, getit: 10 };
+        score += stateScores[state] || 10;
+        if (['tca','combine','stateflow','bloc'].includes(state)) wins.push(`✓ ${state} — reactive, testable state management`);
+
+        // DI
+        if (hasDI) { score += 20; wins.push('✓ Dependency Injection enabled — fully testable code'); }
+        else { issues.push('✗ No DI — ViewModels creating own dependencies, impossible to unit test'); }
+
+        // Repository
+        if (hasRepo) { score += 15; wins.push('✓ Repository layer — data source abstraction in place'); }
+        else { issues.push('✗ No Repository — networking code likely mixed into ViewModels'); }
+
+        // Domain layer
+        if (hasDomain) { score += 15; wins.push('✓ Domain layer — use cases isolated from framework code'); }
+        else { tips.push('💡 Consider adding a Domain layer with Use Cases as the app grows'); }
+
+        // Tests
+        if (hasTests) { score += 10; wins.push('✓ Unit tests present'); }
+        else { issues.push('✗ No unit tests — untested business logic is a maintenance risk'); }
+
+        // Team-specific tips
+        if (teamSize >= 6 && pattern === 'mvvm' && !hasDomain) {
+            tips.push('💡 For a team of ' + teamSize + ', consider Clean Architecture to enforce module boundaries');
+        }
+        if (teamSize >= 15 && !['tca','clean'].includes(pattern)) {
+            tips.push('💡 Large teams benefit from strict modular architecture — consider multi-module Clean Architecture');
+        }
+
+        // Platform-specific tips
+        if (platform === 'ios' && state === 'stateflow') tips.push('💡 StateFlow is a Kotlin/Android concept — use Combine or @Published for iOS');
+        if (platform === 'android' && state === 'combine') tips.push('💡 Combine is Apple-only — use StateFlow or SharedFlow for Android');
+        if (platform === 'flutter' && !['bloc','provider','riverpod'].includes(state)) tips.push('💡 For Flutter, consider BLoC or Riverpod as the community standard');
+
+        const grade = score >= 80 ? '🟢 Production-Ready' : score >= 60 ? '🟡 Needs Improvement' : '🔴 High Risk';
+        const gradeColor = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ef4444';
+
+        output.innerHTML = `
+<span style="color:#28e0ff;font-weight:bold;">▶ Architecture Analysis</span>
+
+  Pattern    : ${pattern.toUpperCase()}
+  Platform   : ${platform}
+  State Mgmt : ${state}
+  Team size  : ${teamSize}
+
+<span style="color:${gradeColor};font-size:1.1rem;font-weight:bold;">${score}/100 — ${grade}</span>
+
+${wins.length ? `<strong style="color:#50fa7b;">✅ Strengths:</strong>
+${wins.map(w => `<span style="color:#50fa7b;">${w}</span>`).join('\n')}
+` : ''}${issues.length ? `<strong style="color:#ef4444;">❌ Critical issues:</strong>
+${issues.map(i => `<span style="color:#ef4444;">${i}</span>`).join('\n')}
+` : ''}${tips.length ? `<strong style="color:#f59e0b;">💡 Suggestions:</strong>
+${tips.map(t => `<span style="color:#f59e0b;">${t}</span>`).join('\n')}
+` : ''}
+<em style="color:#6272a4;">Tip: Enable domainLayer: true and usesDependencyInjection: true for the biggest testability gains.</em>`;
+    }
+
+    class QuizManager {
+        constructor() {
+            this.questionsData = {
+                q1:  { correct: 'B', exp: 'MVVM isolates business logic in a ViewModel that has no UIKit/SwiftUI imports, making it fully unit-testable. MVC puts everything in the View Controller, leading to untestable "Massive View Controllers".' },
+                q2:  { correct: 'B', exp: 'The Dependency Rule states that source code dependencies must always point inward toward higher-level policies. A ViewModel can depend on a UseCase, but a UseCase must never import UIKit, Retrofit, or any framework.' },
+                q3:  { correct: 'B', exp: 'A Reducer is a pure function: (State, Action) → NewState. It has no side effects, makes no network calls, and is fully deterministic — the same inputs always produce the same output, making it trivially testable.' },
+                q4:  { correct: 'B', exp: 'BLoC stands for Business Logic Component — Flutter\'s primary architectural pattern that separates UI from business logic using streams of Events (in) and States (out).' },
+                q5:  { correct: 'B', exp: 'DI allows you to inject a MockService implementing the same protocol as the real service. The class being tested never changes — only its dependency does, enabling fast, isolated unit tests without network or database access.' },
+                q6:  { correct: 'B', exp: 'Use Cases (Interactors) belong in the Domain Layer — the innermost layer of Clean Architecture. This layer has zero framework dependencies and contains pure business logic that can be tested without any mobile framework.' },
+                q7:  { correct: 'B', exp: 'The Repository Pattern abstracts data sources behind an interface. The rest of the app calls repository.getUser() without caring whether the data comes from an API, a local database, or a cache.' },
+                q8:  { correct: 'B', exp: '@StateObject creates and owns the ViewModel instance for the lifetime of the View. @ObservedObject receives an externally-created ViewModel. Using @ObservedObject for a ViewModel the View creates leads to the ViewModel being recreated on every re-render.' },
+                q9:  { correct: 'A', exp: 'The three Redux principles: (1) Single source of truth — one Store holds all state. (2) State is read-only — only Actions can trigger changes. (3) Changes are made with pure functions — Reducers are deterministic and have no side effects.' },
+                q10: { correct: 'B', exp: 'In BLoC, Events flow IN from the UI (user interactions, lifecycle events) and States flow OUT to the UI. The BLoC processes events, runs business logic, and emits new states via a stream.' },
+                q11: { correct: 'B', exp: 'Ephemeral state is short-lived UI state — a TextField\'s current text, whether a dropdown is open, an animation in progress. It should live as close to the UI as possible using @State or remember{}, never in a global store.' },
+                q12: { correct: 'B', exp: 'Hilt is Google\'s recommended DI framework for Android, built on Dagger 2. It provides compile-time validation, standard scoping (Activity, Fragment, ViewModel), and integrates directly with Jetpack.' },
+                q13: { correct: 'B', exp: 'Effects in TCA are async side effects — API calls, timers, notifications — that run outside the pure Reducer. They return their results as new Actions that are dispatched back into the store, keeping the Reducer pure and testable.' },
+                q14: { correct: 'B', exp: 'Massive View Controller (MVC) syndrome occurs when all responsibilities pile into the View Controller: networking, data transformation, business rules, UI updates, navigation. The result is files with thousands of lines that cannot be unit-tested.' },
+                q15: { correct: 'B', exp: 'Global state introduces hidden coupling between unrelated features. A change to global state in one screen can accidentally affect another. Screen-level state is encapsulated, predictable, and discarded when the screen is closed.' }
+            };
+            this.init();
+        }
+
+        init() {
+            document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+            document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+        }
+
+        submitQuiz() {
+            const formData = new FormData(document.getElementById('quiz-form'));
+            let score = 0, feedbackHTML = '';
+
+            Object.keys(this.questionsData).forEach((key, index) => {
+                const userAnswer = formData.get(key);
+                const isCorrect = userAnswer === this.questionsData[key].correct;
+                if (isCorrect) score++;
+
+                feedbackHTML += `
+                    <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                        <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                        <div>
+                            <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                            ${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+                        </div>
+                    </div>`;
+            });
+
+            const total = Object.keys(this.questionsData).length;
+            const percent = Math.round((score / total) * 100);
+            const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+
+            document.getElementById('quiz-score').innerHTML = `
+                <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                <p style="color:var(--text-secondary)">${percent >= 70
+                    ? 'Excellent! You understand the architectural foundations of production mobile apps.'
+                    : 'Review MVVM, Clean Architecture, and state management patterns and try again.'}</p>`;
+
+            document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+            const resultsDiv = document.getElementById('quiz-results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        clearQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-results').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => new QuizManager());
+</script>
+</body>
+</html>

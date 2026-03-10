@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BitJourney — Cibersegurança</title>
+  <link rel="icon" href="favicon.ico">
+
+  <style>
+    :root{
+      --bg:#201b0b; --panel:#332d12; --panel-2:#30280f;
+      --text:#e6f0ff; --muted:#d8d49f;
+      --p1:#ff6200; --p2:#ffcc00; --p3:#ff8c00;
+      --ok:#22c55e; --ring:#faeb60;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:radial-gradient(1000px 700px at 100% -10%,#553b1a 0%,transparent 60%),var(--bg);color:var(--text);font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial}
+    a{color:inherit;text-decoration:none}
+
+    /* Header */
+    header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,rgba(11,16,32,.9),rgba(32, 27, 11, 0.45));backdrop-filter:blur(10px);border-bottom:1px solid rgba(250, 227, 96, 0.15)}
+    .container{max-width:1100px;margin:0 auto;padding:0 1.25rem}
+    .row{display:flex;align-items:center;justify-content:space-between;padding:1rem 0}
+    .brand{display:flex;align-items:center;gap:.6rem}
+    .brand-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--p1),var(--p2) 60%,var(--p3));display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:0 8px 24px rgba(235, 199, 37, 0.35)}
+    .chip{font-size:.8rem;padding:.25rem .6rem;border:1px solid rgba(255,255,255,.15);border-radius:999px;color:var(--muted)}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.1rem;border-radius:.75rem;border:1px solid rgba(255,255,255,.08);background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;font-weight:600;box-shadow:0 10px 30px rgba(235, 205, 37, 0.25);transition:transform .15s ease, box-shadow .2s ease;cursor:pointer}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 16px 36px rgba(235, 189, 37, 0.35)}
+    .btn-ghost{background:transparent;border-color:rgba(255,255,255,.15);color:var(--text)}
+    .btn-ghost:hover{background:rgba(255,255,255,.05)}
+
+    /* Hero */
+    .hero{padding:3rem 0 1rem;text-align:center}
+    .title{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800}
+    .subtitle{color:var(--muted);max-width:760px;margin:.75rem auto 0;font-size:1.05rem}
+
+    /* Stage Panel */
+    .panel{position:relative;background:linear-gradient(180deg,rgba(51, 48, 18, 0.8),rgba(48, 39, 13, 0.8));border:1px solid rgba(250, 227, 96, 0.15);border-radius:18px;padding:1rem;box-shadow:inset 0 0 0 1px rgba(234, 237, 58, 0.05),0 10px 40px rgba(23, 23, 2, 0.6)}
+
+    /* Vertical Road */
+    .road-wrap{position:relative;padding:1.5rem 0}
+    .road {
+  height: 2500px;
+  width: 100%;
+  display: block;
+}
+
+    /* Milestones (cards) */
+    .milestone{
+      position:absolute;transform:translateY(-50%);
+      width:min(420px,42vw);max-width:92%;
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:16px;padding:1rem;backdrop-filter:blur(6px);
+      box-shadow:0 10px 28px rgba(23, 18, 2, 0.55)
+    }
+    .milestone h4{margin:0 0 .3rem;font-size:1rem}
+    .milestone p{margin:.2rem 0;color:var(--muted);font-size:.92rem;line-height:1.3}
+    .tags{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem}
+    .tag{font-size:.72rem;padding:.18rem .5rem;border-radius:999px;border:1px solid rgba(255,255,255,.18);color:#ffeecf}
+    .actions{display:flex;gap:.5rem;margin-top:.7rem;flex-wrap:wrap}
+    .mini{padding:.45rem .65rem;border-radius:.6rem;font-size:.82rem}
+    .done{outline:2px solid rgba(34,197,94,.6);box-shadow:0 0 0 3px rgba(34,197,94,.15)}
+    .locked{opacity:.78;filter:grayscale(.25)}
+
+    /* Alternância esquerda / direita */
+    .left{left:4%}
+    .right{right:4%}
+
+    /* Posições ao longo do eixo Y (0% topo → 100% fundo) */
+    .mv1{top:5%}
+.mv2{top:12%}
+.mv3{top:20%}
+.mv4{top:28%}
+.mv5{top:36%}
+.mv6{top:44%}
+.mv7{top:54%}
+.mv8{top:62%}
+.mv9{top:72%}
+.mv10{top:80%}
+.mv11{top:91%}
+
+    /* Troféu/Progresso: **AGORA NO CANTO SUPERIOR DIREITO** */
+    .trophy{
+      position:absolute;
+      top:12px; right:12px;
+      transform:none;
+      display:flex;gap:.6rem;align-items:center;
+      background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.05));
+      border:1px solid rgba(255,255,255,.18);
+      padding:.5rem .7rem;border-radius:.7rem; z-index:10
+    }
+    .trophy .icon{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#ffe08a,#f59e0b);box-shadow:0 0 0 2px rgba(255,255,255,.15),0 6px 16px rgba(245,158,11,.3)}
+    .trophy small{color:var(--muted)}
+    .trophy.unlocked .icon{background:radial-gradient(circle at 30% 30%,#a7f3d0,#22c55e)}
+    .trophy.unlocked small{color:#a7f3d0}
+
+    .progressbar{display:flex;align-items:center;gap:.6rem;margin-top:.7rem}
+    .progress{flex:1;height:10px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+    .progress>span{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--p1),var(--p2));transition:width .35s ease}
+
+    /* Modal genérico */
+    .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(23, 21, 3, 0.6);backdrop-filter:blur(6px);z-index:80}
+    .modal.active{display:grid}
+    .card{background:linear-gradient(180deg,rgba(18,25,51,.95),rgba(48, 44, 13, 0.95));border:1px solid rgba(250, 222, 96, 0.18);border-radius:16px;padding:1.2rem 1.2rem 1rem;max-width:560px}
+
+    /* Modal Parabéns */
+    .trophy-big{width:120px;height:120px;margin:0 auto .4rem;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b0,#f59e0b 60%,#b45309 100%);box-shadow:0 10px 30px rgba(245,158,11,.35), inset 0 0 30px rgba(255,255,255,.35)}
+    .confetti{position:absolute;inset:0;pointer-events:none;opacity:.8}
+
+    /* CTA Footer */
+    .cta{margin:1.25rem 0 3rem;display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+
+    /* Botão flutuante de reset de progresso */
+    #resetProgressBtn{
+      position:fixed; bottom:20px; left:20px; z-index:9999;
+      padding:.55rem .8rem; font-size:.9rem; border:none; border-radius:.65rem;
+      background:linear-gradient(90deg,var(--p1),var(--p2)); color:#fff; box-shadow:0 8px 22px rgba(235, 205, 37, 0.35);
+      cursor:pointer; opacity:.9
+    }
+    #resetProgressBtn:hover{opacity:1}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container row">
+    <div class="brand">
+      <div class="brand-logo">BJ</div>
+      <div>
+        <div style="font-weight:800;letter-spacing:.3px">BitJourney</div>
+        <div class="chip">Premium • Cyberscurity</div>
+      </div>
+    </div>
+    <nav style="display:flex;gap:.6rem">
+      <a class="btn-ghost btn" href="index.html">Início</a>
+      <a class="btn-ghost btn" href="browse.html">Explorar</a>
+      <a class="btn" href="area-privada.html">Área Privada</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <!-- HERO -->
+  <section class="hero">
+    <h1 class="title">A tua Jornada Premium — <span style="background:linear-gradient(90deg,var(--p1),var(--p2));-webkit-background-clip:text;background-clip:text;color:transparent">Cybersecurity</span></h1>
+    <p class="subtitle">
+      Uma estrada <strong>vertical</strong> feita de <strong>bits (0 e 1)</strong> guia-te por vários temas — completa cada marco e ganha o troféu no final.
+    </p>
+  </section>
+
+  <!-- STAGE (Vertical Road) -->
+  <section class="panel road-wrap">
+    <!-- Trophy mini status -->
+    <div id="trophy" class="trophy">
+      <div class="icon"></div>
+      <div>
+        <div style="font-weight:700;font-size:.92rem">Troféu da Jornada</div>
+        <small id="trophyStatus">Completa todos os objetivos</small>
+      </div>
+    </div>
+
+    <!-- Estrada de Bits -->
+    <svg class="road" viewBox="0 0 1100 1100" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="gv" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#09c"/>
+          <stop offset="60%" stop-color="#2563eb"/>
+          <stop offset="100%" stop-color="#7c3aed"/>
+        </linearGradient>
+        <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="6" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <path id="vpath" d="
+          M 550 0
+          C 650 80, 650 160, 550 240
+          S 450 400, 550 480
+          S 650 640, 550 720
+          S 450 880, 550 960
+          S 650 1040, 550 1100" />
+      </defs>
+
+      <path d="M 530 0
+               C 630 80, 630 160, 530 240
+               S 470 400, 530 480
+               S 630 640, 530 720
+               S 470 880, 530 960
+               S 630 1040, 530 1100
+               L 570 1100
+               C 670 1040, 670 960, 570 900
+               S 470 720, 570 640
+               S 670 480, 570 400
+               S 470 240, 570 160
+               S 670 80, 570 0 Z"
+            fill="url(#gv)" opacity=".12" filter="url(#glow)"/>
+      <use href="#vpath" fill="none" stroke="url(#gv)" stroke-width="6" opacity=".55"/>
+      <text font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas" font-size="18" fill="#6bb7ff" opacity=".5">
+        <textPath href="#vpath" startOffset="0%">
+          010101001101001110100101001011100101001000101101001011001010100110010101001101001010010101001101001001110001010100101101001011001010010
+        </textPath>
+      </text>
+    </svg>
+
+    <!-- Milestones -->
+    <div class="milestone mv1 left" data-key="html-css">
+      <h4>1) Fundamentos de TI & Segurança</h4>
+      <p>Conceitos básicos de hardware, sistemas operacionais (Windows/Linux), rede e introdução à segurança da informação.</p>
+      <div class="tags"><span class="tag">hardware</span><span class="tag">SO</span><span class="tag">rede básica</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="cybersecurity-premium1.html">Ver conteúdos</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv2 right locked" data-key="git-workflow">
+      <h4>2) Redes & Protocolos</h4>
+      <p>Modelo OSI/TCP-IP, portas, protocolos comuns, subnetting, Wireshark básico, conceitos de firewall e VPN.</p>
+      <div class="tags"><span class="tag">OSI</span><span class="tag">portas</span><span class="tag">TCP/UDP</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="cybersecurity-premium2.html">Guia</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv3 left locked" data-key="js-basico">
+      <h4>3) Linux & Ferramentas de Linha de Comando</h4>
+      <p>Comandos essenciais, permissões, bash scripting básico, gerenciamento de pacotes, hardening inicial.</p>
+      <div class="tags"><span class="tag">terminal</span><span class="tag">bash</span><span class="tag">permissões</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="cybersecurity-premium3.html">Aprofundar</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv4 right locked" data-key="js-avancado">
+      <h4>4) Segurança Ofensiva Básica</h4>
+      <p>Reconhecimento (OSINT, WHOIS, Shodan), scanning (nmap), vulnerabilidades web (OWASP Top 10), exploits básicos, CTFs iniciais.</p>
+      <div class="tags"><span class="tag">OSINT</span><span class="tag">nmap</span><span class="tag">OWASP</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="cybersecurity-premium4.html">Referências</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv5 left locked" data-key="frontend-framework">
+      <h4>5) Segurança Defensiva & SOC</h4>
+      <p>Logs, SIEM básico, análise de tráfego, IDS/IPS, detecção de intrusão, incident response fundamentals, EDR conceitos.</p>
+      <div class="tags"><span class="tag">Logs</span><span class="tag">SIEM</span><span class="tag">IDS/IPS</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="cybersecurity-premium5.html">Comparar</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv6 right locked" data-key="backend-api">
+      <h4>6) Criptografia, Autenticação & Cloud Security</h4>
+      <p>Cripto básica (hash, simétrica/assimétrica, PKI), MFA, autenticação moderna (OAuth, SAML), segurança em AWS/Azure/GCP (IAM, buckets, VPC).</p>
+      <div class="tags"><span class="tag">Cripto</span><span class="tag">MFA</span><span class="tag">Auth</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="cybersecurity-premium6.html">Guia</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv7 left locked" data-key="devops-deploy">
+      <h4>7) Especialização + DevSecOps</h4>
+      <p>Escolher trilha, automação e certificações.</p>
+      <div class="tags"><span class="tag">pentest</span><span class="tag">SOC</span><span class="tag">cloud sec</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="cybersecurity-premium7.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+    
+    <div class="milestone mv8 right locked" data-key="certificacoes">
+  <h4>8) Governance, Risk and Compliance (GRC)</h4>
+  <p>Fundamentos de governança de TI, gestão de riscos, compliance, frameworks como ISO 27001, NIST, COBIT, políticas de segurança e auditorias.</p>
+  <div class="tags">
+    <span class="tag">governança</span>
+    <span class="tag">risk management</span>
+    <span class="tag">compliance</span>
+  </div>
+  <div class="actions">
+    <button class="btn mini" data-complete>Concluir</button>
+    <a class="btn-ghost btn mini" href="cybersecurity-premium8.html">GRC</a>
+  </div>
+  <div class="progressbar"><div class="progress"><span></span></div></div>
+</div>
+
+<div class="milestone mv9 left locked" data-key="portfolio">
+  <h4>9) Análise de risco e princípios da segurança</h4>
+  <p>Identificação de ativos, ameaças e vulnerabilidades, análise qualitativa e quantitativa de riscos, CIA (Confidencialidade, Integridade e Disponibilidade) e controles de mitigação.</p>
+  <div class="tags">
+    <span class="tag">análise de risco</span>
+    <span class="tag">CIA</span>
+    <span class="tag">controles</span>
+  </div>
+  <div class="actions">
+    <button class="btn mini" data-complete>Concluir</button>
+    <a class="btn-ghost btn mini" href="cybersecurity-premium9.html">Análise de Risco</a>
+  </div>
+  <div class="progressbar"><div class="progress"><span></span></div></div>
+</div>
+
+<div class="milestone mv10 right locked" data-key="carreira">
+  <h4>10) PEN Testing</h4>
+  <p>Metodologias de teste de intrusão, reconhecimento, exploração de vulnerabilidades, pós-exploração, elaboração de relatórios técnicos e uso de ferramentas como Kali Linux e Metasploit.</p>
+  <div class="tags">
+    <span class="tag">pentest</span>
+    <span class="tag">ethical hacking</span>
+    <span class="tag">exploração</span>
+  </div>
+  <div class="actions">
+    <button class="btn mini" data-complete>Concluir</button>
+    <a class="btn-ghost btn mini" href="cybersecurity-premium10.html">PEN Testing</a>
+  </div>
+  <div class="progressbar"><div class="progress"><span></span></div></div>
+</div>
+
+<div class="milestone mv11 left locked" data-key="engenharia-social">
+  <h4>11) Engenharia social & segurança humana</h4>
+  <p>Técnicas de manipulação psicológica, phishing, pretexting, baiting, conscientização de usuários, cultura de segurança e prevenção contra ataques baseados em fator humano.</p>
+  <div class="tags">
+    <span class="tag">engenharia social</span>
+    <span class="tag">phishing</span>
+    <span class="tag">segurança humana</span>
+  </div>
+  <div class="actions">
+    <button class="btn mini" data-complete>Concluir</button>
+    <a class="btn-ghost btn mini" href="cybersecurity-premium11.html">Engenharia Social</a>
+  </div>
+  <div class="progressbar"><div class="progress"><span></span></div></div>
+</div>
+
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <button id="btnStart" class="btn">Começar Jornada</button>
+    <a class="btn-ghost btn" href="browse.html">Voltar a explorar</a>
+  </section>
+</main>
+
+<!-- Modal: precisa de login -->
+<div id="loginModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="mlabel">
+  <div class="card">
+    <h3 id="mlabel" style="margin:0 0 .25rem;font-size:1.25rem">Acesso Premium</h3>
+    <p style="color:var(--muted);margin:.25rem 0 .9rem">
+      Precisas de iniciar sessão com o teu código para veres e gravares o teu progresso.
+    </p>
+    <div style="display:flex;gap:.6rem;justify-content:flex-end">
+      <button id="closeModal" class="btn-ghost btn">Agora não</button>
+      <a class="btn" href="login.html">Fazer Login</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Parabéns -->
+<div id="congratsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="glabel">
+  <div class="card" style="text-align:center;position:relative;overflow:hidden">
+    <div class="confetti" id="confetti"></div>
+    <div class="trophy-big"></div>
+    <h3 id="glabel" style="margin:.25rem 0 .25rem;font-size:1.35rem">Parabéns! Jornada concluída 🏆</h3>
+    <p style="color:var(--muted);margin:0 0 1rem">Completaste todos os objetivos da rota Cybersecurity.</p>
+    <div style="display:flex;gap:.6rem;justify-content:center">
+      <a class="btn" href="area-privada.html">Ver certificados</a>
+      <button id="closeCongrats" class="btn-ghost btn">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Botão flutuante para reset do progresso -->
+<button id="resetProgressBtn" title="Apagar só o progresso desta jornada">🗑 Reset progresso</button>
+
+<script>
+  // --------- GATE PREMIUM ----------
+  const isLogged = !!localStorage.getItem('userCode');
+  const loginModal = document.getElementById('loginModal');
+  const closeLogin = document.getElementById('closeModal');
+  if (!isLogged) setTimeout(()=> loginModal.classList.add('active'), 450);
+  closeLogin?.addEventListener('click', ()=> loginModal.classList.remove('active'));
+
+  // --------- PROGRESSO ----------
+  // CORRIGIDO: array agora inclui todos os 10 milestones
+  const MILESTONES = [
+  'html-css',
+  'git-workflow',
+  'js-basico',
+  'js-avancado',
+  'frontend-framework',
+  'backend-api',
+  'devops-deploy',
+  'certificacoes',
+  'portfolio',
+  'carreira',
+  'engenharia-social'
+];
+  const KEY = 'bj_cybersec_progress_vertical';
+  const CONGRATS_FLAG = 'bj_cybersec_congrats_shown';
+
+  const load = () => {
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+    catch(e){ return {}; }
+  };
+  const save = (state) => localStorage.setItem(KEY, JSON.stringify(state));
+  const state = load();
+
+  function updateGlobal(){
+    const completed = MILESTONES.filter(k => state[k]?.done).length;
+    const percent = Math.round(completed / MILESTONES.length * 100);
+    document.querySelectorAll('.milestone').forEach((ms) => {
+      const k = ms.dataset.key;
+      const bar = ms.querySelector('.progress > span');
+      if (bar) {
+        bar.style.width = (state[k]?.done ? '100%' : (state[k]?.percent || 0)+'%');
+      }
+    });
+    const trophy = document.getElementById('trophy');
+    const status = document.getElementById('trophyStatus');
+    if (completed === MILESTONES.length){
+      trophy.classList.add('unlocked');
+      status.textContent = 'Jornada concluída — Parabéns! 🏆';
+      showCongratsOnce();
+    } else {
+      trophy.classList.remove('unlocked');
+      status.textContent = `Progresso: ${percent}%`;
+    }
+  }
+
+  function refreshLocks(){
+    const firstUndone = MILESTONES.findIndex(k => !state[k]?.done);
+    document.querySelectorAll('.milestone').forEach(ms=>{
+      const k = ms.dataset.key;
+      const idx = MILESTONES.indexOf(k);
+      ms.classList.toggle('locked', idx > firstUndone && firstUndone !== -1);
+      ms.classList.toggle('done', !!state[k]?.done);
+    });
+  }
+
+  document.querySelectorAll('[data-complete]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const ms = e.target.closest('.milestone');
+      const key = ms.dataset.key;
+      state[key] = {done: !(state[key]?.done), percent: state[key]?.done ? 100 : 0};
+      save(state);
+      refreshLocks();
+      updateGlobal();
+    });
+  });
+
+  document.getElementById('btnStart').addEventListener('click', ()=>{
+    if (!isLogged){ loginModal.classList.add('active'); return; }
+    const k = MILESTONES[0];
+    state[k] = state[k] || {done:false, percent:0};
+    let p = state[k].percent || 0;
+    const id = setInterval(()=>{
+      p += 8; state[k].percent = Math.min(p, 92); save(state); updateGlobal();
+      if (p>=92) clearInterval(id);
+    }, 80);
+    refreshLocks();
+  });
+
+  // Modal Parabéns
+  const congratsModal = document.getElementById('congratsModal');
+  const closeCongrats = document.getElementById('closeCongrats');
+  closeCongrats?.addEventListener('click', ()=> congratsModal.classList.remove('active'));
+
+  function showCongratsOnce(){
+    if (localStorage.getItem(CONGRATS_FLAG) === '1') return;
+    spawnConfetti();
+    congratsModal.classList.add('active');
+    localStorage.setItem(CONGRATS_FLAG, '1');
+  }
+
+  function spawnConfetti(){
+    const confetti = document.getElementById('confetti');
+    const n = 80;
+    const frags = [];
+    for (let i=0;i<n;i++){
+      const d = document.createElement('div');
+      const size = 6 + Math.random()*6;
+      d.style.position='absolute';
+      d.style.left = (Math.random()*100)+'%';
+      d.style.top = (-10 + Math.random()*10)+'%';
+      d.style.width = size+'px';
+      d.style.height = size+'px';
+      d.style.borderRadius='2px';
+      d.style.background = ['#22c55e','#60a5fa','#7c3aed','#06b6d4','#f59e0b'][Math.floor(Math.random()*5)];
+      d.style.opacity = .9;
+      d.style.transform = `translateY(0) rotate(${Math.random()*180}deg)`;
+      d.style.transition = `transform ${2+Math.random()*1.5}s cubic-bezier(.2,.8,.2,1), opacity 2.5s`;
+      frags.push(d);
+      confetti.appendChild(d);
+      requestAnimationFrame(()=>{
+        d.style.transform = `translateY(${180 + Math.random()*220}px) rotate(${360+Math.random()*360}deg)`;
+        d.style.opacity = .0;
+      });
+    }
+    setTimeout(()=> frags.forEach(f=>f.remove()), 3000);
+  }
+
+  // ---- Botão flutuante: reset APENAS do progresso desta página ----
+  const resetBtn = document.getElementById('resetProgressBtn');
+  resetBtn.addEventListener('click', ()=>{
+    if (!confirm('Apagar o progresso desta jornada?')) return;
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(CONGRATS_FLAG);
+
+    for (const k of MILESTONES){ delete state[k]; }
+    document.querySelectorAll('.progress > span').forEach(b=> b.style.width='0%');
+    document.querySelectorAll('.milestone').forEach(ms=>{
+      ms.classList.remove('done');
+      ms.classList.remove('locked');
+    });
+    refreshLocks();
+    const trophy = document.getElementById('trophy');
+    const status = document.getElementById('trophyStatus');
+    trophy.classList.remove('unlocked');
+    status.textContent = 'Completa todos os objetivos';
+
+    alert('Progresso apagado!');
+  });
+
+  // Init
+  refreshLocks();
+  updateGlobal();
+</script>
+
+</body>
+</html>

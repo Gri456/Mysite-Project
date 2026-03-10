@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - SQL & Data Manipulation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+    --bg-dark: #0b0d14;
+
+    /* Nova paleta verde */
+    --green-primary: #22c55e;     /* verde principal */
+    --green-secondary: #4ade80;   /* verde claro */
+    --green-accent: #16a34a;      /* verde forte */
+    --green-cyan: #2dd4bf;        /* verde-água (mantém vibe tech) */
+    --cyan: #28e0ff;              /* ciano para detalhes e destaques */
+
+    --text-light: #e8ecf8;
+    --text-secondary: #b6c0de;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px; font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary {
+    background: linear-gradient(135deg, var(--green-primary), var(--green-cyan));
+    color: white;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente: from-lime-500 via-green-400 to-lime-400 */
+    background: linear-gradient(to right, #84cc16, #4ade80, #a3e635);
+
+    /* Faz o gradiente aplicar apenas ao texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback para browsers antigos */
+}
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill {
+    height: 100%;background: linear-gradient(90deg, var(--green-primary), var(--green-cyan));width: 0%; transition: width 0.3s ease;
+}
+
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active {
+    background: rgba(15, 155, 67, 0.3);
+} 
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--green-primary), var(--green-cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--green-primary);; display: flex; align-items: center; gap: 10px; }
+        .content-card h4 { margin: 1.2rem 0 0.6rem; color: var(--green-cyan);; font-size: 1rem; }
+        .code-explanation { border-left: 3px solid var(--green-primary);; padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--green-cyan);; font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Code block */
+        .code-block {
+            background: #0a0c12;
+            border: 1px solid rgba(91,124,255,0.3);
+            border-radius: 8px; padding: 1.2rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; }
+        .code-block code { font-family: 'Courier New', Consolas, monospace; font-size: 0.875rem; line-height: 1.7; color: #c9d1d9; }
+        .code-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: block; }
+
+        /* Tip / Warning boxes */
+        .tip-box { background: rgba(34, 197, 94, 0.08);
+    border-left: 4px solid var(--green-primary); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .tip-box strong { color: var(--green-primary); }
+        .warning-box { background: rgba(255, 165, 0, 0.07); border-left: 4px solid #ffa500; border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .warning-box strong { color: #ffa500; }
+
+        /* Two-column grid */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+        .mini-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mini-card h5 { color: var(--cyan); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .mini-card p, .mini-card li { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+
+        /* Chapter header */
+        .chapter-header {
+            background: linear-gradient(
+                135deg,
+                rgba(34, 197, 94, 0.15),
+                rgba(45, 212, 191, 0.08)
+            );
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; margin-top: 2.5rem;
+        }
+        .chapter-header:first-child { margin-top: 0; }
+        .chapter-header h2 { font-size: 1.4rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.4rem; }
+        .chapter-header p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-secondary); font-size: 0.88rem; }
+        .data-table thead tr { border-bottom: 2px solid var(--border-color); text-align: left; }
+        .data-table th { padding: 10px; font-weight: 600; color: var(--text-light); }
+        .data-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .data-table td { padding: 10px; }
+
+        /* Inline formula highlight */
+        .formula { font-family: monospace; background: rgba(40,224,255,0.1); padding: 2px 8px; border-radius: 4px; color: var(--cyan); font-size: 0.9rem; }
+
+        /* Quiz */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(40, 224, 255, 0.05)); border: 1px solid rgba(34, 197, 94, 0.08); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #0a0c12; color: #c9d1d9; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-data-science.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objective: SQL & Data Manipulation</h1>
+            <p class="course-description">
+                Learn to tame raw data. Master the essential tools for extracting, cleaning, and transforming large volumes of information, ensuring your analysis begins with a solid and reliable foundation.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item">
+                    <span>⏱</span>
+                    <span>6–8h</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>• Python • SQL • Pandas</span>
+                </div>
+                <div class="meta-item">
+                    <span>📌</span>
+                    <span>Engineering & Data Manipulation</span>
+                </div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Laboratory</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Evaluation</button>
+            </nav>
+
+            <div id="aprender" class="tab-panel active">
+
+    <!-- 3.1 Intro -->
+    <div class="content-card">
+        <h3>🔍 3.1 SQL & Data Manipulation — The Foundation of Data Science</h3>
+        <p>No Data Science project begins with AI models. Before any machine learning, before any chart, before any insight — there is <strong>data</strong>. And raw data is almost never ready to use. It is messy, scattered, inconsistent, and full of errors.</p>
+        <br>
+        <p>This process of acquiring, cleaning, and transforming data is called <strong>Data Wrangling</strong> or <strong>Data Munging</strong>, and it consumes approximately <strong>80% of a Data Scientist's time</strong>. It is not glamorous, but it is the skill that separates junior analysts from professionals who deliver real business value.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1.5rem;">
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🗄️</div>
+                <strong style="color:var(--cyan);">SQL</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Extract and aggregate data from relational databases at scale</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🔢</div>
+                <strong style="color:var(--blue);">NumPy</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Fast numerical computing with arrays and matrices</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.07);border:1px solid rgba(122,75,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🐼</div>
+                <strong style="color:var(--purple);">Pandas</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Tabular data manipulation: filter, group, reshape, clean</p>
+            </div>
+            <div style="background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🔄</div>
+                <strong style="color:#ffa500;">ETL Pipeline</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Extract → Transform → Load data into analysis-ready format</p>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border-left:4px solid var(--cyan);padding:1rem;border-radius:0 8px 8px 0;margin-top:1.5rem;">
+            <strong>📐 The Data Science Pipeline:</strong>
+            <div style="font-family:monospace;font-size:0.85rem;color:var(--text-secondary);margin-top:0.8rem;text-align:center;line-height:2.2;">
+                <span style="color:var(--blue);">Raw Data</span> → <span style="color:var(--blue);">Collection</span> → <span style="color:var(--cyan);">Cleaning</span> → <span style="color:var(--cyan);">Transformation</span> → <span style="color:var(--purple);">EDA</span> → <span style="color:var(--purple);">Modelling</span> → <span style="color:#ffa500;">Insights</span>
+            </div>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;">This module covers the first three stages — arguably the most critical, because errors here corrupt everything that follows.</p>
+        </div>
+    </div>
+
+    <!-- 3.2 Data Sources -->
+    <div class="content-card">
+        <h3>🌐 3.2 Data Sources and Formats</h3>
+        <p>A Data Scientist must be versatile in accessing many different types of data sources. Understanding the strengths and limitations of each is essential for designing efficient pipelines.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🗄️ Relational Databases (SQL)</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Structured data in linked tables. The industry standard for transactional systems. Examples: <strong>PostgreSQL, MySQL, SQLite, SQL Server, Oracle</strong>.</p>
+                <pre style="background:#000;padding:0.5rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;"><code># Connect with Python
+import pandas as pd
+import sqlalchemy as sa
+engine = sa.create_engine("postgresql://user:pass@host/db")
+df = pd.read_sql("SELECT * FROM customers", engine)</code></pre>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">📄 Flat Files (CSV, Excel, Parquet)</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Simple tabular files. CSV is the most universal. Parquet is the modern columnar format preferred for large datasets (much faster to read/write).</p>
+                <pre style="background:#000;padding:0.5rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;"><code>df = pd.read_csv("sales.csv")
+df = pd.read_excel("report.xlsx", sheet_name="Q1")
+df = pd.read_parquet("big_data.parquet")  # Fast!</code></pre>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🌍 APIs (JSON/XML)</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Web services that return data in JSON or XML. Used to get live data from external platforms (weather, financial markets, social media).</p>
+                <pre style="background:#000;padding:0.5rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;"><code>import requests
+response = requests.get("https://api.example.com/data")
+data = response.json()       # Parse JSON
+df = pd.json_normalize(data) # Flatten nested JSON to DataFrame</code></pre>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🕸️ Web Scraping & Other Sources</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">When no API exists, scrape websites directly with <strong>BeautifulSoup</strong> or <strong>Scrapy</strong>. Other sources: cloud storage (S3), Kafka streams, NoSQL (MongoDB).</p>
+                <pre style="background:#000;padding:0.5rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;"><code>from bs4 import BeautifulSoup
+import requests
+html = requests.get("https://example.com/table").text
+soup = BeautifulSoup(html, "html.parser")
+df = pd.read_html(str(soup.find("table")))[0]</code></pre>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>⚖️ When to Use What:</strong>
+            <table style="width:100%;border-collapse:collapse;margin-top:0.8rem;font-size:0.82rem;">
+                <thead><tr style="border-bottom:1px solid var(--border-color);">
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Format</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Best For</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Caution</th>
+                </tr></thead>
+                <tbody style="color:var(--text-secondary);">
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:0.5rem;">CSV</td><td style="padding:0.5rem;">Simple sharing, small datasets</td><td style="padding:0.5rem;">Slow for >1M rows, no type safety</td></tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:0.5rem;">Parquet</td><td style="padding:0.5rem;">Large datasets, production pipelines</td><td style="padding:0.5rem;">Not human-readable</td></tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:0.5rem;">SQL DB</td><td style="padding:0.5rem;">Live data, multi-user, complex queries</td><td style="padding:0.5rem;">Requires connection setup</td></tr>
+                    <tr><td style="padding:0.5rem;">JSON</td><td style="padding:0.5rem;">APIs, nested/hierarchical data</td><td style="padding:0.5rem;">Needs flattening for tabular analysis</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 3.3 SQL Core -->
+    <div class="content-card">
+        <h3>📊 3.3 SQL: The Language of Data — Core Syntax</h3>
+        <p>SQL (Structured Query Language) is the universal language for working with relational databases. It is declarative — you describe <em>what</em> you want, not <em>how</em> to get it. Every Data Scientist must be fluent in SQL.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">SQL ANATOMY — A Complete Query</p>
+            <pre style="font-size:0.8rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code>SELECT                          -- 5. Choose columns to display
+    customer_id,
+    name,
+    SUM(order_total) AS revenue, -- Aggregate function
+    COUNT(*) AS num_orders
+FROM orders                     -- 1. Source table
+JOIN customers                  -- 2. Combine with another table
+    ON orders.customer_id = customers.id
+WHERE order_date >= '2024-01-01' -- 3. Filter rows BEFORE grouping
+    AND status = 'completed'
+GROUP BY customer_id, name      -- 4. Group for aggregation
+HAVING SUM(order_total) > 1000  -- 6. Filter AFTER grouping
+ORDER BY revenue DESC           -- 7. Sort results
+LIMIT 10;                       -- 8. Return only top 10</code></pre>
+        </div>
+
+        <div style="margin-top:1.5rem;">
+            <strong>🔑 Essential Clauses Explained:</strong>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:0.8rem;margin-top:0.8rem;">
+                <div style="background:rgba(40,224,255,0.06);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;">
+                    <strong style="color:var(--cyan);">SELECT / FROM</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">The backbone. SELECT defines which columns to return; FROM defines the source table. <strong>Avoid SELECT *</strong> on large tables — always name only the columns you need.</p>
+                </div>
+                <div style="background:rgba(91,124,255,0.06);border:1px solid rgba(91,124,255,0.2);padding:1rem;border-radius:8px;">
+                    <strong style="color:var(--blue);">WHERE</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Filters rows before any grouping. Supports: <code>=, !=, &gt;, &lt;, BETWEEN, IN, LIKE, IS NULL, AND, OR, NOT</code>.</p>
+                    <pre style="background:#000;padding:0.4rem;border-radius:4px;font-size:0.73rem;color:#0f0;margin-top:0.4rem;overflow-x:auto;"><code>WHERE country IN ('PT','ES','BR')
+  AND age BETWEEN 18 AND 65
+  AND email IS NOT NULL</code></pre>
+                </div>
+                <div style="background:rgba(122,75,255,0.06);border:1px solid rgba(122,75,255,0.2);padding:1rem;border-radius:8px;">
+                    <strong style="color:var(--purple);">GROUP BY + Aggregations</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">The core of data summarization. Turns millions of rows into meaningful summaries.</p>
+                    <pre style="background:#000;padding:0.4rem;border-radius:4px;font-size:0.73rem;color:#0f0;margin-top:0.4rem;overflow-x:auto;"><code>SELECT department,
+  COUNT(*) AS employees,
+  AVG(salary) AS avg_salary,
+  MAX(salary) AS top_salary
+FROM staff
+GROUP BY department;</code></pre>
+                </div>
+                <div style="background:rgba(255,165,0,0.06);border:1px solid rgba(255,165,0,0.2);padding:1rem;border-radius:8px;">
+                    <strong style="color:#ffa500;">HAVING vs WHERE</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;"><strong>WHERE</strong> filters individual rows (before grouping). <strong>HAVING</strong> filters grouped results (after grouping). Common confusion point!</p>
+                    <pre style="background:#000;padding:0.4rem;border-radius:4px;font-size:0.73rem;color:#0f0;margin-top:0.4rem;overflow-x:auto;"><code>-- Only departments with avg salary > 50k
+GROUP BY department
+HAVING AVG(salary) > 50000</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">PRACTICAL EXAMPLES — Real-world SQL Patterns</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>-- Top 5 best-selling products this month
+SELECT product_name, SUM(quantity) AS units_sold
+FROM sales
+WHERE MONTH(sale_date) = MONTH(CURRENT_DATE)
+GROUP BY product_name
+ORDER BY units_sold DESC
+LIMIT 5;
+
+-- Customers who haven't ordered in 90 days (churn risk)
+SELECT c.name, c.email, MAX(o.order_date) AS last_order
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customer_id
+GROUP BY c.id, c.name, c.email
+HAVING MAX(o.order_date) < CURRENT_DATE - INTERVAL '90 days'
+    OR MAX(o.order_date) IS NULL;
+
+-- Monthly revenue trend
+SELECT DATE_TRUNC('month', order_date) AS month,
+       SUM(total) AS monthly_revenue,
+       COUNT(DISTINCT customer_id) AS unique_buyers
+FROM orders
+WHERE status = 'paid'
+GROUP BY 1
+ORDER BY 1;</code></pre>
+        </div>
+    </div>
+
+    <!-- 3.4 SQL JOINs -->
+    <div class="content-card">
+        <h3>🔗 3.4 SQL JOINs — Combining Tables</h3>
+        <p>In normalized databases, data is split across multiple related tables. JOINs allow you to bring that data back together for analysis. Understanding all types of JOINs is one of the most critical SQL skills.</p>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;margin-top:1.2rem;font-family:monospace;font-size:0.85rem;line-height:2;">
+            <strong style="color:var(--cyan);">Example Tables:</strong><br>
+            <span style="color:#ffa500;">customers</span>: id | name | email<br>
+            <span style="color:#ffa500;">orders</span>: id | customer_id | total | status
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">INNER JOIN — Only matching rows in BOTH tables</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>SELECT c.name, o.total
+FROM customers c
+INNER JOIN orders o ON c.id = o.customer_id;
+-- Returns only customers who HAVE orders</code></pre>
+            </div>
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">LEFT JOIN — All left rows, matching right if exists</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>SELECT c.name, o.total
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customer_id;
+-- Returns ALL customers, NULL if no orders
+-- Perfect for finding customers with 0 orders!</code></pre>
+            </div>
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">RIGHT JOIN — All right rows, matching left if exists</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>SELECT c.name, o.total
+FROM customers c
+RIGHT JOIN orders o ON c.id = o.customer_id;
+-- Returns ALL orders, even orphaned ones
+-- Useful for data quality checks</code></pre>
+            </div>
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">FULL OUTER JOIN — All rows from both tables</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>SELECT c.name, o.total
+FROM customers c
+FULL OUTER JOIN orders o ON c.id = o.customer_id;
+-- Returns everything, NULLs where no match
+-- Great for reconciliation analysis</code></pre>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🧩 Subqueries and CTEs (Common Table Expressions):</strong>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">CTEs make complex queries readable by breaking them into named, reusable steps:</p>
+            <div style="background:#000;padding:1rem;border-radius:8px;margin-top:0.6rem;">
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>-- CTE: Step-by-step logic
+WITH active_customers AS (
+    SELECT customer_id, COUNT(*) AS order_count
+    FROM orders
+    WHERE status = 'completed'
+    GROUP BY customer_id
+    HAVING COUNT(*) >= 3         -- Repeat buyers
+),
+high_value AS (
+    SELECT customer_id, SUM(total) AS lifetime_value
+    FROM orders GROUP BY customer_id
+    HAVING SUM(total) > 500
+)
+SELECT c.name, ac.order_count, hv.lifetime_value
+FROM customers c
+JOIN active_customers ac ON c.id = ac.customer_id
+JOIN high_value hv ON c.id = hv.customer_id;</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3.5 Window Functions -->
+    <div class="content-card">
+        <h3>🪟 3.5 SQL Window Functions — Advanced Analytics</h3>
+        <p>Window functions are one of the most powerful features in SQL. Unlike GROUP BY (which collapses rows into groups), window functions perform calculations <em>across rows while keeping each row intact</em>. They are essential for time-series analysis, ranking, and running totals.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">WINDOW FUNCTION SYNTAX</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>function_name() OVER (
+    PARTITION BY column   -- Divide into groups (like GROUP BY, but keeps rows)
+    ORDER BY column       -- Define order within each partition
+    ROWS BETWEEN ...      -- Define the "window frame"
+)</code></pre>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">PRACTICAL WINDOW FUNCTION EXAMPLES</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>-- 1. RANK employees by salary within each department
+SELECT name, department, salary,
+    RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_rank
+FROM employees;
+
+-- 2. Running total of sales over time
+SELECT order_date, daily_revenue,
+    SUM(daily_revenue) OVER (ORDER BY order_date) AS cumulative_revenue
+FROM daily_sales;
+
+-- 3. Compare each sale to the previous one (MoM growth)
+SELECT month, revenue,
+    LAG(revenue, 1) OVER (ORDER BY month) AS prev_month,
+    revenue - LAG(revenue, 1) OVER (ORDER BY month) AS growth
+FROM monthly_revenue;
+
+-- 4. Moving 7-day average (smoothing noise)
+SELECT date, sales,
+    AVG(sales) OVER (ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS moving_avg_7d
+FROM daily_sales;</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.8rem;margin-top:1.2rem;font-size:0.82rem;">
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">ROW_NUMBER()</strong><br><span style="color:var(--text-secondary);">Unique sequential number per partition</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">RANK() / DENSE_RANK()</strong><br><span style="color:var(--text-secondary);">Ranking with/without gaps on ties</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">LAG() / LEAD()</strong><br><span style="color:var(--text-secondary);">Access previous / next row value</span></div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">NTILE(n)</strong><br><span style="color:var(--text-secondary);">Divide into n equal percentile buckets</span></div>
+        </div>
+    </div>
+
+    <!-- 3.6 NumPy -->
+    <div class="content-card">
+        <h3>🔢 3.6 NumPy — Numerical Computing Foundation</h3>
+        <p>NumPy (Numerical Python) is the bedrock of the entire Python data science ecosystem. Pandas, Scikit-Learn, TensorFlow — they all use NumPy under the hood. It works with <strong>n-dimensional arrays (ndarrays)</strong> that are stored in contiguous memory blocks, making operations 10–100× faster than native Python lists.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">CREATING ARRAYS</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>import numpy as np
+
+# From list
+a = np.array([1, 2, 3, 4, 5])
+
+# Special arrays
+np.zeros((3, 4))        # 3x4 matrix of zeros
+np.ones((2, 2))         # 2x2 matrix of ones
+np.eye(3)               # 3x3 identity matrix
+np.arange(0, 10, 2)     # [0, 2, 4, 6, 8]
+np.linspace(0, 1, 5)    # [0, 0.25, 0.5, 0.75, 1.0]
+np.random.randn(3, 3)   # Normal distribution
+
+# Shape and type
+a.shape   # (5,)
+a.dtype   # float64
+a.ndim    # 1</code></pre>
+            </div>
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">ARRAY OPERATIONS (Vectorized)</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>a = np.array([1, 2, 3, 4])
+b = np.array([10, 20, 30, 40])
+
+# Element-wise (no loops needed!)
+a + b        # [11, 22, 33, 44]
+a * b        # [10, 40, 90, 160]
+a ** 2       # [1, 4, 9, 16]
+np.sqrt(a)   # [1.0, 1.41, 1.73, 2.0]
+
+# Broadcasting: scalar applies to all
+a * 2        # [2, 4, 6, 8]
+a > 2        # [False, False, True, True]
+
+# Aggregate functions
+np.sum(a)       # 10
+np.mean(a)      # 2.5
+np.std(a)       # 1.118
+np.max(a)       # 4
+np.argmax(a)    # 3  (index of max)</code></pre>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">INDEXING, SLICING AND RESHAPING</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>matrix = np.array([[1,2,3],[4,5,6],[7,8,9]])
+
+# Indexing  [row, col]
+matrix[0, 1]      # 2 (first row, second col)
+matrix[1:, :2]    # Rows 1+, first 2 columns → [[4,5],[7,8]]
+
+# Boolean indexing (very powerful!)
+a = np.array([10, 25, 5, 18, 30])
+a[a > 15]         # [25, 18, 30] — filter without loop!
+a[a > 15] = 0     # Set values to 0 where condition is True
+
+# Reshaping
+a = np.arange(12)
+a.reshape(3, 4)   # 12 elements → 3x4 matrix
+a.reshape(2, -1)  # NumPy figures out the other dimension</code></pre>
+        </div>
+
+        <div style="background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.2);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>⚡ Why is NumPy so fast?</strong>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.5rem;">1. Arrays are stored in <strong>contiguous memory blocks</strong> (unlike Python lists which store pointers). 2. Operations are executed in <strong>C and Fortran</strong> code, not interpreted Python. 3. <strong>Vectorization</strong> eliminates Python for-loops entirely — a single NumPy operation on 1M elements is ~100× faster than a Python loop.</p>
+        </div>
+    </div>
+
+    <!-- 3.7 Pandas -->
+    <div class="content-card">
+        <h3>🐼 3.7 Pandas — DataFrames in Depth</h3>
+        <p>Pandas is the most important library for data manipulation in Python. At its core is the <strong>DataFrame</strong> — a 2D table with labelled rows and columns. Think of it as an Excel spreadsheet with the full power of Python. Every step of data preparation happens here.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">LOADING AND FIRST INSPECTION</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>import pandas as pd
+
+df = pd.read_csv("sales.csv", parse_dates=["date"])
+
+# First inspection
+df.shape          # (rows, columns) → (10000, 8)
+df.head(5)        # First 5 rows
+df.tail(5)        # Last 5 rows
+df.info()         # Types, non-null counts, memory
+df.describe()     # Count, mean, std, min, quartiles, max
+df.dtypes         # Data type of each column
+df.columns        # List of column names
+df.isnull().sum() # Count NaN per column</code></pre>
+            </div>
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">SELECTING DATA</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Select column(s)
+df["name"]                  # Series (one column)
+df[["name", "age", "city"]] # DataFrame (multiple)
+
+# Select rows — loc (label-based)
+df.loc[0:5]                 # Rows 0 to 5
+df.loc[df["age"] > 30]      # Rows where age > 30
+df.loc[df["age"] > 30, ["name", "city"]]  # Filter + columns
+
+# Select rows — iloc (position-based)
+df.iloc[0:10]               # First 10 rows
+df.iloc[:, 1:4]             # Columns 2,3,4
+
+# Boolean filtering (most common)
+adults = df[df["age"] >= 18]
+pt_clients = df[(df["country"] == "PT") & (df["active"] == True)]
+big_orders = df[df["total"].between(100, 500)]</code></pre>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">CREATING AND TRANSFORMING COLUMNS</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># New calculated columns
+df["total_with_vat"] = df["price"] * df["quantity"] * 1.23
+df["margin_pct"] = (df["revenue"] - df["cost"]) / df["revenue"] * 100
+df["name_upper"] = df["name"].str.upper()
+df["first_name"] = df["full_name"].str.split(" ").str[0]
+
+# Conditional column (like IF in Excel)
+df["segment"] = pd.cut(df["age"],
+    bins=[0, 18, 35, 60, 100],
+    labels=["Minor", "Young Adult", "Adult", "Senior"])
+
+# Apply custom function to a column
+def classify_order(total):
+    if total > 1000: return "high"
+    elif total > 200: return "medium"
+    return "low"
+
+df["order_class"] = df["total"].apply(classify_order)
+
+# Rename columns
+df.rename(columns={"qty": "quantity", "dt": "date"}, inplace=True)
+
+# Drop columns
+df.drop(columns=["redundant_col", "temp"], inplace=True)</code></pre>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">GROUPBY — The SQL GROUP BY of Pandas</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Simple groupby
+df.groupby("category")["revenue"].sum()
+df.groupby("category")["revenue"].mean()
+df.groupby("category")["revenue"].agg(["sum", "mean", "count", "std"])
+
+# Multiple group keys
+df.groupby(["region", "year"])["sales"].sum().reset_index()
+
+# Custom aggregations per column
+result = df.groupby("region").agg(
+    total_revenue=("revenue", "sum"),
+    avg_order=("total", "mean"),
+    num_customers=("customer_id", "nunique"),  # unique count!
+    first_sale=("date", "min")
+).reset_index()
+
+# Pivot table (Excel-style)
+pivot = df.pivot_table(
+    values="revenue",
+    index="product",
+    columns="region",
+    aggfunc="sum",
+    fill_value=0
+)</code></pre>
+        </div>
+    </div>
+
+    <!-- 3.8 Data Cleaning -->
+    <div class="content-card">
+        <h3>🧹 3.8 Data Cleaning — The Most Critical Step</h3>
+        <p>Garbage In, Garbage Out. Even the most sophisticated model will produce wrong results if fed dirty data. This section covers the full toolkit for identifying and fixing data quality issues.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">HANDLING MISSING VALUES (NaN)</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Detect missing values
+df.isnull().sum()                # Count NaN per column
+df.isnull().sum() / len(df) * 100  # % missing per column
+
+# Strategy 1: Drop rows/columns with too many nulls
+df.dropna()                      # Drop rows with ANY null
+df.dropna(subset=["name", "age"]) # Only drop if THESE are null
+df.dropna(thresh=5)              # Keep rows with at least 5 non-null values
+df.drop(columns=["useless_col"], inplace=True)
+
+# Strategy 2: Fill with a constant
+df["status"].fillna("unknown", inplace=True)
+df["count"].fillna(0, inplace=True)
+
+# Strategy 3: Fill with statistical value (imputation)
+df["age"].fillna(df["age"].median(), inplace=True)    # Median (robust to outliers)
+df["salary"].fillna(df["salary"].mean(), inplace=True) # Mean
+
+# Strategy 4: Forward/backward fill (time series)
+df["price"].fillna(method="ffill", inplace=True)  # Use previous value
+df["price"].fillna(method="bfill", inplace=True)  # Use next value</code></pre>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">DUPLICATES, DATA TYPES AND STRING CLEANING</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Duplicates
+df.duplicated().sum()               # Count duplicate rows
+df.drop_duplicates(inplace=True)    # Remove all duplicates
+df.drop_duplicates(subset=["email"], keep="first")  # Based on one column
+
+# Data type conversions
+df["age"] = df["age"].astype(int)
+df["price"] = df["price"].astype(float)
+df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+df["category"] = df["category"].astype("category")  # Memory efficient!
+
+# String cleaning (very common with real-world data)
+df["name"] = df["name"].str.strip()         # Remove whitespace
+df["name"] = df["name"].str.lower()         # Lowercase
+df["phone"] = df["phone"].str.replace("-","").str.replace(" ","")
+df["email"] = df["email"].str.replace(r"\s+", "", regex=True)
+
+# Standardize inconsistent values
+df["gender"] = df["gender"].replace({"M": "male", "F": "female", "1": "male", "0": "female"})
+df["country"] = df["country"].str.strip().str.title()</code></pre>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">OUTLIER DETECTION AND HANDLING</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>import numpy as np
+
+# Method 1: IQR (Interquartile Range) — robust
+Q1 = df["salary"].quantile(0.25)
+Q3 = df["salary"].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# See the outliers
+outliers = df[(df["salary"] < lower_bound) | (df["salary"] > upper_bound)]
+print(f"Found {len(outliers)} outliers")
+
+# Remove outliers
+df_clean = df[(df["salary"] >= lower_bound) & (df["salary"] <= upper_bound)]
+
+# Method 2: Z-Score — for normally distributed data
+from scipy import stats
+z_scores = np.abs(stats.zscore(df["salary"]))
+df_clean = df[z_scores < 3]  # Keep rows within 3 standard deviations
+
+# Method 3: Capping (Winsorizing) — keep but limit extremes
+df["salary"] = df["salary"].clip(lower=lower_bound, upper=upper_bound)</code></pre>
+        </div>
+    </div>
+
+    <!-- 3.9 Merging -->
+    <div class="content-card">
+        <h3>🔀 3.9 Merging, Joining and Reshaping DataFrames</h3>
+        <p>Just like SQL JOINs, Pandas allows you to combine multiple DataFrames. This is essential when data comes from different sources (databases, APIs, files) and needs to be unified for analysis.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">MERGE (Like SQL JOIN)</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># INNER JOIN (default)
+result = pd.merge(orders, customers, on="customer_id")
+
+# LEFT JOIN
+result = pd.merge(customers, orders, on="customer_id", how="left")
+
+# Full merge with renamed columns
+result = pd.merge(
+    df_sales.rename(columns={"date": "sale_date"}),
+    df_products[["id", "name", "category"]],
+    left_on="product_id",
+    right_on="id",
+    how="inner"
+)
+
+# CONCATENATE (stacking rows — like SQL UNION)
+all_data = pd.concat([df_2022, df_2023, df_2024], ignore_index=True)
+all_features = pd.concat([df_features, df_labels], axis=1)  # Side by side</code></pre>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">RESHAPE: MELT AND PIVOT</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># MELT: Wide → Long (useful for plotting and modelling)
+# Before: product | Jan | Feb | Mar
+# After:  product | month | value
+df_long = pd.melt(df_wide,
+    id_vars=["product"],
+    value_vars=["Jan", "Feb", "Mar"],
+    var_name="month",
+    value_name="sales")
+
+# PIVOT: Long → Wide (reverse of melt)
+df_wide = df_long.pivot(index="product", columns="month", values="sales")
+
+# STACK / UNSTACK (multi-level index operations)
+df_stacked = df.stack()      # Move column level to row level
+df_unstacked = df.unstack()  # Move row level to column level</code></pre>
+        </div>
+    </div>
+
+    <!-- 3.10 ETL Pipeline -->
+    <div class="content-card">
+        <h3>🔄 3.10 SQL + Python Integration — Building an ETL Pipeline</h3>
+        <p>In real-world Data Science, SQL and Python are not competing tools — they are <strong>complementary stages</strong> in a data pipeline. The golden rule: <em>do the heavy lifting in SQL</em> (filtering, aggregating, joining), then bring a lean, clean result into Python for finer transformations and analysis.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.8rem;margin-top:1.2rem;text-align:center;font-size:0.83rem;">
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;">
+                <div style="font-size:1.5rem;">📥</div>
+                <strong style="color:var(--cyan);">Extract</strong>
+                <p style="color:var(--text-secondary);margin-top:0.3rem;">SQL queries to database or files</p>
+            </div>
+            <div style="font-size:1.5rem;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);">→</div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.2);padding:1rem;border-radius:8px;">
+                <div style="font-size:1.5rem;">⚙️</div>
+                <strong style="color:var(--blue);">Transform</strong>
+                <p style="color:var(--text-secondary);margin-top:0.3rem;">Pandas: clean, reshape, enrich</p>
+            </div>
+            <div style="font-size:1.5rem;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);">→</div>
+            <div style="background:rgba(122,75,255,0.07);border:1px solid rgba(122,75,255,0.2);padding:1rem;border-radius:8px;">
+                <div style="font-size:1.5rem;">📤</div>
+                <strong style="color:var(--purple);">Load</strong>
+                <p style="color:var(--text-secondary);margin-top:0.3rem;">Save to DB, CSV, Parquet, Dashboard</p>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">COMPLETE ETL PIPELINE EXAMPLE</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">import pandas as pd
+import sqlalchemy as sa
+
+# ======================== EXTRACT ========================
+engine = sa.create_engine("postgresql://user:pass@localhost/sales_db")
+
+# Let SQL do the heavy work — filter and aggregate BEFORE loading
+sql_query = """
+    SELECT
+        c.country,
+        p.category,
+        DATE_TRUNC('month', o.order_date) AS month,
+        SUM(oi.quantity * oi.unit_price) AS revenue,
+        COUNT(DISTINCT o.id) AS num_orders
+    FROM orders o
+    JOIN order_items oi ON o.id = oi.order_id
+    JOIN customers c ON o.customer_id = c.id
+    JOIN products p ON oi.product_id = p.id
+    WHERE o.order_date >= '2024-01-01'
+      AND o.status = 'completed'
+    GROUP BY 1, 2, 3
+"""
+df = pd.read_sql(sql_query, engine)
+
+# ======================== TRANSFORM ========================
+# Fix types
+df["month"] = pd.to_datetime(df["month"])
+
+# Clean nulls
+df.dropna(subset=["country", "category"], inplace=True)
+df["revenue"].fillna(0, inplace=True)
+
+# Create new features
+df["avg_order_value"] = df["revenue"] / df["num_orders"]
+df["year"] = df["month"].dt.year
+df["quarter"] = df["month"].dt.quarter
+df["month_name"] = df["month"].dt.strftime("%B")
+
+# Remove outliers
+df = df[df["revenue"] < df["revenue"].quantile(0.99)]
+
+# ======================== LOAD ========================
+# To Parquet (fast, compressed)
+df.to_parquet("clean_sales_2024.parquet", index=False)
+
+# Back to a different table in the database
+df.to_sql("sales_summary", engine, if_exists="replace", index=False)
+
+print(f"Pipeline complete. {len(df)} rows processed.")</code></pre>
+        </div>
+    </div>
+
+    <!-- 3.11 Performance -->
+    <div class="content-card">
+        <h3>⚡ 3.11 Performance: Handling Large Datasets</h3>
+        <p>When datasets grow into millions of rows, naive approaches run out of memory or take hours. Here are the key techniques for working efficiently at scale.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">MEMORY OPTIMIZATION</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code># Check memory usage
+df.memory_usage(deep=True).sum() / 1e6  # MB
+
+# Reduce dtypes (huge savings!)
+df["age"] = df["age"].astype("int8")     # 1 byte vs 8
+df["price"] = df["price"].astype("float32")  # 4 bytes vs 8
+df["category"] = df["category"].astype("category")  # Huge for repeated strings!
+
+# Read only needed columns
+df = pd.read_csv("big.csv", usecols=["id", "date", "revenue"])
+
+# Read in chunks (if RAM limited)
+for chunk in pd.read_csv("huge.csv", chunksize=100_000):
+    process(chunk)</code></pre>
+            </div>
+            <div style="background:#000;padding:1rem;border-radius:8px;">
+                <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">SQL QUERY OPTIMIZATION</p>
+                <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">-- Use indexes (DBA sets these up)
+CREATE INDEX idx_order_date ON orders(order_date);
+CREATE INDEX idx_customer ON orders(customer_id);
+
+-- Avoid SELECT * — name columns
+SELECT id, name, total FROM orders;  -- Good
+SELECT * FROM orders;  -- Slow on wide tables
+
+-- Filter early — use WHERE before JOIN
+SELECT *
+FROM (SELECT * FROM orders WHERE year = 2024) o
+JOIN customers c ON o.customer_id = c.id;
+
+-- Explain query plan to find bottlenecks
+EXPLAIN ANALYZE SELECT ...</code></pre>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>🚀 Modern Alternatives for Big Data:</strong>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.8rem;margin-top:0.8rem;font-size:0.82rem;">
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">Polars</strong><br><span style="color:var(--text-secondary);">Pandas-like but 10–100× faster. Rust-based. The future of DataFrames.</span></div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">DuckDB</strong><br><span style="color:var(--text-secondary);">In-process SQL engine. Query CSV/Parquet directly with SQL. Blazing fast.</span></div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">PySpark</strong><br><span style="color:var(--text-secondary);">Distributed processing for truly massive data (billions of rows).</span></div>
+                <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;"><strong style="color:var(--cyan);">Dask</strong><br><span style="color:var(--text-secondary);">Pandas API for data larger than RAM. Processes in parallel chunks.</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3.12 Common Errors -->
+    <div class="content-card">
+        <h3>⚠️ 3.12 Common Errors and Best Practices</h3>
+        <p>Even experienced Data Scientists make these mistakes. Knowing them in advance will save you hours of debugging and prevent incorrect analyses from reaching production.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ff6b6b;">🚫 Common Mistakes</strong>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ <code>SELECT *</code> on huge tables → crashes DB</li>
+                    <li>→ Modifying original data without a backup copy</li>
+                    <li>→ Calculating means on columns with 40% NaN</li>
+                    <li>→ Ignoring data type mismatches (string "2024-01-01" treated as text)</li>
+                    <li>→ Using <code>.apply()</code> when vectorized operations exist (100× slower)</li>
+                    <li>→ Chained assignment: <code>df[df.age&gt;18]["col"] = x</code> — silently fails!</li>
+                    <li>→ Joining on non-unique keys → row explosion</li>
+                    <li>→ Not resetting the index after filtering</li>
+                </ul>
+            </div>
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">✅ Best Practices</strong>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ Always save a raw copy: <code>df_raw = df.copy()</code></li>
+                    <li>→ Inspect data BEFORE cleaning: <code>df.info()</code>, <code>df.describe()</code></li>
+                    <li>→ Use <code>.loc[]</code> for assignment, not chained indexing</li>
+                    <li>→ Log what you clean: print shape before and after each step</li>
+                    <li>→ Prefer <code>pd.to_datetime()</code> explicitly over auto-parsing</li>
+                    <li>→ Validate row counts after each merge (unexpected duplicates?)</li>
+                    <li>→ Vectorize: <code>df["col"] * 2</code> not <code>df["col"].apply(lambda x: x*2)</code></li>
+                    <li>→ Write functions, not one giant notebook cell</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">DATA QUALITY CHECKLIST — Run this at the start of any project</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code">def data_quality_report(df):
+    print("=== DATA QUALITY REPORT ===")
+    print(f"Shape: {df.shape}")
+    print(f"\n-- Missing Values --")
+    nulls = df.isnull().sum()
+    print(nulls[nulls > 0].sort_values(ascending=False))
+    print(f"\n-- Duplicates: {df.duplicated().sum()} rows")
+    print(f"\n-- Data Types --")
+    print(df.dtypes)
+    print(f"\n-- Numeric Summary --")
+    print(df.describe())
+    print(f"\n-- Unique Values (categoricals) --")
+    for col in df.select_dtypes("object").columns:
+        print(f"  {col}: {df[col].nunique()} unique | top: {df[col].value_counts().index[0]}")
+
+data_quality_report(df)</code></pre>
+        </div>
+    </div>
+
+    <!-- 3.13 Conclusion -->
+    <div class="content-card" style="background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.08)); border-color: rgba(40,224,255,0.3);">
+        <h3>🎓 3.13 Module Conclusion & Learning Path</h3>
+        <p>You now have a complete, professional-grade toolkit for data manipulation. From querying relational databases with advanced SQL, to cleaning and reshaping tabular data with Pandas, to building end-to-end ETL pipelines — these skills form the backbone of every serious Data Science project.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">✅ What you've covered:</strong>
+                <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>✔ Data sources and file formats (CSV, Parquet, JSON, SQL)</li>
+                    <li>✔ Core SQL: SELECT, WHERE, GROUP BY, HAVING, ORDER BY</li>
+                    <li>✔ All JOIN types: INNER, LEFT, RIGHT, FULL OUTER</li>
+                    <li>✔ Window functions: RANK, LAG, LEAD, running totals</li>
+                    <li>✔ CTEs for readable, maintainable queries</li>
+                    <li>✔ NumPy: arrays, vectorized operations, broadcasting</li>
+                    <li>✔ Pandas: DataFrames, filtering, groupby, pivot tables</li>
+                    <li>✔ Data cleaning: nulls, duplicates, types, outliers</li>
+                    <li>✔ Merging and reshaping DataFrames</li>
+                    <li>✔ Building ETL pipelines: SQL → Pandas → Output</li>
+                    <li>✔ Performance optimization for large datasets</li>
+                    <li>✔ Common errors and best practices</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">🗺️ Your next steps:</strong>
+                <div style="margin-top:0.6rem;font-size:0.83rem;">
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">1️⃣ Practice SQL</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Use <strong>SQLZoo</strong>, <strong>Mode Analytics</strong>, or <strong>LeetCode SQL</strong> to solve real query challenges</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">2️⃣ Work on a real dataset</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Download a messy CSV from <strong>Kaggle</strong> and apply the full cleaning pipeline</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">3️⃣ Build a mini-ETL</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Connect to a SQLite database, run queries, clean results in Pandas, export to Parquet</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;">
+                        <strong style="color:var(--blue);">4️⃣ Next module: EDA</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Turn your clean data into charts, distributions, and visual discoveries with Matplotlib and Seaborn</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:1.2rem;margin-top:1.2rem;">
+            <strong>🏆 Challenge:</strong>
+            <p style="font-size:0.9rem;color:var(--text-secondary);margin-top:0.5rem;">Find any public dataset (e.g., World Bank data, Kaggle titanic, COVID stats). Load it, run <code>data_quality_report(df)</code>, fix at least 5 data quality issues, create 3 new calculated columns, build a groupby summary by a key dimension, and export the result. Document every decision you make — <em>why</em> you dropped a column, <em>why</em> you chose median over mean for imputation. This thought process is what separates good data scientists from great ones.</p>
+        </div>
+    </div>
+
+            </div>
+
+            <div id="laboratorio" class="tab-panel">
+                <h3>SQL Data Console</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Practice extracting data. Try filtering customers with high spending.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">EDITOR SQL</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT cliente_nome, total_gasto 
+FROM vendas 
+WHERE total_gasto > 1500
+ORDER BY total_gasto DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">RESULTADO DA QUERY</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Clique em "Executar" para simular a consulta na base de dados...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Executar Query</button>
+            </div>
+
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>SQL & Data Manipulation Quiz</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge of SQL & Data Manipulation. Answer the 15 questions and receive immediate feedback.</p>
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What does the acronym NumPy stand for in the Python ecosystem?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Number Python</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B" data-correct="true"> B) Numerical Python</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Null Processing Python</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Network Python</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. What is the primary Pandas data structure for working with two-dimensional tables?</p>
+                <ul style="list-style: none; padding: 0;">
+                    <li><label class="quiz-option"><input type="radio" name="q2" value="A"> A) Series</label></li>
+                    <li><label class="quiz-option"><input type="radio" name="q2" value="B"> B) ndarray</label></li>
+                    <li><label class="quiz-option"><input type="radio" name="q2" value="C" data-correct="true"> C) DataFrame</label></li>
+                    <li><label class="quiz-option"><input type="radio" name="q2" value="D"> D) List</label></li>
+                </ul>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. Which SQL command is used to combine data from two or more tables based on a common column?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) SELECT</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B"> B) GROUP BY</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C" data-correct="true"> C) JOIN</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) WHERE</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. In Pandas, which function is used to view the first 5 rows of a dataset?</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) df.info()</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B"> B) df.describe()</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C"> C) df.columns</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D" data-correct="true"> D) df.head()</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. What is "Broadcasting" in NumPy?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) A way to transmit code to other servers</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B" data-correct="true"> B) The ability to perform operations between arrays of different shapes</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C"> C) A method for reading very large CSV files</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) A real-time data visualization technique</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. Which of these Pandas functions is essential for the Data Cleaning phase?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A" data-correct="true"> A) df.dropna()</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) df.plot()</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C"> C) df.sort_values()</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) df.to_csv()</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. What is the purpose of the GROUP BY command in SQL and Pandas?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) To delete duplicate rows</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B"> B) To sort data alphabetically</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"> C) To group data and apply aggregate functions like sum or mean</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) To rename columns in a table</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. Which library is considered the foundation for almost all other data libraries in Python?</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Matplotlib</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"> B) NumPy</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Scikit-learn</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Flask</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. If you need to check the data types of each column and if there are null values in a DataFrame, which command do you use?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) df.shape</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B" data-correct="true"> B) df.info()</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C"> C) df.mean()</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) df.tail()</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. How do you add a new calculated column to a DataFrame `df`?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) df.add_column('new')</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B" data-correct="true"> B) df['new_column'] = df['column_A'] * 10</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C"> C) df.new_feature()</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) np.create(df, 'new')</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What is the main advantage of NumPy arrays over native Python lists?</p>
+                <label class="quiz-option"><input type="radio" name="q11" value="A"> A) They are more colorful in the console</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B"> B) They only allow text storage</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C" data-correct="true"> C) They are significantly faster and more memory-efficient</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) They do not allow mathematical calculations</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. Which Pandas function do you use to load an Excel file?</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) pd.read_csv()</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) pd.read_json()</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"> C) pd.read_excel()</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) pd.load_data()</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. In SQL, which clause is used to filter rows before any grouping occurs?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) HAVING</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B"> B) ORDER BY</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"> C) WHERE</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) LIMIT</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. What does the `df.describe()` command do in Pandas?</p>
+                <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Deletes the dataset from memory</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B" data-correct="true"> B) Generates descriptive statistics (mean, std dev, min, max, etc.)</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Creates an automatic bar chart</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Changes all column names to lowercase</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. Which of these tasks is part of "Data Wrangling" or Manipulation?</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Choosing the company logo color</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B" data-correct="true"> B) Converting data types and handling missing values</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Installing the operating system on the server</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Creating PowerPoint presentations for the client</label>
+            </div>
+        </form>
+
+        <div class="quiz-controls" style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback" class="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+        <script>
+        // Quiz functionality
+class QuizManager {
+    constructor() {
+        this.questionsData = {
+            q1: { correct: 'B', exp: 'NumPy stands for Numerical Python and is the fundamental library for numerical computing in Python.' },
+            q2: { correct: 'C', exp: 'The DataFrame is the main structure of Pandas, allowing you to work with data in a tabular format (rows and columns).' },
+            q3: { correct: 'C', exp: 'JOIN is the SQL clause used to combine records from different tables based on a relationship between columns.' },
+            q4: { correct: 'D', exp: 'The df.head() function is the standard for quickly inspecting the beginning of a dataset.' },
+            q5: { correct: 'B', exp: 'Broadcasting describes how NumPy treats arrays with different dimensions during arithmetic operations.' },
+            q6: { correct: 'A', exp: 'df.dropna() is used to remove null values, one of the most common tasks in data cleaning.' },
+            q7: { correct: 'C', exp: 'GROUP BY allows segmenting data into groups and applying calculations like sum or mean to each group.' },
+            q8: { correct: 'B', exp: 'NumPy is the foundation upon which libraries like Pandas and Scikit-Learn are built.' },
+            q9: { correct: 'B', exp: 'df.info() provides a technical summary: data types, non-null value counts, and memory usage.' },
+            q10: { correct: 'B', exp: 'In Pandas, you create new columns declaratively: df["new"] = calculation.' },
+            q11: { correct: 'C', exp: 'NumPy arrays are implemented in C and use continuous blocks of memory, making them much faster than Python lists.' },
+            q12: { correct: 'C', exp: 'The pd.read_excel() function is the specific tool for importing data from Excel spreadsheets.' },
+            q13: { correct: 'C', exp: 'The WHERE clause filters individual rows. HAVING would only be used after grouping.' },
+            q14: { correct: 'B', exp: 'df.describe() automatically generates statistics such as mean, standard deviation, and quartiles for numerical columns.' },
+            q15: { correct: 'B', exp: 'Data Wrangling involves transforming "raw" data into a format suitable for analysis, including error handling.' }
+        };
+        this.init();
+    }
+
+    init() {
+        document.getElementById('submit-quiz').addEventListener('click', () => {
+            this.submitQuiz();
+        });
+
+        document.getElementById('clear-quiz').addEventListener('click', () => {
+            this.clearQuiz();
+        });
+    }
+
+    submitQuiz() {
+                    const form = document.getElementById('quiz-form');
+                    const formData = new FormData(form);
+                    let score = 0;
+                    let feedbackHTML = '';
+                    Object.keys(this.questionsData).forEach((key, index) => {
+                        const userAnswer = formData.get(key);
+                        const isCorrect = userAnswer === this.questionsData[key].correct;
+                        if (isCorrect) score++;
+                        feedbackHTML += `
+                            <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                                <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                                <div>
+                                    <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                    ${!isCorrect ? `<br><small class="correct-answer">
+                                            Correct answer: Option ${this.questionsData[key].correct}
+                                        </small>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    this.displayResults(score, feedbackHTML);
+                }
+
+    displayResults(score, feedbackHTML) {
+        const total = Object.keys(this.questionsData).length;
+        const percent = Math.round((score / total) * 100);
+        const resultsDiv = document.getElementById('quiz-results');
+        
+        let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+
+        document.getElementById('quiz-score').innerHTML = `
+            <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+            <p style="color: var(--text-secondary)">${percent >= 70 ? 'Amazing! You have mastered the fundamentals.' : 'Keep practicing to improve.'}</p>
+        `;
+
+        document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clearQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-results').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+// Start when document loads
+document.addEventListener('DOMContentLoaded', () => {
+    new QuizManager();
+});
+</script>
+
+            <div id="recursos" class="tab-panel">
+                <h3>Materiais de Apoio</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ Guia Definitivo: Python para Análise de Dados</a>
+                    <a href="#" class="resource-link">→ Cheat Sheet: Comandos SQL Essenciais</a>
+                    <a href="#" class="resource-link">→ Documentação Scikit-Learn: Escolhendo o Algoritmo Certo</a>
+                    <a href="#" class="resource-link">→ Workshop: Storytelling com Dados</a>
+                </div>
+            </div>
+
+            <div id="avaliacao" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Domain Criteria: SQL & Data Manipulation</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    To successfully complete this module, you must demonstrate competence in the following mastery levels in handling and preparing data for Data Science:
+                </p>
+                
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential">
+                            <span>💠</span> Essential
+                        </h4>
+                        <ul class="evaluation-list">
+                            <li>Understanding the role of data within the Data Science pipeline</li>
+                            <li>Basic SQL knowledge (SELECT, WHERE, ORDER BY, LIMIT)</li>
+                            <li>Ability to identify different data sources</li>
+                            <li>Basic notions of Python applied to data</li>
+                            <li>Initial use of Pandas to load and visualize datasets</li>
+                        </ul>
+                    </div>
+
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important">
+                            <span>⭐</span> Important
+                        </h4>
+                        <ul class="evaluation-list">
+                            <li>Writing SQL queries with JOINs and GROUP BY</li>
+                            <li>Ability to filter and transform data efficiently</li>
+                            <li>Initial data cleaning (null values, duplicates, data types)</li>
+                            <li>Practical use of Pandas and NumPy for data manipulation</li>
+                            <li>Integration between SQL and Python in simple workflows</li>
+                        </ul>
+                    </div>
+
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced">
+                            <span>🚀</span> Advanced
+                        </h4>
+                        <ul class="evaluation-list">
+                            <li>Optimization of SQL queries for large volumes of data</li>
+                            <li>Creation of basic ETL pipelines for data extraction and transformation</li>
+                            <li>Preparation of datasets ready for EDA and modeling</li>
+                            <li>Identification and prevention of common errors in data manipulation</li>
+                            <li>Documentation and versioning of data processes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+                </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-panel");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            let progressMap = { 'aprender': 25, 'laboratorio': 50, 'quiz': 75, 'recursos': 90, 'avaliacao': 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executada com sucesso.</strong><br><br>Resultados (Top 3):<br>-----------------------<br>1. Carlos Alberto | 4.250,00€<br>2. Beatriz Ramos | 2.100,50€<br>3. Ricardo Jorge | 1.880,00€<br><br><em>Dica: O filtro WHERE funcionou corretamente eliminando registos abaixo de 1500€.</em>";
+        }
+    </script>
+</body>
+</html>

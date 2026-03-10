@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>B1tJ0urney — Merch</title>
+  <meta name="description" content="Merch oficial B1tJ0urney. Street-art futurista, drops limitados e qualidade premium." />
+  <link rel="stylesheet" href="merch.css" />
+</head>
+
+<body class="bj">
+  <!-- Background (street-art futurista + grid digital) -->
+  <div class="bg" aria-hidden="true">
+    <canvas id="spray" class="bg__spray"></canvas>
+    <div class="bg__grid"></div>
+    <div class="bg__glow bg__glow--a"></div>
+    <div class="bg__glow bg__glow--b"></div>
+  </div>
+
+  <!-- Top nav -->
+  <header class="top">
+    <div class="top__inner">
+      <a class="brand" href="#" aria-label="B1tJ0urney Home">
+        <span class="brand__mark" aria-hidden="true">
+          <!-- marca/robot abstract (sem imagens genéricas) -->
+          <svg viewBox="0 0 64 64" class="brand__svg" role="img" aria-label="B1tJ0urney">
+            <defs>
+              <linearGradient id="gBrand" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#37b8ff"/>
+                <stop offset="0.55" stop-color="#7b2cff"/>
+                <stop offset="1" stop-color="#25ffd6"/>
+              </linearGradient>
+            </defs>
+            <path d="M18 22c0-7 5-12 14-12s14 5 14 12v9c0 2-2 4-4 4H26c-2 0-4-2-4-4v-9Z" fill="url(#gBrand)" opacity="0.9"/>
+            <path d="M14 30c0-2 2-4 4-4h28c2 0 4 2 4 4v14c0 6-6 10-18 10S14 50 14 44V30Z" fill="rgba(10,12,18,0.65)" stroke="rgba(120,200,255,0.35)" stroke-width="2"/>
+            <circle cx="26" cy="32" r="3.2" fill="#25ffd6"/>
+            <circle cx="38" cy="32" r="3.2" fill="#37b8ff"/>
+            <path d="M26 41c4 3 8 3 12 0" stroke="rgba(255,255,255,0.55)" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </span>
+        <span class="brand__text">
+          <span class="brand__name">B1tJ0urney</span>
+          <span class="brand__tag">Merch</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Navegação">
+        <a class="nav__link" href="#drops">Drops</a>
+        <a class="nav__link" href="#produtos">Produtos</a>
+        <a class="nav__link" href="#qualidade">Qualidade</a>
+        <a class="nav__link" href="#faq">FAQ</a>
+      </nav>
+
+      <div class="top__actions">
+        <button class="chip" id="btnTheme" type="button" aria-pressed="true" title="Alternar modo/efeitos">
+          <span class="chip__dot" aria-hidden="true"></span>
+          Night
+        </button>
+
+        <button class="cartBtn" id="btnCart" type="button" aria-haspopup="dialog" aria-controls="cartDrawer">
+          <span class="cartBtn__icon" aria-hidden="true">🛒</span>
+          <span class="cartBtn__text">Carrinho</span>
+          <span class="cartBtn__badge" id="cartCount" aria-label="Itens no carrinho">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <main class="main">
+    <section class="hero" id="drops">
+      <div class="hero__inner">
+        <div class="hero__copy">
+          <div class="kicker">
+            <span class="kicker__pill">Drop ativo</span>
+            <span class="kicker__meta">Street-tech edition</span>
+          </div>
+
+          <h1 class="h1">
+            Merch que parece <span class="grad">futuro</span> — com alma de <span class="tagGraffiti">rua</span>.
+          </h1>
+
+          <p class="lead">
+            Peças com design tecnológico, acabamento premium e vibe criativa.
+            Sem ruído. Sem “corporate”. Só identidade.
+          </p>
+
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="#produtos">Ver coleção</a>
+            <button class="btn btn--ghost" id="btnRandomize" type="button">Baralhar estilo</button>
+          </div>
+
+          <div class="hero__stats" role="list">
+            <div class="stat" role="listitem">
+              <div class="stat__val">2–5 dias</div>
+              <div class="stat__label">envio em Portugal</div>
+            </div>
+            <div class="stat" role="listitem">
+              <div class="stat__val">Premium</div>
+              <div class="stat__label">tecidos + impressão</div>
+            </div>
+            <div class="stat" role="listitem">
+              <div class="stat__val">Drops</div>
+              <div class="stat__label">edições limitadas</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero__art" aria-hidden="true">
+          <!-- Poster/“sticker wall” futurista com grafitti via SVG -->
+          <div class="poster">
+            <div class="poster__frame">
+              <svg class="poster__svg" viewBox="0 0 520 520" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                  <linearGradient id="pG" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#37b8ff" stop-opacity="0.95"/>
+                    <stop offset="0.55" stop-color="#7b2cff" stop-opacity="0.85"/>
+                    <stop offset="1" stop-color="#25ffd6" stop-opacity="0.9"/>
+                  </linearGradient>
+                  <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+                    <feGaussianBlur stdDeviation="7" result="b"/>
+                    <feColorMatrix in="b" type="matrix"
+                      values="1 0 0 0 0
+                              0 1 0 0 0
+                              0 0 1 0 0
+                              0 0 0 0.65 0" result="c"/>
+                    <feMerge>
+                      <feMergeNode in="c"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                <!-- base -->
+                <rect x="0" y="0" width="520" height="520" fill="rgba(10,12,18,0.35)"/>
+                <path d="M0 90 C 120 30, 240 160, 520 70 L 520 140 C 300 210, 160 120, 0 180 Z"
+                      fill="url(#pG)" opacity="0.35" filter="url(#softGlow)"/>
+                <path d="M0 350 C 160 240, 260 440, 520 310 L 520 520 L 0 520 Z"
+                      fill="url(#pG)" opacity="0.25"/>
+
+                <!-- strokes graffiti -->
+                <g opacity="0.85" filter="url(#softGlow)">
+                  <path d="M70 250c50-70 150-120 250-70 60 30 90 80 120 140"
+                        fill="none" stroke="#25ffd6" stroke-width="9" stroke-linecap="round"/>
+                  <path d="M90 270c60-50 140-80 210-40 45 25 75 65 95 110"
+                        fill="none" stroke="#37b8ff" stroke-width="6" stroke-linecap="round" opacity="0.75"/>
+                  <path d="M140 145c45 25 75 15 120-20 35-25 60-30 95-12"
+                        fill="none" stroke="#7b2cff" stroke-width="7" stroke-linecap="round" opacity="0.75"/>
+                </g>
+
+                <!-- “tags” -->
+                <g opacity="0.9">
+                  <text x="70" y="420" font-size="54" font-family="system-ui, Segoe UI, Inter, Arial" font-weight="800"
+                        fill="rgba(255,255,255,0.9)" letter-spacing="1.5">
+                    DROP
+                  </text>
+                  <text x="70" y="455" font-size="20" font-family="system-ui, Segoe UI, Inter, Arial" font-weight="600"
+                        fill="rgba(255,255,255,0.65)">
+                    street-tech edition
+                  </text>
+                </g>
+
+                <!-- micro grid -->
+                <g opacity="0.25">
+                  <path d="M40 40H480M40 80H480M40 120H480M40 160H480M40 200H480M40 240H480M40 280H480M40 320H480M40 360H480M40 400H480M40 440H480M40 480H480"
+                        stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+                  <path d="M40 40V480M80 40V480M120 40V480M160 40V480M200 40V480M240 40V480M280 40V480M320 40V480M360 40V480M400 40V480M440 40V480M480 40V480"
+                        stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+                </g>
+              </svg>
+
+              <div class="poster__stickers">
+                <div class="sticker sticker--a">#B1tJ0</div>
+                <div class="sticker sticker--b">AI</div>
+                <div class="sticker sticker--c">CYBER</div>
+                <div class="sticker sticker--d">BUILD</div>
+              </div>
+            </div>
+
+            <div class="poster__caption">
+              <span class="dot"></span>
+              <span>Design inspirado em tecnologia + cultura maker</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls -->
+    <section class="controls" id="produtos">
+      <div class="controls__inner">
+        <div class="controls__left">
+          <h2 class="h2">Coleção Merch</h2>
+          <p class="muted">Escolhe a peça, tamanho, e adiciona ao carrinho. Drops podem esgotar.</p>
+        </div>
+
+        <div class="controls__right">
+          <div class="field">
+            <label class="field__label" for="q">Pesquisar</label>
+            <input class="field__input" id="q" type="search" placeholder="hoodie, t-shirt, sticker..." autocomplete="off" />
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="cat">Categoria</label>
+            <select class="field__select" id="cat">
+              <option value="all">Tudo</option>
+              <option value="apparel">Roupa</option>
+              <option value="accessories">Acessórios</option>
+              <option value="stickers">Stickers</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="sort">Ordenar</label>
+            <select class="field__select" id="sort">
+              <option value="featured">Destaques</option>
+              <option value="priceAsc">Preço: baixo → alto</option>
+              <option value="priceDesc">Preço: alto → baixo</option>
+              <option value="nameAsc">Nome: A → Z</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product grid -->
+    <section class="grid">
+      <div class="grid__inner" id="productGrid" aria-live="polite"></div>
+    </section>
+
+    <!-- Quality -->
+    <section class="split" id="qualidade">
+      <div class="split__inner">
+        <div class="panel panel--info">
+          <h2 class="h2">Qualidade e detalhes</h2>
+          <ul class="list">
+            <li><span class="bullet"></span> Impressão durável com cores vivas (sem “plástico rígido”).</li>
+            <li><span class="bullet"></span> Tecidos confortáveis e consistentes entre tamanhos.</li>
+            <li><span class="bullet"></span> Embalagem com estética “street-tech” e proteção.</li>
+            <li><span class="bullet"></span> Drops e peças limitadas (quando acaba, acabou).</li>
+          </ul>
+
+          <div class="miniCallout">
+            <div class="miniCallout__title">Para quem é?</div>
+            <div class="miniCallout__text">Pessoas que aprendem, constroem e curtem tecnologia com identidade.</div>
+          </div>
+        </div>
+
+        <div class="panel panel--cta">
+          <div class="ctaCard">
+            <div class="ctaCard__top">
+              <div class="ctaCard__kicker">Edição atual</div>
+              <div class="ctaCard__title">Street-Tech Drop</div>
+              <div class="ctaCard__desc">Se queres garantir, não deixes para depois.</div>
+            </div>
+            <div class="ctaCard__bottom">
+              <button class="btn btn--primary btn--wide" type="button" id="btnOpenCart">
+                Abrir carrinho
+              </button>
+              <p class="tiny muted">Checkout aqui é demo — integra com o teu backend depois.</p>
+            </div>
+          </div>
+
+          <div class="sig">
+            <span class="sig__chip">⚡</span>
+            <span class="sig__text">Identidade B1tJ0urney: futurismo, clareza, energia.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+      <div class="faq__inner">
+        <h2 class="h2">FAQ</h2>
+
+        <div class="faq__grid">
+          <details class="qa" open>
+            <summary class="qa__q">Quanto tempo demora o envio?</summary>
+            <div class="qa__a">Normalmente 2–5 dias úteis em Portugal (varia por stock/drop).</div>
+          </details>
+
+          <details class="qa">
+            <summary class="qa__q">Como funcionam os drops?</summary>
+            <div class="qa__a">Peças limitadas. Quando esgota, pode não voltar — depende da coleção.</div>
+          </details>
+
+          <details class="qa">
+            <summary class="qa__q">Posso trocar tamanhos?</summary>
+            <div class="qa__a">Sim, desde que a peça esteja intacta. Implementa a política final no teu site.</div>
+          </details>
+
+          <details class="qa">
+            <summary class="qa__q">Isto está pronto para produção?</summary>
+            <div class="qa__a">Front-end pronto. Para produção, liga o checkout ao teu backend e inventário.</div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="foot">
+      <div class="foot__inner">
+        <div class="foot__left">
+          <div class="foot__brand">B1tJ0urney</div>
+          <div class="foot__muted">Merch com vibe street + futuro. Sem ruído.</div>
+        </div>
+        <div class="foot__right">
+          <a class="foot__link" href="#produtos">Produtos</a>
+          <a class="foot__link" href="#qualidade">Qualidade</a>
+          <a class="foot__link" href="#faq">FAQ</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Drawer: Cart -->
+  <div class="drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-label="Carrinho" hidden>
+    <div class="drawer__overlay" data-close></div>
+
+    <aside class="drawer__panel">
+      <header class="drawer__head">
+        <div>
+          <div class="drawer__title">Carrinho</div>
+          <div class="drawer__sub" id="cartSub">0 itens</div>
+        </div>
+        <button class="iconBtn" type="button" data-close aria-label="Fechar">✕</button>
+      </header>
+
+      <div class="drawer__body">
+        <div class="cart" id="cartItems"></div>
+
+        <div class="summary">
+          <div class="summary__row">
+            <span class="muted">Subtotal</span>
+            <span class="sum" id="subtotal">€0.00</span>
+          </div>
+          <div class="summary__row">
+            <span class="muted">Envio</span>
+            <span class="sum" id="shipping">€0.00</span>
+          </div>
+          <div class="summary__row summary__row--total">
+            <span>Total</span>
+            <span class="sum" id="total">€0.00</span>
+          </div>
+
+          <button class="btn btn--primary btn--wide" id="btnCheckout" type="button">
+            Checkout (demo)
+          </button>
+          <button class="btn btn--ghost btn--wide" id="btnClear" type="button">
+            Limpar carrinho
+          </button>
+
+          <p class="tiny muted">Integrações típicas: Stripe / PayPal / MB WAY via backend.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+
+  <script src="merch.js"></script>
+</body>
+</html>

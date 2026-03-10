@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Networking & Service Mesh</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #020d12;
+            --blue: #00d4ff; --purple: #00aacc; --cyan: #00e5ff;
+            --text-light: #e8f8fc; --text-secondary: #8cc8d8;
+            --card-bg: rgba(0,212,255,0.04); --border-color: rgba(0,212,255,0.15);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; overflow-x: hidden; }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0,212,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(0,180,220,0.07) 1px, transparent 1px);
+            background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1;
+        }
+        @keyframes gridMove { 0%{transform:translate(0,0)} 100%{transform:translate(50px,50px)} }
+        body::after {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(0,180,220,0.08) 0%, rgba(0,212,255,0.04) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(2,13,18,0.88); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(0,212,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: #001a20; font-weight: 700; box-shadow: 0 4px 15px rgba(0,212,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,212,255,0.45); }
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(to right, #00b8d4, #00e5ff, #00acc1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(0,212,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; font-family: 'Inter', sans-serif; }
+        .tab-button:hover { color: var(--text-light); background: rgba(0,212,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(0,212,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .content-card { background: rgba(0,212,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; color: #00b8d4; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+        pre { background: rgba(0,0,0,0.45); border: 1px solid var(--border-color); border-radius: 6px; padding: 1.1rem; overflow-x: auto; margin: 1rem 0; }
+        code { font-family: 'Courier New', monospace; font-size: 0.88rem; color: #a0e8f4; line-height: 1.6; }
+        .quiz-item { background: rgba(0,212,255,0.02); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .quiz-question { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(0,212,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all 0.3s ease; margin-bottom: 0.5rem; }
+        .quiz-option:hover { background: rgba(0,212,255,0.08); border-color: var(--blue); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); flex-shrink: 0; }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; font-family: 'Courier New', monospace; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,229,255,0.04)); border: 1px solid rgba(0,212,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; background: rgba(255,255,255,0.02); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer { color: #ef4444; font-weight: 600; }
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .evaluation-column { background: rgba(0,212,255,0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); }
+        .evaluation-title { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; font-size: 1rem; font-weight: 600; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .essential { color: var(--cyan); border-bottom-color: var(--cyan) !important; }
+        .important { color: #ffd700; border-bottom-color: #ffd700 !important; }
+        .advanced { color: #ff6b6b; border-bottom-color: #ff6b6b !important; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.875rem; color: var(--text-secondary); }
+        .evaluation-list li { padding-left: 1.2rem; position: relative; line-height: 1.4; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.6rem 0; font-size: 0.95rem; transition: opacity 0.2s; }
+        .resource-link:hover { text-decoration: underline; opacity: 0.85; }
+        .lab-container { display: flex; gap: 1rem; height: 420px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .lab-header { background: rgba(0,212,255,0.08); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.5px; }
+        .lab-textarea { flex: 1; background: #000d12; color: #00d4ff; font-family: 'Courier New', monospace; padding: 1rem; border: none; resize: none; outline: none; font-size: 0.88rem; line-height: 1.6; }
+        .lab-output { flex: 1; background: #001018; color: #a0e8f4; padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; }
+        .arch-diagram { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; font-family: 'Courier New', monospace; font-size: 0.83rem; color: #a0e8f4; line-height: 1.9; overflow-x: auto; }
+        .tag-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.75rem 0; }
+        .tag { font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 999px; border: 1px solid rgba(0,212,255,0.25); color: #a0e8f4; background: rgba(0,212,255,0.06); }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } .lab-container { flex-direction: column; height: auto; } .lab-editor, .lab-preview { height: 260px; } }
+        .mini-card { background: rgba(0,212,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mini-card h4 { color: var(--cyan); font-size: 0.88rem; margin-bottom: 0.5rem; }
+        .mini-card p { color: var(--text-secondary); font-size: 0.82rem; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <div class="logo">BitJourney</div>
+            <span class="premium-badge">Premium • Cloud</span>
+        </div>
+        <nav style="display:flex;gap:.75rem">
+            <a href="premium-cloud.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objective: Networking & Service Mesh</h1>
+        <p class="course-description">
+            Design and operate cloud-native network architectures — from VPCs and subnets to load balancers, DNS, CDN, VPN, and hybrid connectivity. Then go deeper with advanced service mesh patterns using Linkerd and Envoy.
+        </p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>6–8h</span></div>
+            <div class="meta-item"><span>🎯</span><span>VPC · Subnets · Load Balancers · DNS · CDN · VPC Peering · VPN · Linkerd · Envoy</span></div>
+            <div class="meta-item"><span>📌</span><span>Requires: Cloud Architecture + Security basics</span></div>
+        </div>
+        <div class="tag-row">
+            <span class="tag">VPC</span>
+            <span class="tag">Subnets</span>
+            <span class="tag">ALB / NLB</span>
+            <span class="tag">Route 53</span>
+            <span class="tag">CloudFront</span>
+            <span class="tag">VPC Peering</span>
+            <span class="tag">Transit Gateway</span>
+            <span class="tag">Direct Connect</span>
+            <span class="tag">Linkerd</span>
+            <span class="tag">Envoy</span>
+            <span class="tag">eBPF</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary)">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'learn')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'lab')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'resources')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'evaluation')">Evaluation</button>
+        </nav>
+
+        <!-- ══════════════════════════ LEARN ══════════════════════════ -->
+        <div id="learn" class="tab-panel active">
+
+            <div class="content-card">
+                <h3>🌐 5.1 VPC — Virtual Private Cloud</h3>
+                <p>A VPC is a logically isolated section of the cloud provider's network where you launch resources. It is your private address space in the cloud.</p>
+                <div class="arch-diagram">
+┌──────────────────────────────────────────────────────────────┐
+│  VPC: 10.0.0.0/16   (eu-west-1)                             │
+│                                                              │
+│  ┌─────────────────────┐   ┌─────────────────────┐         │
+│  │  AZ-1a              │   │  AZ-1b              │         │
+│  │  ┌───────────────┐  │   │  ┌───────────────┐  │         │
+│  │  │ Public Subnet │  │   │  │ Public Subnet │  │         │
+│  │  │ 10.0.1.0/24   │  │   │  │ 10.0.2.0/24   │  │         │
+│  │  │ [ALB] [NAT GW]│  │   │  │ [ALB] [NAT GW]│  │         │
+│  │  └───────┬───────┘  │   │  └───────┬───────┘  │         │
+│  │          │          │   │          │          │         │
+│  │  ┌───────▼───────┐  │   │  ┌───────▼───────┐  │         │
+│  │  │Private Subnet │  │   │  │Private Subnet │  │         │
+│  │  │ 10.0.11.0/24  │  │   │  │ 10.0.12.0/24  │  │         │
+│  │  │ [EC2] [RDS]   │  │   │  │ [EC2] [RDS]   │  │         │
+│  │  └───────────────┘  │   │  └───────────────┘  │         │
+│  └─────────────────────┘   └─────────────────────┘         │
+│                                                              │
+│  Internet Gateway ←→ Public Subnets                         │
+│  NAT Gateway → Private subnets outbound only                │
+└──────────────────────────────────────────────────────────────┘</div>
+                <ul class="styled-list">
+                    <li><strong>CIDR block:</strong> The IP address range of the VPC (e.g., 10.0.0.0/16 = 65,536 addresses). Plan carefully — it cannot be shrunk after creation.</li>
+                    <li><strong>Public subnets:</strong> Directly reachable from the internet via an Internet Gateway. Used for load balancers, NAT Gateways, bastion hosts.</li>
+                    <li><strong>Private subnets:</strong> No direct internet access. Used for application servers, databases, and internal services.</li>
+                    <li><strong>Internet Gateway (IGW):</strong> The door between your VPC and the public internet. Attached to the VPC, not a subnet.</li>
+                    <li><strong>NAT Gateway:</strong> Allows private subnet resources to initiate outbound internet traffic (e.g., download packages) without being reachable inbound.</li>
+                    <li><strong>Route Tables:</strong> Define where traffic is routed. Each subnet is associated with one route table.</li>
+                </ul>
+                <pre><code># Full VPC with public + private subnets (Terraform)
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "5.1.0"
+
+  name = "prod-vpc"
+  cidr = "10.0.0.0/16"
+
+  azs             = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+  private_subnets = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
+  public_subnets  = ["10.0.1.0/24",  "10.0.2.0/24",  "10.0.3.0/24"]
+
+  enable_nat_gateway     = true
+  single_nat_gateway     = false  # one per AZ for HA
+  enable_dns_hostnames   = true
+  enable_dns_support     = true
+
+  tags = {
+    Environment = "production"
+    Team        = "platform"
+  }
+}</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🔒 5.2 Security Groups and NACLs</h3>
+                <p>AWS provides two layers of network access control. Understanding the difference is critical for both security and troubleshooting.</p>
+                <div class="two-col">
+                    <div class="mini-card">
+                        <h4>🛡️ Security Groups (stateful)</h4>
+                        <p>Act as virtual firewalls at the instance (ENI) level. Stateful — return traffic is automatically allowed. Rules are allow-only (no explicit deny). Evaluated as a union of all rules.</p>
+                    </div>
+                    <div class="mini-card">
+                        <h4>🧱 Network ACLs (stateless)</h4>
+                        <p>Act at the subnet level. Stateless — you must explicitly allow both inbound AND outbound directions. Rules are evaluated in order by number. Supports explicit deny.</p>
+                    </div>
+                </div>
+                <pre><code># Security Group — allow HTTPS inbound from anywhere, all outbound
+resource "aws_security_group" "alb_sg" {
+  name   = "alb-sg"
+  vpc_id = module.vpc.vpc_id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS from internet"
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTP — redirect to HTTPS"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# App SG — only allow traffic FROM the ALB security group
+resource "aws_security_group" "app_sg" {
+  name   = "app-sg"
+  vpc_id = module.vpc.vpc_id
+
+  ingress {
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id]
+    description     = "App port — from ALB only"
+  }
+}</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>⚖️ 5.3 Load Balancers — ALB, NLB, and GLB</h3>
+                <p>Load balancers distribute incoming traffic across multiple targets, improving availability and scalability.</p>
+                <ul class="styled-list">
+                    <li><strong>ALB (Application Load Balancer) — Layer 7:</strong> HTTP/HTTPS aware. Routes by path (<code>/api/*</code>), hostname (<code>api.example.com</code>), headers, query strings. Supports WebSockets, gRPC, and sticky sessions.</li>
+                    <li><strong>NLB (Network Load Balancer) — Layer 4:</strong> Ultra-low latency TCP/UDP/TLS routing. Preserves source IP. Static IP / Elastic IP support. Best for real-time gaming, financial apps, IoT.</li>
+                    <li><strong>GLB (Gateway Load Balancer) — Layer 3:</strong> Deploy and scale third-party virtual appliances (firewalls, IDS/IPS) transparently.</li>
+                    <li><strong>Health checks:</strong> All load balancers perform health checks and remove unhealthy targets automatically. Configure path, interval, thresholds.</li>
+                    <li><strong>Target groups:</strong> Logical grouping of targets — EC2 instances, Lambda, IPs, or K8s pods via AWS Load Balancer Controller.</li>
+                </ul>
+                <pre><code># ALB with HTTPS listener, path-based routing (Terraform)
+resource "aws_lb" "main" {
+  name               = "prod-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = module.vpc.public_subnets
+
+  access_logs {
+    bucket  = aws_s3_bucket.lb_logs.id
+    enabled = true
+  }
+}
+
+resource "aws_lb_listener_rule" "api_rule" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.api.arn
+  }
+
+  condition {
+    path_pattern { values = ["/api/*"] }
+  }
+}
+
+resource "aws_lb_listener_rule" "frontend_rule" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 200
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.frontend.arn
+  }
+
+  condition {
+    path_pattern { values = ["/*"] }
+  }
+}</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🌍 5.4 DNS — Route 53 and Resolution</h3>
+                <p>DNS (Domain Name System) translates human-readable domain names into IP addresses. Route 53 is AWS's highly available, globally distributed DNS service.</p>
+                <ul class="styled-list">
+                    <li><strong>A record:</strong> Maps a domain to an IPv4 address. Alias A records in Route 53 can point to AWS resources (ALB, CloudFront, S3) with no extra charge.</li>
+                    <li><strong>AAAA record:</strong> Maps a domain to an IPv6 address.</li>
+                    <li><strong>CNAME:</strong> Alias one domain to another. Cannot be used at the zone apex (root domain).</li>
+                    <li><strong>MX record:</strong> Directs email to mail servers.</li>
+                    <li><strong>TXT record:</strong> Arbitrary text — used for SPF, DKIM, domain ownership verification.</li>
+                    <li><strong>TTL (Time to Live):</strong> How long resolvers cache the record. Low TTL before migrations; higher TTL for stable records reduces cost and latency.</li>
+                </ul>
+                <div class="code-explanation">
+                    <strong>Route 53 Routing Policies:</strong><br>
+                    • <span class="highlight">Simple</span> — single value, no health checking.<br>
+                    • <span class="highlight">Weighted</span> — split traffic by percentage (canary, A/B testing).<br>
+                    • <span class="highlight">Latency-based</span> — route to the region with lowest latency for the user.<br>
+                    • <span class="highlight">Geolocation</span> — route by user's geographic location (GDPR data residency).<br>
+                    • <span class="highlight">Geoproximity</span> — route based on resource location with a bias setting.<br>
+                    • <span class="highlight">Failover</span> — primary/secondary with health check-driven automatic failover.<br>
+                    • <span class="highlight">Multivalue Answer</span> — return up to 8 healthy records, simple client-side load balancing.
+                </div>
+                <pre><code># Route 53 — weighted routing for canary (Terraform)
+resource "aws_route53_record" "api_v1" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "api.example.com"
+  type    = "A"
+
+  weighted_routing_policy { weight = 90 }
+  set_identifier = "v1"
+
+  alias {
+    name                   = aws_lb.v1.dns_name
+    zone_id                = aws_lb.v1.zone_id
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_route53_record" "api_v2" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "api.example.com"
+  type    = "A"
+
+  weighted_routing_policy { weight = 10 }
+  set_identifier = "v2"
+
+  alias {
+    name                   = aws_lb.v2.dns_name
+    zone_id                = aws_lb.v2.zone_id
+    evaluate_target_health = true
+  }
+}</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>⚡ 5.5 CDN — CloudFront and Content Delivery</h3>
+                <p>A CDN caches content at geographically distributed edge locations, serving users from the closest point of presence (PoP) to dramatically reduce latency.</p>
+                <div class="arch-diagram">
+Without CDN:  User (Tokyo) ──────────────────────▶ Origin (Dublin)
+              Round-trip: ~250ms
+
+With CDN:     User (Tokyo) ──▶ Edge PoP (Tokyo) ──▶ Cache HIT
+              Round-trip: ~5ms (cache hit)
+              or Edge PoP ──▶ Origin (Dublin) on cache MISS</div>
+                <ul class="styled-list">
+                    <li><strong>CloudFront (AWS):</strong> 450+ PoPs globally. Integrates natively with S3, ALB, API Gateway, Lambda@Edge, and CloudFront Functions.</li>
+                    <li><strong>Behaviours:</strong> Define caching rules per path pattern — cache static assets for 1 year, forward API requests to origin with no cache.</li>
+                    <li><strong>Cache-Control headers:</strong> Origin controls caching via <code>Cache-Control: max-age=31536000, immutable</code> (static) or <code>no-store</code> (API).</li>
+                    <li><strong>Origin Shield:</strong> Additional caching layer between edge and origin — reduces origin load by 60–90%.</li>
+                    <li><strong>Lambda@Edge / CloudFront Functions:</strong> Run code at the edge — A/B testing, request rewrites, auth header injection.</li>
+                    <li><strong>DDoS protection:</strong> AWS Shield Standard is included with CloudFront at no extra cost.</li>
+                    <li><strong>Alternatives:</strong> Cloudflare, Fastly, Azure CDN, Akamai — evaluate on PoP count, DDoS protection, and edge compute capability.</li>
+                </ul>
+                <pre><code># CloudFront distribution with S3 origin + ALB origin (Terraform)
+resource "aws_cloudfront_distribution" "main" {
+  enabled             = true
+  default_root_object = "index.html"
+  aliases             = ["app.example.com"]
+
+  # Static assets from S3
+  origin {
+    domain_name            = aws_s3_bucket.assets.bucket_regional_domain_name
+    origin_id              = "s3-assets"
+    origin_access_control_id = aws_cloudfront_origin_access_control.main.id
+  }
+
+  # API from ALB
+  origin {
+    domain_name = aws_lb.main.dns_name
+    origin_id   = "alb-api"
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  # Cache static assets for 1 year
+  default_cache_behavior {
+    target_origin_id       = "s3-assets"
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+    cached_methods         = ["GET", "HEAD"]
+    allowed_methods        = ["GET", "HEAD"]
+    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Caching Optimized
+  }
+
+  # Forward /api/* to ALB with no caching
+  ordered_cache_behavior {
+    path_pattern           = "/api/*"
+    target_origin_id       = "alb-api"
+    viewer_protocol_policy = "https-only"
+    allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods         = ["GET", "HEAD"]
+    cache_policy_id        = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CachingDisabled
+    origin_request_policy_id = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # AllViewer
+  }
+
+  viewer_certificate {
+    acm_certificate_arn      = aws_acm_certificate.cert.arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
+  }
+}</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🔗 5.6 VPC Peering and Transit Gateway</h3>
+                <p>As organisations grow, they create multiple VPCs for isolation — by environment, team, or compliance. Connecting them requires a connectivity strategy.</p>
+                <div class="arch-diagram">
+VPC Peering (point-to-point):
+  VPC-A ←──────▶ VPC-B
+  VPC-A ←──────▶ VPC-C
+  VPC-B ←──────▶ VPC-C   (3 peerings for 3 VPCs — grows as N²)
+
+Transit Gateway (hub-and-spoke):
+               ┌──────────────┐
+  VPC-A ──────▶│              │◀────── VPC-D
+  VPC-B ──────▶│  Transit     │◀────── On-premises
+  VPC-C ──────▶│  Gateway     │◀────── VPN
+               └──────────────┘
+  (1 attachment per VPC — scales linearly)</div>
+                <ul class="styled-list">
+                    <li><strong>VPC Peering:</strong> Direct, private connection between two VPCs (same or different accounts/regions). Non-transitive — traffic cannot pass through a peer to reach a third VPC. Best for simple, bilateral connectivity.</li>
+                    <li><strong>Transit Gateway (TGW):</strong> A regional network hub that connects VPCs, VPNs, and Direct Connect in a hub-and-spoke model. Transitive routing — attach once, reach all. Supports route tables per attachment for segmentation.</li>
+                    <li><strong>PrivateLink:</strong> Expose a service from your VPC as an endpoint that other VPCs consume privately, without peering or internet. Used by AWS services and for ISV integrations.</li>
+                    <li><strong>Resource Access Manager (RAM):</strong> Share Transit Gateway, subnets, and other resources across AWS accounts in an Organization.</li>
+                </ul>
+                <pre><code># Transit Gateway with shared route table (Terraform)
+resource "aws_ec2_transit_gateway" "main" {
+  description                     = "Central network hub"
+  default_route_table_association = "disable"
+  default_route_table_propagation = "disable"
+  auto_accept_shared_attachments  = "enable"
+  tags = { Name = "prod-tgw" }
+}
+
+resource "aws_ec2_transit_gateway_vpc_attachment" "app" {
+  subnet_ids         = module.vpc_app.private_subnets
+  transit_gateway_id = aws_ec2_transit_gateway.main.id
+  vpc_id             = module.vpc_app.vpc_id
+  tags = { Name = "app-vpc-attachment" }
+}
+
+resource "aws_ec2_transit_gateway_route" "default" {
+  destination_cidr_block         = "0.0.0.0/0"
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.egress.id
+  transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.egress.id
+}</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🏢 5.7 VPN and Hybrid Networks</h3>
+                <p>Hybrid networking connects on-premises data centres to cloud VPCs. There are two main approaches, chosen based on bandwidth requirements and latency sensitivity.</p>
+                <div class="two-col">
+                    <div class="mini-card">
+                        <h4>🔐 Site-to-Site VPN</h4>
+                        <p>Encrypted IPSec tunnel over the public internet. Quick to set up (~minutes). Up to 1.25 Gbps per tunnel. Two redundant tunnels per connection for HA. Use when bandwidth is moderate and setup speed matters.</p>
+                    </div>
+                    <div class="mini-card">
+                        <h4>⚡ AWS Direct Connect</h4>
+                        <p>Dedicated private fibre connection (1, 10, or 100 Gbps). Bypasses the public internet entirely. Consistent latency — no network jitter. Required for latency-sensitive workloads, large data transfers, and regulated industries.</p>
+                    </div>
+                </div>
+                <pre><code># Site-to-Site VPN — two redundant tunnels (Terraform)
+resource "aws_customer_gateway" "onprem" {
+  bgp_asn    = 65000
+  ip_address = "203.0.113.1"  # on-premises router public IP
+  type       = "ipsec.1"
+  tags       = { Name = "onprem-cgw" }
+}
+
+resource "aws_vpn_connection" "main" {
+  customer_gateway_id   = aws_customer_gateway.onprem.id
+  transit_gateway_id    = aws_ec2_transit_gateway.main.id
+  type                  = "ipsec.1"
+  static_routes_only    = false  # use BGP dynamic routing
+
+  tunnel1_preshared_key = var.vpn_psk_1
+  tunnel2_preshared_key = var.vpn_psk_2
+
+  tags = { Name = "prod-vpn" }
+}</code></pre>
+                <div class="code-explanation">
+                    <strong>BGP (Border Gateway Protocol):</strong> Dynamic routing protocol used with both VPN and Direct Connect. Automatically propagates route changes between on-premises and cloud networks without manual static route management.
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>🔍 5.8 VPC Flow Logs and Network Observability</h3>
+                <p>VPC Flow Logs capture metadata about all IP traffic flowing through network interfaces in your VPC. Essential for security analysis, troubleshooting connectivity, and compliance.</p>
+                <pre><code># Flow log record format:
+# version account-id interface-id srcaddr dstaddr srcport dstport protocol packets bytes start end action log-status
+2 123456789012 eni-abc12345 10.0.1.15 10.0.11.22 55423 8080 6 10 2340 1680000000 1680000060 ACCEPT OK
+2 123456789012 eni-abc12345 10.0.0.1  10.0.11.22 0     0    1 1  84   1680000000 1680000060 REJECT OK
+
+# Enable VPC Flow Logs to S3 with Athena-friendly format (Terraform)
+resource "aws_flow_log" "main" {
+  vpc_id          = module.vpc.vpc_id
+  traffic_type    = "ALL"       # ACCEPT | REJECT | ALL
+  iam_role_arn    = aws_iam_role.flow_log.arn
+  log_destination = aws_s3_bucket.flow_logs.arn
+  log_destination_type = "s3"
+
+  destination_options {
+    file_format                = "parquet"   # efficient for Athena queries
+    hive_compatible_partitions = true
+    per_hour_partition         = true
+  }
+}</code></pre>
+                <ul class="styled-list">
+                    <li><strong>Query with Athena:</strong> Use AWS Athena to query flow logs in S3 — find top talkers, rejected traffic, unusual ports.</li>
+                    <li><strong>GuardDuty:</strong> Consumes VPC Flow Logs automatically to detect port scanning, exfiltration, and lateral movement.</li>
+                    <li><strong>Network Reachability Analyser:</strong> Verifies that a path between two endpoints is actually reachable given your security group and route table configs.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>🕸️ 5.9 Service Mesh Deep Dive — Architecture</h3>
+                <p>A service mesh adds a dedicated network infrastructure layer that handles all service-to-service communication. It is typically implemented as a <strong>sidecar proxy</strong> injected alongside every service instance.</p>
+                <div class="arch-diagram">
+Without service mesh:
+
+  [Service A]  ────HTTP────▶  [Service B]
+   (app code handles retries, timeouts, auth)
+
+With service mesh (sidecar pattern):
+
+  [Service A]──[Proxy A]──mTLS──[Proxy B]──[Service B]
+                    │                  │
+                    └──── Control Plane (config, certs, telemetry)
+
+  App code is unmodified. Proxy handles:
+  → Encryption (mTLS)      → Retries / timeouts
+  → Load balancing         → Circuit breaking
+  → Traffic splitting      → Distributed tracing
+  → Access policies        → Golden metrics</div>
+                <div class="code-explanation">
+                    The <strong>data plane</strong> (the proxies) handles actual traffic. The <strong>control plane</strong> configures the proxies centrally — pushing certificates, routing rules, and telemetry configuration without restarting services.
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>🔷 5.10 Envoy Proxy — The Universal Data Plane</h3>
+                <p>Envoy is an open-source, high-performance proxy written in C++ originally built at Lyft. It is now the de facto standard data plane for service meshes, API gateways, and edge proxies.</p>
+                <ul class="styled-list">
+                    <li><strong>L3/L4 and L7:</strong> Envoy understands HTTP/1.1, HTTP/2, gRPC, WebSocket, MongoDB, Redis, and more at the application layer.</li>
+                    <li><strong>xDS API:</strong> A standard control plane API (Listener Discovery Service, Route Discovery Service, Cluster Discovery Service) — any control plane that implements xDS can configure Envoy.</li>
+                    <li><strong>Observability:</strong> Built-in metrics (Prometheus format), access logs, and trace propagation (Zipkin, Jaeger, OpenTelemetry).</li>
+                    <li><strong>Extensibility:</strong> Lua scripts and WebAssembly (WASM) plugins — extend Envoy without recompilation.</li>
+                    <li><strong>Used by:</strong> Istio (sidecar), AWS App Mesh, Contour (Ingress), Envoy Gateway, Kong Gateway.</li>
+                </ul>
+                <pre><code># Envoy static configuration example
+static_resources:
+  listeners:
+  - name: app_listener
+    address:
+      socket_address: { address: 0.0.0.0, port_value: 8080 }
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          stat_prefix: ingress_http
+          route_config:
+            virtual_hosts:
+            - name: backend
+              domains: ["*"]
+              routes:
+              - match: { prefix: "/api/" }
+                route:
+                  cluster: api_service
+                  timeout: 5s
+                  retry_policy:
+                    retry_on: "5xx,connect-failure"
+                    num_retries: 3
+          http_filters:
+          - name: envoy.filters.http.router
+
+  clusters:
+  - name: api_service
+    connect_timeout: 1s
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: api_service
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address: { address: api-svc, port_value: 8080 }</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🔗 5.11 Linkerd — Ultralight Service Mesh</h3>
+                <p>Linkerd is a CNCF-graduated service mesh that prioritises simplicity, reliability, and minimal resource overhead. Unlike Istio, which uses Envoy, Linkerd uses its own purpose-built micro-proxy written in <strong>Rust</strong>.</p>
+                <ul class="styled-list">
+                    <li><strong>Zero-config mTLS:</strong> Automatic mutual TLS for all meshed traffic with no configuration required. Certificate rotation is handled automatically by Linkerd.</li>
+                    <li><strong>Golden metrics — automatic:</strong> Success rate, request rate, and p50/p99/p999 latency for every service, deployment, and route — without any instrumentation.</li>
+                    <li><strong>HTTP/2 and gRPC native:</strong> Linkerd understands gRPC streams and reports per-route metrics natively.</li>
+                    <li><strong>Lightweight:</strong> The linkerd2-proxy adds ~10ms p99 latency and uses ~10MB RSS per pod — significantly less than Envoy-based meshes.</li>
+                    <li><strong>Traffic splitting (SMI):</strong> Weighted traffic splitting using the Service Mesh Interface (SMI) spec — no Istio-style CRD complexity.</li>
+                    <li><strong>Multi-cluster:</strong> Linkerd supports service mirroring across clusters — services in Cluster A are accessible from Cluster B using standard Kubernetes DNS.</li>
+                </ul>
+                <pre><code># Install Linkerd
+linkerd install --crds | kubectl apply -f -
+linkerd install | kubectl apply -f -
+linkerd check
+
+# Install Viz extension (dashboard + metrics)
+linkerd viz install | kubectl apply -f -
+linkerd viz dashboard &
+
+# Inject Linkerd into a namespace (all new pods get the proxy)
+kubectl annotate namespace production linkerd.io/inject=enabled
+
+# Or inject into an existing deployment
+kubectl get deploy -n production -o yaml \
+  | linkerd inject - \
+  | kubectl apply -f -
+
+# View per-service golden metrics
+linkerd viz stat deployments -n production
+linkerd viz stat deploy/checkout -n production
+
+# Live traffic dashboard for a deployment
+linkerd viz top deployment/checkout -n production
+
+# Routes-level metrics (per HTTP path)
+linkerd viz routes deployment/checkout -n production</code></pre>
+                <pre><code># Linkerd traffic split — canary (SMI spec)
+apiVersion: split.smi-spec.io/v1alpha2
+kind: TrafficSplit
+metadata:
+  name: checkout-split
+  namespace: production
+spec:
+  service: checkout
+  backends:
+  - service: checkout-v1
+    weight: 900m   # 90%
+  - service: checkout-v2
+    weight: 100m   # 10%</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>⚡ 5.12 eBPF — The Next Generation Data Plane</h3>
+                <p>eBPF (extended Berkeley Packet Filter) allows running sandboxed programs in the Linux kernel without changing kernel source code. It is revolutionising cloud-native networking.</p>
+                <ul class="styled-list">
+                    <li><strong>Cilium:</strong> Kubernetes CNI (network plugin) built entirely on eBPF. Replaces kube-proxy, implements NetworkPolicies, and — with Cilium Service Mesh — can provide mesh functionality without any sidecar proxies.</li>
+                    <li><strong>No sidecar:</strong> eBPF-based meshes run at the kernel level — no proxy injection, no pod restart, lower overhead than sidecar-based approaches.</li>
+                    <li><strong>Hubble:</strong> Cilium's observability layer — real-time network flow visualisation, DNS monitoring, and connection tracking at the kernel level.</li>
+                    <li><strong>Tetragon:</strong> Cilium's security enforcement component — eBPF-based runtime threat detection and policy enforcement.</li>
+                    <li><strong>Sidecar vs eBPF:</strong> Sidecar proxies (Envoy, linkerd2-proxy) are mature and portable. eBPF requires Linux kernel 5.8+ but offers better performance and no pod restarts on mesh adoption.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>🌐 5.13 Global Load Balancing and Anycast</h3>
+                <ul class="styled-list">
+                    <li><strong>AWS Global Accelerator:</strong> Uses the AWS global backbone (not the public internet) to route users to the optimal regional endpoint. Provides static Anycast IPs — users always connect to the nearest AWS edge, then traffic travels the fast private AWS network to your origin.</li>
+                    <li><strong>Anycast routing:</strong> The same IP address is announced from multiple locations. Users are automatically routed to the nearest one via BGP. Used by all major CDNs and DNS providers.</li>
+                    <li><strong>Azure Front Door / Google Cloud Load Balancing:</strong> Equivalent global load balancing services with integrated WAF and CDN.</li>
+                    <li><strong>Latency vs consistency:</strong> Global routing improves latency but introduces complexity — watch for split-brain in stateful systems.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>🔒 5.14 Network Security Deep Dive</h3>
+                <ul class="styled-list">
+                    <li><strong>AWS Network Firewall:</strong> Stateful, managed firewall with Suricata-compatible IPS rules. Deploy in each VPC or centralise behind a TGW inspection VPC.</li>
+                    <li><strong>AWS WAF:</strong> Layer 7 firewall — block SQL injection, XSS, bad bots, geographic restrictions. Attach to CloudFront, ALB, or API Gateway.</li>
+                    <li><strong>AWS Shield Advanced:</strong> Enhanced DDoS protection with 24/7 DDoS Response Team, cost protection, and AWS WAF included.</li>
+                    <li><strong>Egress filtering:</strong> Use NAT Gateway + Network Firewall or a proxy (Squid, AWS Verified Access) to control and log outbound internet traffic from private subnets.</li>
+                    <li><strong>DNS Firewall (Route 53 Resolver):</strong> Block DNS queries to known malicious domains — first line of defence against C2 communication and data exfiltration.</li>
+                </ul>
+                <pre><code># Route 53 Resolver DNS Firewall — block malicious domains
+resource "aws_route53_resolver_firewall_domain_list" "blocklist" {
+  name    = "malicious-domains"
+  domains = ["malware-c2.example.com", "exfil.badactor.net"]
+}
+
+resource "aws_route53_resolver_firewall_rule_group" "main" {
+  name = "dns-security-rules"
+}
+
+resource "aws_route53_resolver_firewall_rule" "block" {
+  name                    = "block-malicious"
+  action                  = "BLOCK"
+  block_response          = "NXDOMAIN"
+  firewall_domain_list_id = aws_route53_resolver_firewall_domain_list.blocklist.id
+  firewall_rule_group_id  = aws_route53_resolver_firewall_rule_group.main.id
+  priority                = 100
+}</code></pre>
+            </div>
+
+            <div class="content-card" style="border-left:5px solid var(--cyan)">
+                <h3>✅ 5.15 Module Summary</h3>
+                <p>After this module you should be able to:</p>
+                <ul class="styled-list">
+                    <li>Design a multi-AZ VPC with public/private subnets, Internet Gateway, and NAT Gateway.</li>
+                    <li>Choose between Security Groups (stateful/instance) and NACLs (stateless/subnet).</li>
+                    <li>Configure ALB for L7 path-based routing and NLB for high-performance L4 workloads.</li>
+                    <li>Use Route 53 routing policies for failover, weighted canary, and geolocation routing.</li>
+                    <li>Configure CloudFront for global CDN with separate caching policies for static assets and APIs.</li>
+                    <li>Choose between VPC Peering and Transit Gateway for multi-VPC connectivity.</li>
+                    <li>Design hybrid connectivity with Site-to-Site VPN and Direct Connect.</li>
+                    <li>Understand the service mesh data plane vs control plane, and when each mesh fits.</li>
+                    <li>Configure Linkerd for zero-config mTLS, golden metrics, and traffic splitting.</li>
+                    <li>Explain how Envoy's xDS API makes it the universal data plane.</li>
+                    <li>Understand eBPF and sidecar-less mesh as an emerging alternative.</li>
+                </ul>
+                <p style="margin-top:0.75rem"><strong>Next:</strong> Observability & SRE — measuring and maintaining the reliability of everything you just built.</p>
+            </div>
+
+        </div>
+
+        <!-- ══════════════════════════ LAB ══════════════════════════ -->
+        <div id="lab" class="tab-panel">
+            <h3 style="margin-bottom:0.5rem">Lab: VPC Architecture Designer</h3>
+            <p style="color:var(--text-secondary);margin-bottom:1.25rem;font-size:0.9rem">
+                Configure your VPC parameters below and click Run to generate a full architecture summary, CIDR plan, and security recommendations.
+            </p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header">VPC CONFIG</div>
+                    <textarea class="lab-textarea" id="lab-input">const vpc = {
+  name:            "prod-vpc",
+  cidr:            "10.0.0.0/16",
+  region:          "eu-west-1",
+  availabilityZones: 3,
+  publicSubnets:   true,
+  privateSubnets:  true,
+  natGateway:      "one_per_az",  // "single" | "one_per_az" | "none"
+  vpcPeering:      false,
+  transitGateway:  true,
+  vpn:             false,
+  directConnect:   false,
+  flowLogs:        true,
+  dnsFw:           true,
+  serviceMesh:     "linkerd",     // "linkerd" | "istio" | "cilium" | "none"
+};</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header">ARCHITECTURE OUTPUT</div>
+                    <div class="lab-output" id="lab-output">Click "▶ Generate" to build your VPC architecture plan...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem" onclick="runLab()">▶ Generate Architecture</button>
+        </div>
+
+        <!-- ══════════════════════════ QUIZ ══════════════════════════ -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: Networking & Service Mesh</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">
+                    15 questions covering VPCs, subnets, load balancers, DNS, CDN, hybrid networking, and service mesh architectures. Some questions are intentionally close — read carefully.
+                </p>
+                <form id="quiz-form">
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">1. What is the purpose of a NAT Gateway in a VPC?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"><span class="option-text">A) Allow inbound internet traffic to reach private subnet resources</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B" data-correct="true"><span class="option-text">B) Allow private subnet resources to initiate outbound internet connections without being reachable inbound</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C"><span class="option-text">C) Translate between IPv4 and IPv6 addresses within the VPC</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"><span class="option-text">D) Connect two VPCs together in the same region</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">2. Security Groups in AWS are described as "stateful". What does this mean?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A"><span class="option-text">A) Security Group rules persist across VPC deletions</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B"><span class="option-text">B) You must write rules in both inbound and outbound directions for every connection</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C" data-correct="true"><span class="option-text">C) Return traffic for an allowed inbound connection is automatically permitted without an explicit outbound rule</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"><span class="option-text">D) Security Groups maintain a log of connection state for auditing</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">3. Which AWS load balancer type operates at OSI Layer 7 and supports path-based and host-based routing?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"><span class="option-text">A) NLB — Network Load Balancer</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B" data-correct="true"><span class="option-text">B) ALB — Application Load Balancer</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C"><span class="option-text">C) GLB — Gateway Load Balancer</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"><span class="option-text">D) CLB — Classic Load Balancer</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">4. Which NLB feature makes it preferred over ALB for financial trading or real-time gaming workloads?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"><span class="option-text">A) It supports HTTP/2 natively</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B"><span class="option-text">B) It integrates with AWS WAF</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C" data-correct="true"><span class="option-text">C) Ultra-low latency, static/Elastic IPs, and source IP preservation at Layer 4</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"><span class="option-text">D) It can inspect and modify HTTP headers</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">5. What does a Route 53 "Failover" routing policy require to work correctly?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"><span class="option-text">A) At least three regional endpoints</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B" data-correct="true"><span class="option-text">B) Health checks configured on the primary endpoint — Route 53 switches to secondary automatically when the primary fails</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C"><span class="option-text">C) An active–active configuration with equal weights</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"><span class="option-text">D) A manually triggered DNS TTL change to zero</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">6. A CNAME record CANNOT be used at the zone apex (root domain, e.g., example.com). Which Route 53 record type solves this limitation?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"><span class="option-text">A) TXT record</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B"><span class="option-text">B) MX record</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C" data-correct="true"><span class="option-text">C) Alias A record — Route 53 proprietary record that resolves AWS resources at the zone apex for free</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"><span class="option-text">D) AAAA record pointing to the IPv6 address</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">7. What is CloudFront's "Origin Shield" and what problem does it solve?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"><span class="option-text">A) A DDoS protection layer between users and CloudFront edge nodes</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B" data-correct="true"><span class="option-text">B) An additional caching layer between CloudFront edges and the origin server — reduces origin load by consolidating cache misses</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C"><span class="option-text">C) A WAF rule set applied at edge locations to block malicious traffic</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"><span class="option-text">D) An IAM-based authentication mechanism for S3 origins</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">8. What is the key architectural limitation of VPC Peering that Transit Gateway solves?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"><span class="option-text">A) VPC Peering does not support cross-region connections</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"><span class="option-text">B) VPC Peering is non-transitive — traffic cannot pass through a peered VPC to reach a third VPC, making it unscalable for many VPCs</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C"><span class="option-text">C) VPC Peering requires both VPCs to be in the same AWS account</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"><span class="option-text">D) VPC Peering does not support overlapping CIDR blocks</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">9. When would you choose AWS Direct Connect over a Site-to-Site VPN for hybrid connectivity?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"><span class="option-text">A) When you need connectivity set up within the next 30 minutes</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B"><span class="option-text">B) When cost is the primary concern</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"><span class="option-text">C) For consistent low-latency, high-bandwidth workloads, large data transfers, or regulated industries requiring traffic off the public internet</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"><span class="option-text">D) When you only need 100 Mbps of bandwidth</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">10. In the service mesh architecture, what is the difference between the data plane and the control plane?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"><span class="option-text">A) The data plane stores configuration; the control plane routes traffic</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B" data-correct="true"><span class="option-text">B) The data plane (proxies) handles actual traffic; the control plane configures the proxies centrally with certificates, routing rules, and policies</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C"><span class="option-text">C) The data plane is the application code; the control plane is the Kubernetes API server</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"><span class="option-text">D) They are synonyms — both describe the set of proxies in the mesh</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">11. What is Envoy's xDS API and why is it significant?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"><span class="option-text">A) A monitoring API that exposes Prometheus metrics from Envoy</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B"><span class="option-text">B) An extension system for writing Envoy plugins in JavaScript</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C" data-correct="true"><span class="option-text">C) A standard dynamic configuration API (LDS, RDS, CDS, EDS) — any control plane implementing xDS can configure Envoy, making it universally interoperable</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"><span class="option-text">D) An encryption protocol used by Envoy for mTLS certificate exchange</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">12. What makes Linkerd's data plane proxy architecturally different from Istio/Envoy?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"><span class="option-text">A) Linkerd runs as a node-level daemon rather than a sidecar</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B" data-correct="true"><span class="option-text">B) Linkerd uses a purpose-built Rust micro-proxy (linkerd2-proxy) — smaller, lower overhead, and simpler than Envoy (C++)</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C"><span class="option-text">C) Linkerd uses eBPF instead of sidecar proxies</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"><span class="option-text">D) Linkerd only supports HTTP/1.1 while Envoy supports HTTP/2</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">13. In Linkerd, what are the "golden metrics" automatically provided for every meshed service?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"><span class="option-text">A) CPU usage, memory consumption, and network throughput</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B"><span class="option-text">B) Pod count, restart count, and pending requests</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"><span class="option-text">C) Success rate, request volume (RPS), and latency percentiles (p50/p99/p999)</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"><span class="option-text">D) TLS handshake time, certificate expiry, and cipher suite metrics</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">14. What is eBPF and how does Cilium use it for Kubernetes networking?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"><span class="option-text">A) A container image format; Cilium uses it to build optimised CNI images</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"><span class="option-text">B) An AWS networking protocol for VPC-to-VPC connectivity</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C" data-correct="true"><span class="option-text">C) A Linux kernel technology for running sandboxed programs without modifying kernel source; Cilium uses it to implement networking, security, and observability at kernel level — without sidecar proxies</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"><span class="option-text">D) A packet encryption protocol used for encrypting Kubernetes pod-to-pod traffic</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">15. What does AWS Global Accelerator use to route user traffic more efficiently than standard internet routing?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"><span class="option-text">A) DNS-based geo-routing with lower TTLs than Route 53</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"><span class="option-text">B) A private CDN with more edge PoPs than CloudFront</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"><span class="option-text">C) Anycast static IPs that route users to the nearest AWS edge, then traffic travels the private AWS global backbone network to the origin — bypassing unpredictable public internet hops</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D"><span class="option-text">D) BGP route injection into ISP networks to shorten autonomous system paths</span></label>
+                    </div>
+
+                </form>
+
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+
+                <div id="quiz-results" class="quiz-results" style="display:none">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback" class="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════ RESOURCES ══════════════════════════ -->
+        <div id="resources" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem">Support Materials</h3>
+            <div class="content-card">
+                <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem">Official documentation, architecture guides, and deep-dive references:</p>
+                <a href="https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html" target="_blank" class="resource-link">→ AWS VPC User Guide</a>
+                <a href="https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html" target="_blank" class="resource-link">→ AWS Transit Gateway Documentation</a>
+                <a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html" target="_blank" class="resource-link">→ Amazon Route 53 Developer Guide</a>
+                <a href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html" target="_blank" class="resource-link">→ Amazon CloudFront Developer Guide</a>
+                <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html" target="_blank" class="resource-link">→ AWS Application Load Balancer Guide</a>
+                <a href="https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html" target="_blank" class="resource-link">→ AWS Direct Connect User Guide</a>
+                <a href="https://linkerd.io/2.14/overview/" target="_blank" class="resource-link">→ Linkerd Documentation</a>
+                <a href="https://linkerd.io/2.14/tasks/multicluster/" target="_blank" class="resource-link">→ Linkerd Multi-Cluster Setup</a>
+                <a href="https://www.envoyproxy.io/docs/envoy/latest/" target="_blank" class="resource-link">→ Envoy Proxy Documentation</a>
+                <a href="https://docs.cilium.io/en/stable/" target="_blank" class="resource-link">→ Cilium / eBPF Documentation</a>
+                <a href="https://smi-spec.io/" target="_blank" class="resource-link">→ Service Mesh Interface (SMI) Spec</a>
+                <a href="https://aws.amazon.com/blogs/networking-and-content-delivery/" target="_blank" class="resource-link">→ AWS Networking & Content Delivery Blog</a>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════ EVALUATION ══════════════════════════ -->
+        <div id="evaluation" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Domain Criteria: Networking & Service Mesh</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">
+                    To successfully complete this module, demonstrate understanding across these three competency levels:
+                </p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>VPC, CIDR blocks, public vs private subnets</li>
+                            <li>Internet Gateway vs NAT Gateway — purpose and difference</li>
+                            <li>Route Tables — how traffic is directed within a VPC</li>
+                            <li>Security Groups (stateful, instance-level) vs NACLs (stateless, subnet-level)</li>
+                            <li>ALB vs NLB — OSI layer and use cases</li>
+                            <li>DNS record types: A, CNAME, MX, TXT, Alias</li>
+                            <li>CDN purpose and cache-hit vs cache-miss flows</li>
+                            <li>What a service mesh does and why it is useful</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Route 53 routing policies: weighted, latency, failover, geolocation</li>
+                            <li>CloudFront behaviours and cache policies per path</li>
+                            <li>VPC Peering vs Transit Gateway — scalability trade-offs</li>
+                            <li>Site-to-Site VPN vs Direct Connect — when to use each</li>
+                            <li>VPC Flow Logs — what they capture and how to analyse them</li>
+                            <li>Linkerd installation, injection, golden metrics, and traffic split</li>
+                            <li>Envoy xDS API and its role as a universal data plane</li>
+                            <li>PrivateLink — private access to services without peering</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>Transit Gateway route tables and network segmentation</li>
+                            <li>BGP dynamic routing with Direct Connect and VPN</li>
+                            <li>Envoy static and dynamic configuration (xDS deep dive)</li>
+                            <li>Linkerd multi-cluster service mirroring</li>
+                            <li>eBPF / Cilium sidecar-less mesh architecture</li>
+                            <li>AWS Global Accelerator vs CloudFront — use case differences</li>
+                            <li>Network Firewall with Suricata rules in a TGW inspection VPC</li>
+                            <li>Route 53 Resolver DNS Firewall for C2 blocking</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+/* ── Tab navigation ── */
+function openTab(evt, tabName) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
+    const map = { learn: 25, lab: 50, quiz: 75, resources: 90, evaluation: 100 };
+    document.getElementById('progress-fill').style.width = map[tabName] + '%';
+    document.getElementById('progress-text').innerText = map[tabName] + '%';
+    window.scrollTo({ top: 150, behavior: 'smooth' });
+}
+
+/* ── Lab — VPC Architecture Designer ── */
+function runLab() {
+    const input = document.getElementById('lab-input').value;
+    const out   = document.getElementById('lab-output');
+
+    // Parse values from the config object
+    const get = (key, def) => {
+        const m = input.match(new RegExp(key + '\\s*:\\s*["\']?([^,"\'\n}]+)["\']?'));
+        return m ? m[1].trim() : def;
+    };
+
+    const name    = get('name', 'my-vpc');
+    const cidr    = get('cidr', '10.0.0.0/16');
+    const region  = get('region', 'eu-west-1');
+    const azs     = parseInt(get('availabilityZones', '2')) || 2;
+    const nat     = get('natGateway', 'single');
+    const mesh    = get('serviceMesh', 'none');
+    const tgw     = input.includes('transitGateway: true') || input.includes("transitGateway:true");
+    const peer    = input.includes('vpcPeering: true') || input.includes("vpcPeering:true");
+    const vpn     = input.includes('vpn: true') || input.includes("vpn:true");
+    const dc      = input.includes('directConnect: true') || input.includes("directConnect:true");
+    const fl      = input.includes('flowLogs: true') || input.includes("flowLogs:true");
+    const dnsfw   = input.includes('dnsFw: true') || input.includes("dnsFw:true");
+
+    // Parse CIDR to calculate subnets
+    const baseParts = cidr.split('/')[0].split('.');
+    const base      = `${baseParts[0]}.${baseParts[1]}`;
+
+    const natCost    = nat === 'one_per_az' ? (azs * 32.4).toFixed(0) : '32.40';
+    const meshName   = { linkerd: 'Linkerd (Rust micro-proxy)', istio: 'Istio (Envoy sidecar)', cilium: 'Cilium (eBPF, no sidecar)', none: 'None' }[mesh] || mesh;
+    const meshNotes  = { linkerd: 'Zero-config mTLS + golden metrics. Low overhead (~10ms p99 latency). Recommended for most teams.', istio: 'Full-featured: VirtualService, DestinationRule, circuit breaking. Higher complexity.', cilium: 'eBPF kernel-level — no pod injection needed. Requires kernel ≥ 5.8.', none: 'No service mesh — mTLS, retries, and metrics must be handled at the application level.' }[mesh] || '';
+
+    let subnets = '';
+    for (let i = 0; i < azs; i++) {
+        const az = ['a','b','c'][i];
+        subnets += `  Public  AZ-${az}: ${base}.${i + 1}.0/24  (${256} IPs)\n`;
+        subnets += `  Private AZ-${az}: ${base}.${10 + i + 1}.0/24  (${256} IPs)\n`;
+    }
+
+    const warnings = [];
+    if (nat === 'single') warnings.push('⚠️  Single NAT Gateway = single point of failure. Use one_per_az for production.');
+    if (!fl)   warnings.push('⚠️  VPC Flow Logs disabled — no network visibility for security and troubleshooting.');
+    if (!dnsfw) warnings.push('ℹ️  DNS Firewall disabled — consider enabling to block malicious domain queries.');
+    if (peer && tgw) warnings.push('ℹ️  Both VPC Peering and Transit Gateway enabled — prefer TGW for >3 VPCs to avoid N² complexity.');
+
+    const connectivity = [];
+    if (tgw) connectivity.push('✅ Transit Gateway — hub-and-spoke, transitive routing');
+    if (peer) connectivity.push('✅ VPC Peering — direct bilateral connectivity');
+    if (vpn)  connectivity.push('✅ Site-to-Site VPN — encrypted IPSec tunnel (up to 1.25 Gbps)');
+    if (dc)   connectivity.push('✅ AWS Direct Connect — dedicated private fibre');
+    if (!tgw && !peer && !vpn && !dc) connectivity.push('ℹ️  No external connectivity configured');
+
+    out.textContent =
+`VPC Architecture Plan
+${'═'.repeat(48)}
+
+NAME:      ${name}
+CIDR:      ${cidr}
+REGION:    ${region}
+AZs:       ${azs} (${['eu-west-1a','eu-west-1b','eu-west-1c'].slice(0,azs).join(', ')})
+
+SUBNETS (auto-calculated):
+${subnets}
+GATEWAYS:
+  Internet Gateway:  1 (attached to VPC)
+  NAT Gateway:       ${nat === 'one_per_az' ? azs + ' (one per AZ — HA)' : '1 (single — not HA)'}
+
+CONNECTIVITY:
+${connectivity.map(c => '  ' + c).join('\n')}
+
+OBSERVABILITY:
+  VPC Flow Logs:  ${fl ? '✅ Enabled (Parquet → S3 → Athena)' : '❌ Disabled'}
+  DNS Firewall:   ${dnsfw ? '✅ Enabled (Route 53 Resolver)' : '❌ Disabled'}
+
+SERVICE MESH:
+  Provider: ${meshName}
+  Notes:    ${meshNotes}
+
+ESTIMATED MONTHLY COST (USD):
+  NAT Gateway:      ~$${natCost} (${nat === 'one_per_az' ? azs + ' × $32.40' : '1 × $32.40'})
+  Transit Gateway:  ${tgw ? '~$36.50 (VPC attachments)' : 'Not configured'}
+  Flow Logs:        ${fl ? '~$5–15 (volume-dependent)' : 'Not configured'}
+  VPN:              ${vpn ? '~$36.50/month + data transfer' : 'Not configured'}
+
+${warnings.length > 0 ? 'RECOMMENDATIONS:\n' + warnings.map(w => '  ' + w).join('\n') : '✅ Configuration looks good — no critical issues.'}`;
+}
+
+/* ── Quiz ── */
+const questionsData = {
+    q1:  { correct: 'B', exp: 'NAT Gateway (Network Address Translation) lets private subnet resources initiate outbound connections — e.g., downloading updates — without exposing them to inbound internet traffic.' },
+    q2:  { correct: 'C', exp: 'Stateful means the firewall tracks connection state. If you allow inbound traffic on port 443, the return traffic is automatically allowed without writing an explicit outbound rule. NACLs are stateless — you must allow both directions.' },
+    q3:  { correct: 'B', exp: 'ALB operates at Layer 7 (HTTP/HTTPS) and understands application-level attributes like URL paths, hostnames, headers, and query strings for routing decisions.' },
+    q4:  { correct: 'C', exp: 'NLB operates at Layer 4 (TCP/UDP) and provides ultra-low latency, static/Elastic IP addresses, and preserves the client source IP. It handles millions of requests per second with minimal latency — ideal for real-time systems.' },
+    q5:  { correct: 'B', exp: 'Route 53 Failover routing requires health checks on the primary record. When the health check fails, Route 53 automatically routes all traffic to the secondary (standby) endpoint.' },
+    q6:  { correct: 'C', exp: 'Route 53 Alias records are a proprietary AWS extension to DNS. Unlike CNAME, they can be used at the zone apex (root domain) and they resolve AWS resources (ALB, CloudFront, S3) without an extra DNS lookup — and at no charge.' },
+    q7:  { correct: 'B', exp: 'Origin Shield is an optional additional caching layer between CloudFront edge locations and your origin. Multiple edge nodes with cache misses hit Origin Shield first, not the origin directly — dramatically reducing origin request volume.' },
+    q8:  { correct: 'B', exp: 'VPC Peering is non-transitive: if VPC-A peers with VPC-B and VPC-B peers with VPC-C, VPC-A cannot reach VPC-C through VPC-B. For N VPCs you need N*(N-1)/2 peerings. Transit Gateway provides transitive routing — each VPC attaches once.' },
+    q9:  { correct: 'C', exp: 'Direct Connect provides a private, dedicated fibre connection with consistent latency and high bandwidth (1–100 Gbps). It is required for latency-sensitive workloads, large data migration, and regulated industries where traffic cannot traverse the public internet.' },
+    q10: { correct: 'B', exp: 'Data plane = proxies (Envoy, linkerd2-proxy) that actually forward traffic between services. Control plane (Istiod, Linkerd control plane) = the system that pushes configuration, certificates, and routing rules to all proxies — the proxies implement the policies.' },
+    q11: { correct: 'C', exp: 'xDS (discovery services) is a set of APIs — LDS (Listener), RDS (Route), CDS (Cluster), EDS (Endpoint) — that any control plane can implement to dynamically configure Envoy. This made Envoy the universal data plane: Istio, Contour, AWS App Mesh all use it.' },
+    q12: { correct: 'B', exp: 'Linkerd uses linkerd2-proxy, a purpose-built ultra-lightweight proxy written in Rust. It adds only ~10ms p99 latency and ~10MB RSS per pod — significantly less overhead than Envoy (C++) which is more powerful but heavier.' },
+    q13: { correct: 'C', exp: 'Linkerd automatically captures "golden metrics" for every meshed service without any code changes: success rate (%), request rate (RPS), and latency percentiles (p50, p99, p999). These map directly to SLO definitions.' },
+    q14: { correct: 'C', exp: 'eBPF lets you run verified programs in the Linux kernel safely. Cilium uses eBPF to implement CNI networking, NetworkPolicies, and load balancing at kernel level — without sidecar proxies. This means no pod restarts to join the mesh and lower overhead.' },
+    q15: { correct: 'C', exp: 'Global Accelerator provides static Anycast IPs announced at AWS edge locations worldwide. Users connect to the nearest edge, then traffic travels AWS\'s private global backbone (not the public internet) to reach the origin region — avoiding congested internet paths and reducing latency by 20–60%.' }
+};
+
+document.getElementById('submit-quiz').addEventListener('click', () => {
+    const form = document.getElementById('quiz-form');
+    const data = new FormData(form);
+    let score = 0;
+    let feedbackHTML = '';
+
+    Object.keys(questionsData).forEach((key, index) => {
+        const userAnswer = data.get(key);
+        const isCorrect  = userAnswer === questionsData[key].correct;
+        if (isCorrect) score++;
+
+        feedbackHTML += `
+        <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+            <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+            <div>
+                <strong>Question ${index + 1}:</strong> ${questionsData[key].exp}
+                ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${questionsData[key].correct}</small>` : ''}
+            </div>
+        </div>`;
+    });
+
+    const total   = Object.keys(questionsData).length;
+    const percent = Math.round((score / total) * 100);
+    const cls     = percent >= 80 ? 'score-excellent' : percent >= 53 ? 'score-good' : 'score-poor';
+    const msg     = percent >= 80
+        ? '🎉 Excellent! Strong networking fundamentals and service mesh knowledge. Move on to Observability & SRE.'
+        : percent >= 53
+        ? '👍 Good progress. Review VPC connectivity options, Route 53 policies, and service mesh data/control plane concepts.'
+        : '📖 Networking is foundational — review the VPC, load balancing, and service mesh sections carefully.';
+
+    document.getElementById('quiz-score').innerHTML = `
+        <div class="${cls}">${score}/${total} (${percent}%)</div>
+        <p style="color:var(--text-secondary);margin-top:0.5rem">${msg}</p>`;
+    document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+
+    const results = document.getElementById('quiz-results');
+    results.style.display = 'block';
+    results.scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('clear-quiz').addEventListener('click', () => {
+    document.getElementById('quiz-form').reset();
+    document.getElementById('quiz-results').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>

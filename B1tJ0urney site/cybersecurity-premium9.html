@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Risk Analysis and Security Principles</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --orange: #ff6200;
+            --yellow: #ffcc00;
+            --amber: #ff8c00;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(255, 98, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 98, 0, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255, 140, 0, 0.12) 0%, rgba(255, 204, 0, 0.06) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 140, 0, 0.15);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            color: var(--yellow);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-buttons { display: flex; gap: 1rem; align-items: center; }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 140, 0, 0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: #0f172a; box-shadow: 0 4px 15px rgba(255, 98, 0, 0.35); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.45); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--orange), var(--amber), var(--yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-section { margin-bottom: 2rem; }
+        .progress-label { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--orange), var(--yellow)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+
+        .tab-button {
+            flex: 1; min-width: 120px; padding: 1rem 1.5rem;
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.3s ease; position: relative; white-space: nowrap;
+        }
+
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(255, 98, 0, 0.1); }
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+        }
+
+        .tab-content { padding: 2rem; min-height: 400px; }
+        .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
+        .content-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-light); }
+        .content-text { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+
+        .code-block { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.875rem; line-height: 1.5; color: var(--text-light); }
+        .code-block .tag { color: #ff6b6b; }
+        .code-block .attr { color: #4ecdc4; }
+        .code-block .string { color: #95e1d3; }
+        .code-block .comment { color: #6c757d; font-style: italic; }
+        .code-block .keyword { color: #ffcc00; }
+        .code-block .value { color: #a8e6cf; }
+        .code-block .section { color: #ff8c00; font-weight: 600; }
+
+        .learn-section { margin-bottom: 2rem; }
+
+        .learn-intro {
+            background: linear-gradient(135deg, rgba(255, 98, 0, 0.12), rgba(255, 204, 0, 0.06));
+            border: 1px solid rgba(255, 140, 0, 0.25);
+            border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .learn-intro h4 { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .learn-intro p { color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem; }
+
+        .code-explanation { background: rgba(255, 255, 255, 0.02); border-left: 3px solid var(--orange); padding: 1rem 1.5rem; margin: 1rem 0; border-radius: 0 8px 8px 0; }
+        .code-explanation h5 { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .code-explanation p { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; }
+
+        .concept-section { margin-bottom: 2.5rem; }
+        .concept-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+
+        .concept-icon {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        .concept-icon.orange { background: rgba(255, 98, 0, 0.2); }
+        .concept-icon.yellow { background: rgba(255, 204, 0, 0.2); }
+        .concept-icon.green  { background: rgba(76, 175, 80, 0.2); }
+        .concept-icon.red    { background: rgba(244, 67, 54, 0.2); }
+        .concept-icon.blue   { background: rgba(33, 150, 243, 0.2); }
+        .concept-icon.purple { background: rgba(156, 39, 176, 0.2); }
+
+        .concept-header h3 { font-size: 1.2rem; font-weight: 700; color: var(--text-light); }
+
+        .pipeline-visual { display: flex; align-items: center; gap: 0; margin: 1.5rem 0; overflow-x: auto; padding-bottom: 0.5rem; }
+        .pipeline-step { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; min-width: 90px; flex: 1; }
+        .pipeline-box { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.6rem 0.8rem; text-align: center; font-size: 0.75rem; font-weight: 600; color: var(--text-light); width: 100%; transition: all 0.3s; }
+        .pipeline-box:hover { border-color: var(--orange); background: rgba(255, 98, 0, 0.08); }
+        .pipeline-box.highlight { border-color: var(--orange); background: rgba(255, 98, 0, 0.12); color: var(--yellow); }
+        .pipeline-label { font-size: 0.65rem; color: var(--text-secondary); text-align: center; }
+        .pipeline-arrow { color: var(--orange); font-size: 1.2rem; flex-shrink: 0; margin: 0 2px; padding-bottom: 1.2rem; }
+
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+        .compare-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; }
+        .compare-card.sast { border-top: 3px solid #4ecdc4; }
+        .compare-card.dast { border-top: 3px solid #ff6b6b; }
+        .compare-card.sca  { border-top: 3px solid #ffcc00; }
+        .compare-card.iast { border-top: 3px solid #a8e6cf; }
+        .compare-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .compare-card.sast .compare-title { color: #4ecdc4; }
+        .compare-card.dast .compare-title { color: #ff6b6b; }
+        .compare-card.sca  .compare-title { color: #ffcc00; }
+        .compare-card.iast .compare-title { color: #a8e6cf; }
+        .compare-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+        .compare-list li { font-size: 0.8rem; color: var(--text-secondary); padding-left: 1rem; position: relative; line-height: 1.4; }
+        .compare-list li::before { content: '▸'; position: absolute; left: 0; color: var(--orange); }
+
+        .info-box { border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; display: flex; gap: 0.75rem; align-items: flex-start; }
+        .info-box.warning { background: rgba(255, 152, 0, 0.1); border: 1px solid rgba(255, 152, 0, 0.25); }
+        .info-box.danger  { background: rgba(244, 67, 54, 0.1); border: 1px solid rgba(244, 67, 54, 0.25); }
+        .info-box.success { background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.25); }
+        .info-box.info    { background: rgba(33, 150, 243, 0.1); border: 1px solid rgba(33, 150, 243, 0.25); }
+        .info-box-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .info-box-text { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; }
+        .info-box-text strong { color: var(--text-light); display: block; margin-bottom: 0.25rem; }
+
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .tool-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; transition: all 0.3s; }
+        .tool-card:hover { border-color: rgba(255, 140, 0, 0.4); background: rgba(255, 140, 0, 0.05); transform: translateY(-2px); }
+        .tool-name { font-size: 0.9rem; font-weight: 700; color: var(--yellow); margin-bottom: 0.25rem; }
+        .tool-category { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--orange); margin-bottom: 0.5rem; }
+        .tool-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
+
+        .timeline { position: relative; padding-left: 2rem; margin: 1.5rem 0; }
+        .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--orange), var(--yellow)); opacity: 0.4; }
+        .timeline-item { position: relative; margin-bottom: 1.5rem; }
+        .timeline-item::before { content: ''; position: absolute; left: -1.65rem; top: 0.4rem; width: 10px; height: 10px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 8px rgba(255, 98, 0, 0.5); }
+        .timeline-title { font-size: 0.95rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.35rem; }
+        .timeline-text { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.5; }
+
+        .section-divider { display: flex; align-items: center; gap: 1rem; margin: 2rem 0 1.5rem; }
+        .section-divider-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--border-color), transparent); }
+        .section-divider-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--orange); white-space: nowrap; }
+
+        .checklist { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin: 1rem 0; }
+        .checklist li { display: flex; align-items: flex-start; gap: 0.75rem; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.4; }
+        .check-icon { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .check-icon.done { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
+        .check-icon.warn { background: rgba(255, 152, 0, 0.2); color: #ff9800; }
+        .check-icon.bad  { background: rgba(244, 67, 54, 0.2); color: #f44336; }
+
+        .real-example { background: linear-gradient(135deg, rgba(11, 13, 20, 0.8), rgba(255, 98, 0, 0.04)); border: 1px solid rgba(255, 140, 0, 0.2); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
+        .real-example-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--orange); margin-bottom: 0.75rem; }
+        .real-example-title { font-size: 1rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.5rem; }
+        .real-example-text { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; }
+
+        .lab-container { display: flex; gap: 1rem; height: 600px; margin-bottom: 1rem; }
+        .lab-editor { flex: 1; display: flex; flex-direction: column; }
+        .lab-preview { flex: 1; display: flex; flex-direction: column; }
+        .lab-header { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-bottom: none; border-radius: 8px 8px 0 0; padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; padding: 1rem; color: var(--text-light); font-family: 'Courier New', monospace; font-size: 0.875rem; line-height: 1.5; resize: none; outline: none; }
+        .lab-textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2); }
+        .lab-iframe { flex: 1; background: white; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; width: 100%; }
+        .lab-controls { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+        .btn-execute { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3); }
+        .btn-execute:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4); }
+        .btn-reset { background: rgba(255, 255, 255, 0.1); color: var(--text-light); border: 1px solid var(--border-color); padding: 0.75rem 1.5rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
+        .btn-reset:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .lab-instructions { background: rgba(40, 224, 255, 0.1); border: 1px solid rgba(40, 224, 255, 0.2); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: var(--text-secondary); }
+
+        .quiz-question { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .question-title { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+        .quiz-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all 0.3s ease; }
+        .quiz-option:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--orange); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--orange); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(255, 140, 0, 0.12), rgba(255, 204, 0, 0.06)); border: 1px solid rgba(255, 140, 0, 0.25); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border-radius: 6px; font-size: 0.875rem; }
+        .feedback-correct { border-left: 3px solid #4caf50; }
+        .feedback-incorrect { border-left: 3px solid #f44336; }
+        .feedback-icon { font-size: 1.1rem; font-weight: bold; }
+        .feedback-correct .feedback-icon { color: #4caf50; }
+        .feedback-incorrect .feedback-icon { color: #f44336; }
+        .score-excellent { color: #4caf50; }
+        .score-good { color: #28e0ff; }
+        .score-fair { color: #ff9800; }
+        .score-poor { color: #f44336; }
+
+        .resources-list { margin: 1.5rem 0; }
+        .resource-category { margin-bottom: 2rem; }
+        .category-title { color: var(--yellow); font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        .resource-links { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+        .resource-link { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0; border-radius: 4px; transition: all 0.3s ease; font-size: 0.875rem; position: relative; padding-left: 1.5rem; }
+        .resource-link::before { content: '→'; position: absolute; left: 0; color: var(--orange); font-weight: bold; }
+        .resource-link:hover { color: var(--text-light); padding-left: 2rem; }
+        .resources-note { background: rgba(255, 140, 0, 0.1); border: 1px solid rgba(255, 140, 0, 0.2); border-radius: 8px; padding: 1rem; margin-top: 2rem; font-size: 0.875rem; }
+        .resources-note p { color: var(--text-secondary); margin: 0; }
+
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 140, 0, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--yellow); border-bottom-color: var(--yellow); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-icon { font-size: 1.1rem; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: #28e0ff; }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .header-content { padding: 1rem; flex-direction: column; gap: 1rem; }
+            .nav-buttons { width: 100%; justify-content: center; }
+            .course-title { font-size: 2rem; }
+            .course-meta { flex-direction: column; gap: 0.75rem; }
+            .main-content { padding: 1rem; }
+            .tab-nav { flex-direction: column; }
+            .tab-button { flex: none; text-align: left; }
+            .tab-content { padding: 1rem; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .lab-controls { justify-content: center; }
+            .compare-grid { grid-template-columns: 1fr; }
+            .pipeline-visual { flex-wrap: wrap; gap: 0.5rem; }
+            .pipeline-arrow { display: none; }
+            .evaluation-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav class="nav-buttons">
+                <a href="premium-cyber-progress.html" class="btn btn-back">← Back to Journey</a>
+                <a href="browse.html" class="btn btn-primary">Explore</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Risk Analysis and Security Principles</h1>
+            <p class="course-description">
+                Understand the core principles of information security and learn to systematically identify, analyse and manage risk across an organisation.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>Risk Analysis • CIA Triad • Threat Modelling • Security Principles</span></div>
+                <div class="meta-item"><span>📌</span><span>From foundational concepts to practical risk management</span></div>
+            </div>
+            <div class="progress-section">
+                <div class="progress-label">Progress: <span id="progress-text">0%</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav" role="tablist">
+                <button class="tab-button active" data-tab="learn" role="tab" aria-selected="true">Learn</button>
+                <button class="tab-button" data-tab="lab" role="tab" aria-selected="false">Lab</button>
+                <button class="tab-button" data-tab="quiz" role="tab" aria-selected="false">Quiz</button>
+                <button class="tab-button" data-tab="resources" role="tab" aria-selected="false">Resources</button>
+                <button class="tab-button" data-tab="evaluation" role="tab" aria-selected="false">Evaluation</button>
+            </nav>
+
+            <div class="tab-content">
+
+                <!-- LEARN TAB -->
+                <div id="panel-learn" class="tab-panel active" role="tabpanel">
+                    <div class="learn-section">
+
+                        <div class="learn-intro">
+                            <h4>🛡️ Risk Analysis and Security Principles</h4>
+                            <p>
+                                Security is not just about tools and technology — it starts with understanding <strong>what you are protecting</strong>,
+                                <strong>what threatens it</strong> and <strong>what the consequences</strong> of a failure would be.
+                                Risk analysis is the structured process that answers these questions.
+                            </p>
+                            <p>
+                                In this module you will learn the foundational security principles (CIA Triad, Defence in Depth, Least Privilege),
+                                how to identify and classify threats, perform qualitative and quantitative risk analysis, apply threat modelling frameworks
+                                and design layered defences.
+                            </p>
+                        </div>
+
+                        <!-- 1. Foundational Security Principles -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon orange">🔺</div>
+                                <h3>1. Foundational Security Principles</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Before analysing risk, you need a solid conceptual foundation. These principles underpin every security decision —
+                                from choosing a control to accepting a residual risk.
+                            </p>
+
+                            <div class="section-divider">
+                                <div class="section-divider-line"></div>
+                                <span class="section-divider-label">The CIA Triad</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+
+                            <div class="compare-grid">
+                                <div class="compare-card sast">
+                                    <div class="compare-title">🔒 Confidentiality</div>
+                                    <ul class="compare-list">
+                                        <li>Only authorised parties can access information</li>
+                                        <li>Violated by: data breaches, eavesdropping, insider leaks</li>
+                                        <li>Controls: encryption, access control, DLP, MFA</li>
+                                        <li>Example: encrypting a database of customer PII</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card dast">
+                                    <div class="compare-title">✅ Integrity</div>
+                                    <ul class="compare-list">
+                                        <li>Information is accurate, complete and unaltered</li>
+                                        <li>Violated by: tampering, ransomware, injection attacks</li>
+                                        <li>Controls: hashing, digital signatures, audit logs, checksums</li>
+                                        <li>Example: SHA-256 hash to verify file authenticity</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card sca">
+                                    <div class="compare-title">⚡ Availability</div>
+                                    <ul class="compare-list">
+                                        <li>Systems and data are accessible when needed</li>
+                                        <li>Violated by: DDoS attacks, ransomware, hardware failures</li>
+                                        <li>Controls: redundancy, backups, failover, rate limiting</li>
+                                        <li>Example: multi-region deployment with auto-failover</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card iast">
+                                    <div class="compare-title">➕ Beyond the Triad</div>
+                                    <ul class="compare-list">
+                                        <li><strong>Non-repudiation</strong> — proof of origin / action</li>
+                                        <li><strong>Authenticity</strong> — verifying identity of parties</li>
+                                        <li><strong>Accountability</strong> — traceability to individuals</li>
+                                        <li>Tools: digital certificates, audit trails, SIEM logging</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="info-box info">
+                                <span class="info-box-icon">💡</span>
+                                <div class="info-box-text">
+                                    <strong>Security trade-offs are real</strong>
+                                    Maximising all three CIA properties simultaneously is impossible. Stronger encryption improves confidentiality but can reduce availability if key management fails. Security design always involves conscious trade-offs based on context and risk appetite.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Core Security Design Principles -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon yellow">📐</div>
+                                <h3>2. Core Security Design Principles</h3>
+                            </div>
+
+                            <p class="content-text">
+                                These principles, first formalised by Jerome Saltzer and Michael Schroeder in 1975, remain the bedrock of secure system design today.
+                            </p>
+
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-title">Least Privilege</div>
+                                    <div class="timeline-text">Every user, process and system component should have the minimum access rights required to perform its function — and nothing more. Reduces the blast radius of a compromise. Example: a web server process should not run as root.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">Defence in Depth</div>
+                                    <div class="timeline-text">Layer multiple, independent security controls so that if one fails, others remain. No single point of failure. Example: firewall + IDS + EDR + MFA + encryption — an attacker must bypass all layers.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">Fail Secure (Fail Safe)</div>
+                                    <div class="timeline-text">When a system fails, it should default to a secure state — denying access rather than granting it. Example: a firewall that crashes should block all traffic, not allow it.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">Separation of Duties</div>
+                                    <div class="timeline-text">No single individual should have enough access to commit fraud or cause significant harm alone. Example: the same person should not be able to both create and approve financial transactions.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">Economy of Mechanism</div>
+                                    <div class="timeline-text">Keep security mechanisms simple. Complexity is the enemy of security — complex systems are harder to reason about, audit and test. Simple, well-understood controls are more reliably secure.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">Zero Trust</div>
+                                    <div class="timeline-text">Never trust, always verify. No entity — user, device or service — is implicitly trusted based on network location. Every access request must be authenticated, authorised and continuously validated.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Risk Concepts -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon blue">⚖️</div>
+                                <h3>3. Core Risk Concepts</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Risk management has a precise vocabulary. Understanding these terms is essential before attempting any risk analysis.
+                            </p>
+
+                            <div class="content-card">
+                                <h3 class="content-title">Risk Terminology Reference</h3>
+                                <div class="code-block">
+<pre><code><span class="section">ASSET</span>
+<span class="keyword">  Definition:</span>  <span class="value">Anything of value to the organisation</span>
+<span class="keyword">  Examples:</span>   <span class="value">Customer database, source code, brand reputation, staff</span>
+
+<span class="section">THREAT</span>
+<span class="keyword">  Definition:</span>  <span class="value">A potential cause of an unwanted incident</span>
+<span class="keyword">  Examples:</span>   <span class="value">Malicious insider, ransomware actor, natural disaster, misconfiguration</span>
+<span class="keyword">  Sources:</span>    <span class="value">Human (intentional/accidental), environmental, technical</span>
+
+<span class="section">VULNERABILITY</span>
+<span class="keyword">  Definition:</span>  <span class="value">A weakness that can be exploited by a threat</span>
+<span class="keyword">  Examples:</span>   <span class="value">Unpatched software (CVE), weak password policy, no MFA, open S3 bucket</span>
+
+<span class="section">RISK</span>
+<span class="keyword">  Definition:</span>  <span class="value">The potential for loss when a threat exploits a vulnerability</span>
+<span class="keyword">  Formula:</span>    <span class="value">Risk = Likelihood × Impact</span>
+<span class="keyword">  Note:</span>       <span class="value">Risk requires BOTH a threat AND a vulnerability to exist</span>
+
+<span class="section">CONTROL (SAFEGUARD)</span>
+<span class="keyword">  Definition:</span>  <span class="value">A measure that reduces likelihood or impact of a risk</span>
+<span class="keyword">  Types:</span>      <span class="value">Preventive, Detective, Corrective, Deterrent, Compensating</span>
+
+<span class="section">RESIDUAL RISK</span>
+<span class="keyword">  Definition:</span>  <span class="value">Risk remaining after controls are applied</span>
+<span class="keyword">  Action:</span>     <span class="value">Must be formally accepted by an authorised risk owner</span>
+
+<span class="section">RISK APPETITE</span>
+<span class="keyword">  Definition:</span>  <span class="value">The level of risk an organisation is willing to accept</span>
+<span class="keyword">  Set by:</span>     <span class="value">Board / senior leadership — drives all risk treatment decisions</span></code></pre>
+                                </div>
+
+                                <div class="code-explanation">
+                                    <h5>The Risk Equation in practice:</h5>
+                                    <p>
+                                        <strong>No threat → No risk</strong> — An unpatched server in an air-gapped lab with no internet access has a vulnerability but low risk because the threat likelihood is minimal<br>
+                                        <strong>No vulnerability → No risk</strong> — A fully patched, MFA-protected system still has threats, but the absence of exploitable weaknesses reduces risk significantly<br>
+                                        <strong>High impact alone ≠ High risk</strong> — A nuclear strike on your data centre is catastrophically impactful but has near-zero likelihood for most organisations
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Threat Modelling -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon purple">🗺️</div>
+                                <h3>4. Threat Modelling Frameworks</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Threat modelling is the structured process of identifying threats to a system <em>before</em> building or deploying it.
+                                It answers four key questions: <em>What are we building? What can go wrong? What are we doing about it? Did we do a good job?</em>
+                            </p>
+
+                            <div class="compare-grid">
+                                <div class="compare-card sast">
+                                    <div class="compare-title">STRIDE</div>
+                                    <ul class="compare-list">
+                                        <li><strong>S</strong>poofing — impersonating a user or component</li>
+                                        <li><strong>T</strong>ampering — modifying data or code</li>
+                                        <li><strong>R</strong>epudiation — denying having performed an action</li>
+                                        <li><strong>I</strong>nformation Disclosure — exposing data to unauthorised parties</li>
+                                        <li><strong>D</strong>enial of Service — making a system unavailable</li>
+                                        <li><strong>E</strong>levation of Privilege — gaining unauthorised permissions</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card dast">
+                                    <div class="compare-title">PASTA</div>
+                                    <ul class="compare-list">
+                                        <li>Process for Attack Simulation and Threat Analysis</li>
+                                        <li>7-stage risk-centric methodology</li>
+                                        <li>Aligns technical threats with business objectives</li>
+                                        <li>Produces attack trees and attack scenarios</li>
+                                        <li>Used in complex enterprise and application contexts</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card sca">
+                                    <div class="compare-title">DREAD</div>
+                                    <ul class="compare-list">
+                                        <li><strong>D</strong>amage potential — how bad is the impact?</li>
+                                        <li><strong>R</strong>eproducibility — how easily can it be repeated?</li>
+                                        <li><strong>E</strong>xploitability — how easy is it to exploit?</li>
+                                        <li><strong>A</strong>ffected users — how many are impacted?</li>
+                                        <li><strong>D</strong>iscoverability — how easy is it to find?</li>
+                                        <li>Each dimension rated 1–10, scores prioritise threats</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card iast">
+                                    <div class="compare-title">Attack Trees</div>
+                                    <ul class="compare-list">
+                                        <li>Root node = attacker's goal (e.g. "Exfiltrate customer data")</li>
+                                        <li>Child nodes = methods to achieve each step</li>
+                                        <li>AND/OR logic for combining attack paths</li>
+                                        <li>Useful for mapping complex multi-step attacks</li>
+                                        <li>Visual — easy to communicate to non-technical stakeholders</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="real-example">
+                                <div class="real-example-label">📰 Real Case</div>
+                                <div class="real-example-title">Equifax Breach (2017) — A Threat Modelling Failure</div>
+                                <div class="real-example-text">
+                                    Attackers exploited a known vulnerability (CVE-2017-5638 in Apache Struts) that had been unpatched for 78 days.
+                                    A basic threat model would have identified: Threat = external attacker, Vulnerability = unpatched web framework,
+                                    Asset = 147 million consumer records. The control failure was a broken patch management process.
+                                    The total cost exceeded $1.4 billion in settlements and remediation.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Risk Analysis Methods -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon green">📊</div>
+                                <h3>5. Risk Analysis Methods</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Risk analysis can be <strong>qualitative</strong> (descriptive categories like High/Medium/Low),
+                                <strong>quantitative</strong> (expressed in financial terms) or <strong>semi-quantitative</strong> (numerical scales mapped to categories).
+                            </p>
+
+                            <div class="content-card">
+                                <h3 class="content-title">Qualitative vs Quantitative Risk Analysis</h3>
+                                <div class="code-block">
+<pre><code><span class="comment"># ─────────────────────────────────────────────
+# QUALITATIVE RISK ANALYSIS
+# ─────────────────────────────────────────────</span>
+<span class="section">Risk Matrix (5×5)</span>
+<span class="keyword">  Likelihood:</span>  <span class="value">1=Rare  2=Unlikely  3=Possible  4=Likely  5=Almost Certain</span>
+<span class="keyword">  Impact:</span>      <span class="value">1=Negligible  2=Minor  3=Moderate  4=Major  5=Catastrophic</span>
+<span class="keyword">  Score:</span>       <span class="value">Likelihood × Impact  →  1–25</span>
+
+<span class="tag">Example:</span>
+  <span class="attr">Threat:</span>       <span class="value">Phishing email leads to credential theft</span>
+  <span class="attr">Likelihood:</span>  <span class="value">4 (Likely — employees receive phishing daily)</span>
+  <span class="attr">Impact:</span>       <span class="value">4 (Major — admin credential access)</span>
+  <span class="attr">Score:</span>        <span class="value">16 → HIGH RISK</span>
+
+<span class="comment"># ─────────────────────────────────────────────
+# QUANTITATIVE RISK ANALYSIS (ALE Method)
+# ─────────────────────────────────────────────</span>
+<span class="section">Key Terms:</span>
+<span class="keyword">  AV</span>   <span class="comment"># Asset Value — monetary value of the asset</span>
+<span class="keyword">  EF</span>   <span class="comment"># Exposure Factor — % of asset lost per incident (0.0–1.0)</span>
+<span class="keyword">  SLE</span>  <span class="comment"># Single Loss Expectancy = AV × EF</span>
+<span class="keyword">  ARO</span>  <span class="comment"># Annual Rate of Occurrence — expected incidents per year</span>
+<span class="keyword">  ALE</span>  <span class="comment"># Annual Loss Expectancy = SLE × ARO</span>
+
+<span class="tag">Example:</span>
+  <span class="attr">AV</span>  = <span class="value">$500,000</span>  <span class="comment"># Customer database value</span>
+  <span class="attr">EF</span>  = <span class="value">0.40</span>      <span class="comment"># 40% data exposed per breach</span>
+  <span class="attr">SLE</span> = <span class="value">$200,000</span>  <span class="comment"># AV × EF = cost per breach</span>
+  <span class="attr">ARO</span> = <span class="value">0.25</span>      <span class="comment"># Once every 4 years</span>
+  <span class="attr">ALE</span> = <span class="value">$50,000</span>   <span class="comment"># SLE × ARO = annual expected loss</span>
+
+<span class="comment"># Control cost decision:
+# If control costs $30,000/year and reduces ALE to $10,000
+# → Net benefit = $50,000 - $10,000 - $30,000 = $10,000/year ✅</span></span></code></pre>
+                                </div>
+
+                                <div class="code-explanation">
+                                    <h5>Choosing the right method:</h5>
+                                    <p>
+                                        <strong>Qualitative</strong> — faster, requires less data, widely used for initial assessments and operational decisions. Suitable when precise financial data is unavailable<br>
+                                        <strong>Quantitative (ALE)</strong> — produces financial figures that justify security investments to boards and CFOs. Requires reliable historical data, which is often scarce<br>
+                                        <strong>Semi-quantitative</strong> — numerical scores on qualitative scales. Balances rigour with practicality — the most commonly used in industry
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6. Control Types -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon red">🛡️</div>
+                                <h3>6. Security Control Types and Categories</h3>
+                            </div>
+
+                            <div class="info-box warning">
+                                <span class="info-box-icon">⚠️</span>
+                                <div class="info-box-text">
+                                    <strong>Controls must be matched to threats</strong>
+                                    A detective control (e.g. SIEM alerting) cannot prevent a breach — it only discovers it after the fact.
+                                    Effective security requires the right mix of preventive, detective and corrective controls for each risk.
+                                </div>
+                            </div>
+
+                            <div class="tools-grid">
+                                <div class="tool-card">
+                                    <div class="tool-name">Preventive</div>
+                                    <div class="tool-category">Control Function</div>
+                                    <div class="tool-desc">Stop an attack before it occurs. Examples: firewalls, MFA, input validation, patch management, access controls.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">Detective</div>
+                                    <div class="tool-category">Control Function</div>
+                                    <div class="tool-desc">Identify attacks in progress or after the fact. Examples: SIEM, IDS, audit logs, anomaly detection, vulnerability scans.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">Corrective</div>
+                                    <div class="tool-category">Control Function</div>
+                                    <div class="tool-desc">Restore systems after an incident. Examples: backups, incident response plans, disaster recovery, patch deployment.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">Deterrent</div>
+                                    <div class="tool-category">Control Function</div>
+                                    <div class="tool-desc">Discourage attackers from attempting an attack. Examples: warning banners, CCTV signage, prosecution policies, bug bounty programmes.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">Technical</div>
+                                    <div class="tool-category">Control Category</div>
+                                    <div class="tool-desc">Implemented in hardware or software. Examples: encryption, antivirus, firewalls, access control lists, MFA.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">Administrative</div>
+                                    <div class="tool-category">Control Category</div>
+                                    <div class="tool-desc">Policies, procedures and training. Examples: security awareness training, background checks, acceptable use policies, incident response plans.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 7. Defence in Depth in Practice -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon blue">🏰</div>
+                                <h3>7. Defence in Depth — A Practical Example</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Defence in Depth means structuring controls in concentric layers — like a castle with walls, moat, guards and a keep.
+                                If an attacker breaches one layer, they face another.
+                            </p>
+
+                            <div class="pipeline-visual">
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box">🌐 Perimeter</div>
+                                    <div class="pipeline-label">Firewall / WAF</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box highlight">🔗 Network</div>
+                                    <div class="pipeline-label">IDS / Segmentation</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box highlight">💻 Endpoint</div>
+                                    <div class="pipeline-label">EDR / Patching</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box highlight">🔑 Identity</div>
+                                    <div class="pipeline-label">MFA / Zero Trust</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box">📦 Application</div>
+                                    <div class="pipeline-label">SAST / WAF rules</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box">🗄️ Data</div>
+                                    <div class="pipeline-label">Encryption / DLP</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box">👥 People</div>
+                                    <div class="pipeline-label">Awareness Training</div>
+                                </div>
+                            </div>
+
+                            <ul class="checklist">
+                                <li>
+                                    <div class="check-icon done">✓</div>
+                                    <span>Layer controls so a failure at one level does not immediately compromise everything</span>
+                                </li>
+                                <li>
+                                    <div class="check-icon done">✓</div>
+                                    <span>Use different technologies from different vendors at different layers — avoid single points of failure</span>
+                                </li>
+                                <li>
+                                    <div class="check-icon done">✓</div>
+                                    <span>Include people and processes as layers — technology alone is not enough</span>
+                                </li>
+                                <li>
+                                    <div class="check-icon warn">!</div>
+                                    <span>More layers increase complexity — ensure each layer is manageable and maintained</span>
+                                </li>
+                                <li>
+                                    <div class="check-icon bad">✗</div>
+                                    <span>Rely on perimeter security alone — once the firewall is breached, everything is exposed</span>
+                                </li>
+                                <li>
+                                    <div class="check-icon bad">✗</div>
+                                    <span>Neglect the "people" layer — the majority of breaches involve a human element</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 8. Risk Treatment and Tolerance -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon yellow">🎯</div>
+                                <h3>8. Risk Treatment, Tolerance and Communication</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Once risks are identified and scored, the organisation must decide how to respond to each one.
+                                There are four fundamental treatment strategies, and the choice depends on cost, feasibility and risk appetite.
+                            </p>
+
+                            <div class="content-card">
+                                <h3 class="content-title">Risk Treatment Decision Framework</h3>
+                                <div class="code-block">
+<pre><code><span class="comment"># ─────────────────────────────────────────────
+# THE FOUR RISK TREATMENT OPTIONS
+# ─────────────────────────────────────────────</span>
+
+<span class="keyword">1. MITIGATE (Reduce)</span>
+<span class="value">   Implement controls to reduce likelihood or impact</span>
+<span class="attr">   When to use:</span> <span class="value">Risk is above appetite; cost of control &lt; cost of risk</span>
+<span class="attr">   Example:</span>     <span class="value">Deploy MFA to reduce credential theft likelihood</span>
+
+<span class="keyword">2. TRANSFER (Share)</span>
+<span class="value">   Shift financial consequences to a third party</span>
+<span class="attr">   When to use:</span> <span class="value">Risk impact is high but control cost is prohibitive</span>
+<span class="attr">   Example:</span>     <span class="value">Cyber insurance, outsourcing to an MSSP</span>
+
+<span class="keyword">3. AVOID (Eliminate)</span>
+<span class="value">   Remove the activity or asset that creates the risk</span>
+<span class="attr">   When to use:</span> <span class="value">Risk is unacceptable and cannot be reduced cost-effectively</span>
+<span class="attr">   Example:</span>     <span class="value">Discontinue collecting data you don't need</span>
+
+<span class="keyword">4. ACCEPT (Retain)</span>
+<span class="value">   Acknowledge and monitor the risk without additional action</span>
+<span class="attr">   When to use:</span> <span class="value">Risk is within appetite; control cost exceeds potential loss</span>
+<span class="attr">   Requirement:</span> <span class="value">Formal sign-off by an authorised risk owner + documentation</span>
+
+<span class="comment"># ─────────────────────────────────────────────
+# COMMUNICATING RISK TO LEADERSHIP
+# ─────────────────────────────────────────────</span>
+<span class="section">Wrong approach:</span>
+<span class="tag">  "CVE-2024-1234 has a CVSS score of 9.8 in the</span>
+<span class="tag">   libssl library affecting our RHEL 8 servers"</span>
+
+<span class="section">Right approach:</span>
+<span class="value">  "A critical vulnerability in our web servers could allow</span>
+<span class="value">   an external attacker to access customer payment data.</span>
+<span class="value">   Estimated impact: €2M fine + reputational damage.</span>
+<span class="value">   Patch available. Remediation cost: 2 engineer-days."</span></code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="content-card">
+                            <h3 class="content-title">✅ Summary and Next Steps</h3>
+                            <p class="content-text">
+                                In this module you covered the foundational security principles (CIA Triad, Least Privilege, Defence in Depth, Zero Trust),
+                                core risk terminology (asset, threat, vulnerability, risk, control), qualitative and quantitative risk analysis methods (risk matrix, ALE),
+                                threat modelling frameworks (STRIDE, PASTA, DREAD) and the four risk treatment strategies.
+                            </p>
+                            <div class="info-box info">
+                                <span class="info-box-icon">💡</span>
+                                <div class="info-box-text">
+                                    <strong>Keep learning</strong>
+                                    Practice building a risk matrix in the <strong>Lab</strong>, test your knowledge in the <strong>Quiz</strong>,
+                                    and deepen your understanding with the curated links in the <strong>Resources</strong> section.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- LAB TAB -->
+                <div id="panel-lab" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Risk Analysis Lab — Risk Matrix Builder</h3>
+                        <p class="content-text">
+                            Build and visualise a risk matrix and threat register in HTML. Edit the starter code to add your own threats,
+                            adjust likelihood and impact scores, and observe how the risk level changes.
+                        </p>
+                        <div class="lab-instructions">
+                            <strong>Instructions:</strong> The starter code shows a 5×5 risk heatmap and a threat register table.
+                            Try adding new threats, changing scores, or modifying the colour thresholds.
+                            Press <strong>Ctrl+Enter</strong> to run at any time.
+                        </div>
+                        <div class="lab-controls">
+                            <button id="execute-btn" class="btn-execute">Run</button>
+                            <button id="reset-btn" class="btn-reset">Reset</button>
+                        </div>
+                        <div class="lab-container">
+                            <div class="lab-editor">
+                                <div class="lab-header">HTML Editor</div>
+                                <textarea id="code-editor" class="lab-textarea"><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Risk Matrix</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+        h2 { color: #2c3e50; margin-bottom: 0.5rem; }
+        h3 { color: #555; margin: 1.5rem 0 0.5rem; font-size: 1rem; }
+        table { border-collapse: collapse; margin-bottom: 1.5rem; }
+        .matrix td, .matrix th { width: 70px; height: 50px; text-align: center; font-size: 0.75rem; font-weight: bold; border: 2px solid white; }
+        .matrix th { background: #2c3e50; color: white; }
+        .low      { background: #c8e6c9; color: #1b5e20; }
+        .medium   { background: #fff9c4; color: #f57f17; }
+        .high     { background: #ffccbc; color: #bf360c; }
+        .critical { background: #ef9a9a; color: #b71c1c; }
+        .register { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .register th { background: #2c3e50; color: white; padding: 8px 12px; text-align: left; }
+        .register td { padding: 8px 12px; border-bottom: 1px solid #ddd; background: white; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+        .badge.low      { background: #c8e6c9; color: #1b5e20; }
+        .badge.medium   { background: #fff9c4; color: #f57f17; }
+        .badge.high     { background: #ffccbc; color: #bf360c; }
+        .badge.critical { background: #ef9a9a; color: #b71c1c; }
+        .axis-label { font-size: 0.65rem; color: #888; }
+    </style>
+</head>
+<body>
+    <h2>🛡️ Risk Analysis Dashboard</h2>
+
+    <h3>5×5 Risk Heatmap</h3>
+    <table class="matrix">
+        <tr>
+            <th></th>
+            <th>Negligible (1)</th>
+            <th>Minor (2)</th>
+            <th>Moderate (3)</th>
+            <th>Major (4)</th>
+            <th>Catastrophic (5)</th>
+        </tr>
+        <tr><th>Almost Certain (5)</th><td class="medium">5</td><td class="high">10</td><td class="high">15</td><td class="critical">20</td><td class="critical">25</td></tr>
+        <tr><th>Likely (4)</th>        <td class="low">4</td><td class="medium">8</td><td class="high">12</td><td class="critical">16</td><td class="critical">20</td></tr>
+        <tr><th>Possible (3)</th>      <td class="low">3</td><td class="medium">6</td><td class="medium">9</td><td class="high">12</td><td class="high">15</td></tr>
+        <tr><th>Unlikely (2)</th>      <td class="low">2</td><td class="low">4</td><td class="medium">6</td><td class="medium">8</td><td class="high">10</td></tr>
+        <tr><th>Rare (1)</th>          <td class="low">1</td><td class="low">2</td><td class="low">3</td><td class="low">4</td><td class="medium">5</td></tr>
+    </table>
+    <p class="axis-label">↑ Likelihood  →  Impact  |  Critical ≥16  |  High 10–15  |  Medium 5–9  |  Low ≤4</p>
+
+    <h3>Threat Register</h3>
+    <table class="register">
+        <thead>
+            <tr><th>Threat</th><th>Asset</th><th>Likelihood</th><th>Impact</th><th>Score</th><th>Level</th><th>Treatment</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Phishing / BEC</td><td>Email / Credentials</td><td>4</td><td>4</td><td>16</td><td><span class="badge critical">CRITICAL</span></td><td>Mitigate — MFA + training</td></tr>
+            <tr><td>Ransomware</td><td>File servers</td><td>3</td><td>5</td><td>15</td><td><span class="badge high">HIGH</span></td><td>Mitigate — EDR + air-gapped backups</td></tr>
+            <tr><td>Insider data leak</td><td>Customer database</td><td>2</td><td>4</td><td>8</td><td><span class="badge medium">MEDIUM</span></td><td>Mitigate — DLP + access review</td></tr>
+            <tr><td>DDoS attack</td><td>Web application</td><td>3</td><td>3</td><td>9</td><td><span class="badge medium">MEDIUM</span></td><td>Transfer — CDN + cyber insurance</td></tr>
+            <tr><td>Physical theft of laptop</td><td>Employee laptop</td><td>2</td><td>2</td><td>4</td><td><span class="badge low">LOW</span></td><td>Accept — full disk encryption in place</td></tr>
+        </tbody>
+    </table>
+</body>
+</html></textarea>
+                            </div>
+                            <div class="lab-preview">
+                                <div class="lab-header">Preview</div>
+                                <iframe id="preview-iframe" class="lab-iframe" sandbox="allow-scripts"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QUIZ TAB -->
+                <div id="panel-quiz" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Risk Analysis and Security Principles Quiz</h3>
+                        <p class="content-text">
+                            Test your understanding of the core security principles, risk concepts and threat modelling frameworks. Answer all 15 questions and receive immediate feedback.
+                        </p>
+
+                        <div id="quiz-container">
+                            <form id="quiz-form">
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">1. What are the three components of the CIA Triad?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q1" value="a"><span class="option-text">Compliance, Integrity, Accountability</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="b"><span class="option-text">Confidentiality, Integrity, Availability</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="c"><span class="option-text">Confidentiality, Investigation, Authenticity</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="d"><span class="option-text">Control, Identity, Assurance</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">2. What does the "Least Privilege" principle mean?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q2" value="a"><span class="option-text">All users should have administrator access to maximise productivity</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="b"><span class="option-text">Every user, process or system component should have only the minimum access rights needed to perform its function</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="c"><span class="option-text">Security should be as cheap as possible</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="d"><span class="option-text">Fewer security controls lead to fewer attack surfaces</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">3. In risk analysis, what is the difference between a "threat" and a "vulnerability"?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q3" value="a"><span class="option-text">They are synonyms — both refer to weaknesses in a system</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="b"><span class="option-text">A threat is a potential cause of harm; a vulnerability is a weakness that a threat can exploit</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="c"><span class="option-text">A threat is a technical issue; a vulnerability is a human error</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="d"><span class="option-text">A vulnerability is always more dangerous than a threat</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">4. What is the standard formula for calculating risk in qualitative risk analysis?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q4" value="a"><span class="option-text">Risk = Threat + Vulnerability</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="b"><span class="option-text">Risk = Asset Value ÷ Control Strength</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="c"><span class="option-text">Risk = Likelihood × Impact</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="d"><span class="option-text">Risk = Threat × Asset Value</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">5. What does ALE stand for in quantitative risk analysis?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q5" value="a"><span class="option-text">Asset Loss Expectation</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="b"><span class="option-text">Annual Loss Expectancy</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="c"><span class="option-text">Assessed Likelihood Evaluation</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="d"><span class="option-text">Aggregate Loss Estimate</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">6. In the STRIDE threat modelling framework, what does "E" stand for?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q6" value="a"><span class="option-text">Exfiltration</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="b"><span class="option-text">Exposure</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="c"><span class="option-text">Elevation of Privilege</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="d"><span class="option-text">Enumeration</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">7. What is "Defence in Depth"?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q7" value="a"><span class="option-text">Using a single, very powerful firewall to block all attacks</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="b"><span class="option-text">Layering multiple independent security controls so that if one fails, others remain effective</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="c"><span class="option-text">Conducting very deep penetration tests</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="d"><span class="option-text">Investing heavily in perimeter security only</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">8. Which CIA Triad property is most directly threatened by a DDoS attack?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q8" value="a"><span class="option-text">Confidentiality</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="b"><span class="option-text">Integrity</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="c"><span class="option-text">Availability</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="d"><span class="option-text">Non-repudiation</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">9. What does "Fail Secure" (Fail Safe) mean in security design?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q9" value="a"><span class="option-text">Systems should be designed to never fail</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="b"><span class="option-text">When a system fails, it should default to a secure state — denying access rather than granting it</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="c"><span class="option-text">Failures should always be made visible to end users</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="d"><span class="option-text">Backups should be tested regularly</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">10. What is "residual risk"?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q10" value="a"><span class="option-text">The total risk before any controls are applied</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="b"><span class="option-text">Risk that cannot be quantified in financial terms</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="c"><span class="option-text">The risk that remains after security controls have been implemented, which must be formally accepted by the risk owner</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="d"><span class="option-text">Risk transferred to a cyber insurer</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">11. A control that prevents an attack from succeeding in the first place is called a:</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q11" value="a"><span class="option-text">Detective control</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="b"><span class="option-text">Corrective control</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="c"><span class="option-text">Preventive control</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="d"><span class="option-text">Deterrent control</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">12. What does the Zero Trust model assume about network location?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q12" value="a"><span class="option-text">Devices inside the corporate network are implicitly trusted</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="b"><span class="option-text">No entity — user, device or service — is implicitly trusted based on network location; every access request must be verified</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="c"><span class="option-text">VPN users do not need MFA</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="d"><span class="option-text">External users are always untrusted; internal users are always trusted</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">13. In the ALE quantitative risk model, what does SLE × ARO calculate?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q13" value="a"><span class="option-text">The cost of a single security control</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="b"><span class="option-text">The total asset value of the organisation</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="c"><span class="option-text">The Annual Loss Expectancy — the expected financial loss from a risk over one year</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="d"><span class="option-text">The probability that a threat exploits a vulnerability</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">14. What is "Separation of Duties" designed to prevent?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q14" value="a"><span class="option-text">Too many employees attending security training</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="b"><span class="option-text">A single individual having enough access and authority to commit fraud, sabotage or cause significant harm without detection</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="c"><span class="option-text">Developers writing insecure code</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="d"><span class="option-text">Data being stored in multiple locations</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">15. An organisation decides to purchase cyber insurance instead of investing in additional controls for a specific risk. Which risk treatment strategy is this?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q15" value="a"><span class="option-text">Risk Avoidance</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="b"><span class="option-text">Risk Acceptance</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="c"><span class="option-text">Risk Mitigation</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="d"><span class="option-text">Risk Transfer</span></label>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+
+                        <div class="quiz-controls">
+                            <button id="submit-quiz" class="btn-execute" type="button">Submit</button>
+                            <button id="clear-quiz" class="btn-reset" type="button">Clear</button>
+                        </div>
+
+                        <div id="quiz-results" class="quiz-results" style="display: none;">
+                            <h4 class="results-title">Quiz Results</h4>
+                            <div id="quiz-score" class="quiz-score"></div>
+                            <div id="quiz-feedback" class="quiz-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RESOURCES TAB -->
+                <div id="panel-resources" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Recommended Resources</h3>
+                        <p class="content-text">
+                            A curated selection of essential resources to deepen your knowledge of Risk Analysis and Security Principles.
+                        </p>
+                        <div class="resources-list">
+                            <div class="resource-category">
+                                <h4 class="category-title">Standards &amp; Frameworks</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">NIST SP 800-30 — Guide for Conducting Risk Assessments</a></li>
+                                    <li><a href="#" class="resource-link">ISO/IEC 27005 — Information Security Risk Management</a></li>
+                                    <li><a href="#" class="resource-link">NIST SP 800-160 — Systems Security Engineering</a></li>
+                                    <li><a href="#" class="resource-link">CIS Controls v8 — Prioritised security best practices</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Threat Modelling</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">Microsoft Threat Modelling Tool — STRIDE guide</a></li>
+                                    <li><a href="#" class="resource-link">OWASP Threat Modelling Cheat Sheet</a></li>
+                                    <li><a href="#" class="resource-link">PASTA Methodology — VerSprite research</a></li>
+                                    <li><a href="#" class="resource-link">Adam Shostack — Threat Modelling: Designing for Security (book)</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Foundational Reading</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">Saltzer &amp; Schroeder — The Protection of Information in Computer Systems (1975)</a></li>
+                                    <li><a href="#" class="resource-link">OWASP Top 10 — Most Critical Web Application Security Risks</a></li>
+                                    <li><a href="#" class="resource-link">ENISA — Threat Landscape Reports (annual)</a></li>
+                                    <li><a href="#" class="resource-link">Verizon DBIR — Data Breach Investigations Report</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Quantitative Risk</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">FAIR Institute — Factor Analysis of Information Risk</a></li>
+                                    <li><a href="#" class="resource-link">NIST SP 800-39 — Managing Information Security Risk</a></li>
+                                    <li><a href="#" class="resource-link">CVE / NVD — National Vulnerability Database (CVSS scores)</a></li>
+                                    <li><a href="#" class="resource-link">CISA Known Exploited Vulnerabilities Catalogue</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="resources-note">
+                            <p>💡 <strong>Note:</strong> You can edit this list in the future to add your own favourite resources.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EVALUATION TAB -->
+                <div id="panel-evaluation" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Evaluation Criteria</h3>
+                        <p class="content-text">
+                            Criteria organised by importance level to assess your mastery of Risk Analysis and Security Principles.
+                        </p>
+                        <div class="evaluation-grid">
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title essential">
+                                    <span class="evaluation-icon">💠</span>
+                                    Essential
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>The CIA Triad — Confidentiality, Integrity, Availability</li>
+                                    <li>Definitions of asset, threat, vulnerability and risk</li>
+                                    <li>Risk formula: Likelihood × Impact</li>
+                                    <li>The four risk treatment options</li>
+                                    <li>Least Privilege principle</li>
+                                    <li>Preventive vs Detective vs Corrective controls</li>
+                                </ul>
+                            </div>
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title important">
+                                    <span class="evaluation-icon">⭐</span>
+                                    Important
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>Defence in Depth — layered security architecture</li>
+                                    <li>Zero Trust model and its implications</li>
+                                    <li>Separation of Duties and Fail Secure</li>
+                                    <li>STRIDE threat modelling framework</li>
+                                    <li>Qualitative risk matrix construction</li>
+                                    <li>Communicating risk in business terms</li>
+                                </ul>
+                            </div>
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title advanced">
+                                    <span class="evaluation-icon">🚀</span>
+                                    Advanced
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>Quantitative risk analysis — ALE, SLE, ARO</li>
+                                    <li>PASTA and DREAD threat modelling methodologies</li>
+                                    <li>Attack tree construction and analysis</li>
+                                    <li>Risk appetite definition and governance</li>
+                                    <li>FAIR model for financial risk quantification</li>
+                                    <li>Control selection and cost-benefit analysis</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentProgress = 0;
+
+        function updateProgress(percentage) {
+            currentProgress = percentage;
+            document.getElementById('progress-text').textContent = percentage + '%';
+            document.getElementById('progress-fill').style.width = percentage + '%';
+        }
+
+        class TabSystem {
+            constructor() {
+                this.currentTab = 'learn';
+                this.tabs = ['learn', 'lab', 'quiz', 'resources', 'evaluation'];
+                this.init();
+            }
+
+            init() {
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+                });
+                window.addEventListener('hashchange', () => this.handleHashChange());
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+                this.handleHashChange();
+            }
+
+            switchTab(tabId) {
+                if (!this.tabs.includes(tabId)) return;
+                this.currentTab = tabId;
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    const isActive = button.dataset.tab === tabId;
+                    button.classList.toggle('active', isActive);
+                    button.setAttribute('aria-selected', isActive);
+                });
+                document.querySelectorAll('.tab-panel').forEach(panel => {
+                    panel.classList.toggle('active', panel.id === `panel-${tabId}`);
+                });
+                history.replaceState(null, null, `#${tabId}`);
+                this.updateProgressForTab(tabId);
+            }
+
+            handleHashChange() {
+                const hash = window.location.hash.slice(1);
+                if (hash && this.tabs.includes(hash)) this.switchTab(hash);
+            }
+
+            handleKeyboard(e) {
+                if (!e.target.classList.contains('tab-button')) return;
+                const currentIndex = this.tabs.indexOf(this.currentTab);
+                let newIndex = currentIndex;
+                switch(e.key) {
+                    case 'ArrowLeft': e.preventDefault(); newIndex = currentIndex > 0 ? currentIndex - 1 : this.tabs.length - 1; break;
+                    case 'ArrowRight': e.preventDefault(); newIndex = currentIndex < this.tabs.length - 1 ? currentIndex + 1 : 0; break;
+                    case 'Home': e.preventDefault(); newIndex = 0; break;
+                    case 'End': e.preventDefault(); newIndex = this.tabs.length - 1; break;
+                }
+                if (newIndex !== currentIndex) {
+                    this.switchTab(this.tabs[newIndex]);
+                    document.querySelector(`[data-tab="${this.tabs[newIndex]}"]`).focus();
+                }
+            }
+
+            updateProgressForTab(tabId) {
+                const progressMap = { 'learn': 20, 'lab': 40, 'quiz': 60, 'resources': 80, 'evaluation': 100 };
+                updateProgress(Math.max(currentProgress, progressMap[tabId] || 0));
+            }
+        }
+
+        class LabEditor {
+            constructor() {
+                this.editor = document.getElementById('code-editor');
+                this.iframe = document.getElementById('preview-iframe');
+                this.executeBtn = document.getElementById('execute-btn');
+                this.resetBtn = document.getElementById('reset-btn');
+                this.defaultCode = this.editor.value;
+                this.init();
+            }
+
+            init() {
+                this.executeBtn.addEventListener('click', () => this.executeCode());
+                this.resetBtn.addEventListener('click', () => this.resetCode());
+                this.editor.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); this.executeCode(); }
+                });
+                setTimeout(() => this.executeCode(), 500);
+            }
+
+            executeCode() {
+                const blob = new Blob([this.editor.value], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                this.iframe.src = url;
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                this.executeBtn.textContent = 'Executed!';
+                this.executeBtn.style.background = 'linear-gradient(135deg, #4caf50, #8bc34a)';
+                setTimeout(() => {
+                    this.executeBtn.textContent = 'Run';
+                    this.executeBtn.style.background = 'linear-gradient(135deg, var(--orange), var(--yellow))';
+                }, 1000);
+            }
+
+            resetCode() {
+                this.editor.value = this.defaultCode;
+                this.executeCode();
+                this.resetBtn.textContent = 'Cleared!';
+                setTimeout(() => { this.resetBtn.textContent = 'Reset'; }, 1000);
+            }
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questions = [
+                    { question: 1,  correct: 'b', explanation: 'The CIA Triad — Confidentiality, Integrity and Availability — is the foundational model of information security. Every security control and risk assessment can be mapped to protecting one or more of these three properties.' },
+                    { question: 2,  correct: 'b', explanation: 'Least Privilege means every entity (user, process, service) gets only the minimum access needed for its function. It limits the blast radius of a compromise — a hijacked low-privilege account cannot access everything.' },
+                    { question: 3,  correct: 'b', explanation: 'A threat is any potential cause of harm (e.g. a malicious actor, ransomware, natural disaster). A vulnerability is a specific weakness that a threat can exploit (e.g. unpatched software, weak password). Risk requires both to exist.' },
+                    { question: 4,  correct: 'c', explanation: 'Risk = Likelihood × Impact is the core qualitative and semi-quantitative formula. Both factors are rated on a scale (e.g. 1–5), producing a risk score that allows threats to be compared and prioritised.' },
+                    { question: 5,  correct: 'b', explanation: 'ALE (Annual Loss Expectancy) = SLE × ARO. It is the expected financial loss from a specific risk over one year, calculated by multiplying the cost of a single incident (SLE) by the expected frequency of occurrence (ARO).' },
+                    { question: 6,  correct: 'c', explanation: 'In STRIDE, E stands for Elevation of Privilege — an attacker gains permissions they should not have, such as a regular user obtaining admin rights. The full acronym: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege.' },
+                    { question: 7,  correct: 'b', explanation: 'Defence in Depth layers multiple independent security controls so that if one fails, others remain. The analogy is a castle: walls, moat, guards and a keep — each an independent barrier. It eliminates single points of failure.' },
+                    { question: 8,  correct: 'c', explanation: 'A DDoS attack floods a system with traffic to make it unavailable to legitimate users — directly attacking Availability. Confidentiality and Integrity are not typically threatened by a DDoS, though availability loss can have downstream confidentiality implications.' },
+                    { question: 9,  correct: 'b', explanation: 'Fail Secure means that when a system fails, it defaults to denying access rather than granting it. Example: a crashed firewall should block all traffic. This prevents a system failure from creating an open window for attackers.' },
+                    { question: 10, correct: 'c', explanation: 'Residual risk is what remains after controls are applied. It can never be reduced to zero. It must be formally evaluated against the risk appetite and accepted in writing by an authorised risk owner, with documentation retained for audit purposes.' },
+                    { question: 11, correct: 'c', explanation: 'A preventive control acts before an attack succeeds — blocking or stopping it. Examples: firewalls, MFA, input validation, access control lists. Detective controls identify attacks after they occur; corrective controls restore systems afterward.' },
+                    { question: 12, correct: 'b', explanation: 'Zero Trust rejects the notion of implicit trust based on network location — the traditional assumption that internal network = trusted. In Zero Trust, every access request must be authenticated, authorised and continuously validated regardless of origin.' },
+                    { question: 13, correct: 'c', explanation: 'ALE = SLE × ARO, where SLE (Single Loss Expectancy) = Asset Value × Exposure Factor, and ARO (Annual Rate of Occurrence) is how often the incident is expected to happen per year. ALE is used to justify security control investments in financial terms.' },
+                    { question: 14, correct: 'b', explanation: 'Separation of Duties ensures no single person can complete a sensitive transaction or commit fraud alone. Example: the same person should not be able to both create and approve financial transfers. It is a fundamental fraud prevention and insider threat control.' },
+                    { question: 15, correct: 'd', explanation: 'Risk Transfer shifts the financial or operational consequence of a risk to a third party — cyber insurance being the most common example. The risk still exists; the organisation has simply transferred the financial liability to the insurer in exchange for premium payments.' }
+                ];
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0;
+                const feedback = [];
+                this.questions.forEach(q => {
+                    const userAnswer = formData.get(`q${q.question}`);
+                    const isCorrect = userAnswer === q.correct;
+                    if (isCorrect) score++;
+                    feedback.push({ question: q.question, correct: isCorrect, explanation: q.explanation, correctAnswer: q.correct });
+                });
+                this.displayResults(score, feedback);
+            }
+
+            displayResults(score, feedback) {
+                const resultsDiv = document.getElementById('quiz-results');
+                const scoreDiv = document.getElementById('quiz-score');
+                const feedbackDiv = document.getElementById('quiz-feedback');
+                const percentage = Math.round((score / this.questions.length) * 100);
+
+                let scoreClass, message;
+                if (percentage >= 90) { scoreClass = 'score-excellent'; message = 'Excellent! You have a strong command of risk analysis and security principles!'; }
+                else if (percentage >= 70) { scoreClass = 'score-good'; message = 'Well done! You have a solid grasp of the fundamentals.'; }
+                else if (percentage >= 50) { scoreClass = 'score-fair'; message = 'Not bad, but review the CIA Triad, risk concepts and control types again.'; }
+                else { scoreClass = 'score-poor'; message = 'You need more study. Go back to the learning content and focus on the core definitions.'; }
+
+                scoreDiv.innerHTML = `
+                    <div class="${scoreClass}">${score}/${this.questions.length} (${percentage}%)</div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">${message}</div>
+                `;
+
+                feedbackDiv.innerHTML = feedback.map(item => `
+                    <div class="feedback-item ${item.correct ? 'feedback-correct' : 'feedback-incorrect'}">
+                        <span class="feedback-icon">${item.correct ? '✓' : '✗'}</span>
+                        <span>
+                            <strong>Question ${item.question}:</strong> ${item.explanation}
+                            ${!item.correct ? `<br><span style="margin-top: 0.3rem; display: inline-block; font-size: 0.82rem; color: #c0392b; font-weight: 600;">Correct answer: ${item.correctAnswer.toUpperCase()}</span>` : ''}
+                        </span>
+                    </div>
+                `).join('');
+
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            clearQuiz() {
+                document.querySelectorAll('#quiz-form input[type="radio"]').forEach(i => i.checked = false);
+                document.getElementById('quiz-results').style.display = 'none';
+                const btn = document.getElementById('clear-quiz');
+                btn.textContent = 'Cleared!';
+                setTimeout(() => { btn.textContent = 'Clear'; }, 1000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new TabSystem();
+            new LabEditor();
+            new QuizManager();
+        });
+    </script>
+</body>
+</html>

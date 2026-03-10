@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Testing, QA & Publishing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #d000ff;
+            --purple: #c266ff;
+            --cyan: #a200ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(91, 124, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(207, 75, 255, 0.1) 0%, rgba(217, 91, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255,255,255,0.1); border: 1px solid var(--border-color);
+            color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+
+        .tab-button {
+            flex: 1; min-width: 120px; padding: 1rem 1.5rem;
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.3s ease; position: relative; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card {
+            background: rgba(255,255,255,0.03); padding: 1.5rem;
+            border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;
+        }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); }
+
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 0.75rem 0; }
+        .styled-list li { margin-bottom: 0.6rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        .code-block {
+            background: rgba(0,0,0,0.5); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.82rem; line-height: 1.6; color: var(--text-light); }
+        .code-block .kw { color: #ff79c6; }
+        .code-block .fn { color: #50fa7b; }
+        .code-block .str { color: #f1fa8c; }
+        .code-block .cm { color: #6272a4; font-style: italic; }
+        .code-block .ty { color: #8be9fd; }
+
+        /* Testing type grid */
+        .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .test-card {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1rem;
+        }
+        .test-card-title { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.4rem; }
+        .test-card-desc { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
+        .test-unit .test-card-title { color: #10b981; }
+        .test-ui .test-card-title { color: var(--cyan); }
+        .test-perf .test-card-title { color: #f59e0b; }
+        .test-compat .test-card-title { color: var(--purple); }
+        .test-sec .test-card-title { color: #ef4444; }
+        .test-reg .test-card-title { color: #ff79c6; }
+
+        /* Pipeline visual */
+        .pipeline { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 1rem 0; }
+        .pipeline-step {
+            background: rgba(91,124,255,0.1); border: 1px solid rgba(91,124,255,0.3);
+            padding: 0.5rem 0.85rem; border-radius: 6px; font-size: 0.78rem;
+            color: var(--cyan); white-space: nowrap;
+        }
+        .pipeline-arrow { color: var(--blue); padding: 0 0.3rem; font-size: 1rem; }
+
+        /* Rejection list */
+        .rejection-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        .rejection-col { background: rgba(255,255,255,0.02); border-radius: 8px; padding: 1rem; border: 1px solid var(--border-color); }
+        .rejection-col h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .apple-col h4 { color: #e8ecf8; }
+        .google-col h4 { color: #50fa7b; }
+        .rejection-col ul { list-style: none; }
+        .rejection-col ul li { font-size: 0.8rem; color: var(--text-secondary); padding: 0.3rem 0 0.3rem 1.2rem; position: relative; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .rejection-col ul li::before { content: '✕'; position: absolute; left: 0; color: #ef4444; font-size: 0.7rem; top: 0.45rem; }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 420px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header-bar { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); border-radius: 8px 8px 0 0; }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.82rem; border-radius: 0 0 8px 8px; line-height: 1.6; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; font-size: 0.9rem; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Quiz */
+        .quiz-option {
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem;
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;
+            margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05));
+            border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem;
+        }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+
+        .feedback-item {
+            display: flex; align-items: flex-start; gap: 1rem; padding: 1rem;
+            border-radius: 8px; background: rgba(255,255,255,0.03);
+        }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 1rem; font-weight: 600; margin-bottom: 1rem;
+            padding-bottom: 0.75rem; border-bottom: 2px solid;
+        }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .test-grid, .rejection-grid { grid-template-columns: 1fr; }
+            .pipeline { gap: 0.25rem; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 280px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-mobile.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: Testing, QA & Publishing</h1>
+            <p class="course-description">
+                Building an app is only half the work. Learn how to test, debug, and ship a production-ready mobile application — from unit tests and UI automation to App Store submission and post-release monitoring.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• QA • Unit Tests • Debugging • App Signing • TestFlight • Crashlytics</span></div>
+                <div class="meta-item"><span>📌</span><span>Prerequisite: API & Database Integration</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- LEARN -->
+            <div id="aprender" class="tab-panel active">
+
+                <div class="content-card">
+                    <h3>Why Testing & Publishing Matter</h3>
+                    <p>Building an app is only half the work — the other half is making sure it:</p>
+                    <ul class="styled-list">
+                        <li>Works correctly across devices and OS versions</li>
+                        <li>Has no crashes or critical bugs</li>
+                        <li>Performs well under real usage</li>
+                        <li>Passes store review validation</li>
+                        <li>Provides a smooth, consistent user experience</li>
+                    </ul>
+                    <p style="margin-top: 0.75rem;">Topics covered: <span class="highlight">QA</span> · Manual testing · Automated testing · Debugging · Build preparation · Store publishing · Post-release monitoring</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>Types of Mobile Testing</h3>
+                    <div class="test-grid">
+                        <div class="test-card test-unit">
+                            <div class="test-card-title">Unit Testing</div>
+                            <div class="test-card-desc">Tests small, isolated pieces of logic. Fastest to write and run.</div>
+                        </div>
+                        <div class="test-card test-ui">
+                            <div class="test-card-title">UI / UX Testing</div>
+                            <div class="test-card-desc">Validates the interface is smooth, intuitive, and consistent.</div>
+                        </div>
+                        <div class="test-card test-perf">
+                            <div class="test-card-title">Performance Testing</div>
+                            <div class="test-card-desc">App load time, scroll smoothness, CPU & memory usage.</div>
+                        </div>
+                        <div class="test-card test-compat">
+                            <div class="test-card-title">Compatibility Testing</div>
+                            <div class="test-card-desc">iOS 14–17, Android 10–14, various screen sizes and hardware.</div>
+                        </div>
+                        <div class="test-card test-sec">
+                            <div class="test-card-title">Security Testing</div>
+                            <div class="test-card-desc">Authentication, encryption, permissions, data at rest.</div>
+                        </div>
+                        <div class="test-card test-reg">
+                            <div class="test-card-title">Regression Testing</div>
+                            <div class="test-card-desc">Ensures new features don't break existing functionality.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Manual Testing – Human Validation</h3>
+                    <p>Manual QA is essential, especially before store submission. Manual testing catches things automated tests can't.</p>
+                    <p style="margin-top: 0.75rem;"><strong>Manual QA checklist:</strong></p>
+                    <ul class="styled-list">
+                        <li>Does navigation work on all screens?</li>
+                        <li>Do buttons and gestures respond correctly?</li>
+                        <li>Are animations smooth?</li>
+                        <li>Does the app handle no-internet mode gracefully?</li>
+                        <li>Are error messages shown correctly?</li>
+                        <li>Is the UI responsive across all screen sizes?</li>
+                        <li>Does dark mode work correctly?</li>
+                        <li>Are permissions requested appropriately?</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Automated Testing – Making QA Faster</h3>
+                    <p>Automation is critical for large or long-term apps with frequent updates.</p>
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">1. Unit Tests</span> — Test small pieces of logic in isolation.</p>
+                        <div class="code-block">
+<pre><span class="cm">// Swift – XCTest</span>
+<span class="fn">XCTAssertEqual</span>(<span class="fn">add</span>(2, 3), 5)
+<span class="fn">XCTAssertNotNil</span>(user.email)
+
+<span class="cm">// Kotlin – JUnit</span>
+<span class="fn">assert</span>(result == 5)
+<span class="fn">assertEquals</span>(<span class="str">"Nuno"</span>, user.name)</pre>
+                        </div>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">2. UI Tests</span> — Simulate user actions like tapping, swiping, and typing.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">3. Integration Tests</span> — Verify that components work correctly together.</p>
+                    </div>
+                    <p style="margin-top: 1rem;"><strong>Testing frameworks by platform:</strong></p>
+                    <ul class="styled-list">
+                        <li>iOS → XCTest, XCUITest</li>
+                        <li>Android → Espresso (UI), JUnit (logic)</li>
+                        <li>Flutter → flutter_test, WidgetTest</li>
+                        <li>React Native → Detox, Jest</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Debugging – Finding & Fixing Issues</h3>
+                    <p>Debugging tools help identify crashes, UI layout problems, memory leaks, API errors, and performance bottlenecks.</p>
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">iOS Debugging (Xcode):</span> Xcode Debugger · View Hierarchy Inspector · Instruments (memory, CPU, leaks) · Console logs</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Android Debugging (Android Studio):</span> Logcat · Android Profiler · Layout Inspector · ADB shell</p>
+                    </div>
+                    <p style="margin-top: 0.75rem;"><strong>Common debugging techniques:</strong></p>
+                    <ul class="styled-list">
+                        <li>Breakpoints — pause execution at a specific line</li>
+                        <li>Logging — print statements to trace execution flow</li>
+                        <li>Crash reports — stack trace analysis</li>
+                        <li>Simulating poor network conditions</li>
+                        <li>Testing on multiple emulators / real devices</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Preparing an App for Release</h3>
+                    <p>Before submitting, apps must be optimized, bug-free, secure, and properly signed.</p>
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">iOS Requirements:</span> Archive build in Xcode · Provisioning profiles · Code signing certificates · App Store Connect metadata · App icon & screenshots for all device sizes</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Android Requirements:</span> Release build (.aab) · Signing keystore · Version code increment · Play Console metadata · Screenshots + feature graphic</p>
+                    </div>
+                    <p style="margin-top: 1rem;"><strong>Release pipeline:</strong></p>
+                    <div class="pipeline">
+                        <div class="pipeline-step">Write Code</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-step">Run Tests</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-step">Fix Bugs</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-step">Build & Sign</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-step">Beta Test</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-step">Submit</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-step">Monitor</div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Why Stores Reject Apps</h3>
+                    <div class="rejection-grid">
+                        <div class="rejection-col apple-col">
+                            <h4>🍎 Apple App Store</h4>
+                            <ul>
+                                <li>Crashes or bugs</li>
+                                <li>Unfinished features</li>
+                                <li>Poor UI or inaccessible elements</li>
+                                <li>Inaccurate metadata</li>
+                                <li>Privacy issues</li>
+                                <li>No explanation for permissions</li>
+                                <li>Broken links</li>
+                                <li>Misuse of Apple brand</li>
+                            </ul>
+                        </div>
+                        <div class="rejection-col google-col">
+                            <h4>🤖 Google Play</h4>
+                            <ul>
+                                <li>Malware or suspicious behavior</li>
+                                <li>Excessive permissions</li>
+                                <li>Non-functional features</li>
+                                <li>Policy violations</li>
+                                <li>Sensitive content without warnings</li>
+                                <li>Deceptive metadata</li>
+                                <li>Targeting wrong age group</li>
+                                <li>Data safety violations</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Release Channels</h3>
+                    <div class="code-explanation" style="margin-top: 0.5rem;">
+                        <p><span class="highlight">iOS:</span> TestFlight (beta distribution with up to 10,000 testers) → App Store (public release)</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Android:</span> Internal testing → Closed testing → Open beta → Production release</p>
+                    </div>
+                    <p style="margin-top: 0.75rem; color: var(--text-secondary);">Apps should always go through TestFlight or Play Store internal tracks before public release — never skip beta testing.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>Monitoring After Release</h3>
+                    <p>Publishing is not the finish line — production monitoring is critical.</p>
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Crash Analytics:</span> Firebase Crashlytics · Sentry · Bugsnag</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Performance:</span> Slow screens · Device-specific behavior · Network failures · Memory pressure</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">User Feedback:</span> App store reviews · Support tickets · In-app feedback forms</p>
+                    </div>
+                    <p style="margin-top: 0.75rem;">New bugs always appear when real users with real devices use the app at scale. Iteration and updates are a permanent part of the mobile development lifecycle.</p>
+                </div>
+
+                <!-- ═══════════════════════════════════════════ -->
+                <!--           NEW CONTENT ADDED BELOW          -->
+                <!-- ═══════════════════════════════════════════ -->
+
+                <div class="content-card">
+                    <h3>Test-Driven Development (TDD)</h3>
+                    <p>TDD is a development methodology where tests are written <strong>before</strong> the actual code. The cycle is: Red → Green → Refactor.</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">1. Red</span> – Write a failing test for a feature that doesn't exist yet.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">2. Green</span> – Write the minimum code needed to make that test pass.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">3. Refactor</span> – Clean up the code while keeping the test green.</p>
+                    </div>
+
+                    <div class="code-block" style="margin-top: 1rem;">
+<pre><span class="cm">// Swift TDD example</span>
+<span class="cm">// Step 1: Write the failing test first</span>
+<span class="kw">func</span> <span class="fn">testPasswordTooShort</span>() {
+    <span class="kw">let</span> validator = <span class="ty">PasswordValidator</span>()
+    <span class="fn">XCTAssertFalse</span>(validator.<span class="fn">isValid</span>(<span class="str">"abc"</span>))
+}
+
+<span class="cm">// Step 2: Implement just enough to pass</span>
+<span class="kw">func</span> <span class="fn">isValid</span>(_ password: <span class="ty">String</span>) -> <span class="ty">Bool</span> {
+    <span class="kw">return</span> password.count >= 8
+}</pre>
+                    </div>
+
+                    <p style="margin-top: 0.75rem;"><strong>Benefits of TDD:</strong></p>
+                    <ul class="styled-list">
+                        <li>Forces clear thinking about requirements before coding</li>
+                        <li>Results in naturally testable, modular code</li>
+                        <li>Provides a safety net for future refactoring</li>
+                        <li>Reduces time spent debugging later in development</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>UI Automation Testing in Depth</h3>
+                    <p>UI automation tests simulate real user interactions — tapping buttons, typing text, scrolling — without human involvement. They are slower than unit tests but catch a different class of bugs.</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">XCUITest (iOS):</span> Apple's built-in framework for UI automation. Tests run on simulator or real device.</p>
+                    </div>
+                    <div class="code-block">
+<pre><span class="cm">// XCUITest – tap login and verify result</span>
+<span class="kw">let</span> app = <span class="ty">XCUIApplication</span>()
+app.<span class="fn">launch</span>()
+
+app.textFields[<span class="str">"Email"</span>].<span class="fn">tap</span>()
+app.textFields[<span class="str">"Email"</span>].<span class="fn">typeText</span>(<span class="str">"user@test.com"</span>)
+app.buttons[<span class="str">"Login"</span>].<span class="fn">tap</span>()
+
+<span class="fn">XCTAssertTrue</span>(app.staticTexts[<span class="str">"Welcome"</span>].<span class="fn">exists</span>)</pre>
+                    </div>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Espresso (Android):</span> Google's UI testing framework. Automatically synchronizes with the UI thread, making tests stable and reliable.</p>
+                    </div>
+                    <div class="code-block">
+<pre><span class="cm">// Espresso – type in EditText and click button</span>
+<span class="fn">onView</span>(<span class="fn">withId</span>(R.id.emailField))
+    .<span class="fn">perform</span>(<span class="fn">typeText</span>(<span class="str">"user@test.com"</span>))
+<span class="fn">onView</span>(<span class="fn">withId</span>(R.id.loginButton))
+    .<span class="fn">perform</span>(<span class="fn">click</span>())
+<span class="fn">onView</span>(<span class="fn">withText</span>(<span class="str">"Welcome"</span>))
+    .<span class="fn">check</span>(<span class="fn">matches</span>(<span class="fn">isDisplayed</span>()))</pre>
+                    </div>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Detox (React Native):</span> End-to-end testing framework that runs full app flows on a real simulator or device. Designed to handle async operations gracefully.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Performance Profiling Tools</h3>
+                    <p>Slow apps lose users. Profiling tools help identify exactly where bottlenecks occur — whether in rendering, memory, CPU, or network.</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Xcode Instruments (iOS):</span></p>
+                    </div>
+                    <ul class="styled-list">
+                        <li><strong>Time Profiler</strong> – Shows which functions consume the most CPU time</li>
+                        <li><strong>Allocations</strong> – Tracks all memory objects created and retained</li>
+                        <li><strong>Leaks</strong> – Detects objects that are allocated but never freed</li>
+                        <li><strong>Core Animation</strong> – Measures frame rate and rendering performance</li>
+                        <li><strong>Network</strong> – Profiles all HTTP requests and response times</li>
+                    </ul>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Android Profiler (Android Studio):</span></p>
+                    </div>
+                    <ul class="styled-list">
+                        <li><strong>CPU Profiler</strong> – Record method traces and identify slow functions</li>
+                        <li><strong>Memory Profiler</strong> – Monitor heap usage and detect memory leaks</li>
+                        <li><strong>Network Profiler</strong> – Inspect API call timing and payload sizes</li>
+                        <li><strong>Energy Profiler</strong> – Understand how the app affects battery life</li>
+                    </ul>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Key performance targets:</span> App launch under 2 seconds · 60fps scroll (16ms per frame) · No more than 50MB RAM for typical apps · Battery usage should be minimal in the background</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Accessibility Testing</h3>
+                    <p>Accessibility ensures that apps are usable by people with visual, motor, hearing, or cognitive disabilities. Both app stores now penalize apps with poor accessibility. In many regions, accessibility compliance is also a legal requirement.</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">iOS Accessibility:</span> Enable VoiceOver to verify all interactive elements have meaningful labels. Use the Accessibility Inspector in Xcode to audit issues automatically.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Android Accessibility:</span> Enable TalkBack and navigate your app purely by touch. Use the Accessibility Scanner app from Google to detect unlabelled buttons and low-contrast text.</p>
+                    </div>
+
+                    <p style="margin-top: 0.75rem;"><strong>Common accessibility issues to check:</strong></p>
+                    <ul class="styled-list">
+                        <li>All buttons and images have descriptive accessibility labels</li>
+                        <li>Text contrast ratio meets WCAG 2.1 AA standard (4.5:1 minimum)</li>
+                        <li>Interactive elements are large enough to tap (at least 44×44pt on iOS)</li>
+                        <li>The app works without relying on color alone to convey information</li>
+                        <li>Dynamic text sizes are supported (users who increase system font size)</li>
+                        <li>No flashing content that could trigger photosensitive seizures</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>App Size Optimization</h3>
+                    <p>Large app sizes reduce download rates, especially in markets with limited storage or slow connections. Reducing app size is a key pre-release optimization step.</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">iOS – Reducing IPA size:</span></p>
+                    </div>
+                    <ul class="styled-list">
+                        <li>Use <strong>App Thinning</strong> — Apple delivers device-specific assets only (slicing)</li>
+                        <li>Enable <strong>Bitcode</strong> (where applicable) for future optimizations by Apple</li>
+                        <li>Compress images and use vector assets where possible</li>
+                        <li>Remove unused frameworks and dead code</li>
+                        <li>Use <strong>On-Demand Resources</strong> to load large assets only when needed</li>
+                    </ul>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Android – Reducing AAB size:</span></p>
+                    </div>
+                    <ul class="styled-list">
+                        <li>Use <strong>Android App Bundle (.aab)</strong> — Play Store delivers only the APK splits needed per device</li>
+                        <li>Enable <strong>R8/ProGuard</strong> to shrink and obfuscate code</li>
+                        <li>Use <strong>WebP</strong> format for images instead of PNG/JPG</li>
+                        <li>Enable resource shrinking to remove unused resources</li>
+                        <li>Analyze with <strong>APK Analyzer</strong> in Android Studio to identify the largest contributors</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>CI/CD for Mobile – Automating the Pipeline</h3>
+                    <p>CI/CD (Continuous Integration / Continuous Delivery) automates building, testing, and deploying the app every time code is pushed. This eliminates manual steps and catches regressions early.</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">A typical mobile CI/CD pipeline:</span></p>
+                    </div>
+                    <div class="pipeline" style="margin-bottom: 1rem;">
+                        <div class="pipeline-step">Push Code</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-step">Lint & Static Analysis</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-step">Unit Tests</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-step">Build</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-step">UI Tests</div>
+                        <span class="pipeline-arrow">→</span>
+                        <div class="pipeline-step">Deploy to Beta</div>
+                    </div>
+
+                    <ul class="styled-list">
+                        <li><strong>Codemagic</strong> – Purpose-built for Flutter and iOS/Android; YAML config, fast Mac builders</li>
+                        <li><strong>Bitrise</strong> – Visual workflow editor, strong iOS support, integrates with Slack and Jira</li>
+                        <li><strong>GitHub Actions</strong> – Free for open-source; large community of reusable mobile workflows</li>
+                        <li><strong>Fastlane</strong> – Open-source automation tool for screenshots, code signing, and store deployment</li>
+                    </ul>
+
+                    <div class="code-block" style="margin-top: 1rem;">
+<pre><span class="cm"># Fastlane – Deploy to TestFlight automatically</span>
+<span class="fn">lane</span> :beta <span class="kw">do</span>
+  <span class="fn">build_app</span>(scheme: <span class="str">"MyApp"</span>)
+  <span class="fn">upload_to_testflight</span>
+<span class="kw">end</span></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>App Store Optimization (ASO)</h3>
+                    <p>ASO is the process of improving an app's visibility and conversion rate in the App Store and Google Play — the equivalent of SEO for mobile apps.</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Key ASO factors:</span></p>
+                    </div>
+                    <ul class="styled-list">
+                        <li><strong>App title</strong> – Include the main keyword; limit is 30 chars (iOS) / 50 chars (Android)</li>
+                        <li><strong>Subtitle / Short description</strong> – Second most important keyword placement</li>
+                        <li><strong>Keywords field (iOS)</strong> – 100 character limit; no spaces, comma-separated</li>
+                        <li><strong>Long description</strong> – First 3 lines visible before "more" — make them count</li>
+                        <li><strong>Screenshots</strong> – The biggest driver of conversion; show value immediately</li>
+                        <li><strong>App icon</strong> – Recognizable, distinct from competitors, simple at small sizes</li>
+                        <li><strong>Ratings & reviews</strong> – Prompt users at the right moment using native review APIs</li>
+                        <li><strong>Update frequency</strong> – Regular updates signal an active, maintained app</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Post-Release Update Strategy</h3>
+                    <p>Shipping v1.0 is the beginning of the lifecycle, not the end. A structured update strategy keeps users happy and the app growing.</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Hotfix releases</span> – For critical crashes or security issues. Should be submitted as quickly as possible, ideally within 24–48 hours of discovery.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Patch releases (x.x.1)</span> – Bug fixes and small improvements. No new features. Can be shipped frequently without major review risk.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Minor releases (x.1.0)</span> – New features, UX improvements, new content. Requires full QA cycle and may need updated store screenshots.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Major releases (2.0.0)</span> – Significant redesigns or architecture changes. Treat like a new product launch — phased rollout recommended.</p>
+                    </div>
+
+                    <p style="margin-top: 0.75rem;"><strong>Phased rollouts (Google Play):</strong> Release to 1% → 5% → 20% → 50% → 100% of users. Allows you to catch widespread issues before they affect everyone.</p>
+                    <p style="margin-top: 0.5rem;"><strong>iOS phased release:</strong> Apple also supports 7-day phased rollouts. You can pause a release at any stage if issues are detected.</p>
+                </div>
+
+                <!-- ═══════════════════════════════════════════ -->
+                <!--             END OF NEW CONTENT             -->
+                <!-- ═══════════════════════════════════════════ -->
+
+                <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                    <h3>Section Conclusion</h3>
+                    <p>You now understand:</p>
+                    <ul class="styled-list">
+                        <li>All testing types: unit, UI, performance, compatibility, security, regression</li>
+                        <li>Manual vs automated QA</li>
+                        <li>Debugging tools for iOS (Xcode/Instruments) and Android (Logcat/Profiler)</li>
+                        <li>Release preparation: signing, certificates, metadata</li>
+                        <li>Store review requirements and common rejection reasons</li>
+                        <li>Beta channels: TestFlight and Play Store tracks</li>
+                        <li>Post-release monitoring with Crashlytics and Sentry</li>
+                        <li>TDD methodology and UI automation testing in depth</li>
+                        <li>Performance profiling, accessibility testing, and app size optimization</li>
+                        <li>CI/CD pipelines, ASO, and structured update strategies</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">These skills ensure the delivery of a stable, professional, store-approved mobile application.</p>
+                </div>
+
+            </div>
+
+            <!-- LAB -->
+            <div id="laboratorio" class="tab-panel">
+                <h3 style="margin-bottom: 1rem;">Pre-Release Checklist Generator</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">Configure your app release settings below and generate a custom pre-submission checklist.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header-bar">RELEASE CONFIGURATION</div>
+                        <textarea class="lab-textarea" id="lab-input">// Configure your app release
+
+const release = {
+  platform: "ios",        // ios | android | both
+  testingDone: "manual",  // manual | automated | both
+  hasAuth: true,          // true | false
+  hasCamera: false,       // true | false
+  hasLocation: true,      // true | false
+  crashReporting: true,   // true | false
+  isFirstRelease: true    // true | false
+};
+
+// Click "Generate Checklist" to see your checklist!</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header-bar">PRE-RELEASE CHECKLIST</div>
+                        <div class="lab-output" id="lab-output">
+                            Click "Generate Checklist" to see what needs to be done before submission...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runLab()">▶ Generate Checklist</button>
+            </div>
+
+            <!-- QUIZ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Quiz: Testing, QA & Publishing</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge on QA types, debugging tools, app signing, beta channels, store guidelines, and post-release monitoring. Answer all 15 questions.</p>
+
+                    <form id="quiz-form">
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">1. What is the purpose of QA?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) To design UI layouts</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) To ensure software quality and functionality before release</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) To manage servers</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) To write marketing content</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">2. What is regression testing?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Testing new features only</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Testing existing features to ensure they still work after changes</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Testing UI colors</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Testing app marketing materials</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">3. What is a breakpoint?</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) A UI error message</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) A debugging point where execution pauses so you can inspect state</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) A deployment tool</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) A database query optimizer</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">4. What is Logcat used for in Android?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Viewing real-time log output and debugging messages</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) UI design</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) App publishing</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Database management</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">5. What is the difference between alpha and beta testing?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Alpha is public, beta is private</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Alpha is internal testing by the team, beta is external user testing</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Alpha is marketing, beta is development</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Alpha is the final release, beta is planning</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">6. What is a signing key?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) A UI component</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B"> B) A security credential used to verify app authenticity before publishing</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) A database password</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) A testing framework</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">7. What is the .aab file format?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) A database file</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Android App Bundle — the modern publishing format for Google Play</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) An iOS app archive</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) A project backup format</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">8. Why might an app be rejected during store review?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Poor color choices</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) Crashes, missing permissions, policy violations, or unstable code</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Large marketing images</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Lack of documentation comments</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">9. What is TestFlight used for?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Publishing Android apps</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Distributing iOS apps to beta testers before App Store release</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) UI animation creation</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Backend deployment</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">10. What is App Store Connect?</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) A coding framework</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Apple's platform for managing, submitting, and monitoring iOS apps</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) A testing device</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) A networking tool</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">11. Why do apps need screenshots for store submission?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) To reduce app size</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) To show potential users how the app looks and works before they download</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) To improve runtime performance</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) To enable push notifications</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">12. What is performance testing?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Testing visual layout colors</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Testing app speed, responsiveness, memory, and stability under load</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Testing marketing campaigns</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Testing code documentation</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">13. Why must apps explain their permission requests?</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) To improve animations</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) To inform users why the app needs access to their data or device features</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) To configure databases</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) To set up server infrastructure</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">14. What does Firebase Crashlytics do?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Captures, logs, and reports app crashes in real time after release</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Designs app UI components</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Manages app store submissions</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Creates unit tests automatically</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">15. What should a developer do after publishing a new version?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Stop monitoring the app</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Monitor performance, fix bugs, and collect user feedback for the next iteration</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Delete previous versions</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Disable automatic updates</label>
+                        </div>
+
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display: none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div id="recursos" class="tab-panel">
+                <h3 style="margin-bottom: 1.5rem;">Support Materials</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ XCTest – Apple's Testing Framework Documentation</a>
+                    <a href="#" class="resource-link">→ Espresso – Android UI Testing Framework (Google)</a>
+                    <a href="#" class="resource-link">→ Detox – End-to-End Testing for React Native</a>
+                    <a href="#" class="resource-link">→ Flutter Testing Guide – Official Documentation</a>
+                    <a href="#" class="resource-link">→ Instruments – Apple Performance Profiling Tool</a>
+                    <a href="#" class="resource-link">→ Firebase Crashlytics – Crash Reporting Guide</a>
+                    <a href="#" class="resource-link">→ TestFlight – Apple Beta Testing Platform</a>
+                    <a href="#" class="resource-link">→ App Store Review Guidelines – Apple</a>
+                    <a href="#" class="resource-link">→ Google Play Policy Center – Submission Requirements</a>
+                    <a href="#" class="resource-link">→ Sentry – Error Monitoring for Mobile Apps</a>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: Testing, QA & Publishing</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        To successfully complete this module, demonstrate understanding across the following competency levels:
+                    </p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>What QA is and why it matters</li>
+                                <li>The 6 types of mobile testing</li>
+                                <li>What regression testing is</li>
+                                <li>What a breakpoint is and how to use it</li>
+                                <li>Logcat vs Xcode debugger: what each does</li>
+                                <li>What a signing key / keystore is</li>
+                                <li>What .aab and .ipa formats are</li>
+                                <li>What TestFlight and App Store Connect are</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Writing unit tests with XCTest or JUnit</li>
+                                <li>Writing UI tests with Espresso or XCUITest</li>
+                                <li>Using the Android Profiler or Xcode Instruments</li>
+                                <li>Building a release build with proper signing</li>
+                                <li>Preparing metadata and screenshots for store submission</li>
+                                <li>Distributing a beta via TestFlight</li>
+                                <li>Setting up Firebase Crashlytics in a project</li>
+                                <li>Performing a manual QA pass before release</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Setting up a full CI/CD pipeline (Codemagic, Bitrise, GitHub Actions)</li>
+                                <li>Writing integration tests across multiple components</li>
+                                <li>Implementing automated UI tests with Detox or XCUITest</li>
+                                <li>Profiling and resolving memory leaks with Instruments</li>
+                                <li>Configuring phased rollouts on Google Play</li>
+                                <li>Responding to store review feedback and resubmitting</li>
+                                <li>Analyzing and resolving crashes from Crashlytics reports</li>
+                                <li>Setting up A/B testing with store listing experiments</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+            document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runLab() {
+            const input = document.getElementById('lab-input').value.toLowerCase();
+            const output = document.getElementById('lab-output');
+
+            const isIOS = input.includes('"ios"') || input.includes("'ios'");
+            const isAndroid = input.includes('"android"') || input.includes("'android'");
+            const isBoth = input.includes('"both"') || (!isIOS && !isAndroid);
+
+            const hasAuto = input.includes('"automated"') || input.includes('"both"');
+            const hasAuth = input.includes('hasauth: true') || input.includes('hasauth:true');
+            const hasCamera = input.includes('hascamera: true') || input.includes('hascamera:true');
+            const hasLocation = input.includes('haslocation: true') || input.includes('haslocation:true');
+            const hasCrash = input.includes('crashreporting: true') || input.includes('crashreporting:true');
+            const isFirst = input.includes('isfirstrelease: true') || input.includes('isfirstrelease:true');
+
+            let checklist = [];
+
+            checklist.push('[ ] Run full manual QA pass on all screens');
+            checklist.push('[ ] Verify app on at least 3 different screen sizes');
+            checklist.push('[ ] Test offline mode / no internet behavior');
+            checklist.push('[ ] Verify dark mode appearance');
+            if (hasAuto) checklist.push('[ ] Run full unit test suite — all tests must pass');
+            if (hasAuto) checklist.push('[ ] Run UI test suite — check for failures');
+
+            if (hasAuth) {
+                checklist.push('[ ] Test login / logout flow end-to-end');
+                checklist.push('[ ] Verify token refresh works silently');
+                checklist.push('[ ] Test invalid credential error handling');
+            }
+
+            if (hasCamera) {
+                checklist.push('[ ] Test camera permission request flow');
+                checklist.push('[ ] Verify app handles denied camera permission gracefully');
+            }
+            if (hasLocation) {
+                checklist.push('[ ] Test location permission prompt and explanation text');
+                checklist.push('[ ] Test location denied / when-in-use / always modes');
+            }
+
+            if (isIOS || isBoth) {
+                checklist.push('[ ] Archive build in Xcode (Product → Archive)');
+                checklist.push('[ ] Validate provisioning profile and signing cert');
+                checklist.push('[ ] Upload to App Store Connect');
+                checklist.push('[ ] Distribute via TestFlight to internal testers');
+                checklist.push('[ ] Prepare screenshots for all required device sizes');
+                if (isFirst) {
+                    checklist.push('[ ] Set up App Store Connect listing (description, keywords, category)');
+                    checklist.push('[ ] Complete App Privacy questionnaire');
+                    checklist.push('[ ] Add support URL and privacy policy URL');
+                }
+            }
+            if (isAndroid || isBoth) {
+                checklist.push('[ ] Build signed release APK / AAB');
+                checklist.push('[ ] Increment versionCode and versionName');
+                checklist.push('[ ] Upload .aab to Play Console');
+                checklist.push('[ ] Submit to Internal Test track first');
+                checklist.push('[ ] Prepare screenshots + feature graphic');
+                if (isFirst) {
+                    checklist.push('[ ] Complete Data Safety form in Play Console');
+                    checklist.push('[ ] Set content rating via questionnaire');
+                    checklist.push('[ ] Add store description and short description');
+                }
+            }
+
+            if (hasCrash) {
+                checklist.push('[ ] Verify Crashlytics is initialized and reporting');
+                checklist.push('[ ] Confirm non-fatal error logging works');
+            }
+
+            const total = checklist.length;
+            output.innerHTML = `
+                <span style="color:#28e0ff;font-weight:bold;">✔ Pre-Release Checklist Generated</span>
+                <span style="color:#6272a4;"> — ${total} items</span><br><br>
+                ${checklist.map(item => `<span style="color:#a8ff78;">${item}</span>`).join('<br>')}
+                <br><br>
+                <em style="color:#6272a4;">Tip: Change hasCamera, hasLocation, or platform and regenerate for a tailored checklist.</em>
+            `;
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questionsData = {
+                    q1:  { correct: 'B', exp: 'QA (Quality Assurance) ensures that the app works correctly, performs well, and meets user expectations before release.' },
+                    q2:  { correct: 'B', exp: 'Regression testing verifies that existing features still work correctly after new code changes or features are added.' },
+                    q3:  { correct: 'B', exp: 'A breakpoint pauses code execution at a specific line, allowing developers to inspect variables, the call stack, and app state.' },
+                    q4:  { correct: 'A', exp: 'Logcat in Android Studio streams real-time log output, error messages, and debug information from the device or emulator.' },
+                    q5:  { correct: 'B', exp: 'Alpha testing is done internally by the development team; beta testing involves external users providing real-world feedback.' },
+                    q6:  { correct: 'B', exp: 'A signing key (keystore for Android, certificate for iOS) cryptographically identifies the developer and verifies app authenticity.' },
+                    q7:  { correct: 'B', exp: '.aab (Android App Bundle) is Google\'s modern publishing format — it lets the Play Store optimize the APK for each device.' },
+                    q8:  { correct: 'B', exp: 'Apps are rejected for crashes, missing permission explanations, policy violations, non-functional features, and inaccurate metadata.' },
+                    q9:  { correct: 'B', exp: 'TestFlight is Apple\'s beta testing platform that allows developers to distribute iOS apps to up to 10,000 external testers.' },
+                    q10: { correct: 'B', exp: 'App Store Connect is Apple\'s web portal for managing app submissions, metadata, TestFlight, analytics, and review communications.' },
+                    q11: { correct: 'B', exp: 'Store screenshots are the primary way users decide whether to download an app — they must show real UI across all required device sizes.' },
+                    q12: { correct: 'B', exp: 'Performance testing measures how quickly an app launches, how smoothly it scrolls, and how efficiently it uses memory and CPU.' },
+                    q13: { correct: 'B', exp: 'Both Apple and Google require apps to explain why they need each permission — vague or missing reasons are a common rejection cause.' },
+                    q14: { correct: 'A', exp: 'Firebase Crashlytics automatically captures crash reports, stack traces, and session data in real time, enabling fast post-release debugging.' },
+                    q15: { correct: 'B', exp: 'After release, developers must monitor crash rates, review user feedback, track performance metrics, and iterate with bug fixes and updates.' }
+                };
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0, feedbackHTML = '';
+
+                Object.keys(this.questionsData).forEach((key, index) => {
+                    const userAnswer = formData.get(key);
+                    const isCorrect = userAnswer === this.questionsData[key].correct;
+                    if (isCorrect) score++;
+
+                    feedbackHTML += `
+                        <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                            <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                            <div>
+                                <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                ${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+                            </div>
+                        </div>`;
+                });
+
+                this.displayResults(score, feedbackHTML);
+            }
+
+            displayResults(score, feedbackHTML) {
+                const total = Object.keys(this.questionsData).length;
+                const percent = Math.round((score / total) * 100);
+                const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+
+                document.getElementById('quiz-score').innerHTML = `
+                    <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                    <p style="color:var(--text-secondary)">${percent >= 70
+                        ? 'Excellent! You\'re ready to ship production-quality mobile apps.'
+                        : 'Review the testing types, debugging tools, and store publishing sections.'}</p>`;
+
+                document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                const resultsDiv = document.getElementById('quiz-results');
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            clearQuiz() {
+                document.getElementById('quiz-form').reset();
+                document.getElementById('quiz-results').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+</body>
+</html>

@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Git & Workflow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #5b7cff;
+            --purple: #7a4bff;
+            --cyan: #28e0ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 125, 230, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Gradient overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--blue), var(--cyan));
+            color: white;
+            box-shadow: 0 4px 15px rgba(91, 124, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(91, 124, 255, 0.4);
+        }
+        /* Main content */
+        .main-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .course-header {
+            margin-bottom: 2rem;
+        }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente baseado no Tailwind: from-blue-700 via-cyan-500 to-blue-600 */
+    background: linear-gradient(to right, #1d4ed8, #06b6d4, #2563eb);
+
+    /* Faz o gradiente aparecer apenas no texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback */
+}
+
+        .course-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .progress-section {
+            margin-bottom: 2rem;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Tabs */
+        .tabs-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .tab-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+        .tab-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+        .tab-button:hover {
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-button.active {
+            color: var(--text-light);
+            background: rgba(91, 124, 255, 0.1);
+        }
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+        .tab-content {
+            padding: 2rem;
+            min-height: 400px;
+        }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        
+        /* List improvement */
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Quiz Styles */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { 
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem; 
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;
+            transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+
+        /* Lab Styles */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #fff; color: #333; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Evaluation section styles */
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .evaluation-column {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .evaluation-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid;
+        }
+
+        .evaluation-title.essential {
+            color: var(--cyan);
+            border-bottom-color: var(--cyan);
+        }
+
+        .evaluation-title.important {
+            color: #ffd700;
+            border-bottom-color: #ffd700;
+        }
+
+        .evaluation-title.advanced {
+            color: #ff6b6b;
+            border-bottom-color: #ff6b6b;
+        }
+
+        .evaluation-icon {
+            font-size: 1.1rem;
+        }
+
+        .evaluation-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .evaluation-list li {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .evaluation-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .evaluation-column:nth-child(1) .evaluation-list li::before {
+            color: var(--cyan);
+        }
+
+        .evaluation-column:nth-child(2) .evaluation-list li::before {
+            color: #ffd700;
+        }
+
+        .evaluation-column:nth-child(3) .evaluation-list li::before {
+            color: #ff6b6b;
+        }
+
+        @media (max-width: 768px) {
+            .evaluation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /*Quiz*/
+        /* Adding quiz styles */
+        .quiz-question {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--blue);
+        }
+
+        .quiz-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--blue);
+        }
+
+        .option-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            font-family: 'Courier New', monospace;
+        }
+
+        .quiz-option:hover .option-text {
+            color: var(--text-light);
+        }
+
+        .quiz-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91, 124, 255, 0.1), rgba(40, 224, 255, 0.05));
+            border: 1px solid rgba(91, 124, 255, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .results-title {
+            color: var(--cyan);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .quiz-score {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-feedback {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .feedback-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+    }
+    .feedback-correct { border-left: 4px solid #10b981; }
+    .feedback-incorrect { border-left: 4px solid #ef4444; }
+    
+    .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+    .feedback-correct .feedback-icon { color: #10b981; }
+    .feedback-incorrect .feedback-icon { color: #ef4444; }
+
+    .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+    .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+    .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+            .evaluation-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                margin-top: 1rem;
+            }
+            .evaluation-column {
+                background: rgba(255,255,255,0.02);
+                padding: 1.5rem;
+                border-radius: 12px;
+                border: 1px solid var(--border-color);
+            }
+            .evaluation-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 1rem;
+                font-size: 1.1rem;
+            }
+            .essential { color: var(--cyan); }
+            .important { color: var(--blue); }
+            .advanced { color: var(--purple); }
+            .evaluation-list {
+                list-style: none;
+                font-size: 0.9rem;
+                color: var(--text-secondary);
+            }
+            .evaluation-list li {
+                margin-bottom: 0.6rem;
+                padding-left: 1.2rem;
+                position: relative;
+            }
+            .evaluation-list li::before {
+                content: '•';
+                position: absolute;
+                left: 0;
+                color: inherit;
+            }
+            .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+        </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objective: Git, HTML5 e Modern CSS3</h1>
+            <p class="course-description">
+                Master the essential fundamentals of web development. Learn semantic HTML, modern CSS, and accessibility best practices to create professional and responsive websites.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item">
+                    <span>⏱</span>
+                    <span>6–8h</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>• Git/Workflow • HTML5 Semantic • Flex/Grid • Mobile-First</span>
+                </div>
+                <div class="meta-item">
+                    <span>📌</span>
+                    <span>Intermediate Level</span>
+                </div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Evaluation</button>
+            </nav>
+
+            <div id="aprender" class="tab-panel active">
+    <div class="content-card">
+        <h3>🌳 2.1 Git Fundamentals & Workflow</h3>
+        <p>Before writing modern code, we need to know how to manage it. Git is the industry-standard tool for version control.</p>
+        <div class="code-explanation">
+            <strong>What you need to know:</strong>
+            <br>• <span class="highlight">Git:</span> An intelligent history log that records changes. it allows you to compare versions and recover old code if something fails.
+            <br>• <span class="highlight">Workflow:</span> A set of rules (who does what and in what order) that ensures the team doesn't overwrite each other's work.
+        </div>
+    </div>
+
+    <div class="content-card">
+        <h3>🏗️ 2.2 HTML5: Semantic Structure</h3>
+        <p>Modern HTML5 focuses on <strong>meaning</strong> (semantics) and not just appearance. This is what allows Google (SEO) to correctly index your business.</p>
+        <div class="code-explanation">
+            <strong>Essential Semantic Tags:</strong>
+            <br>• <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>: Base structure.
+            <br>• <code>&lt;article&gt;</code>, <code>&lt;section&gt;</code>: Organization of content blocks.
+            <br>• <code>&lt;aside&gt;</code>: Side content or toolbars.
+            <br>• <code>&lt;footer&gt;</code>: Footer information and contact details.
+        </div>
+        
+    </div>
+
+    <div class="content-card">
+        <h3>📝 2.3 Forms and Multimedia</h3>
+        <p>HTML5 eliminated the need for external plugins for common tasks like videos or email validation.</p>
+        <ul class="styled-list">
+            <li><strong>Input Types:</strong> <code>email</code>, <code>date</code>, <code>number</code> and <code>range</code> with native validation (<code>required</code>).</li>
+            <li><strong>Multimedia:</strong> Use of <code>&lt;video&gt;</code> and <code>&lt;audio&gt;</code> with support for subtitles and Picture-in-Picture.</li>
+        </ul>
+    </div>
+
+    <div class="content-card">
+        <h3>🎨 2.4 CSS3: The Power of Modern Design</h3>
+        <p>Today, complex layouts are solved with robust alignment systems:</p>
+        <div class="code-explanation">
+            <strong>Layout Systems:</strong>
+            <br>1. <span class="highlight">Flexbox:</span> Ideal for aligning elements in a row or column (e.g., navigation bars).
+            <br>2. <span class="highlight">CSS Grid:</span> Perfect for two-dimensional page layouts.
+        </div>
+        <div class="code-block">
+            <pre><code><span class="comment">/* Example of Variable and Flexbox */</span>
+<span class="tag">:root</span> { <span class="attr">--primary</span>: <span class="string">#5b7cff</span>; }
+<span class="selector">.nav</span> { 
+    <span class="attr">display</span>: flex; 
+    <span class="attr">background</span>: <span class="tag">var</span>(--primary); 
+}</code></pre>
+        </div>
+    </div>
+
+    <div class="content-card">
+        <h3>📱 2.5 Responsive Design (Mobile First)</h3>
+        <p>A professional website must adapt to any screen size. The focus always starts with mobile devices.</p>
+        <ul class="styled-list">
+            <li><strong>Media Queries:</strong> Change styles based on viewport width.</li>
+            <li><strong>Relative Units:</strong> Use of <code>rem</code>, <code>vw</code>, and <code>vh</code> for fluid sizing.</li>
+            <li><strong>Fluid Images:</strong> Ensure images never break the container layout.
+        </ul>
+    </div>
+
+    <div class="content-card">
+        <h3>✨ 2.6 Performance and BEM Architecture</h3>
+        <p>Organizing CSS is as important as design. The <strong>BEM</strong> pattern helps keep the code clean:</p>
+        <div class="code-explanation">
+            <strong>BEM Example:</strong>
+            <br>• <code>.card</code> (Block)
+            <br>• <code>.card__title</code> (Internal Element)
+            <br>• <code>.card--highlighted</code> (Modificador/Variante)
+        </div>
+        <p>For performance: Minimize CSS, optimize images for <strong>WebP</strong> and use <strong>Lazy Loading</strong>.</p>
+    </div>
+
+    <div class="content-card" style="border-left: 5px solid var(--cyan);">
+        <h3>✅ 2.7 Conclusion: Are you ready for Frameworks?</h3>
+        <p>Mastering semantic HTML, modern layouts (Flex/Grid), and responsive design is a mandatory requirement before moving on to React, Vue, or Angular.</p>
+        <p><strong>Next step:</strong> Go to the Lab and try creating a card using the new semantic tags and Flexbox!</p>
+    </div>
+
+    <div class="content-card">
+    <h3>🔀 2.8 Branching and Collaboration with Git</h3>
+    <p>In professional environments, developers do not work directly on the main branch.</p>
+    <ul class="styled-list">
+        <li><strong>main / master:</strong> Stable production code</li>
+        <li><strong>feature branches:</strong> New features or fixes</li>
+        <li><strong>merge:</strong> Combine changes into main</li>
+        <li><strong>pull request:</strong> Code review before integration</li>
+    </ul>
+    <div class="code-block">
+<pre><code>git checkout -b feature/login
+git add .
+git commit -m "Add login feature"
+git push origin feature/login</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>☁️ 2.9 GitHub and Remote Repositories</h3>
+    <p>GitHub (or GitLab/Bitbucket) allows teams to collaborate and store code remotely.</p>
+    <ul class="styled-list">
+        <li>Version backup in the cloud</li>
+        <li>Issue tracking and project management</li>
+        <li>Code reviews with Pull Requests</li>
+        <li>Portfolio for developers</li>
+    </ul>
+    <div class="code-block">
+<pre><code>git remote add origin https://github.com/user/project.git
+git push -u origin main</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🌐 2.10 HTML5 APIs (Modern Capabilities)</h3>
+    <p>HTML5 introduced powerful browser features without external plugins.</p>
+    <ul class="styled-list">
+        <li><strong>Local Storage:</strong> Store data in the browser</li>
+        <li><strong>Geolocation:</strong> Access user location (with permission)</li>
+        <li><strong>Canvas:</strong> Draw graphics and animations</li>
+        <li><strong>Drag and Drop:</strong> Interactive UI behavior</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🎥 2.11 Advanced Multimedia Optimization</h3>
+    <ul class="styled-list">
+        <li>Provide multiple video formats (mp4, webm)</li>
+        <li>Use subtitles with <code>&lt;track&gt;</code></li>
+        <li>Compress media to reduce load time</li>
+        <li>Lazy load heavy content when possible</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🎨 2.12 CSS3 Advanced Positioning</h3>
+    <ul class="styled-list">
+        <li><strong>relative:</strong> Position relative to itself</li>
+        <li><strong>absolute:</strong> Position inside a parent container</li>
+        <li><strong>fixed:</strong> Stays fixed on screen</li>
+        <li><strong>sticky:</strong> Switches between relative and fixed on scroll</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>✨ 2.13 Transitions and Animations</h3>
+    <p>Modern interfaces use motion to improve user experience.</p>
+    <div class="code-block">
+<pre><code>.button {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🎛️ 2.14 CSS Variables and Theming</h3>
+    <p>Custom properties allow dynamic and maintainable design systems.</p>
+    <div class="code-block">
+<pre><code>:root {
+    --primary: #5b7cff;
+    --spacing: 16px;
+}
+
+.card {
+    padding: var(--spacing);
+    border-color: var(--primary);
+}</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>📐 2.15 Modern CSS Units</h3>
+    <ul class="styled-list">
+        <li><strong>rem</strong> – Scalable typography</li>
+        <li><strong>vw / vh</strong> – Viewport-based layouts</li>
+        <li><strong>clamp()</strong> – Responsive values without media queries</li>
+    </ul>
+    <div class="code-block">
+<pre><code>h1 {
+    font-size: clamp(1.5rem, 4vw, 3rem);
+}</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>⚡ 2.16 Modern Performance Practices</h3>
+    <ul class="styled-list">
+        <li>Use WebP or AVIF images</li>
+        <li>Load CSS efficiently</li>
+        <li>Avoid large layout shifts</li>
+        <li>Reduce unused CSS</li>
+        <li>Optimize fonts and use font-display</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🧠 2.17 Professional Workflow Mindset</h3>
+    <ul class="styled-list">
+        <li>Work with Git branches for every feature</li>
+        <li>Write meaningful commit messages</li>
+        <li>Test responsiveness continuously</li>
+        <li>Keep CSS modular and reusable</li>
+        <li>Think in components, not pages</li>
+    </ul>
+</div>
+
+<div class="content-card" style="border-left: 5px solid var(--purple);">
+    <h3>🚀 2.18 What This Module Enables</h3>
+    <p>After mastering Git, HTML5, and Modern CSS3, you are ready to:</p>
+    <ul class="styled-list">
+        <li>Work in real development teams</li>
+        <li>Manage projects with version control</li>
+        <li>Build responsive production layouts</li>
+        <li>Move confidently into JavaScript frameworks</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🔎 2.19 Git Internals: How Git Actually Works</h3>
+    <p>Git is not just a file tracker — it is a snapshot-based version system.</p>
+    <ul class="styled-list">
+        <li>Each commit is a snapshot of the project</li>
+        <li>Commits are linked using hashes (SHA-1)</li>
+        <li>Branches are lightweight pointers</li>
+        <li>HEAD represents your current working state</li>
+    </ul>
+    <div class="code-block">
+<pre><code>git log --oneline --graph --all</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🧨 2.20 Merge vs Rebase</h3>
+    <p>Understanding this difference separates junior from professional developers.</p>
+    <ul class="styled-list">
+        <li><strong>Merge:</strong> Combines histories, keeps branch structure</li>
+        <li><strong>Rebase:</strong> Rewrites commit history for a cleaner timeline</li>
+        <li>Rebase is powerful but must be used carefully</li>
+    </ul>
+    <div class="code-block">
+<pre><code>git rebase main
+git merge feature/login</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>📦 2.21 Git Best Practices</h3>
+    <ul class="styled-list">
+        <li>Write clear commit messages (imperative tone)</li>
+        <li>Commit small logical changes</li>
+        <li>Never commit sensitive data</li>
+        <li>Use .gitignore properly</li>
+        <li>Pull before pushing</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🌍 2.22 Progressive Enhancement</h3>
+    <p>Build the basic experience first, then enhance with modern features.</p>
+    <ul class="styled-list">
+        <li>Core content must work without JavaScript</li>
+        <li>Enhance interaction gradually</li>
+        <li>Ensure accessibility first</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🎨 2.23 CSS Grid Advanced Layout</h3>
+    <div class="code-block">
+<pre><code>.layout {
+    display: grid;
+    grid-template-areas:
+        "header header"
+        "sidebar main"
+        "footer footer";
+    grid-template-columns: 250px 1fr;
+}</code></pre>
+    </div>
+    <p>Grid allows magazine-level layout control with minimal code.</p>
+</div>
+
+<div class="content-card">
+    <h3>🧩 2.24 CSS Specificity & Cascade</h3>
+    <p>Understanding the cascade prevents styling conflicts.</p>
+    <ul class="styled-list">
+        <li>Inline styles &gt; IDs &gt; Classes &gt; Elements</li>
+        <li>Avoid !important in professional code</li>
+        <li>Keep selectors predictable and shallow</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🌈 2.25 Modern Visual Effects</h3>
+    <ul class="styled-list">
+        <li>Gradients</li>
+        <li>Backdrop filters</li>
+        <li>Glassmorphism</li>
+        <li>Neumorphism (used carefully)</li>
+        <li>Advanced shadows</li>
+    </ul>
+    <div class="code-block">
+<pre><code>.glass {
+    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.1);
+}</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>⚡ 2.26 Critical Rendering Path</h3>
+    <p>Understanding how the browser renders pages is key for performance.</p>
+    <ul class="styled-list">
+        <li>HTML parsing</li>
+        <li>CSSOM construction</li>
+        <li>Render tree creation</li>
+        <li>Layout calculation</li>
+        <li>Painting & compositing</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>📱 2.27 Container Queries (Modern CSS)</h3>
+    <p>Unlike media queries, container queries respond to parent size.</p>
+    <div class="code-block">
+<pre><code>@container (min-width: 400px) {
+    .card {
+        flex-direction: row;
+    }
+}</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🎯 2.28 Design Systems Thinking</h3>
+    <p>Professional projects use reusable components.</p>
+    <ul class="styled-list">
+        <li>Define color tokens</li>
+        <li>Define spacing scale</li>
+        <li>Reusable buttons, cards, inputs</li>
+        <li>Consistent typography scale</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🔐 2.29 Security Basics in Front-End</h3>
+    <ul class="styled-list">
+        <li>Never trust user input</li>
+        <li>Prevent XSS vulnerabilities</li>
+        <li>Use HTTPS always</li>
+        <li>Sanitize dynamic content</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>📊 2.30 Lighthouse & Performance Audits</h3>
+    <p>Use browser tools to measure:</p>
+    <ul class="styled-list">
+        <li>Performance score</li>
+        <li>Accessibility score</li>
+        <li>SEO score</li>
+        <li>Best Practices</li>
+    </ul>
+</div>
+
+<div class="content-card" style="border-left: 5px solid var(--cyan);">
+    <h3>🏆 2.31 Professional Readiness Checklist</h3>
+    <ul class="styled-list">
+        <li>Comfortable with Git branching</li>
+        <li>Can structure semantic HTML5</li>
+        <li>Can build responsive layouts without frameworks</li>
+        <li>Understands CSS architecture</li>
+        <li>Optimizes for performance</li>
+        <li>Thinks in reusable components</li>
+    </ul>
+    <p><strong>If you master everything above, you are no longer beginner level.</strong></p>
+</div>
+</div>
+
+            <div id="laboratorio" class="tab-panel">
+                <h3>Consola SQL de Dados</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Pratica a extração de dados. Tenta filtrar clientes com gastos elevados.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">EDITOR SQL</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT cliente_nome, total_gasto 
+FROM vendas 
+WHERE total_gasto > 1500
+ORDER BY total_gasto DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">RESULTADO DA QUERY</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Clique em "Executar" para simular a consulta na base de dados...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Executar Query</button>
+            </div>
+
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>Quiz: HTML5, CSS3 & Modern Design</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge of semantics, flexible layouts, and modern best practices. Answer the 15 questions to validate your progress.</p>
+        
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What is a semantic HTML tag?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) A tag used only for styling</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B"> B) A tag that has no meaning</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C" data-correct="true"> C) A tag that clearly describes its meaning and content to both the browser and the developer</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) A deprecated HTML tag</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. Name the primary difference between Flexbox and CSS Grid.</p>
+                
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Flexbox is for colors, Grid is for fonts</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B" data-correct="true"> B) Flexbox is one-dimensional (row or column), Grid is two-dimensional (rows and columns)</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Flexbox is only for mobile, Grid is for desktop</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Flexbox replaces HTML</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. What does @media do in CSS?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) Adds animations</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B"> B) Imports fonts</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C" data-correct="true"> C) Applies styles based on device characteristics or screen conditions (Media Queries)</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Defines variables</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. Which unit is relative to the root font size?</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) px</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B"> B) em</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C"> C) %</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D" data-correct="true"> D) rem</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. What is the primary purpose of the &lt;figure&gt; tag?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) To create complex page layouts</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B" data-correct="true"> B) To group self-contained content, like images or diagrams, with an optional caption</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C"> C) To style specific text blocks</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) To embed videos only</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. What does display: flex; enable on a container?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Grid-based layout</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) Standard inline behavior</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C" data-correct="true"> C) Flexible alignment, direction, and distribution of space among child elements</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Keyframe animations</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. How do you make images fluid and responsive?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Using fixed pixel widths</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Using the float property</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"> C) Using max-width: 100%; and height: auto;</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Setting width to 1000px</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. What is the purpose of the grid-template-columns property?</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) To define the total height of rows</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B"> B) To set the gap spacing between elements</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C" data-correct="true"> C) To define the number and specific widths of columns in a grid layout</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) To align text inside a div</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. What are CSS variables (Custom Properties)?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Values that can only be used once in a stylesheet</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Variables that must be defined in JavaScript</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"> C) Reusable properties defined by developers to store specific values (e.g., --main-color)</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) A way to write HTML inside CSS</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. What is a key advantage of the mobile-first approach?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) It ignores desktop browsers entirely</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B"> B) It increases the initial load time</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C" data-correct="true"> C) It ensures core content is prioritized, improving performance and scalability</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) It removes the need for any CSS media queries</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What does the transition property control?</p>
+                <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Moving from one HTML page to another</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B"> B) The underlying DOM structure</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C" data-correct="true"> C) The duration and timing of smooth changes between CSS property values</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) How fonts are downloaded by the browser</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. Why are CSS animations useful in UI design?</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) They significantly reduce the total file size</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) They automatically fix all accessibility issues</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"> C) They provide visual feedback and guide user attention to improve UX</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) They are required for SEO</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. What is BEM (Block, Element, Modifier)?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) A specific CSS framework like Bootstrap</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B"> B) A library for creating JavaScript components</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"> C) A methodology for naming CSS classes to make them readable and maintainable</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) A new browser rendering engine</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. What is the core problem solved by responsive design?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Browser security and cross-site scripting</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Preventing server-side errors</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C" data-correct="true"> C) Ensuring a website adapts and looks correct across a wide range of screen sizes</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Speeding up database queries</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. Why should developers optimize CSS by removing unused rules?</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) To increase the complexity of the HTML</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B"> B) To make the code harder to debug</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"> C) To reduce file size, speed up rendering, and improve long-term maintainability</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) To disable transitions on mobile devices</label>
+            </div>
+        </form>
+
+        <div class="quiz-controls" style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback" class="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+class QuizManager {
+    constructor() {
+        this.questionsData = {
+            q1: { correct: 'C', exp: 'Semantic tags provide meaning to the content for browsers and SEO.' },
+            q2: { correct: 'B', exp: 'Flexbox focuses on axes (1D), while Grid handles columns and rows simultaneously (2D).' },
+            q3: { correct: 'C', exp: 'Media queries are the foundation of responsive design.' },
+            q4: { correct: 'D', exp: '1rem is equal to the font-size of the root element (html).' },
+            q5: { correct: 'B', exp: 'Figure groups media and its caption (figcaption) semantically.' },
+            q6: { correct: 'C', exp: 'Flexbox allows for dynamic alignment of items within a container.' },
+            q7: { correct: 'C', exp: 'This rule prevents images from overflowing their parent container.' },
+            q8: { correct: 'C', exp: 'It defines the vertical structure of the Grid system.' },
+            q9: { correct: 'C', exp: 'Variables (e.g., --main-color) make code maintenance much easier.' },
+            q10: { correct: 'C', exp: 'Starting with mobile ensures lighter code and better overall UX.' },
+            q11: { correct: 'C', exp: 'Transitions allow you to animate state changes (e.g., hover effects).' },
+            q12: { correct: 'C', exp: 'Animations guide user attention and make the UI feel alive.' },
+            q13: { correct: 'C', exp: 'BEM helps prevent naming conflicts in large-scale projects.' },
+            q14: { correct: 'C', exp: 'Ensures the site is readable on everything from smartphones to 4K monitors.' },
+            q15: { correct: 'C', exp: 'Less CSS results in faster downloads and more efficient rendering.' }
+        };
+        this.init();
+    }
+
+    init() {
+        document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+        document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+    }
+
+    submitQuiz() {
+        const form = document.getElementById('quiz-form');
+        const formData = new FormData(form);
+        let score = 0;
+        let feedbackHTML = '';
+
+        Object.keys(this.questionsData).forEach((key, index) => {
+            const userAnswer = formData.get(key);
+            const isCorrect = userAnswer === this.questionsData[key].correct;
+            
+            if (isCorrect) score++;
+
+            feedbackHTML += `
+    <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+        <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+        <div>
+            <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+            ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+        </div>
+    </div>
+`;
+        });
+
+        this.displayResults(score, feedbackHTML);
+    }
+
+    displayResults(score, feedbackHTML) {
+        const total = Object.keys(this.questionsData).length;
+        const percent = Math.round((score / total) * 100);
+        const resultsDiv = document.getElementById('quiz-results');
+        
+        let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+
+        document.getElementById('quiz-score').innerHTML = `
+            <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+            <p style="color: var(--text-secondary)">${percent >= 70 ? 'Excellent! You have mastered the structure of the modern Web.' : 'Review Flexbox and Semantic concepts and try again.'}</p>
+        `;
+
+        document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clearQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-results').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new QuizManager();
+});
+</script>
+            <div id="recursos" class="tab-panel">
+                <h3>Materiais de Apoio</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ Guia Definitivo: Python para Análise de Dados</a>
+                    <a href="#" class="resource-link">→ Cheat Sheet: Comandos SQL Essenciais</a>
+                    <a href="#" class="resource-link">→ Documentação Scikit-Learn: Escolhendo o Algoritmo Certo</a>
+                    <a href="#" class="resource-link">→ Workshop: Storytelling com Dados</a>
+                </div>
+            </div>
+
+            <div id="avaliacao" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Critérios de Domínio: Git & Workflow</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Aqui estão os critérios organizados por níveis de importância para avaliar o teu domínio dos fundamentos de Git e Workflow.
+                </p>
+                
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential">
+                            <span>💠</span> Essential
+                        </h4>
+                        <ul class="evaluation-list">
+                            <li>Understanding the concept of a Repository</li>
+                            <li>Initial configuration (git config user.name/email)</li>
+                            <li>Basic lifecycle: git add, commit, and status.</li>
+                            <li>Creating and navigating branches (git branch, checkout)</li>
+                            <li>Writing clear commit messages</li>
+                            <li>Difference between Working Directory and Staging Area</li>
+                            <li>Using git init and git clone</li>
+                            <li>Basic understanding of SHA (commit ID)</li>
+                        </ul>
+                    </div>
+
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important">
+                            <span>⭐</span> Important
+                        </h4>
+                        <ul class="evaluation-list">
+                            <li>Remote collaboration (git push, pull, fetch)</li>
+                            <li>Management of Pull Requests and Code Reviews</li>
+                            <li>Resolving simple merge conflicts</li>
+                            <li>Strategic use of .gitignore file</li>
+                            <li>Synchronization with remote repositories (GitHub/GitLab)</li>
+                            <li>History visualization (git log, git diff)</li>
+                            <li>Feature Branch Workflow</li>
+                            <li>Understanding of origin and upstream</li>
+                        </ul>
+                    </div>
+
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced">
+                            <span>🚀</span> Advanced
+                        </h4>
+                        <ul class="evaluation-list">
+                            <li>Rewrite history (git commit --amend)</li>
+                            <li>Using Git Rebase vs. Git Merge</li>
+                            <li>Cleanup techniques (git stash, git clean)</li>
+                            <li>Code recovery (git reset --hard/soft)</li>
+                            <li>Continuous Integration (Introduction to GitHub Actions)</li>
+                            <li>Cherry-picking (moving specific commits)</li>
+                            <li>Tag and Version Management (Semantic Versioning)</li>
+                            <li>Git Flow (Complex production workflows)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+                </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-panel");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            let progressMap = { 'aprender': 25, 'laboratorio': 50, 'quiz': 75, 'recursos': 90, 'avaliacao': 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executada com sucesso.</strong><br><br>Resultados (Top 3):<br>-----------------------<br>1. Carlos Alberto | 4.250,00€<br>2. Beatriz Ramos | 2.100,50€<br>3. Ricardo Jorge | 1.880,00€<br><br><em>Dica: O filtro WHERE funcionou corretamente eliminando registos abaixo de 1500€.</em>";
+        }
+    </script>
+</body>
+</html>

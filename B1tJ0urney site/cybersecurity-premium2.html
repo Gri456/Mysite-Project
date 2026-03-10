@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Networks & Protocols</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --orange: #ff6200;
+            --yellow: #ffcc00;
+            --amber: #ff8c00;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --green: #4ade80;
+            --red: #f87171;
+            --blue: #60a5fa;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(255, 98, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 98, 0, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255, 140, 0, 0.12) 0%, rgba(255, 204, 0, 0.06) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .premium-badge {
+            background: rgba(255, 140, 0, 0.15);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            color: var(--yellow);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 140, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            color: #0f172a;
+            box-shadow: 0 4px 15px rgba(255, 98, 0, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 140, 0, 0.45);
+        }
+
+        .main-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .course-header {
+            margin-bottom: 2rem;
+        }
+
+        .course-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--orange), var(--amber), var(--yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .course-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .progress-section { margin-bottom: 2rem; }
+
+        .progress-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .tabs-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-button.active {
+            color: var(--text-light);
+            background: rgba(255, 98, 0, 0.1);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+        }
+
+        .tab-content {
+            padding: 2rem;
+            min-height: 400px;
+        }
+
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        .content-text {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--text-light);
+        }
+
+        .code-block .cm { color: #6c757d; font-style: italic; }
+        .code-block .hl { color: #ff6b6b; }
+        .code-block .ok { color: #4ecdc4; }
+        .code-block .str { color: #95e1d3; }
+        .code-block .kw { color: #c3e88d; }
+        .code-block .nb { color: #ffcc00; }
+
+        .learn-intro {
+            background: linear-gradient(135deg, rgba(255, 98, 0, 0.12), rgba(255, 204, 0, 0.06));
+            border: 1px solid rgba(255, 140, 0, 0.25);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .learn-intro h4 {
+            color: var(--yellow);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .learn-intro p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .code-explanation {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--orange);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .code-explanation h5 {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .code-explanation p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* ── Section divider ── */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0 1rem;
+            gap: 1rem;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,140,0,0.4), transparent);
+        }
+
+        .section-divider span {
+            color: var(--yellow);
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── OSI grid ── */
+        .osi-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin: 1.25rem 0;
+        }
+
+        .osi-layer {
+            display: grid;
+            grid-template-columns: 2rem 7rem 1fr auto;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.07);
+            transition: transform 0.2s;
+        }
+
+        .osi-layer:hover { transform: translateX(4px); }
+
+        .osi-7 { background: rgba(255,98,0,0.15); }
+        .osi-6 { background: rgba(255,120,0,0.12); }
+        .osi-5 { background: rgba(255,150,0,0.10); }
+        .osi-4 { background: rgba(255,180,0,0.10); }
+        .osi-3 { background: rgba(100,200,100,0.10); }
+        .osi-2 { background: rgba(60,180,220,0.10); }
+        .osi-1 { background: rgba(120,100,255,0.10); }
+
+        .osi-num {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--yellow);
+            text-align: center;
+        }
+
+        .osi-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .osi-desc {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            line-height: 1.4;
+        }
+
+        .osi-example {
+            font-size: 0.75rem;
+            color: var(--orange);
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+        }
+
+        /* ── Visual table ── */
+        .visual-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.875rem;
+        }
+
+        .visual-table th {
+            background: rgba(255,140,0,0.12);
+            color: var(--yellow);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,140,0,0.25);
+        }
+
+        .visual-table td {
+            padding: 0.65rem 1rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .visual-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+        /* ── Pills ── */
+        .pill {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .pill-green  { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+        .pill-orange { background: rgba(251,146,60,0.15); color: #fb923c; border: 1px solid rgba(251,146,60,0.3); }
+        .pill-red    { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+        .pill-blue   { background: rgba(96,165,250,0.15);  color: #60a5fa; border: 1px solid rgba(96,165,250,0.3); }
+
+        /* ── Callouts ── */
+        .callout {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            align-items: flex-start;
+        }
+
+        .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+
+        .callout-body {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .callout-body strong { color: var(--text-light); display: block; margin-bottom: 0.3rem; }
+
+        .callout.tip     { background: rgba(255,204,0,0.08); border: 1px solid rgba(255,204,0,0.2); }
+        .callout.info    { background: rgba(96,165,250,0.08); border: 1px solid rgba(96,165,250,0.2); }
+        .callout.warn    { background: rgba(251,146,60,0.08); border: 1px solid rgba(251,146,60,0.2); }
+        .callout.danger  { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); }
+
+        /* ── Diagram / flow ── */
+        .diagram {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .diagram-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .flow-node {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            font-size: 0.82rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .flow-node.blue   { border-color: rgba(96,165,250,0.4); background: rgba(96,165,250,0.08); }
+        .flow-node.green  { border-color: rgba(74,222,128,0.4); background: rgba(74,222,128,0.08); }
+        .flow-node.yellow { border-color: rgba(255,204,0,0.4);  background: rgba(255,204,0,0.08); }
+        .flow-node.red    { border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.08); }
+
+        .flow-arrow {
+            color: var(--orange);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* ── Handshake diagram ── */
+        .handshake {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 0.5rem;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hs-label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .hs-client { color: #60a5fa; background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.2); }
+        .hs-server { color: #4ade80; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2); }
+
+        .hs-arrow {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 0.4rem;
+            line-height: 1.4;
+        }
+
+        .hs-arrow span { color: var(--orange); font-weight: 700; }
+
+        /* ── Lab styles ── */
+        .lab-container {
+            display: flex;
+            gap: 1rem;
+            height: 600px;
+            margin-bottom: 1rem;
+        }
+
+        .lab-editor, .lab-preview {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lab-header {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .lab-textarea {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 1rem;
+            color: var(--text-light);
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+
+        .lab-textarea:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2);
+        }
+
+        .lab-iframe {
+            flex: 1;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            width: 100%;
+        }
+
+        .lab-controls {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-execute {
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+        }
+
+        .btn-execute:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4);
+        }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .lab-instructions {
+            background: rgba(40, 224, 255, 0.1);
+            border: 1px solid rgba(40, 224, 255, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* ── Quiz styles ── */
+        .quiz-question {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--orange);
+        }
+
+        .quiz-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--orange);
+        }
+
+        .option-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        .quiz-option:hover .option-text { color: var(--text-light); }
+
+        .quiz-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(255, 140, 0, 0.12), rgba(255, 204, 0, 0.06));
+            border: 1px solid rgba(255, 140, 0, 0.25);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .results-title {
+            color: var(--yellow);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .quiz-score {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+
+        .feedback-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .feedback-correct { border-left: 3px solid #4caf50; }
+        .feedback-incorrect { border-left: 3px solid #f44336; }
+        .feedback-icon { font-size: 1.1rem; font-weight: bold; }
+        .feedback-correct .feedback-icon { color: #4caf50; }
+        .feedback-incorrect .feedback-icon { color: #f44336; }
+
+        .score-excellent { color: #4caf50; }
+        .score-good { color: #28e0ff; }
+        .score-fair { color: #ff9800; }
+        .score-poor { color: #f44336; }
+
+        /* ── Resources styles ── */
+        .resources-list { margin: 1.5rem 0; }
+        .resource-category { margin-bottom: 2rem; }
+
+        .category-title {
+            color: var(--yellow);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .resource-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .resource-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 0;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .resource-link::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--orange);
+            font-weight: bold;
+        }
+
+        .resource-link:hover {
+            color: var(--text-light);
+            padding-left: 2rem;
+        }
+
+        .resources-note {
+            background: rgba(255, 140, 0, 0.1);
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .resources-note p { color: var(--text-secondary); margin: 0; }
+
+        /* ── Evaluation styles ── */
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .evaluation-column {
+            background: rgba(255, 140, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .evaluation-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid;
+        }
+
+        .evaluation-title.essential { color: var(--yellow); border-bottom-color: var(--yellow); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced  { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-icon { font-size: 1.1rem; }
+
+        .evaluation-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .evaluation-list li {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: #28e0ff; }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .header-content { padding: 1rem; flex-direction: column; gap: 1rem; }
+            .nav-buttons { width: 100%; justify-content: center; }
+            .course-title { font-size: 2rem; }
+            .course-meta { flex-direction: column; gap: 0.75rem; }
+            .main-content { padding: 1rem; }
+            .tab-nav { flex-direction: column; }
+            .tab-button { flex: none; text-align: left; }
+            .tab-content { padding: 1rem; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .lab-controls { justify-content: center; }
+            .evaluation-grid { grid-template-columns: 1fr; }
+            .osi-layer { grid-template-columns: 2rem 1fr; }
+            .osi-desc, .osi-example { grid-column: 2; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav class="nav-buttons">
+                <a href="premium-cyber-progress.html" class="btn btn-back">← Back to Journey</a>
+                <a href="browse.html" class="btn btn-primary">Explore</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Networks & Protocols</h1>
+            <p class="course-description">
+                Master the essential fundamentals of networking to understand how attacks happen and how systems protect themselves.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>Networks • Protocols • Secure Communication</span></div>
+                <div class="meta-item"><span>📌</span><span>Basic cyber concepts</span></div>
+            </div>
+            <div class="progress-section">
+                <div class="progress-label">Progress: <span id="progress-text">0%</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav" role="tablist">
+                <button class="tab-button active" data-tab="learn" role="tab" aria-selected="true" aria-controls="panel-learn">Learn</button>
+                <button class="tab-button" data-tab="lab" role="tab" aria-selected="false" aria-controls="panel-lab">Lab</button>
+                <button class="tab-button" data-tab="quiz" role="tab" aria-selected="false" aria-controls="panel-quiz">Quiz</button>
+                <button class="tab-button" data-tab="resources" role="tab" aria-selected="false" aria-controls="panel-resources">Resources</button>
+                <button class="tab-button" data-tab="evaluation" role="tab" aria-selected="false" aria-controls="panel-evaluation">Evaluation</button>
+            </nav>
+
+            <div class="tab-content">
+
+                <!-- ══════════════════════════
+                     LEARN TAB
+                ══════════════════════════ -->
+                <div id="panel-learn" class="tab-panel active" role="tabpanel">
+
+                    <div class="learn-intro">
+                        <h4>🌐 What are Networks and Protocols?</h4>
+                        <p>A <strong>network</strong> is a collection of devices (computers, servers, phones, routers) connected together to exchange information.</p>
+                        <p><strong>Protocols</strong> are the rules that define how that communication happens — like a shared language all devices need to "speak" to understand each other.</p>
+                        <p>Understanding networks is essential in cybersecurity: most attacks exploit flaws in communication between devices.</p>
+                    </div>
+
+                    <!-- OSI MODEL -->
+                    <div class="section-divider"><span>The OSI Model — The 7 Layers</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">OSI Model</h3>
+                        <p class="content-text">
+                            The OSI (Open Systems Interconnection) model divides network communication into <strong>7 layers</strong>.
+                            Each layer has a specific function and communicates only with adjacent layers.
+                            It is the conceptual map that explains how data travels from your keyboard to the server and back.
+                        </p>
+
+                        <div class="osi-grid">
+                            <div class="osi-layer osi-7">
+                                <span class="osi-num">7</span>
+                                <span class="osi-name">Application</span>
+                                <span class="osi-desc">User interface. High-level protocols.</span>
+                                <span class="osi-example">HTTP, HTTPS, DNS, FTP, SMTP</span>
+                            </div>
+                            <div class="osi-layer osi-6">
+                                <span class="osi-num">6</span>
+                                <span class="osi-name">Presentation</span>
+                                <span class="osi-desc">Data formatting, encryption and compression.</span>
+                                <span class="osi-example">TLS/SSL, JPEG, MP4</span>
+                            </div>
+                            <div class="osi-layer osi-5">
+                                <span class="osi-num">5</span>
+                                <span class="osi-name">Session</span>
+                                <span class="osi-desc">Session management and synchronisation between applications.</span>
+                                <span class="osi-example">NetBIOS, RPC, cookies</span>
+                            </div>
+                            <div class="osi-layer osi-4">
+                                <span class="osi-num">4</span>
+                                <span class="osi-name">Transport</span>
+                                <span class="osi-desc">Reliable end-to-end data delivery. Error control.</span>
+                                <span class="osi-example">TCP, UDP</span>
+                            </div>
+                            <div class="osi-layer osi-3">
+                                <span class="osi-num">3</span>
+                                <span class="osi-name">Network</span>
+                                <span class="osi-desc">Logical addressing and routing between networks.</span>
+                                <span class="osi-example">IP, ICMP, routers</span>
+                            </div>
+                            <div class="osi-layer osi-2">
+                                <span class="osi-num">2</span>
+                                <span class="osi-name">Data Link</span>
+                                <span class="osi-desc">Data transfer between nodes on the same local network.</span>
+                                <span class="osi-example">Ethernet, MAC address, switches</span>
+                            </div>
+                            <div class="osi-layer osi-1">
+                                <span class="osi-num">1</span>
+                                <span class="osi-name">Physical</span>
+                                <span class="osi-desc">Bit transmission over physical media (cables, wi-fi, fibre).</span>
+                                <span class="osi-example">RJ45, fibre optic, radio</span>
+                            </div>
+                        </div>
+
+                        <div class="callout tip">
+                            <span class="callout-icon">💡</span>
+                            <div class="callout-body">
+                                <strong>Mnemonic (layers 7→1)</strong>
+                                "All People Seem To Need Data Processing" — Application, Presentation, Session, Transport, Network, Data Link, Physical.
+                            </div>
+                        </div>
+
+                        <div class="callout info">
+                            <span class="callout-icon">🔐</span>
+                            <div class="callout-body">
+                                <strong>Why does the OSI model matter for security?</strong>
+                                Each layer has specific vulnerabilities. Phishing attacks layer 7 (user). DDoS can attack layers 3/4 (network/transport). SQL Injection attacks layer 7 (application). Knowing the layers helps identify where to defend.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TCP/IP -->
+                    <div class="section-divider"><span>TCP/IP — The Real Internet Model</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">TCP vs UDP</h3>
+                        <p class="content-text">
+                            The TCP/IP model is the practical, simplified version of the OSI — it is what actually runs on the internet.
+                            The two most important transport protocols are <strong>TCP</strong> and <strong>UDP</strong>.
+                        </p>
+
+                        <table class="visual-table">
+                            <thead>
+                                <tr>
+                                    <th>Feature</th>
+                                    <th>TCP (Transmission Control Protocol)</th>
+                                    <th>UDP (User Datagram Protocol)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Connection</td><td>Connection-oriented (handshake)</td><td>Connectionless</td></tr>
+                                <tr><td>Reliability</td><td><span class="pill pill-green">High — guarantees delivery</span></td><td><span class="pill pill-orange">No guarantee</span></td></tr>
+                                <tr><td>Speed</td><td>Slower (acknowledgements)</td><td><span class="pill pill-green">Very fast</span></td></tr>
+                                <tr><td>Packet order</td><td>Maintains order</td><td>May arrive out of order</td></tr>
+                                <tr><td>Typical use</td><td>Web, email, SSH, FTP</td><td>Streaming, gaming, DNS, VoIP</td></tr>
+                                <tr><td>Security risk</td><td>SYN Flood, session hijacking</td><td>UDP Flood, amplification attacks</td></tr>
+                            </tbody>
+                        </table>
+
+                        <h3 class="content-title" style="margin-top:1.5rem">TCP Three-Way Handshake</h3>
+                        <p class="content-text">Before any data is exchanged, TCP establishes a connection through 3 steps:</p>
+
+                        <div class="diagram">
+                            <div class="diagram-title">TCP Three-Way Handshake</div>
+                            <div class="handshake">
+                                <div class="hs-label hs-client">💻 Client</div>
+                                <div></div>
+                                <div class="hs-label hs-server">🖥️ Server</div>
+
+                                <div></div>
+                                <div class="hs-arrow">SYN <span>→</span><br><small>"Can I connect?"</small></div>
+                                <div></div>
+
+                                <div></div>
+                                <div class="hs-arrow"><span>←</span> SYN-ACK<br><small>"Yes, you can."</small></div>
+                                <div></div>
+
+                                <div></div>
+                                <div class="hs-arrow">ACK <span>→</span><br><small>"Thanks, starting now."</small></div>
+                                <div></div>
+
+                                <div></div>
+                                <div style="color:var(--green);font-size:0.85rem;font-weight:600;padding:0.5rem">✅ Connection established — data begins to flow</div>
+                                <div></div>
+                            </div>
+                        </div>
+
+                        <div class="callout warn">
+                            <span class="callout-icon">⚠️</span>
+                            <div class="callout-body">
+                                <strong>SYN Flood Attack</strong>
+                                An attacker sends thousands of SYN requests without ever completing the handshake (never sending the final ACK). The server waits for responses that never arrive, exhausting its resources. This is a form of DDoS attack at the transport layer.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IP & PORTS -->
+                    <div class="section-divider"><span>IP Addressing & Ports</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">IP Addresses — IPv4 and IPv6</h3>
+                        <p class="content-text">An IP address is the "address" of a device on the network. Without it, data has nowhere to go.</p>
+
+                        <table class="visual-table">
+                            <thead>
+                                <tr><th>Type</th><th>Format</th><th>Example</th><th>No. of addresses</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>IPv4</td><td>4 decimal octets</td><td>192.168.1.1</td><td>~4.3 billion</td></tr>
+                                <tr><td>IPv6</td><td>8 hexadecimal groups</td><td>2001:0db8::1</td><td>340 undecillion</td></tr>
+                            </tbody>
+                        </table>
+
+                        <table class="visual-table" style="margin-top:1rem">
+                            <thead>
+                                <tr><th>Type</th><th>Range</th><th>Visible to</th><th>Example</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Public IP</td><td>Assigned by ISP</td><td>The entire internet</td><td>85.241.12.34</td></tr>
+                                <tr><td>Private IP</td><td>10.x.x.x / 192.168.x.x / 172.16-31.x.x</td><td>Local network only</td><td>192.168.1.5</td></tr>
+                                <tr><td>Loopback IP</td><td>127.0.0.1</td><td>The device itself only</td><td>localhost</td></tr>
+                            </tbody>
+                        </table>
+
+                        <div class="callout danger">
+                            <span class="callout-icon">🚨</span>
+                            <div class="callout-body">
+                                <strong>IP Spoofing</strong>
+                                An attacker can falsify the source IP address of their packets to impersonate another device. It is used in DDoS reflection attacks and to bypass network filters. Mitigation: ingress filtering (BCP38), additional authentication.
+                            </div>
+                        </div>
+
+                        <h3 class="content-title" style="margin-top:1.5rem">Ports — The "Apartment" inside the IP Address</h3>
+                        <p class="content-text">
+                            If the IP is the building, the port is the apartment. Each service listens on a specific port.
+                            There are 65,535 ports — the first 1,024 are reserved for well-known services.
+                        </p>
+
+                        <table class="visual-table">
+                            <thead>
+                                <tr><th>Port</th><th>Protocol</th><th>Use</th><th>Security risk</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>21</td><td>FTP</td><td>File transfer</td><td><span class="pill pill-red">Unencrypted</span></td></tr>
+                                <tr><td>22</td><td>SSH</td><td>Secure remote access</td><td><span class="pill pill-green">Encrypted</span></td></tr>
+                                <tr><td>23</td><td>Telnet</td><td>Remote access (legacy)</td><td><span class="pill pill-red">Completely insecure</span></td></tr>
+                                <tr><td>25</td><td>SMTP</td><td>Email sending</td><td><span class="pill pill-orange">Can be exploited for spam</span></td></tr>
+                                <tr><td>53</td><td>DNS</td><td>Name resolution</td><td><span class="pill pill-orange">DNS Spoofing, cache poisoning</span></td></tr>
+                                <tr><td>80</td><td>HTTP</td><td>Unencrypted web</td><td><span class="pill pill-red">MitM, sniffing</span></td></tr>
+                                <tr><td>443</td><td>HTTPS</td><td>Encrypted web (TLS)</td><td><span class="pill pill-green">Secure with valid certificate</span></td></tr>
+                                <tr><td>3306</td><td>MySQL</td><td>Database</td><td><span class="pill pill-red">Never expose to internet</span></td></tr>
+                                <tr><td>3389</td><td>RDP</td><td>Windows remote desktop</td><td><span class="pill pill-red">Frequent brute-force target</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- HTTP vs HTTPS -->
+                    <div class="section-divider"><span>HTTP vs HTTPS &amp; TLS</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">HTTP vs HTTPS — The difference that matters</h3>
+                        <p class="content-text">
+                            HTTP is the base web protocol. HTTPS is the secure version — it encrypts everything with TLS (Transport Layer Security).
+                        </p>
+
+                        <div class="diagram">
+                            <div class="diagram-title">HTTP vs HTTPS — What an attacker sees</div>
+                            <div class="flow" style="flex-direction:column; gap:1rem">
+                                <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; justify-content:center">
+                                    <div class="flow-node red">💻 Browser</div>
+                                    <div class="flow-arrow">──── HTTP ────</div>
+                                    <div class="flow-node red">🖥️ Server</div>
+                                    <div style="color:#f87171; font-size:0.8rem; width:100%; text-align:center">😈 Attacker sees: "username=admin&amp;password=12345"</div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; justify-content:center">
+                                    <div class="flow-node green">💻 Browser</div>
+                                    <div class="flow-arrow">── HTTPS/TLS ──</div>
+                                    <div class="flow-node green">🖥️ Server</div>
+                                    <div style="color:#4ade80; font-size:0.8rem; width:100%; text-align:center">😈 Attacker sees: "x7Kp#@!9mQr..." (unreadable)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <pre><code><span class="cm">### HTTP Request (INSECURE — everything visible as plain text) ###</span>
+
+<span class="hl">GET /login HTTP/1.1</span>
+<span class="ok">Host:</span> <span class="str">example.com</span>
+<span class="ok">User-Agent:</span> <span class="str">Mozilla/5.0</span>
+<span class="ok">Content-Type:</span> <span class="str">application/x-www-form-urlencoded</span>
+
+<span class="hl">username=admin&password=12345</span>   <span class="cm">← visible to anyone on the network!</span>
+
+
+<span class="cm">### Server response ###</span>
+
+<span class="kw">HTTP/1.1 200 OK</span>
+<span class="ok">Content-Type:</span> <span class="str">text/html</span>
+<span class="ok">Set-Cookie:</span> <span class="str">session=abc123; HttpOnly</span>
+
+&lt;html&gt;...dashboard page...&lt;/html&gt;
+</code></pre>
+                        </div>
+
+                        <div class="code-explanation">
+                            <h5>Line by line:</h5>
+                            <p>
+                                <strong>GET /login HTTP/1.1</strong> — HTTP method (GET, POST, PUT, DELETE) + path + protocol version.<br>
+                                <strong>Host</strong> — identifies the destination server (needed when one IP serves multiple domains).<br>
+                                <strong>username=admin&amp;password=12345</strong> — over plain HTTP, this data travels in clear text — anyone on the same network can read it with Wireshark.<br>
+                                <strong>Set-Cookie: session=abc123</strong> — the server creates a session; <code>HttpOnly</code> prevents JavaScript from accessing the cookie (protection against XSS).<br>
+                                <strong>With HTTPS</strong> — the entire exchange is encrypted with TLS; an attacker sees only random, unreadable bytes.
+                            </p>
+                        </div>
+
+                        <table class="visual-table" style="margin-top:1rem">
+                            <thead>
+                                <tr><th>Feature</th><th>HTTP</th><th>HTTPS</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Default port</td><td>80</td><td>443</td></tr>
+                                <tr><td>Encryption</td><td><span class="pill pill-red">None</span></td><td><span class="pill pill-green">TLS 1.2 / 1.3</span></td></tr>
+                                <tr><td>Data visible</td><td>Yes (easy sniffing)</td><td>No (encrypted)</td></tr>
+                                <tr><td>Certificate required</td><td>No</td><td>Yes (CA or Let's Encrypt)</td></tr>
+                                <tr><td>SEO / Browsers</td><td>Marked as "Not secure"</td><td>Green padlock ✅</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- DNS -->
+                    <div class="section-divider"><span>DNS — The Name System</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">How does DNS work?</h3>
+                        <p class="content-text">
+                            DNS (Domain Name System) is the internet's "phone book". It translates human-readable names (google.com) into IP addresses computers understand (142.250.185.78).
+                        </p>
+
+                        <div class="diagram">
+                            <div class="diagram-title">DNS Resolution — What happens when you type "google.com"</div>
+                            <div class="flow">
+                                <div class="flow-node blue">💻 Browser<br><small>"google.com?"</small></div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-node">🔍 DNS Resolver<br><small>(ISP / 8.8.8.8)</small></div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-node yellow">🌍 Root Server<br><small>".com? go there →"</small></div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-node">📋 TLD Server<br><small>"google.com? go there →"</small></div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-node green">✅ Authoritative<br><small>"142.250.185.78"</small></div>
+                            </div>
+                        </div>
+
+                        <table class="visual-table">
+                            <thead>
+                                <tr><th>DNS Record Type</th><th>Function</th><th>Example</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>A</td><td>Name → IPv4</td><td>google.com → 142.250.185.78</td></tr>
+                                <tr><td>AAAA</td><td>Name → IPv6</td><td>google.com → 2a00:1450:4002...</td></tr>
+                                <tr><td>CNAME</td><td>Alias (name → name)</td><td>www.example.com → example.com</td></tr>
+                                <tr><td>MX</td><td>Mail server</td><td>example.com → mail.example.com</td></tr>
+                                <tr><td>TXT</td><td>Generic text</td><td>SPF, DKIM verification, domain</td></tr>
+                                <tr><td>NS</td><td>Authoritative nameservers</td><td>ns1.example.com</td></tr>
+                            </tbody>
+                        </table>
+
+                        <div class="callout danger">
+                            <span class="callout-icon">🚨</span>
+                            <div class="callout-body">
+                                <strong>DNS Spoofing / Cache Poisoning</strong>
+                                An attacker can inject fake DNS records into a resolver's cache. When a user tries to access "mybank.com", they are silently redirected to a fake site identical to the original. Mitigation: DNSSEC, HTTPS (the certificate won't match), DNS over HTTPS (DoH).
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FIREWALL & VPN -->
+                    <div class="section-divider"><span>Firewall, VPN &amp; Wireshark</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">Firewall — The Network Gatekeeper</h3>
+                        <p class="content-text">
+                            A firewall inspects incoming and outgoing traffic and decides what passes through based on defined rules.
+                            It is the first line of defence of any network.
+                        </p>
+
+                        <table class="visual-table">
+                            <thead>
+                                <tr><th>Firewall Type</th><th>How it works</th><th>Example</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Packet Filtering</td><td>Analyses headers (IP, port, protocol)</td><td>iptables, router ACLs</td></tr>
+                                <tr><td>Stateful</td><td>Tracks TCP connection state</td><td>Windows Firewall, pf (macOS)</td></tr>
+                                <tr><td>Application Layer (WAF)</td><td>Analyses HTTP content (layer 7)</td><td>Cloudflare WAF, ModSecurity</td></tr>
+                                <tr><td>Next-Gen (NGFW)</td><td>Deep inspection + integrated IDS/IPS</td><td>Palo Alto, Fortinet</td></tr>
+                            </tbody>
+                        </table>
+
+                        <div class="code-block">
+                            <pre><code><span class="cm"># Example iptables rules (Linux)</span>
+
+<span class="cm"># Block all incoming traffic by default</span>
+iptables -P INPUT DROP
+
+<span class="cm"># Allow already established connections</span>
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+<span class="cm"># Allow SSH (port 22) only from a specific IP</span>
+iptables -A INPUT -p tcp --dport <span class="nb">22</span> -s <span class="str">192.168.1.10</span> -j ACCEPT
+
+<span class="cm"># Allow HTTPS (port 443) from any source</span>
+iptables -A INPUT -p tcp --dport <span class="nb">443</span> -j ACCEPT
+
+<span class="cm"># Block port 23 (Telnet) — completely insecure</span>
+iptables -A INPUT -p tcp --dport <span class="nb">23</span> -j DROP
+</code></pre>
+                        </div>
+
+                        <div class="code-explanation">
+                            <h5>Line by line:</h5>
+                            <p>
+                                <strong>-P INPUT DROP</strong> — default policy: block everything incoming (whitelist approach — more secure).<br>
+                                <strong>ESTABLISHED,RELATED</strong> — allows responses to connections the server itself initiated.<br>
+                                <strong>--dport 22 -s 192.168.1.10</strong> — SSH restricted to one specific IP; avoids internet brute-force.<br>
+                                <strong>--dport 443</strong> — HTTPS open to the world (required to serve a website).<br>
+                                <strong>--dport 23 -j DROP</strong> — Telnet blocked; use SSH instead.
+                            </p>
+                        </div>
+
+                        <h3 class="content-title" style="margin-top:1.5rem">VPN — Secure Tunnel</h3>
+                        <p class="content-text">
+                            A VPN (Virtual Private Network) creates an encrypted tunnel between your device and a VPN server.
+                            All traffic passes through that tunnel — even on public Wi-Fi, nobody can see what you send.
+                        </p>
+
+                        <div class="diagram">
+                            <div class="diagram-title">How a VPN works</div>
+                            <div class="flow">
+                                <div class="flow-node blue">💻 Your device</div>
+                                <div class="flow-arrow">→ encrypted →</div>
+                                <div class="flow-node green">🔐 VPN Server</div>
+                                <div class="flow-arrow">→ normal →</div>
+                                <div class="flow-node yellow">🌐 Internet</div>
+                            </div>
+                            <div style="margin-top:0.75rem; font-size:0.8rem; color:var(--text-secondary)">
+                                ☠️ Public Wi-Fi only sees: encrypted traffic to VPN server — unreadable
+                            </div>
+                        </div>
+
+                        <table class="visual-table">
+                            <thead>
+                                <tr><th>VPN Protocol</th><th>Speed</th><th>Security</th><th>Typical use</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>OpenVPN</td><td>Medium</td><td><span class="pill pill-green">High</span></td><td>Enterprises, privacy</td></tr>
+                                <tr><td>WireGuard</td><td><span class="pill pill-green">Very fast</span></td><td><span class="pill pill-green">High</span></td><td>Most modern — recommended</td></tr>
+                                <tr><td>IPSec/IKEv2</td><td>Fast</td><td><span class="pill pill-green">High</span></td><td>Mobile, enterprises</td></tr>
+                                <tr><td>PPTP</td><td>Fast</td><td><span class="pill pill-red">Obsolete — insecure</span></td><td>Do not use!</td></tr>
+                            </tbody>
+                        </table>
+
+                        <h3 class="content-title" style="margin-top:1.5rem">Wireshark — Viewing Network Traffic</h3>
+                        <p class="content-text">
+                            Wireshark is the most widely used tool to capture and analyse network packets.
+                            It is essential for investigating attacks, diagnosing problems and understanding what really flows across a network.
+                        </p>
+
+                        <div class="code-block">
+                            <pre><code><span class="cm"># Most useful Wireshark filters in cybersecurity</span>
+
+<span class="cm"># Show only HTTP traffic</span>
+<span class="ok">http</span>
+
+<span class="cm"># Show requests to a specific IP</span>
+<span class="ok">ip.dst == 192.168.1.1</span>
+
+<span class="cm"># Show TCP traffic on port 443 (HTTPS)</span>
+<span class="ok">tcp.port == 443</span>
+
+<span class="cm"># Filter by DNS protocol</span>
+<span class="ok">dns</span>
+
+<span class="cm"># See login attempts (HTTP POST requests)</span>
+<span class="ok">http.request.method == "POST"</span>
+
+<span class="cm"># Find packets with SYN flag (connection start)</span>
+<span class="ok">tcp.flags.syn == 1</span>
+
+<span class="cm"># Detect port scanning (many SYN without ACK)</span>
+<span class="ok">tcp.flags.syn == 1 && tcp.flags.ack == 0</span>
+</code></pre>
+                        </div>
+
+                        <div class="callout warn">
+                            <span class="callout-icon">⚠️</span>
+                            <div class="callout-body">
+                                <strong>Ethical use of Wireshark</strong>
+                                Capturing network traffic without authorisation is illegal in most countries. Wireshark should only be used on networks you administer, in lab environments (e.g. TryHackMe), or with explicit written authorisation.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NETWORK ATTACKS -->
+                    <div class="section-divider"><span>Most Common Network Attacks</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">Main Attacks on Networks</h3>
+
+                        <table class="visual-table">
+                            <thead>
+                                <tr><th>Attack</th><th>OSI Layer</th><th>How it works</th><th>Defence</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Man-in-the-Middle (MitM)</td>
+                                    <td>2, 3, 7</td>
+                                    <td>Intercepts communication between two points (e.g. ARP poisoning)</td>
+                                    <td>HTTPS, VPN, HSTS, certificates</td>
+                                </tr>
+                                <tr>
+                                    <td>ARP Poisoning</td>
+                                    <td>2</td>
+                                    <td>Sends fake ARP replies to associate attacker's MAC with victim's IP</td>
+                                    <td>Dynamic ARP Inspection, segmentation</td>
+                                </tr>
+                                <tr>
+                                    <td>DNS Spoofing</td>
+                                    <td>7</td>
+                                    <td>Redirects legitimate domains to malicious IPs</td>
+                                    <td>DNSSEC, DoH, HTTPS + verify certificate</td>
+                                </tr>
+                                <tr>
+                                    <td>DDoS (SYN Flood)</td>
+                                    <td>3, 4</td>
+                                    <td>Floods server with SYN requests without completing handshake</td>
+                                    <td>Rate limiting, SYN cookies, CDN, WAF</td>
+                                </tr>
+                                <tr>
+                                    <td>Port Scanning (Nmap)</td>
+                                    <td>3, 4</td>
+                                    <td>Discovers open ports and running services</td>
+                                    <td>Firewall, IDS, close unnecessary ports</td>
+                                </tr>
+                                <tr>
+                                    <td>Packet Sniffing</td>
+                                    <td>1, 2</td>
+                                    <td>Captures unencrypted traffic on shared networks</td>
+                                    <td>End-to-end encryption, switches instead of hubs</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="callout info">
+                            <span class="callout-icon">🔍</span>
+                            <div class="callout-body">
+                                <strong>Nmap — The Network Scanner</strong>
+                                Nmap is the standard tool for discovering hosts and services on a network. A basic scan: <code style="color:#c3e88d">nmap -sV -p 1-1000 192.168.1.1</code> — discovers open ports and service versions. Used by pentesters and system administrators (always with authorisation!).
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NEXT STEPS -->
+                    <div class="content-card" style="background: linear-gradient(135deg,rgba(255,98,0,0.08),rgba(255,204,0,0.04)); border-color: rgba(255,140,0,0.2);">
+                        <h3 class="content-title">🚀 Next Steps</h3>
+                        <p class="content-text">
+                            Now that you have mastered the network fundamentals, practise in the <strong>Lab</strong>, test your knowledge in the <strong>Quiz</strong> and check the <strong>Resources</strong>.
+                        </p>
+                        <p class="content-text">
+                            In <strong>Goal 3</strong> you will dive deeper into Linux &amp; Command-Line Tools — the native environment of every security professional.
+                        </p>
+                    </div>
+
+                </div><!-- /panel-learn -->
+
+                <!-- LAB TAB -->
+                <div id="panel-lab" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Code Lab</h3>
+                        <p class="content-text">
+                            Experiment with HTML and CSS in real time. Write your code in the editor on the left
+                            and see the result instantly in the preview panel.
+                        </p>
+
+                        <div class="lab-instructions">
+                            <strong>Instructions:</strong> Write HTML (with optional CSS and JavaScript) in the editor.
+                            Click <strong>"Run"</strong> or press <strong>Ctrl+Enter</strong> to see the result.
+                            Use <strong>"Reset"</strong> to clear the editor.
+                        </div>
+
+                        <div class="lab-controls">
+                            <button id="execute-btn" class="btn-execute">Run</button>
+                            <button id="reset-btn" class="btn-reset">Reset</button>
+                        </div>
+
+                        <div class="lab-container">
+                            <div class="lab-editor">
+                                <div class="lab-header">HTML Editor</div>
+                                <textarea id="code-editor" class="lab-textarea" placeholder="Write your HTML code here..."><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .highlight {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hello, HTML!</h1>
+    <div class="highlight">
+        <p>This is a basic HTML example with CSS.</p>
+        <p>Try changing the code and click "Run"!</p>
+    </div>
+
+    <script>
+        console.log('JavaScript works too!');
+    </script>
+</body>
+</html></textarea>
+                            </div>
+
+                            <div class="lab-preview">
+                                <div class="lab-header">Preview</div>
+                                <iframe id="preview-iframe" class="lab-iframe" sandbox="allow-scripts"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QUIZ TAB -->
+                <div id="panel-quiz" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Networks & Protocols Knowledge Quiz</h3>
+                        <p class="content-text">
+                            Test your knowledge of networking and protocols. Answer all 15 questions and receive immediate feedback.
+                        </p>
+
+                        <div id="quiz-container">
+                            <form id="quiz-form">
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">1. What is a network protocol?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q1" value="a"><span class="option-text">A type of virus</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="b"><span class="option-text">A set of rules that govern communication between devices</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="c"><span class="option-text">A piece of security hardware</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="d"><span class="option-text">A type of firewall</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">2. Which of these protocols is secure and uses encryption?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q2" value="a"><span class="option-text">HTTP</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="b"><span class="option-text">HTTPS</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="c"><span class="option-text">FTP</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="d"><span class="option-text">Telnet</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">3. What is the purpose of DNS?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q3" value="a"><span class="option-text">To block network attacks</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="b"><span class="option-text">To encrypt data in transit</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="c"><span class="option-text">To translate domain names into IP addresses</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="d"><span class="option-text">To monitor network traffic</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">4. What uniquely identifies a device on a network?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q4" value="a"><span class="option-text">A port number</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="b"><span class="option-text">A protocol name</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="c"><span class="option-text">An IP address</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="d"><span class="option-text">A firewall rule</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">5. What is the primary function of a firewall?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q5" value="a"><span class="option-text">To increase internet speed</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="b"><span class="option-text">To monitor and control incoming and outgoing network traffic</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="c"><span class="option-text">To store passwords securely</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="d"><span class="option-text">To translate domain names</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">6. What does TCP guarantee that UDP does not?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q6" value="a"><span class="option-text">Faster data transfer</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="b"><span class="option-text">Data encryption during transit</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="c"><span class="option-text">Reliable, ordered delivery of packets</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="d"><span class="option-text">Automatic IP assignment</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">7. Which port is used by default for HTTPS traffic?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q7" value="a"><span class="option-text">Port 21</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="b"><span class="option-text">Port 80</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="c"><span class="option-text">Port 443</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="d"><span class="option-text">Port 8080</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">8. What is a Man-in-the-Middle (MITM) attack?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q8" value="a"><span class="option-text">An attack that floods a server with traffic</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="b"><span class="option-text">An attacker secretly intercepts and relays communication between two parties</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="c"><span class="option-text">A technique to recover lost network packets</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="d"><span class="option-text">A method to bypass firewall rules</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">9. What technology does HTTPS use to secure the connection?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q9" value="a"><span class="option-text">MD5 hashing</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="b"><span class="option-text">VPN tunnelling</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="c"><span class="option-text">TLS (Transport Layer Security)</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="d"><span class="option-text">Base64 encoding</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">10. What is IP spoofing?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q10" value="a"><span class="option-text">Automatically assigning IP addresses to devices</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="b"><span class="option-text">Falsifying the source IP address in a packet to disguise the attacker's identity</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="c"><span class="option-text">Encrypting IP packets during transit</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="d"><span class="option-text">Translating private IPs into public IPs</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">11. How many layers does the OSI model have?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q11" value="a"><span class="option-text">4</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="b"><span class="option-text">5</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="c"><span class="option-text">7</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="d"><span class="option-text">9</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">12. What is packet sniffing?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q12" value="a"><span class="option-text">Compressing network packets to improve speed</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="b"><span class="option-text">Intercepting and logging data packets as they travel across a network</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="c"><span class="option-text">Sending packets faster using optimised routing</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="d"><span class="option-text">Blocking suspicious packets at the firewall</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">13. What does NAT (Network Address Translation) do?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q13" value="a"><span class="option-text">Encrypts all outgoing traffic</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="b"><span class="option-text">Assigns domain names to devices</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="c"><span class="option-text">Maps private IP addresses to a public IP address for internet access</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="d"><span class="option-text">Filters malicious packets before they reach the server</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">14. Which protocol is used to securely connect to a remote server via the command line?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q14" value="a"><span class="option-text">FTP</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="b"><span class="option-text">Telnet</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="c"><span class="option-text">SSH</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="d"><span class="option-text">SMTP</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">15. What is the TCP three-way handshake used for?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q15" value="a"><span class="option-text">To encrypt the data before transmission</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="b"><span class="option-text">To establish a reliable connection between client and server before data is sent</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="c"><span class="option-text">To verify the identity of both parties using certificates</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="d"><span class="option-text">To assign an IP address to the connecting device</span></label>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+
+                        <div class="quiz-controls">
+                            <button id="submit-quiz" class="btn-execute" type="button">Submit</button>
+                            <button id="clear-quiz" class="btn-reset" type="button">Clear</button>
+                        </div>
+
+                        <div id="quiz-results" class="quiz-results" style="display: none;">
+                            <h4 class="results-title">Quiz Results</h4>
+                            <div id="quiz-score" class="quiz-score"></div>
+                            <div id="quiz-feedback" class="quiz-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RESOURCES TAB -->
+                <div id="panel-resources" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Recommended Resources</h3>
+                        <p class="content-text">
+                            Here is a curated list of essential resources to deepen your knowledge
+                            of Networks &amp; Protocols. These documents will help you master the fundamental concepts.
+                        </p>
+
+                        <div class="resources-list">
+                            <div class="resource-category">
+                                <h4 class="category-title">Official Documentation</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">MDN Web Docs — HTTP</a></li>
+                                    <li><a href="#" class="resource-link">RFC 793 — Transmission Control Protocol</a></li>
+                                    <li><a href="#" class="resource-link">IETF — Internet Standards &amp; RFCs</a></li>
+                                    <li><a href="#" class="resource-link">NIST Network Security Guidelines</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Guides &amp; Tutorials</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">Complete Guide to the OSI Model</a></li>
+                                    <li><a href="#" class="resource-link">How DNS Works — Cloudflare</a></li>
+                                    <li><a href="#" class="resource-link">TLS/SSL and HTTPS Explained</a></li>
+                                    <li><a href="#" class="resource-link">Introduction to TCP/IP</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Tools &amp; Validators</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">Wireshark — Network Traffic Analyser</a></li>
+                                    <li><a href="#" class="resource-link">SSL Labs — Certificate Checker</a></li>
+                                    <li><a href="#" class="resource-link">Nmap — Network Scanner</a></li>
+                                    <li><a href="#" class="resource-link">Shodan — Network Search Engine</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Quick References</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">Most Common Network Ports</a></li>
+                                    <li><a href="#" class="resource-link">Network Protocols Glossary</a></li>
+                                    <li><a href="#" class="resource-link">Network Commands Cheat Sheet</a></li>
+                                    <li><a href="#" class="resource-link">TCP/UDP Protocol Table</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="resources-note">
+                            <p>💡 <strong>Note:</strong> You can edit this list in the future to add your own favourite resources.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EVALUATION TAB -->
+                <div id="panel-evaluation" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Evaluation Criteria</h3>
+                        <p class="content-text">
+                            Here are the criteria organised by importance level to assess your mastery
+                            of Networks &amp; Protocols.
+                        </p>
+
+                        <div class="evaluation-grid">
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title essential">
+                                    <span class="evaluation-icon">💠</span>
+                                    Essential
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>What a network is and how it works</li>
+                                    <li>What a communication protocol is</li>
+                                    <li>Difference between HTTP and HTTPS</li>
+                                    <li>What an IP address is (public vs private)</li>
+                                    <li>What network ports are</li>
+                                    <li>Function of DNS</li>
+                                    <li>Difference between TCP and UDP</li>
+                                    <li>What a firewall does</li>
+                                </ul>
+                            </div>
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title important">
+                                    <span class="evaluation-icon">⭐</span>
+                                    Important
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>How the OSI model works (basic layers)</li>
+                                    <li>What encryption in networks means (TLS/SSL)</li>
+                                    <li>Identifying common protocols (HTTP, HTTPS, DNS, FTP, SSH)</li>
+                                    <li>How client-server requests work</li>
+                                    <li>Recognising secure vs insecure traffic</li>
+                                    <li>Concept of a network packet</li>
+                                    <li>Basics of sniffing and interception</li>
+                                    <li>Most used ports on the internet</li>
+                                </ul>
+                            </div>
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title advanced">
+                                    <span class="evaluation-icon">🚀</span>
+                                    Advanced
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>TCP Three-Way Handshake</li>
+                                    <li>MITM, DDoS and Spoofing attacks</li>
+                                    <li>Traffic analysis with Wireshark</li>
+                                    <li>NAT and routing</li>
+                                    <li>Network segmentation</li>
+                                    <li>Protocol hardening</li>
+                                    <li>IDS vs IPS</li>
+                                    <li>Log monitoring and management</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /tab-content -->
+        </div><!-- /tabs-container -->
+    </main>
+
+    <script>
+        let currentProgress = 0;
+
+        function updateProgress(percentage) {
+            currentProgress = percentage;
+            document.getElementById('progress-text').textContent = percentage + '%';
+            document.getElementById('progress-fill').style.width = percentage + '%';
+        }
+
+        class TabSystem {
+            constructor() {
+                this.currentTab = 'learn';
+                this.tabs = ['learn', 'lab', 'quiz', 'resources', 'evaluation'];
+                this.init();
+            }
+
+            init() {
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+                });
+                window.addEventListener('hashchange', () => this.handleHashChange());
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+                this.handleHashChange();
+            }
+
+            switchTab(tabId) {
+                if (!this.tabs.includes(tabId)) return;
+                this.currentTab = tabId;
+
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    const isActive = button.dataset.tab === tabId;
+                    button.classList.toggle('active', isActive);
+                    button.setAttribute('aria-selected', isActive);
+                });
+
+                document.querySelectorAll('.tab-panel').forEach(panel => {
+                    panel.classList.toggle('active', panel.id === `panel-${tabId}`);
+                });
+
+                history.replaceState(null, null, `#${tabId}`);
+                this.updateProgressForTab(tabId);
+            }
+
+            handleHashChange() {
+                const hash = window.location.hash.slice(1);
+                if (hash && this.tabs.includes(hash)) this.switchTab(hash);
+            }
+
+            handleKeyboard(e) {
+                if (!e.target.classList.contains('tab-button')) return;
+                const currentIndex = this.tabs.indexOf(this.currentTab);
+                let newIndex = currentIndex;
+
+                switch(e.key) {
+                    case 'ArrowLeft': e.preventDefault(); newIndex = currentIndex > 0 ? currentIndex - 1 : this.tabs.length - 1; break;
+                    case 'ArrowRight': e.preventDefault(); newIndex = currentIndex < this.tabs.length - 1 ? currentIndex + 1 : 0; break;
+                    case 'Home': e.preventDefault(); newIndex = 0; break;
+                    case 'End': e.preventDefault(); newIndex = this.tabs.length - 1; break;
+                }
+
+                if (newIndex !== currentIndex) {
+                    this.switchTab(this.tabs[newIndex]);
+                    document.querySelector(`[data-tab="${this.tabs[newIndex]}"]`).focus();
+                }
+            }
+
+            updateProgressForTab(tabId) {
+                const progressMap = { 'learn': 20, 'lab': 40, 'quiz': 60, 'resources': 80, 'evaluation': 100 };
+                const newProgress = Math.max(currentProgress, progressMap[tabId] || 0);
+                updateProgress(newProgress);
+            }
+        }
+
+        class LabEditor {
+            constructor() {
+                this.editor = document.getElementById('code-editor');
+                this.iframe = document.getElementById('preview-iframe');
+                this.executeBtn = document.getElementById('execute-btn');
+                this.resetBtn = document.getElementById('reset-btn');
+                this.defaultCode = this.editor.value;
+                this.init();
+            }
+
+            init() {
+                this.executeBtn.addEventListener('click', () => this.executeCode());
+                this.resetBtn.addEventListener('click', () => this.resetCode());
+                this.editor.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        this.executeCode();
+                    }
+                });
+                setTimeout(() => this.executeCode(), 500);
+            }
+
+            executeCode() {
+                const code = this.editor.value;
+                const blob = new Blob([code], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                this.iframe.src = url;
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                this.executeBtn.textContent = 'Executed!';
+                this.executeBtn.style.background = 'linear-gradient(135deg, #4caf50, #8bc34a)';
+                setTimeout(() => {
+                    this.executeBtn.textContent = 'Run';
+                    this.executeBtn.style.background = 'linear-gradient(135deg, var(--orange), var(--yellow))';
+                }, 1000);
+            }
+
+            resetCode() {
+                this.editor.value = this.defaultCode;
+                this.executeCode();
+                this.resetBtn.textContent = 'Cleared!';
+                setTimeout(() => { this.resetBtn.textContent = 'Reset'; }, 1000);
+            }
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questions = [
+                    { question: 1,  correct: 'b', explanation: 'A protocol is a set of rules governing communication between devices on a network.' },
+                    { question: 2,  correct: 'b', explanation: 'HTTPS uses TLS/SSL encryption to protect data transmitted between the browser and server.' },
+                    { question: 3,  correct: 'c', explanation: 'DNS (Domain Name System) translates human-readable domain names into IP addresses that computers use.' },
+                    { question: 4,  correct: 'c', explanation: 'An IP address uniquely identifies a device on a network, acting as its digital address.' },
+                    { question: 5,  correct: 'b', explanation: 'A firewall monitors and controls incoming and outgoing network traffic based on defined security rules.' },
+                    { question: 6,  correct: 'c', explanation: 'TCP guarantees reliable, ordered delivery of packets and retransmits any that are lost, unlike UDP which offers no such guarantees.' },
+                    { question: 7,  correct: 'c', explanation: 'Port 443 is the standard port for HTTPS. Port 80 is used for plain HTTP.' },
+                    { question: 8,  correct: 'b', explanation: 'In a MITM attack, the attacker secretly positions themselves between two communicating parties to intercept, read or alter the data.' },
+                    { question: 9,  correct: 'c', explanation: 'HTTPS uses TLS (Transport Layer Security) to encrypt the connection and authenticate the server.' },
+                    { question: 10, correct: 'b', explanation: 'IP spoofing involves forging the source IP address in packets to hide the attacker\'s true identity or impersonate another device.' },
+                    { question: 11, correct: 'c', explanation: 'The OSI model has 7 layers: Physical, Data Link, Network, Transport, Session, Presentation and Application.' },
+                    { question: 12, correct: 'b', explanation: 'Packet sniffing captures and inspects data packets as they travel across a network — it can be used legitimately for diagnostics or maliciously to steal data.' },
+                    { question: 13, correct: 'c', explanation: 'NAT maps private IP addresses (used inside a local network) to a single public IP address for internet communication.' },
+                    { question: 14, correct: 'c', explanation: 'SSH (Secure Shell) provides an encrypted channel for secure remote access via the command line. Telnet and FTP send data in plain text.' },
+                    { question: 15, correct: 'b', explanation: 'The TCP three-way handshake (SYN → SYN-ACK → ACK) establishes a reliable connection between client and server before any data is exchanged.' }
+                ];
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const form = document.getElementById('quiz-form');
+                const formData = new FormData(form);
+                let score = 0;
+                const feedback = [];
+
+                this.questions.forEach(q => {
+                    const userAnswer = formData.get(`q${q.question}`);
+                    const isCorrect = userAnswer === q.correct;
+                    if (isCorrect) score++;
+                    feedback.push({ question: q.question, correct: isCorrect, explanation: q.explanation, correctAnswer: q.correct });
+                });
+
+                this.displayResults(score, feedback);
+            }
+
+            displayResults(score, feedback) {
+                const resultsDiv = document.getElementById('quiz-results');
+                const scoreDiv = document.getElementById('quiz-score');
+                const feedbackDiv = document.getElementById('quiz-feedback');
+                const percentage = Math.round((score / this.questions.length) * 100);
+
+                let scoreClass, message;
+                if (percentage >= 90)      { scoreClass = 'score-excellent'; message = 'Excellent! You have a strong grasp of Networks & Protocols!'; }
+                else if (percentage >= 70) { scoreClass = 'score-good';      message = 'Well done! You have a good understanding of Networks & Protocols.'; }
+                else if (percentage >= 50) { scoreClass = 'score-fair';      message = 'Not bad, but there is room to improve. Review the concepts again.'; }
+                else                       { scoreClass = 'score-poor';      message = 'You need more study. Go back to the learning content.'; }
+
+                scoreDiv.innerHTML = `
+                    <div class="${scoreClass}">${score}/${this.questions.length} (${percentage}%)</div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">${message}</div>
+                `;
+
+                feedbackDiv.innerHTML = feedback.map(item => `
+                    <div class="feedback-item ${item.correct ? 'feedback-correct' : 'feedback-incorrect'}">
+                        <span class="feedback-icon">${item.correct ? '✓' : '✗'}</span>
+                        <span>
+                            <strong>Question ${item.question}:</strong> ${item.explanation}
+                            ${!item.correct ? `<br><span style="margin-top: 0.3rem; display: inline-block; font-size: 0.82rem; color: #c0392b; font-weight: 600;">Correct answer: ${item.correctAnswer.toUpperCase()}</span>` : ''}
+                        </span>
+                    </div>
+                `).join('');
+
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            clearQuiz() {
+                document.querySelectorAll('#quiz-form input[type="radio"]').forEach(input => { input.checked = false; });
+                document.getElementById('quiz-results').style.display = 'none';
+                const clearBtn = document.getElementById('clear-quiz');
+                clearBtn.textContent = 'Cleared!';
+                setTimeout(() => { clearBtn.textContent = 'Clear'; }, 1000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new TabSystem();
+            new LabEditor();
+            new QuizManager();
+        });
+    </script>
+</body>
+</html>

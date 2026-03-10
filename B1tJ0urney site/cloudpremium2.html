@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Infrastructure as Code</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #020d12; --blue: #00d4ff; --purple: #00aacc; --cyan: #00e5ff;
+            --text-light: #e8f8fc; --text-secondary: #8cc8d8;
+            --card-bg: rgba(0,212,255,0.04); --border-color: rgba(0,212,255,0.15);
+        }
+        body { font-family: 'Inter',sans-serif; background: var(--bg-dark); color: var(--text-light); min-height:100vh; overflow-x:hidden; }
+        body::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%;
+            background-image: linear-gradient(rgba(0,212,255,0.07) 1px,transparent 1px), linear-gradient(90deg,rgba(0,180,220,0.07) 1px,transparent 1px);
+            background-size:50px 50px; animation:gridMove 20s linear infinite; pointer-events:none; z-index:-1; }
+        @keyframes gridMove { 0%{transform:translate(0,0)} 100%{transform:translate(50px,50px)} }
+        body::after { content:''; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:radial-gradient(ellipse at center,rgba(0,180,220,0.08) 0%,rgba(0,212,255,0.04) 50%,transparent 100%);
+            pointer-events:none; z-index:-1; }
+        .header { position:sticky; top:0; z-index:100; background:rgba(2,13,18,0.85); backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border-color); box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width:1160px; margin:0 auto; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo-section { display:flex; align-items:center; gap:0.75rem; }
+        .logo { font-size:1.5rem; font-weight:700; color:var(--text-light); }
+        .premium-badge { background:rgba(0,212,255,0.1); border:1px solid var(--border-color); color:var(--text-light); padding:0.25rem 0.75rem; border-radius:50px; font-size:0.75rem; font-weight:500; }
+        .btn { padding:0.5rem 1.25rem; border-radius:50px; font-size:0.875rem; font-weight:500; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; transition:all 0.3s ease; border:none; cursor:pointer; }
+        .btn-back { background:rgba(255,255,255,0.1); border:1px solid var(--border-color); color:var(--text-light); }
+        .btn-back:hover { background:rgba(255,255,255,0.15); transform:translateY(-1px); }
+        .btn-primary { background:linear-gradient(135deg,var(--blue),var(--cyan)); color:#001a20; box-shadow:0 4px 15px rgba(0,212,255,0.3); font-weight:700; }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,212,255,0.45); }
+        .main-content { max-width:1160px; margin:0 auto; padding:2rem; }
+        .course-header { margin-bottom:2rem; }
+        .course-title { font-size:2.5rem; font-weight:700; margin-bottom:1rem;
+            background:linear-gradient(to right,#00b8d4,#00e5ff,#00acc1);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .course-description { font-size:1.125rem; color:var(--text-secondary); margin-bottom:1.5rem; line-height:1.6; }
+        .course-meta { display:flex; flex-wrap:wrap; gap:1.5rem; margin-bottom:1.5rem; }
+        .meta-item { display:flex; align-items:center; gap:0.5rem; color:var(--text-secondary); font-size:0.875rem; }
+        .progress-bar { width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--blue),var(--cyan)); width:0%; transition:width 0.3s ease; }
+        .tabs-container { background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display:flex; background:rgba(0,212,255,0.02); border-bottom:1px solid var(--border-color); overflow-x:auto; }
+        .tab-button { flex:1; min-width:120px; padding:1rem 1.5rem; background:none; border:none; color:var(--text-secondary); font-size:0.875rem; font-weight:500; cursor:pointer; transition:all 0.3s ease; position:relative; white-space:nowrap; }
+        .tab-button:hover { color:var(--text-light); background:rgba(0,212,255,0.05); }
+        .tab-button.active { color:var(--text-light); background:rgba(0,212,255,0.1); }
+        .tab-button.active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--blue),var(--cyan)); }
+        .tab-panel { display:none; padding:2rem; animation:fadeIn 0.4s ease; }
+        .tab-panel.active { display:block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .content-card { background:rgba(0,212,255,0.03); padding:1.5rem; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem; }
+        .content-card h3 { margin-bottom:1rem; display:flex; align-items:center; gap:10px; color:#00b8d4; }
+        .code-explanation { border-left:3px solid var(--blue); padding-left:1rem; margin:1rem 0; font-size:0.95rem; line-height:1.6; }
+        .highlight { color:var(--cyan); font-weight:600; }
+        .styled-list { list-style:none; margin:1rem 0; }
+        .styled-list li { margin-bottom:0.8rem; padding-left:1.5rem; position:relative; color:var(--text-secondary); }
+        .styled-list li::before { content:'→'; position:absolute; left:0; color:var(--cyan); }
+        pre { background:rgba(0,0,0,0.4); border:1px solid var(--border-color); border-radius:6px; padding:1rem; overflow-x:auto; margin:1rem 0; }
+        code { font-family:'Courier New',monospace; font-size:0.88rem; color:#a0e8f4; }
+        .quiz-item { background:rgba(0,212,255,0.02); padding:1.5rem; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem; }
+        .quiz-question { color:var(--text-light); font-size:1rem; font-weight:600; margin-bottom:1rem; line-height:1.4; }
+        .quiz-option { display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:rgba(0,212,255,0.03); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; transition:all 0.3s ease; margin-bottom:0.5rem; }
+        .quiz-option:hover { background:rgba(0,212,255,0.08); border-color:var(--blue); }
+        .quiz-option input[type="radio"] { width:18px; height:18px; accent-color:var(--blue); }
+        .option-text { color:var(--text-secondary); font-size:0.875rem; line-height:1.4; }
+        .quiz-option:hover .option-text { color:var(--text-light); }
+        .quiz-controls { display:flex; gap:1rem; margin:2rem 0; justify-content:center; }
+        .quiz-results { background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(0,229,255,0.04)); border:1px solid rgba(0,212,255,0.2); border-radius:8px; padding:1.5rem; margin-top:2rem; }
+        .results-title { color:var(--cyan); font-size:1.1rem; font-weight:600; margin-bottom:1rem; text-align:center; }
+        .quiz-score { text-align:center; font-size:1.25rem; font-weight:600; margin-bottom:1rem; }
+        .quiz-feedback { display:grid; gap:0.75rem; }
+        .feedback-item { display:flex; align-items:flex-start; gap:1rem; padding:1rem; border-radius:8px; margin-bottom:1rem; background:rgba(255,255,255,0.02); }
+        .feedback-correct { border-left:4px solid #10b981; }
+        .feedback-incorrect { border-left:4px solid #ef4444; }
+        .feedback-icon { font-weight:bold; font-size:1.2rem; }
+        .feedback-correct .feedback-icon { color:#10b981; }
+        .feedback-incorrect .feedback-icon { color:#ef4444; }
+        .score-excellent { color:#10b981; font-size:2rem; font-weight:bold; }
+        .score-good { color:#f59e0b; font-size:2rem; font-weight:bold; }
+        .score-poor { color:#ef4444; font-size:2rem; font-weight:bold; }
+        .correct-answer { color:#ef4444; font-weight:600; }
+        .evaluation-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem; margin-top:1rem; }
+        .evaluation-column { background:rgba(0,212,255,0.02); padding:1.5rem; border-radius:12px; border:1px solid var(--border-color); }
+        .evaluation-title { display:flex; align-items:center; gap:10px; margin-bottom:1rem; font-size:1rem; font-weight:600; padding-bottom:0.75rem; border-bottom:2px solid; }
+        .essential { color:var(--cyan); border-bottom-color:var(--cyan)!important; }
+        .important { color:#ffd700; border-bottom-color:#ffd700!important; }
+        .advanced { color:#ff6b6b; border-bottom-color:#ff6b6b!important; }
+        .evaluation-list { list-style:none; display:flex; flex-direction:column; gap:0.6rem; font-size:0.875rem; color:var(--text-secondary); }
+        .evaluation-list li { padding-left:1.2rem; position:relative; }
+        .evaluation-list li::before { content:'•'; position:absolute; left:0; font-weight:bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color:var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color:#ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color:#ff6b6b; }
+        .resource-link { color:var(--cyan); text-decoration:none; display:block; margin:0.5rem 0; }
+        .resource-link:hover { text-decoration:underline; }
+        .lab-container { display:flex; gap:1rem; height:360px; margin-top:1rem; }
+        .lab-editor,.lab-preview { flex:1; display:flex; flex-direction:column; border:1px solid var(--border-color); border-radius:8px; overflow:hidden; }
+        .lab-header { background:rgba(0,212,255,0.08); padding:0.5rem 1rem; font-size:0.8rem; color:var(--text-secondary); }
+        .lab-textarea { flex:1; background:#000d12; color:#00d4ff; font-family:monospace; padding:1rem; border:none; resize:none; outline:none; font-size:0.88rem; }
+        .lab-output { flex:1; background:#001018; color:#a0e8f4; padding:1rem; overflow-y:auto; font-family:monospace; font-size:0.88rem; line-height:1.5; white-space:pre-wrap; }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <div class="logo">BitJourney</div>
+            <span class="premium-badge">Premium &bull; DevOps</span>
+        </div>
+        <nav style="display:flex;gap:.75rem">
+            <a href="premium-cloud.html" class="btn btn-back">&larr; Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objective: Infrastructure as Code</h1>
+        <p class="course-description">Master the principles and tools of Infrastructure as Code &mdash; provision, manage, and version your infrastructure using Terraform, Pulumi, Ansible, and modern GitOps workflows.</p>
+        <div class="course-meta">
+            <div class="meta-item"><span>&#9201;</span><span>5&ndash;7h</span></div>
+            <div class="meta-item"><span>&#127919;</span><span>Terraform &middot; Pulumi &middot; Ansible &middot; GitOps &middot; CI/CD</span></div>
+            <div class="meta-item"><span>&#128204;</span><span>DevOps core module</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary)">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'learn')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'lab')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'resources')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'evaluation')">Evaluation</button>
+        </nav>
+
+        <!-- LEARN -->
+        <div id="learn" class="tab-panel active">
+            <div class="content-card">
+                <h3>&#127959; 1.1 What is Infrastructure as Code?</h3>
+                <p>Infrastructure as Code (IaC) is the practice of managing and provisioning computing infrastructure through machine-readable configuration files, rather than manual processes or interactive configuration tools.</p>
+                <div class="code-explanation">
+                    <strong>Core IaC principles:</strong><br>
+                    &bull; <span class="highlight">Declarative vs Imperative</span> &mdash; describe what you want (declarative) vs how to get there (imperative).<br>
+                    &bull; <span class="highlight">Idempotency</span> &mdash; applying the same config multiple times produces the same result.<br>
+                    &bull; <span class="highlight">Version Control</span> &mdash; infrastructure changes tracked in Git, enabling rollback and full audit trail.<br>
+                    &bull; <span class="highlight">Immutability</span> &mdash; replace infrastructure instead of patching it in place.<br>
+                    &bull; <span class="highlight">Automation</span> &mdash; eliminate manual, error-prone configuration steps entirely.
+                </div>
+            </div>
+            <div class="content-card">
+                <h3>&#9881; 1.2 IaC Tool Categories</h3>
+                <ul class="styled-list">
+                    <li><strong>Provisioning tools:</strong> Create and manage cloud resources (VMs, networks, databases). Examples: Terraform, Pulumi, AWS CloudFormation, Azure Bicep.</li>
+                    <li><strong>Configuration management:</strong> Install and configure software on existing servers. Examples: Ansible, Chef, Puppet, SaltStack.</li>
+                    <li><strong>Container orchestration:</strong> Manage containerised workloads declaratively. Examples: Kubernetes manifests, Helm charts, Kustomize.</li>
+                    <li><strong>Policy as Code:</strong> Enforce governance rules on infrastructure. Examples: OPA (Open Policy Agent), Sentinel, Checkov.</li>
+                </ul>
+                <div class="code-explanation">
+                    Most teams combine tools: Terraform to provision cloud resources, Ansible to configure instances, and Kubernetes manifests for application workloads.
+                </div>
+            </div>
+            <div class="content-card">
+                <h3>&#127758; 1.3 Terraform: Core Concepts</h3>
+                <p>Terraform by HashiCorp is the most widely adopted IaC tool. It uses HCL (HashiCorp Configuration Language) to describe infrastructure declaratively.</p>
+                <pre><code># main.tf &mdash; provision an AWS EC2 instance
+provider "aws" {
+  region = "eu-west-1"
+}
+
+resource "aws_instance" "web" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t3.micro"
+
+  tags = {
+    Name        = "web-server"
+    Environment = "production"
+  }
+}</code></pre>
+                <ul class="styled-list">
+                    <li><strong>Provider:</strong> Plugin that connects Terraform to a platform (AWS, Azure, GCP, Kubernetes).</li>
+                    <li><strong>Resource:</strong> A managed infrastructure object (VM, bucket, database).</li>
+                    <li><strong>State file:</strong> Terraform tracks real-world resource state in <code>terraform.tfstate</code>.</li>
+                    <li><strong>Plan / Apply:</strong> <code>terraform plan</code> previews changes; <code>terraform apply</code> executes them.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>&#128194; 1.4 Terraform State Management</h3>
+                <p>Terraform state is the source of truth for your infrastructure. Improper state management is one of the most common IaC failure points.</p>
+                <pre><code># backend.tf &mdash; remote state in S3 with DynamoDB locking
+terraform {
+  backend "s3" {
+    bucket         = "my-tf-state-bucket"
+    key            = "prod/terraform.tfstate"
+    region         = "eu-west-1"
+    dynamodb_table = "terraform-state-lock"
+    encrypt        = true
+  }
+}</code></pre>
+                <ul class="styled-list">
+                    <li><strong>Local state:</strong> Stored on disk &mdash; fine for solo development, dangerous in teams.</li>
+                    <li><strong>Remote state:</strong> S3 + DynamoDB (AWS), Azure Storage, Terraform Cloud &mdash; enables collaboration and locking.</li>
+                    <li><strong>State locking:</strong> Prevents concurrent runs from corrupting state.</li>
+                    <li><strong>State commands:</strong> <code>terraform state list</code>, <code>terraform state mv</code>, <code>terraform import</code>.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>&#128230; 1.5 Terraform Modules</h3>
+                <p>Modules are reusable, self-contained packages of Terraform configurations. They are the primary mechanism for code reuse and abstraction.</p>
+                <pre><code># Calling a reusable VPC module from the registry
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "5.1.0"
+
+  name = "production-vpc"
+  cidr = "10.0.0.0/16"
+
+  azs             = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+
+  enable_nat_gateway = true
+}</code></pre>
+                <div class="code-explanation">
+                    <strong>Best practice:</strong> Use the Terraform Registry for well-tested community modules. Build internal modules to enforce organisational standards across teams.
+                </div>
+            </div>
+            <div class="content-card">
+                <h3>&#128260; 1.6 Pulumi: IaC with Real Programming Languages</h3>
+                <p>Pulumi lets you write infrastructure using TypeScript, Python, Go, or C# &mdash; bringing the full power of general-purpose languages to IaC.</p>
+                <pre><code># Python Pulumi &mdash; provision an S3 bucket
+import pulumi
+import pulumi_aws as aws
+
+bucket = aws.s3.Bucket("my-bucket",
+    acl="private",
+    versioning=aws.s3.BucketVersioningArgs(enabled=True),
+    tags={"Environment": "production"}
+)
+
+pulumi.export("bucket_name", bucket.id)</code></pre>
+                <ul class="styled-list">
+                    <li><strong>Advantage over Terraform:</strong> Real loops, conditionals, and functions &mdash; no DSL limitations.</li>
+                    <li><strong>Pulumi Cloud:</strong> Managed state backend, secrets management, and audit logs.</li>
+                    <li><strong>Same concepts:</strong> Stack (= Terraform workspace), Project (= root module).</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>&#129302; 1.7 Ansible: Configuration Management</h3>
+                <p>Ansible uses YAML playbooks to automate configuration, deployment, and orchestration. It is agentless &mdash; connecting via SSH.</p>
+                <pre><code># playbook.yml &mdash; install and configure Nginx
+---
+- name: Configure web servers
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Install Nginx
+      ansible.builtin.package:
+        name: nginx
+        state: present
+    - name: Ensure Nginx is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes
+    - name: Deploy config
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+      notify: Restart Nginx
+  handlers:
+    - name: Restart Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted</code></pre>
+                <ul class="styled-list">
+                    <li><strong>Inventory:</strong> Defines the hosts Ansible manages (static file or dynamic cloud inventory).</li>
+                    <li><strong>Roles:</strong> Reusable, structured units of Ansible content.</li>
+                    <li><strong>Idempotency:</strong> Tasks check current state before making changes.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>&#128640; 1.8 GitOps and IaC Pipelines</h3>
+                <p>GitOps applies Git as the single source of truth for infrastructure. Changes are made via pull requests, and automation applies them to the target environment.</p>
+                <div class="code-explanation">
+                    <strong>GitOps principles:</strong><br>
+                    &bull; The desired state of the system is declared in Git.<br>
+                    &bull; An automated agent continuously reconciles actual state with desired state.<br>
+                    &bull; All changes go through Git &mdash; no manual interventions in production.
+                </div>
+                <pre><code># .github/workflows/terraform.yml
+name: Terraform CI
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init
+      - run: terraform fmt -check
+      - run: terraform validate
+      - run: terraform plan</code></pre>
+                <ul class="styled-list">
+                    <li><strong>Atlantis:</strong> Runs Terraform plan/apply triggered by pull request comments.</li>
+                    <li><strong>Flux / ArgoCD:</strong> Kubernetes GitOps operators that sync cluster state from Git.</li>
+                    <li><strong>GitHub Actions / GitLab CI:</strong> Run IaC pipelines on push and merge events.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>&#128274; 1.9 Secrets and Security in IaC</h3>
+                <p>Never store secrets in IaC code or state files. Use dedicated secrets management solutions.</p>
+                <ul class="styled-list">
+                    <li><strong>HashiCorp Vault:</strong> Centralised secrets management with dynamic short-lived credentials.</li>
+                    <li><strong>AWS Secrets Manager / Parameter Store:</strong> Native AWS secret storage integrated with IAM.</li>
+                    <li><strong>SOPS:</strong> Encrypt secrets files committed to Git &mdash; works with Terraform and Ansible.</li>
+                    <li><strong>Environment variables:</strong> Pass secrets at runtime; never hardcode in configuration files.</li>
+                    <li><strong>State encryption:</strong> Always encrypt remote state &mdash; it can contain sensitive resource attributes in plaintext.</li>
+                </ul>
+                <div class="code-explanation">
+                    <strong>Rule:</strong> If it is a secret, it must not appear in plaintext in your repository or state file. Ever.
+                </div>
+            </div>
+            <div class="content-card">
+                <h3>&#9989; 1.10 IaC Testing and Validation</h3>
+                <ul class="styled-list">
+                    <li><strong>terraform validate:</strong> Checks syntax and internal consistency of configurations.</li>
+                    <li><strong>terraform plan:</strong> Dry-run showing exactly what would change before applying.</li>
+                    <li><strong>tflint:</strong> Linter for Terraform code and provider-specific rule enforcement.</li>
+                    <li><strong>Checkov / tfsec:</strong> Static analysis scanning for security misconfigurations.</li>
+                    <li><strong>Terratest:</strong> Go library for writing automated tests against real provisioned infrastructure.</li>
+                    <li><strong>OPA / Sentinel:</strong> Policy-as-code to enforce compliance rules before any apply runs.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>&#127970; 1.11 IaC at Scale: Workspaces and Environments</h3>
+                <p>Managing multiple environments (dev, staging, production) requires a disciplined and consistent structure.</p>
+                <pre><code># Directory-based structure (preferred for large teams)
+infrastructure/
+&#9500;&#9472;&#9472; modules/
+&#9474;   &#9500;&#9472;&#9472; vpc/
+&#9474;   &#9500;&#9472;&#9472; eks/
+&#9474;   &#9492;&#9472;&#9472; rds/
+&#9492;&#9472;&#9472; environments/
+    &#9500;&#9472;&#9472; dev/
+    &#9500;&#9472;&#9472; staging/
+    &#9492;&#9472;&#9472; production/</code></pre>
+                <ul class="styled-list">
+                    <li><strong>Workspaces:</strong> Isolated state within one config &mdash; useful for feature branches.</li>
+                    <li><strong>Directory-based:</strong> Separate folder per environment &mdash; more explicit, easier to audit.</li>
+                    <li><strong>Terragrunt:</strong> DRY wrapper for Terraform that reduces repetition across environments and modules.</li>
+                </ul>
+            </div>
+            <div class="content-card">
+                <h3>&#9729; 1.12 Cloud-Native IaC Tools</h3>
+                <ul class="styled-list">
+                    <li><strong>AWS CloudFormation:</strong> Native AWS IaC in JSON/YAML. Tight integration but verbose and AWS-only.</li>
+                    <li><strong>AWS CDK:</strong> Define CloudFormation stacks using TypeScript, Python, or Java with higher abstraction.</li>
+                    <li><strong>Azure Bicep:</strong> Simplified DSL that compiles to ARM templates. Azure-native with excellent IDE support.</li>
+                    <li><strong>Google Deployment Manager:</strong> GCP-native IaC using YAML or Python templates.</li>
+                </ul>
+                <div class="code-explanation">
+                    Terraform and Pulumi are cloud-agnostic and preferred for multi-cloud or portable teams. Native tools offer deeper integration but create vendor dependency.
+                </div>
+            </div>
+            <div class="content-card" style="border-left:5px solid var(--cyan)">
+                <h3>&#9989; 1.13 Module Summary</h3>
+                <ul class="styled-list">
+                    <li>IaC principles: declarative, idempotent, versioned infrastructure</li>
+                    <li>Terraform: providers, resources, state, modules, workspaces</li>
+                    <li>Pulumi: IaC using general-purpose programming languages</li>
+                    <li>Ansible: agentless configuration management with YAML playbooks</li>
+                    <li>GitOps: Git as the source of truth with automated reconciliation</li>
+                    <li>Security: secrets management, state encryption, policy as code</li>
+                </ul>
+                <p><strong>Next:</strong> CI/CD Pipelines &mdash; automate build, test, and deployment workflows end-to-end.</p>
+            </div>
+        </div>
+
+        <!-- LAB -->
+        <div id="lab" class="tab-panel">
+            <h3 style="margin-bottom:1rem">Lab: Terraform Config Planner</h3>
+            <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem">Configure your IaC parameters below and run to generate a Terraform plan summary with recommended module structure and CI/CD pipeline.</p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header">IaC CONFIG</div>
+                    <textarea class="lab-textarea" id="lab-input">// IaC Planner Config
+const config = {
+  tool: "Terraform",         // Terraform | Pulumi | Ansible
+  provider: "AWS",           // AWS | Azure | GCP
+  environment: "production", // dev | staging | production
+  modules: ["vpc", "eks"],   // vpc | eks | rds | s3 | iam
+  remoteState: true,
+  gitops: true
+};</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header">IaC OUTPUT</div>
+                    <div class="lab-output" id="lab-output">Click "Run" to generate your IaC recommendation...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem" onclick="runLab()">&#9654; Run</button>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: Infrastructure as Code</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">Test your IaC knowledge. 10 questions &mdash; immediate feedback on every answer.</p>
+                <form id="quiz-form">
+                    <div class="quiz-item">
+                        <p class="quiz-question">1. What does "idempotency" mean in the context of IaC?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"><span class="option-text">A) Code that runs only once and then stops</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B"><span class="option-text">B) Infrastructure that cannot be modified after initial deployment</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C" data-correct="true"><span class="option-text">C) Applying the same configuration multiple times produces the same result</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"><span class="option-text">D) A deployment strategy that only targets production environments</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">2. What is the primary purpose of the Terraform state file?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A"><span class="option-text">A) Securely store provider credentials</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B" data-correct="true"><span class="option-text">B) Track the real-world state of managed infrastructure resources</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C"><span class="option-text">C) Cache Terraform provider plugin binaries locally</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"><span class="option-text">D) Log all plan and apply operations for auditing</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">3. Which Terraform command previews changes without applying them?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"><span class="option-text">A) terraform apply --dry-run</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B" data-correct="true"><span class="option-text">B) terraform plan</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C"><span class="option-text">C) terraform validate</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"><span class="option-text">D) terraform check</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">4. What key advantage does Pulumi have over Terraform?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"><span class="option-text">A) It supports a wider range of cloud providers</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B"><span class="option-text">B) It includes a fully managed built-in CI/CD system</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C" data-correct="true"><span class="option-text">C) Infrastructure is written in general-purpose languages like Python or TypeScript</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"><span class="option-text">D) It eliminates the need to manage any state file</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">5. Ansible connects to target hosts using which protocol?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"><span class="option-text">A) HTTPS REST API calls</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B"><span class="option-text">B) A proprietary Ansible agent installed on each host</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C" data-correct="true"><span class="option-text">C) SSH (no agent required on managed nodes)</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"><span class="option-text">D) WinRM exclusively, for all platforms</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">6. What is the core principle of GitOps?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"><span class="option-text">A) All deployments must be triggered manually via a Git command</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B" data-correct="true"><span class="option-text">B) Git is the single source of truth and automation reconciles actual state with it</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C"><span class="option-text">C) Only infrastructure code is stored in Git, not application source code</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"><span class="option-text">D) Git integration replaces the need for a dedicated CI/CD pipeline</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">7. Why should secrets never be stored in Terraform state files?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"><span class="option-text">A) Terraform cannot reference secrets from state during plan operations</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B"><span class="option-text">B) It significantly slows down terraform apply operations</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"><span class="option-text">C) State files can contain sensitive attributes in plaintext and may be exposed</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"><span class="option-text">D) State files are automatically deleted after each apply run</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">8. What does Checkov / tfsec do in an IaC workflow?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"><span class="option-text">A) Automatically formats and fixes Terraform HCL code</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B"><span class="option-text">B) Manages and migrates remote state backends between providers</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C" data-correct="true"><span class="option-text">C) Performs static analysis to detect security misconfigurations before deployment</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"><span class="option-text">D) Runs integration tests against live provisioned infrastructure</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">9. Which tool is a DRY wrapper for Terraform to reduce repetition across environments?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"><span class="option-text">A) Atlantis</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B"><span class="option-text">B) Ansible</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"><span class="option-text">C) Terragrunt</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"><span class="option-text">D) Flux</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">10. What distinguishes a declarative IaC approach from an imperative one?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"><span class="option-text">A) Declarative tools only support public cloud environments</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B"><span class="option-text">B) Imperative tools always execute faster than declarative ones</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C" data-correct="true"><span class="option-text">C) Declarative describes the desired end state; imperative specifies the steps to reach it</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"><span class="option-text">D) Declarative tools always require an agent installed on each managed host</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">11. What is the purpose of <code>terraform import</code>?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"><span class="option-text">A) Import a Terraform module from the public registry into your project</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B"><span class="option-text">B) Copy the state file from one backend to another</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C" data-correct="true"><span class="option-text">C) Bring an existing, manually created cloud resource under Terraform management by writing it into the state file</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"><span class="option-text">D) Download provider plugins required for the current configuration</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">12. In Ansible, what is the difference between a <em>task</em> and a <em>role</em>?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"><span class="option-text">A) Tasks run on Windows hosts; roles run on Linux hosts</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B" data-correct="true"><span class="option-text">B) A task is a single action in a playbook (e.g. install a package); a role is a reusable, structured collection of tasks, variables, handlers, and templates grouped by function</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C"><span class="option-text">C) Roles require an agent on the target host; tasks are agentless</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"><span class="option-text">D) Tasks are declarative; roles are imperative</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">13. What is infrastructure drift and how does Terraform detect it?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"><span class="option-text">A) Drift is a version mismatch between provider plugins; detected by <code>terraform init -upgrade</code></span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B"><span class="option-text">B) Drift is outdated Terraform syntax; detected by <code>terraform fmt</code></span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"><span class="option-text">C) Drift is when real-world infrastructure diverges from the state file (e.g. manual changes in the console); detected by <code>terraform plan</code>, which shows unexpected diffs</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"><span class="option-text">D) Drift is a merge conflict in a <code>.tfstate</code> file; resolved by <code>terraform state push</code></span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">14. Why should you use OIDC (OpenID Connect) instead of static IAM access keys in a CI/CD pipeline that runs Terraform?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"><span class="option-text">A) OIDC allows Terraform to run without a provider configuration block</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"><span class="option-text">B) Static keys are not supported by AWS when running from GitHub Actions</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C" data-correct="true"><span class="option-text">C) OIDC issues short-lived tokens per pipeline run with no long-lived secret to store or rotate — eliminating the risk of credential leakage if the secret is exposed</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"><span class="option-text">D) OIDC provides faster authentication than access keys, reducing pipeline duration</span></label>
+                    </div>
+                    <div class="quiz-item">
+                        <p class="quiz-question">15. What is the key difference between Terraform <em>workspaces</em> and using separate <em>directories</em> per environment?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"><span class="option-text">A) Workspaces support remote state; directories only support local state</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"><span class="option-text">B) Directories can only contain one environment; workspaces support unlimited environments</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"><span class="option-text">C) Workspaces share the same configuration with isolated state — risky if environments need different variable values or resource counts. Separate directories give full isolation with independent state, variables, and configurations per environment</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D"><span class="option-text">D) Workspaces are a Terraform Cloud feature only; directories work with open-source Terraform</span></label>
+                    </div>
+                </form>
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear</button>
+                </div>
+                <div id="quiz-results" class="quiz-results" style="display:none">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback" class="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESOURCES -->
+        <div id="resources" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem">Support Materials</h3>
+            <div class="content-card">
+                <a href="https://developer.hashicorp.com/terraform/docs" target="_blank" class="resource-link">&rarr; Terraform Official Documentation</a>
+                <a href="https://www.pulumi.com/docs/" target="_blank" class="resource-link">&rarr; Pulumi Documentation</a>
+                <a href="https://docs.ansible.com/" target="_blank" class="resource-link">&rarr; Ansible Official Docs</a>
+                <a href="https://registry.terraform.io/" target="_blank" class="resource-link">&rarr; Terraform Registry (Providers &amp; Modules)</a>
+                <a href="https://www.checkov.io/" target="_blank" class="resource-link">&rarr; Checkov &mdash; IaC Security Scanner</a>
+                <a href="https://www.gitops.tech/" target="_blank" class="resource-link">&rarr; GitOps Principles (gitops.tech)</a>
+                <a href="https://developer.hashicorp.com/terraform/tutorials" target="_blank" class="resource-link">&rarr; HashiCorp Learn &mdash; Terraform Tutorials</a>
+            </div>
+        </div>
+
+        <!-- EVALUATION -->
+        <div id="evaluation" class="tab-panel">
+            <div class="content-card">
+                <h3>&#127919; Domain Criteria: Infrastructure as Code</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">To complete this module, demonstrate understanding across these competency levels:</p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>&#128310;</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>IaC principles: declarative, idempotency, versioning</li>
+                            <li>Difference between provisioning and configuration management</li>
+                            <li>Terraform core workflow: init, plan, apply, destroy</li>
+                            <li>What Terraform state is and why it matters</li>
+                            <li>Basic Ansible playbook structure and inventory</li>
+                            <li>Why secrets must never be hardcoded in IaC files</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>&#11088;</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Terraform modules: creation, inputs, outputs, registry usage</li>
+                            <li>Remote state with S3 + DynamoDB locking</li>
+                            <li>GitOps principles and tools (Atlantis, ArgoCD, Flux)</li>
+                            <li>Pulumi vs Terraform trade-offs</li>
+                            <li>Terraform workspaces vs directory-based environments</li>
+                            <li>IaC linting and security scanning (tflint, Checkov)</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>&#128640;</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>Terratest: automated infrastructure testing in Go</li>
+                            <li>OPA / Sentinel: policy-as-code enforcement in pipelines</li>
+                            <li>Terragrunt: DRY multi-environment configuration management</li>
+                            <li>SOPS and Vault: secrets-in-IaC patterns</li>
+                            <li>Immutable infrastructure and blue/green deployments</li>
+                            <li>IaC drift detection and remediation strategies</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function openTab(evt, tabName) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
+    const map = { learn:25, lab:50, quiz:75, resources:90, evaluation:100 };
+    document.getElementById('progress-fill').style.width = map[tabName] + '%';
+    document.getElementById('progress-text').innerText = map[tabName] + '%';
+    window.scrollTo({ top: 150, behavior: 'smooth' });
+}
+
+function runLab() {
+    const input = document.getElementById('lab-input').value;
+    const out = document.getElementById('lab-output');
+    let tool = 'Terraform', provider = 'AWS', env = 'production', gitops = true, remoteState = true;
+    let modules = ['vpc', 'eks'];
+    try {
+        const m1 = input.match(/tool:\s*["'](\w+)["']/);
+        const m2 = input.match(/provider:\s*["'](\w+)["']/);
+        const m3 = input.match(/environment:\s*["'](\w+)["']/);
+        const m4 = input.match(/modules:\s*\[([^\]]+)\]/);
+        const m5 = input.match(/remoteState:\s*(true|false)/);
+        const m6 = input.match(/gitops:\s*(true|false)/);
+        if (m1) tool = m1[1];
+        if (m2) provider = m2[1];
+        if (m3) env = m3[1];
+        if (m4) modules = m4[1].replace(/["'\s]/g,'').split(',').filter(Boolean);
+        if (m5) remoteState = m5[1] === 'true';
+        if (m6) gitops = m6[1] === 'true';
+    } catch(e) {}
+    const backends = { AWS:'S3 + DynamoDB locking', Azure:'Azure Blob Storage + lease locking', GCP:'GCS bucket + built-in locking' };
+    const ciTools = { AWS:'GitHub Actions + AWS OIDC', Azure:'Azure DevOps Pipelines', GCP:'Cloud Build + Workload Identity' };
+    const secretsTools = { AWS:'AWS Secrets Manager or HashiCorp Vault', Azure:'Azure Key Vault', GCP:'Google Secret Manager' };
+    const moduleLines = modules.map(m => `  -> module "${m}" { source = "./modules/${m}" }`).join('\n');
+    const moduleDirs = modules.map(m => `  |   +-- ${m}/`).join('\n');
+    const stateMsg = remoteState ? `[OK] Remote state: ${backends[provider] || 'Remote backend'}` : '[!!] Local state -- NOT recommended for teams';
+    const gitopsMsg = gitops ? '[OK] GitOps enabled -- changes via PR + Atlantis/ArgoCD' : '[!!] GitOps disabled -- manual applies required';
+    out.textContent =
+`[OK] IaC Plan: ${tool} on ${provider}
+=====================================
+Tool:          ${tool}
+Provider:      ${provider}
+Environment:   ${env}
+${stateMsg}
+${gitopsMsg}
+
+Modules to provision:
+${moduleLines}
+
+Recommended file structure:
+  infrastructure/
+  +-- modules/
+${moduleDirs}
+  +-- environments/
+      +-- dev/
+      +-- staging/
+      +-- ${env}/
+
+CI/CD Pipeline:
+  -> ${ciTools[provider] || 'GitHub Actions'}
+  -> terraform fmt -check
+  -> terraform validate
+  -> tflint (linting)
+  -> checkov (security scan)
+  -> terraform plan  (on pull request)
+  -> terraform apply (on merge to main)
+
+Security checklist:
+  -> Use ${secretsTools[provider] || 'a secrets manager'}
+  -> Enable state encryption at rest
+  -> Never commit .tfvars with secrets
+  -> Use OIDC for CI/CD -- no static keys
+  -> Enable state locking`;
+}
+
+const questionsData = {
+    q1:  { correct:'C', exp:'Idempotency means applying the same configuration multiple times yields the same outcome with no unintended side effects.' },
+    q2:  { correct:'B', exp:'The state file maps Terraform config to real-world resources, allowing Terraform to detect drift and plan accurate changes.' },
+    q3:  { correct:'B', exp:'"terraform plan" is a dry run showing exactly what would be created, changed, or destroyed without touching real infrastructure.' },
+    q4:  { correct:'C', exp:'Pulumi uses Python, TypeScript, Go or C#, giving you real language features like loops and conditionals without HCL limitations.' },
+    q5:  { correct:'C', exp:'Ansible is agentless and uses SSH to connect to hosts — no daemon or agent software is needed on target machines.' },
+    q6:  { correct:'B', exp:'GitOps uses Git as the single source of truth. An automated agent continuously reconciles actual system state with what is declared in Git.' },
+    q7:  { correct:'C', exp:'Terraform state can store sensitive resource attributes in plaintext. If unencrypted or improperly stored, secrets can be exposed.' },
+    q8:  { correct:'C', exp:'Checkov and tfsec scan IaC code statically for security misconfigurations before any infrastructure is deployed.' },
+    q9:  { correct:'C', exp:'Terragrunt is a thin wrapper around Terraform that keeps configs DRY across multiple environments and modules.' },
+    q10: { correct:'C', exp:'Declarative IaC describes the desired end state (Terraform, K8s). Imperative specifies the step-by-step procedure to reach it (scripts, Ansible tasks).' },
+    q11: { correct:'C', exp:'terraform import reads an existing cloud resource and writes it into the Terraform state file, allowing Terraform to manage it going forward. You still need to write the matching HCL resource block manually.' },
+    q12: { correct:'B', exp:'A task is a single atomic action (install nginx, copy a file). A role bundles related tasks, variables, handlers, templates, and files into a reusable, shareable unit — the standard way to package Ansible automation.' },
+    q13: { correct:'C', exp:'Infrastructure drift happens when someone modifies resources outside of Terraform (e.g. via the AWS console). Running terraform plan compares the live state against the state file and shows unexpected changes that need to be reconciled.' },
+    q14: { correct:'C', exp:'OIDC lets the CI provider (GitHub Actions, GitLab) exchange a signed JWT for short-lived cloud credentials scoped to that run. No static secret is stored anywhere — eliminating the most common IaC credential leak vector.' },
+    q15: { correct:'C', exp:'Workspaces use the same .tf files with separate state, which causes problems when environments need different instance counts, regions, or variable defaults. Separate directories per environment provide full isolation and are the pattern recommended by the Terraform team for production use.' }
+};
+
+document.getElementById('submit-quiz').addEventListener('click', () => {
+    const form = document.getElementById('quiz-form');
+    const data = new FormData(form);
+    let score = 0, html = '';
+    Object.keys(questionsData).forEach((key, i) => {
+        const ans = data.get(key);
+        const ok = ans === questionsData[key].correct;
+        if (ok) score++;
+        html += `<div class="feedback-item ${ok ? 'feedback-correct' : 'feedback-incorrect'}">
+            <span class="feedback-icon">${ok ? '&#10003;' : '&#10007;'}</span>
+            <div><strong>Q${i+1}:</strong> ${questionsData[key].exp}
+            ${!ok ? `<br><small class="correct-answer">Correct: Option ${questionsData[key].correct}</small>` : ''}</div>
+        </div>`;
+    });
+    const total = Object.keys(questionsData).length;
+    const pct = Math.round(score / total * 100);
+    const cls = pct >= 80 ? 'score-excellent' : pct >= 50 ? 'score-good' : 'score-poor';
+    document.getElementById('quiz-score').innerHTML = `<div class="${cls}">${score}/${total} (${pct}%)</div>
+        <p style="color:var(--text-secondary)">${pct >= 80 ? 'Excellent! You are ready to move on to CI/CD Pipelines.' : pct >= 53 ? 'Good progress — review the weaker areas and try again.' : 'Review the IaC material carefully and try again.'}</p>`;
+    document.getElementById('quiz-feedback').innerHTML = html;
+    const r = document.getElementById('quiz-results');
+    r.style.display = 'block';
+    r.scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('clear-quiz').addEventListener('click', () => {
+    document.getElementById('quiz-form').reset();
+    document.getElementById('quiz-results').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>

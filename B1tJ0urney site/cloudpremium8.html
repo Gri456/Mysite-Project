@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Edge &amp; Future Architectures</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg-dark:#020d12; --blue:#00d4ff; --cyan:#00e5ff;
+            --text-light:#e8f8fc; --text-secondary:#8cc8d8;
+            --card-bg:rgba(0,212,255,0.04); --border-color:rgba(0,212,255,0.15);
+        }
+        body { font-family:'Inter',sans-serif; background:var(--bg-dark); color:var(--text-light); min-height:100vh; overflow-x:hidden; }
+        body::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background-image:linear-gradient(rgba(0,212,255,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,220,0.07) 1px,transparent 1px); background-size:50px 50px; animation:gridMove 20s linear infinite; pointer-events:none; z-index:-1; }
+        @keyframes gridMove{0%{transform:translate(0,0)}100%{transform:translate(50px,50px)}}
+        body::after { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center,rgba(0,180,220,0.08) 0%,rgba(0,212,255,0.04) 50%,transparent 100%); pointer-events:none; z-index:-1; }
+        .header { position:sticky; top:0; z-index:100; background:rgba(2,13,18,0.88); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-color); box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width:1160px; margin:0 auto; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo { font-size:1.5rem; font-weight:700; color:var(--text-light); }
+        .premium-badge { background:rgba(0,212,255,0.1); border:1px solid var(--border-color); color:var(--text-light); padding:0.25rem 0.75rem; border-radius:50px; font-size:0.75rem; font-weight:500; }
+        .btn { padding:0.5rem 1.25rem; border-radius:50px; font-size:0.875rem; font-weight:500; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; transition:all 0.3s ease; border:none; cursor:pointer; font-family:'Inter',sans-serif; }
+        .btn-back { background:rgba(255,255,255,0.1); border:1px solid var(--border-color); color:var(--text-light); }
+        .btn-back:hover { background:rgba(255,255,255,0.15); transform:translateY(-1px); }
+        .btn-primary { background:linear-gradient(135deg,var(--blue),var(--cyan)); color:#001a20; font-weight:700; box-shadow:0 4px 15px rgba(0,212,255,0.3); }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,212,255,0.45); }
+        .main-content { max-width:1160px; margin:0 auto; padding:2rem; }
+        .course-title { font-size:2.5rem; font-weight:700; margin-bottom:1rem; background:linear-gradient(to right,#00b8d4,#00e5ff,#00acc1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .course-description { font-size:1.125rem; color:var(--text-secondary); margin-bottom:1.5rem; line-height:1.6; }
+        .course-meta { display:flex; flex-wrap:wrap; gap:1.5rem; margin-bottom:1.5rem; }
+        .meta-item { display:flex; align-items:center; gap:0.5rem; color:var(--text-secondary); font-size:0.875rem; }
+        .progress-bar { width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--blue),var(--cyan)); width:0%; transition:width 0.3s ease; }
+        .tabs-container { background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display:flex; background:rgba(0,212,255,0.02); border-bottom:1px solid var(--border-color); overflow-x:auto; }
+        .tab-button { flex:1; min-width:120px; padding:1rem 1.5rem; background:none; border:none; color:var(--text-secondary); font-size:0.875rem; font-weight:500; cursor:pointer; transition:all 0.3s ease; position:relative; white-space:nowrap; font-family:'Inter',sans-serif; }
+        .tab-button:hover { color:var(--text-light); background:rgba(0,212,255,0.05); }
+        .tab-button.active { color:var(--text-light); background:rgba(0,212,255,0.1); }
+        .tab-button.active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--blue),var(--cyan)); }
+        .tab-panel { display:none; padding:2rem; animation:fadeIn 0.4s ease; }
+        .tab-panel.active { display:block; }
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .content-card { background:rgba(0,212,255,0.03); padding:1.5rem; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem; }
+        .content-card h3 { margin-bottom:1rem; display:flex; align-items:center; gap:10px; color:#00b8d4; }
+        .code-explanation { border-left:3px solid var(--blue); padding-left:1rem; margin:1rem 0; font-size:0.95rem; line-height:1.7; }
+        .highlight { color:var(--cyan); font-weight:600; }
+        .styled-list { list-style:none; margin:1rem 0; }
+        .styled-list li { margin-bottom:0.8rem; padding-left:1.5rem; position:relative; color:var(--text-secondary); line-height:1.5; }
+        .styled-list li::before { content:'->'; position:absolute; left:0; color:var(--cyan); }
+        pre { background:rgba(0,0,0,0.45); border:1px solid var(--border-color); border-radius:6px; padding:1.1rem; overflow-x:auto; margin:1rem 0; }
+        code { font-family:'Courier New',monospace; font-size:0.88rem; color:#a0e8f4; line-height:1.6; }
+        .quiz-item { background:rgba(0,212,255,0.02); padding:1.5rem; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem; }
+        .quiz-question { color:var(--text-light); font-size:1rem; font-weight:600; margin-bottom:1rem; line-height:1.4; }
+        .quiz-option { display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:rgba(0,212,255,0.03); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; transition:all 0.3s ease; margin-bottom:0.5rem; }
+        .quiz-option:hover { background:rgba(0,212,255,0.08); border-color:var(--blue); }
+        .quiz-option input[type="radio"] { width:18px; height:18px; accent-color:var(--blue); flex-shrink:0; }
+        .option-text { color:var(--text-secondary); font-size:0.875rem; line-height:1.4; font-family:'Courier New',monospace; }
+        .quiz-option:hover .option-text { color:var(--text-light); }
+        .quiz-controls { display:flex; gap:1rem; margin:2rem 0; justify-content:center; }
+        .quiz-results { background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(0,229,255,0.04)); border:1px solid rgba(0,212,255,0.2); border-radius:8px; padding:1.5rem; margin-top:2rem; }
+        .results-title { color:var(--cyan); font-size:1.1rem; font-weight:600; margin-bottom:1rem; text-align:center; }
+        .quiz-score { text-align:center; font-size:1.25rem; font-weight:600; margin-bottom:1rem; }
+        .quiz-feedback { display:grid; gap:0.75rem; }
+        .feedback-item { display:flex; align-items:flex-start; gap:1rem; padding:1rem; border-radius:8px; margin-bottom:0.5rem; background:rgba(255,255,255,0.02); }
+        .feedback-correct { border-left:4px solid #10b981; }
+        .feedback-incorrect { border-left:4px solid #ef4444; }
+        .feedback-icon { font-weight:bold; font-size:1.2rem; flex-shrink:0; }
+        .feedback-correct .feedback-icon { color:#10b981; }
+        .feedback-incorrect .feedback-icon { color:#ef4444; }
+        .score-excellent { color:#10b981; font-size:2rem; font-weight:bold; }
+        .score-good { color:#f59e0b; font-size:2rem; font-weight:bold; }
+        .score-poor { color:#ef4444; font-size:2rem; font-weight:bold; }
+        .correct-answer { color:#ef4444; font-weight:600; }
+        .evaluation-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem; margin-top:1rem; }
+        .evaluation-column { background:rgba(0,212,255,0.02); padding:1.5rem; border-radius:12px; border:1px solid var(--border-color); }
+        .evaluation-title { display:flex; align-items:center; gap:10px; margin-bottom:1rem; font-size:1rem; font-weight:600; padding-bottom:0.75rem; border-bottom:2px solid; }
+        .essential { color:var(--cyan); border-bottom-color:var(--cyan) !important; }
+        .important { color:#ffd700; border-bottom-color:#ffd700 !important; }
+        .advanced { color:#ff6b6b; border-bottom-color:#ff6b6b !important; }
+        .evaluation-list { list-style:none; display:flex; flex-direction:column; gap:0.65rem; font-size:0.875rem; color:var(--text-secondary); }
+        .evaluation-list li { padding-left:1.2rem; position:relative; line-height:1.4; }
+        .evaluation-list li::before { content:'*'; position:absolute; left:0; font-weight:bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color:var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color:#ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color:#ff6b6b; }
+        .resource-link { color:var(--cyan); text-decoration:none; display:block; margin:0.6rem 0; font-size:0.95rem; transition:opacity 0.2s; }
+        .resource-link:hover { text-decoration:underline; opacity:0.85; }
+        .lab-container { display:flex; gap:1rem; height:440px; margin-top:1rem; }
+        .lab-editor,.lab-preview { flex:1; display:flex; flex-direction:column; border:1px solid var(--border-color); border-radius:8px; overflow:hidden; }
+        .lab-header-bar { background:rgba(0,212,255,0.08); padding:0.5rem 1rem; font-size:0.8rem; color:var(--text-secondary); font-weight:500; letter-spacing:0.5px; }
+        .lab-textarea { flex:1; background:#000d12; color:#00d4ff; font-family:'Courier New',monospace; padding:1rem; border:none; resize:none; outline:none; font-size:0.88rem; line-height:1.6; }
+        .lab-output { flex:1; background:#001018; color:#a0e8f4; padding:1rem; overflow-y:auto; font-family:'Courier New',monospace; font-size:0.85rem; line-height:1.6; white-space:pre-wrap; }
+        .arch-diagram { background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:8px; padding:1.5rem; margin:1rem 0; font-family:'Courier New',monospace; font-size:0.83rem; color:#a0e8f4; line-height:1.9; overflow-x:auto; }
+        .tag-row { display:flex; gap:0.5rem; flex-wrap:wrap; margin:0.75rem 0; }
+        .tag { font-size:0.72rem; padding:0.2rem 0.55rem; border-radius:999px; border:1px solid rgba(0,212,255,0.25); color:#a0e8f4; background:rgba(0,212,255,0.06); }
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1rem 0; }
+        .three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin:1rem 0; }
+        @media(max-width:750px){.two-col,.three-col{grid-template-columns:1fr}.lab-container{flex-direction:column;height:auto}.lab-editor,.lab-preview{height:260px}}
+        .mini-card { background:rgba(0,212,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem; }
+        .mini-card h4 { color:var(--cyan); font-size:0.88rem; margin-bottom:0.5rem; }
+        .mini-card p { color:var(--text-secondary); font-size:0.82rem; line-height:1.5; }
+        .trend-pill { display:inline-block; font-size:0.72rem; padding:0.15rem 0.6rem; border-radius:999px; margin:0.2rem; font-weight:600; }
+        .tp-hot  { background:rgba(239,68,68,0.15);  border:1px solid #ef4444; color:#ef4444; }
+        .tp-rise { background:rgba(245,158,11,0.15); border:1px solid #f59e0b; color:#f59e0b; }
+        .tp-grow { background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#10b981; }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="header-content">
+        <div style="display:flex;align-items:center;gap:0.75rem">
+            <div class="logo">BitJourney</div>
+            <span class="premium-badge">Premium &bull; Cloud</span>
+        </div>
+        <nav style="display:flex;gap:.75rem">
+            <a href="premium-cloud.html" class="btn btn-back">&#8592; Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div style="margin-bottom:2rem">
+        <h1 class="course-title">Objective: Edge &amp; Future Architectures</h1>
+        <p class="course-description">The frontier of cloud computing is moving outward — to edge nodes, serverless functions running at the network boundary, WebAssembly runtimes, and AI-native infrastructure. Understand where the industry is heading and how to build for it today.</p>
+        <div class="course-meta">
+            <div class="meta-item"><span>&#9201;</span><span>5-6h</span></div>
+            <div class="meta-item"><span>&#127919;</span><span>Edge Computing &middot; Advanced Serverless &middot; WASM &middot; AI/ML Infra &middot; Multi-Cloud &middot; Platform Engineering</span></div>
+            <div class="meta-item"><span>&#128204;</span><span>Requires: Full cloud journey (modules 1-7)</span></div>
+        </div>
+        <div class="tag-row">
+            <span class="tag">Edge Computing</span><span class="tag">Lambda@Edge</span><span class="tag">Cloudflare Workers</span>
+            <span class="tag">WebAssembly</span><span class="tag">WASI</span><span class="tag">Serverless</span>
+            <span class="tag">AI/ML Infra</span><span class="tag">SageMaker</span><span class="tag">Multi-Cloud</span>
+            <span class="tag">Platform Engineering</span><span class="tag">IDP</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary)">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'learn')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'lab')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'resources')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'evaluation')">Evaluation</button>
+        </nav>
+
+        <!-- LEARN -->
+        <div id="learn" class="tab-panel active">
+
+<div class="content-card">
+<h3>&#127758; 8.1 Edge Computing — The Cloud Moves Outward</h3>
+<p>Traditional cloud runs in a small number of large regional data centres. Edge computing pushes compute closer to where data is generated and users are located — reducing latency, bandwidth costs, and enabling real-time processing impossible from a distant region.</p>
+<div class="arch-diagram">Cloud evolution:
+
+  Gen 1 (2006-):  [User] --200ms--> [AWS Region: 1 DC]
+  Gen 2 (2016-):  [User] --20ms-->  [CDN Edge PoP] --> [AWS Region]
+  Gen 3 (now):    [User] --1ms-->   [Edge Compute] (logic runs AT the edge)
+  Gen 4 (coming): [Device] --0ms--> [On-device inference + local sync]
+
+Edge use cases:
+  * Sub-10ms API responses for gaming, trading, AR/VR
+  * Real-time video processing at camera (factory, retail)
+  * IoT sensor aggregation before cloud upload
+  * Personalisation and A/B testing at the network boundary
+  * Data sovereignty: process EU data in EU, never leave region</div>
+<ul class="styled-list">
+<li><strong>AWS Wavelength:</strong> Extends AWS compute into 5G carrier networks — single-digit millisecond latency from mobile devices to cloud logic.</li>
+<li><strong>AWS Outposts:</strong> Full AWS rack deployed in your own data centre. Run EC2, EKS, RDS on-premises with native AWS APIs — true hybrid.</li>
+<li><strong>Azure Stack Edge:</strong> Microsoft's equivalent AI-capable edge appliance — runs Azure services on-premises with GPU support.</li>
+<li><strong>Google Distributed Cloud:</strong> Run GKE workloads in your data centre, at telecom edges, or in air-gapped environments.</li>
+</ul>
+</div>
+
+<div class="content-card">
+<h3>&#9889; 8.2 Serverless at the Edge — Lambda@Edge and CloudFront Functions</h3>
+<p>AWS allows JavaScript and Python functions to run directly on CloudFront's 450+ global PoPs — executing request/response logic within milliseconds of any user worldwide.</p>
+<div class="two-col">
+<div class="mini-card"><h4>Lambda@Edge</h4><p>Full Node.js / Python runtime. Runs on CloudFront viewer/origin request/response events. Supports external API calls. Up to 10s timeout (origin) / 5s (viewer). Use for auth, dynamic routing, SSR, header manipulation.</p></div>
+<div class="mini-card"><h4>CloudFront Functions</h4><p>Ultra-lightweight JavaScript runtime. Sub-millisecond execution. Cheaper than Lambda@Edge (~6x). No external calls. Use for URL rewrites, redirects, header inspection, A/B cookie assignment. Runs at ALL PoPs globally.</p></div>
+</div>
+<pre><code>// CloudFront Function -- A/B test routing by cookie
+function handler(event) {
+    var request = event.request;
+    var cookies  = request.cookies;
+
+    // If no experiment cookie, assign user to a group
+    if (!cookies['ab-group']) {
+        var group = Math.random() < 0.1 ? 'variant' : 'control';
+        request.headers['x-ab-group'] = { value: group };
+        // Note: set-cookie on the response, not here
+    } else {
+        request.headers['x-ab-group'] = {
+            value: cookies['ab-group'].value
+        };
+    }
+    return request;
+}
+
+// Lambda@Edge -- JWT auth at the edge (viewer request)
+exports.handler = async (event) => {
+    const request = event.Records[0].cf.request;
+    const headers = request.headers;
+    const token   = headers['authorization']?.[0]?.value?.split(' ')[1];
+
+    if (!token) {
+        return { status: '401', body: 'Unauthorized' };
+    }
+
+    try {
+        // Verify JWT (use lightweight library bundled in deployment package)
+        await verifyJWT(token, process.env.JWT_SECRET);
+        return request; // pass through to origin
+    } catch {
+        return { status: '403', body: 'Forbidden' };
+    }
+};</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#127760; 8.3 Cloudflare Workers and the Edge Runtime Ecosystem</h3>
+<p>Cloudflare Workers run JavaScript/TypeScript (and WASM) on Cloudflare's network of 300+ data centres — often the lowest-latency serverless platform globally.</p>
+<ul class="styled-list">
+<li><strong>V8 Isolates:</strong> Workers use V8 JavaScript isolates — not containers or VMs. Cold start is under 1ms because there is no process to boot. Thousands of isolates can run on a single machine simultaneously.</li>
+<li><strong>Workers KV:</strong> Globally replicated key-value store with eventually consistent reads. Perfect for feature flags, configuration, and session data at the edge.</li>
+<li><strong>Durable Objects:</strong> Single-instance stateful actors with strong consistency — coordinate real-time state (chat rooms, multiplayer game state, live dashboards) at the edge.</li>
+<li><strong>Workers AI:</strong> Run inference on LLMs, image models, and speech models directly in Cloudflare's network — no GPU instance provisioning needed.</li>
+<li><strong>R2 Storage:</strong> S3-compatible object storage with zero egress fees — pair with Workers for edge-served dynamic content.</li>
+</ul>
+<pre><code>// Cloudflare Worker -- personalised edge response with KV
+export default {
+  async fetch(request, env) {
+    const url      = new URL(request.url);
+    const country  = request.cf?.country ?? 'US';
+
+    // Read feature flags from Workers KV (sub-ms read)
+    const flags    = await env.FEATURE_FLAGS.get(country, { type: 'json' });
+    const newUI    = flags?.new_checkout_ui ?? false;
+
+    // Fetch from origin with context header
+    const originReq = new Request(request, {
+      headers: {
+        ...Object.fromEntries(request.headers),
+        'x-country':  country,
+        'x-new-ui':   String(newUI),
+      }
+    });
+
+    const response = await fetch(originReq);
+
+    // Add edge-side cache headers
+    return new Response(response.body, {
+      headers: {
+        ...Object.fromEntries(response.headers),
+        'x-served-by': 'edge',
+        'x-country':    country,
+      }
+    });
+  }
+};</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#128256; 8.4 WebAssembly (WASM) — The Universal Runtime</h3>
+<p>WebAssembly is a binary instruction format designed as a portable compilation target. Originally for browsers, it is rapidly becoming the universal runtime for edge computing and cloud-native workloads.</p>
+<div class="arch-diagram">WebAssembly in the cloud:
+
+  [Rust / C++ / Go / Python / JS]
+           |
+           | compile
+           v
+      [.wasm binary]          -- portable, sandboxed, ~native speed
+           |
+     +-----------+------------+
+     |           |            |
+  [Browser]  [Cloudflare  [Wasmtime /  [Docker /
+             Workers]     Spin]        containerd+WASM]
+
+Properties:
+  * Near-native performance (within 10-20% of native)
+  * Sandboxed by default -- no filesystem/network unless granted
+  * Sub-millisecond cold starts -- no OS to boot
+  * Portable -- compile once, run on any WASM runtime
+  * Tiny binaries -- 1-10MB vs 50-200MB for containers</div>
+<ul class="styled-list">
+<li><strong>WASI (WebAssembly System Interface):</strong> Standard API for WASM modules to access OS-like capabilities (files, sockets, clocks) in a capability-based security model — bring your own permissions.</li>
+<li><strong>Spin (Fermyon):</strong> Serverless microservices framework built on WASM. Deploy Rust, Go, Python, or JS functions that start in microseconds. No containers.</li>
+<li><strong>Wasmtime / WasmEdge:</strong> WASM runtimes for server-side execution. WasmEdge is optimised for edge AI inference.</li>
+<li><strong>containerd + WASM:</strong> OCI-compatible WASM containers runnable in Kubernetes via the <code>runwasi</code> shim — same orchestration, different runtime.</li>
+<li><strong>Docker+Wasm (Technical Preview):</strong> Run WASM workloads alongside Linux containers in the same Docker environment.</li>
+</ul>
+<pre><code># Build a Rust function for WASM/WASI
+cargo build --target wasm32-wasi --release
+
+# Run with Wasmtime
+wasmtime target/wasm32-wasi/release/my-func.wasm
+
+# Deploy to Spin (Fermyon)
+spin new -t http-rust my-edge-api
+spin build && spin up
+
+# Kubernetes + WASM via runwasi (RuntimeClass)
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: wasmtime-spin
+handler: spin
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      runtimeClassName: wasmtime-spin
+      containers:
+      - name: my-wasm-service
+        image: ghcr.io/myorg/api:latest  # OCI image containing .wasm
+        command: ["/"]</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#129504; 8.5 Advanced Serverless — Beyond Simple Functions</h3>
+<p>First-generation serverless (AWS Lambda 2014) was about stateless functions triggered by events. Advanced serverless in 2025 encompasses durable workflows, event-driven architectures, and serverless containers.</p>
+<ul class="styled-list">
+<li><strong>AWS Step Functions:</strong> Orchestrate complex workflows as state machines — parallel branches, retries with backoff, human approval steps, and error handling. Express (short) and Standard (long-running up to 1 year) workflows.</li>
+<li><strong>Durable Functions (Azure):</strong> Stateful workflow extensions for Azure Functions — orchestrator, activity, entity, and monitor patterns without managing state storage.</li>
+<li><strong>AWS Lambda response streaming:</strong> Stream responses progressively (like Server-Sent Events) without waiting for the full response — dramatically improves perceived performance for LLM outputs and large payloads.</li>
+<li><strong>Lambda SnapStart (Java):</strong> Pre-initialise function execution environments and snapshot them — eliminates cold starts for Java/Kotlin Lambda.</li>
+<li><strong>AWS Fargate:</strong> Serverless containers — define CPU and memory, AWS manages all EC2 infrastructure. No cluster nodes to manage, patches, or right-size.</li>
+<li><strong>Google Cloud Run:</strong> Scale-to-zero containerised functions with up to 60-minute request timeout. Best-in-class cold start performance for containers.</li>
+</ul>
+<pre><code># AWS Step Functions -- order processing workflow (ASL)
+{
+  "Comment": "Order processing pipeline",
+  "StartAt": "ValidateOrder",
+  "States": {
+    "ValidateOrder": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:::function:validate-order",
+      "Next": "ProcessPayment",
+      "Retry": [{ "ErrorEquals": ["Lambda.ServiceException"],
+                  "IntervalSeconds": 2, "MaxAttempts": 3,
+                  "BackoffRate": 2 }],
+      "Catch": [{ "ErrorEquals": ["ValidationError"],
+                  "Next": "NotifyInvalidOrder" }]
+    },
+    "ProcessPayment": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage.waitForTaskToken",
+      "Parameters": {
+        "QueueUrl": "https://sqs.../payment-queue",
+        "MessageBody": {
+          "orderId.$": "$.orderId",
+          "TaskToken.$": "$$.Task.Token"
+        }
+      },
+      "HeartbeatSeconds": 300,
+      "Next": "FulfillOrder"
+    },
+    "FulfillOrder": { "Type": "Task", "Resource": "...", "End": true },
+    "NotifyInvalidOrder": { "Type": "Task", "Resource": "...", "End": true }
+  }
+}</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#129302; 8.6 AI/ML Infrastructure — The New Cloud Primitive</h3>
+<p>AI/ML workloads are the fastest-growing segment of cloud spend. Infrastructure for AI has unique requirements: GPUs, distributed training, model serving, and vector databases.</p>
+<div class="arch-diagram">ML Platform Stack:
+
+  [Data] --> [Feature Store] --> [Training] --> [Registry] --> [Serving]
+                                    |
+              GPUs (A100/H100)  Spot + On-Demand mix
+              Distributed training (Ray, Horovod, FSDP)
+              Experiment tracking (MLflow, W&amp;B)
+                                    |
+                          [Model Registry]
+                          (MLflow, SageMaker)
+                                    |
+              [Online Serving]         [Batch Inference]
+              Real-time REST API       Scheduled jobs
+              SageMaker Endpoints      SageMaker Batch
+              KServe / Triton          AWS Batch + S3</div>
+<ul class="styled-list">
+<li><strong>AWS SageMaker:</strong> End-to-end ML platform — data labelling, notebook environments, training jobs, hyperparameter tuning, model registry, real-time and batch inference endpoints.</li>
+<li><strong>EC2 GPU instances:</strong> P4 (A100), P5 (H100), G5 (A10G) for training. Inf2 (AWS Inferentia2) for cost-effective inference — up to 70% cheaper than GPU for production serving.</li>
+<li><strong>Amazon Bedrock:</strong> Managed API for foundation models (Claude, Llama, Titan, Stable Diffusion) — no GPU provisioning, no model management, pay per token.</li>
+<li><strong>Vector databases:</strong> Store and search high-dimensional embeddings for RAG (Retrieval-Augmented Generation) — Amazon OpenSearch with k-NN, Pinecone, Weaviate, pgvector (Postgres).</li>
+<li><strong>Spot for training:</strong> ML training jobs are the ideal Spot workload — checkpointing to S3 every N minutes, restart from checkpoint on interruption. 70-90% cost reduction.</li>
+</ul>
+<pre><code># SageMaker Training Job with Spot (Boto3)
+import sagemaker
+from sagemaker.pytorch import PyTorch
+
+estimator = PyTorch(
+    entry_point     = 'train.py',
+    role            = sagemaker_role,
+    instance_type   = 'ml.p3.2xlarge',   # V100 GPU
+    instance_count  = 4,                  # distributed training
+    framework_version = '2.1',
+    py_version      = 'py310',
+
+    # Spot config -- save ~70% on training cost
+    use_spot_instances        = True,
+    max_run                   = 86400,    # 24h max
+    max_wait                  = 90000,    # 25h including wait time
+    checkpoint_s3_uri         = 's3://my-bucket/checkpoints/',
+    checkpoint_local_path     = '/opt/ml/checkpoints',
+
+    hyperparameters = {
+        'epochs':     100,
+        'batch-size': 256,
+        'lr':         0.001
+    }
+)
+
+estimator.fit({'train': 's3://my-bucket/data/train',
+               'val':   's3://my-bucket/data/val'})</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#127760; 8.7 Multi-Cloud Architecture</h3>
+<p>Multi-cloud is the deliberate use of services from two or more cloud providers. It is often mandated by enterprise strategy, regulatory requirements, or risk management — but it adds significant operational complexity.</p>
+<div class="arch-diagram">Multi-Cloud Patterns:
+
+  ACTIVE-ACTIVE:
+    Users --> [AWS us-east-1] + [Azure West Europe]  (both serve traffic)
+    Requires: data sync, consistent APIs, global load balancer
+
+  ACTIVE-PASSIVE (Disaster Recovery):
+    Primary: [AWS]  --async replication-->  Standby: [GCP]
+    Failover only on catastrophic AWS failure
+
+  BEST-OF-BREED (most common):
+    Compute:   AWS EC2 + EKS
+    ML/AI:     GCP Vertex AI (best ML tooling)
+    Comms:     Twilio / SendGrid (SaaS, not cloud)
+    CDN:       Cloudflare (independent of cloud)
+
+  AVOID-LOCK-IN:
+    OpenTofu (Terraform) for IaC across providers
+    Kubernetes as the portable compute abstraction
+    OTLP for observability (send to any backend)</div>
+<ul class="styled-list">
+<li><strong>When multi-cloud makes sense:</strong> Regulatory data residency requirements, disaster recovery with genuine provider-level failure protection, best-of-breed service selection, negotiation leverage on contracts.</li>
+<li><strong>When it does not:</strong> "Avoiding lock-in" as a primary motivation rarely justifies the cost. Running the same workload across two clouds doubles operational complexity without proportional benefit.</li>
+<li><strong>Kubernetes as the abstraction layer:</strong> Deploy to EKS, GKE, and AKS using the same Helm charts and GitOps pipelines. Cloud-specific services (RDS, Pub/Sub) are still used underneath.</li>
+<li><strong>Crossplane:</strong> Kubernetes-native control plane that provisions cloud resources (AWS RDS, GCP Pub/Sub) via Kubernetes CRDs — cloud-agnostic infrastructure provisioning.</li>
+</ul>
+<pre><code># Crossplane -- provision an RDS instance via Kubernetes CRD
+apiVersion: rds.aws.crossplane.io/v1alpha1
+kind: RDSInstance
+metadata:
+  name: prod-postgres
+spec:
+  forProvider:
+    region: eu-west-1
+    dbInstanceClass: db.t3.medium
+    engine: postgres
+    engineVersion: "15.4"
+    masterUsername: admin
+    allocatedStorage: 100
+    multiAZ: true
+    storageEncrypted: true
+  writeConnectionSecretsToRef:
+    namespace: production
+    name: prod-postgres-creds</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#127959;&#65039; 8.8 Platform Engineering and Internal Developer Platforms</h3>
+<p>As organisations scale, the cognitive burden on developers — "what S3 bucket naming convention? which Terraform module? how do I set up observability?" — becomes a bottleneck. Platform Engineering solves this by building an Internal Developer Platform (IDP).</p>
+<div class="code-explanation">
+<strong>Platform Engineering goal:</strong> Make the right thing the easy thing. Developers should be able to deploy a new service with <span class="highlight">security, observability, cost tagging, and CI/CD</span> built in by default — without reading 10 pages of documentation.
+</div>
+<ul class="styled-list">
+<li><strong>Backstage (Spotify):</strong> Open-source developer portal — service catalogue, scaffolding templates (golden paths), TechDocs, and plugin ecosystem. The most widely adopted IDP framework.</li>
+<li><strong>Golden path templates:</strong> Pre-approved, pre-instrumented Terraform + Helm + CI/CD templates. New service = 1 CLI command, not 2 weeks of setup.</li>
+<li><strong>Self-service infrastructure:</strong> Developers request databases, queues, and storage via a portal or CLI — the platform provisions it with the right settings, tags, and security policies automatically.</li>
+<li><strong>Score (Humanitec):</strong> Workload specification format — describe what your service needs (database, cache, storage) without specifying how to provision it on each cloud.</li>
+<li><strong>Port:</strong> Commercial IDP platform — software catalogue + self-service actions + scorecards for DevEx metrics.</li>
+</ul>
+<pre><code># Backstage software template -- new service scaffolding
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: new-service-template
+  title: "New Cloud Service"
+spec:
+  parameters:
+    - title: Service Details
+      properties:
+        serviceName:   { type: string, title: "Service name" }
+        team:          { type: string, title: "Owning team" }
+        language:      { type: string, enum: [go, python, typescript] }
+        database:      { type: boolean, title: "Needs PostgreSQL?" }
+        queue:         { type: boolean, title: "Needs SQS queue?" }
+
+  steps:
+    - id: fetch-template
+      action: fetch:template
+      input:
+        url: ./skeleton/${{ parameters.language }}
+        values:
+          serviceName: ${{ parameters.serviceName }}
+          team:        ${{ parameters.team }}
+
+    - id: provision-infra
+      action: terraform:apply
+      input:
+        terraformModule: golden-path/service
+        variables:
+          service_name: ${{ parameters.serviceName }}
+          team_tag:     ${{ parameters.team }}
+          enable_rds:   ${{ parameters.database }}
+          enable_sqs:   ${{ parameters.queue }}
+
+    - id: create-repo
+      action: github:repo:create
+      input:
+        name: ${{ parameters.serviceName }}
+        org:  myorg</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#128201; 8.9 GitOps at Scale — Flux and Multi-Cluster Patterns</h3>
+<p>At scale, GitOps evolves beyond single-cluster ArgoCD to fleet-level management of dozens or hundreds of clusters across regions and environments.</p>
+<ul class="styled-list">
+<li><strong>Flux CD:</strong> CNCF-graduated GitOps operator. Pull-based model — Flux agents in each cluster pull from Git. No central server to manage. Supports Helm releases, Kustomize overlays, and multi-tenancy.</li>
+<li><strong>ArgoCD ApplicationSet:</strong> Generate ArgoCD Applications dynamically — one template deploys to all clusters matching a label selector or list. Essential for fleet management.</li>
+<li><strong>Fleet-level config:</strong> Separate repos for: cluster config (node pools, add-ons), platform services (cert-manager, external-secrets, ingress), and application workloads. GitOps all three layers.</li>
+<li><strong>Progressive delivery at fleet scale:</strong> Argo Rollouts + Flagger — automated canary analysis gates before promoting across regions.</li>
+</ul>
+<pre><code># Flux -- multi-cluster HelmRelease with environment overrides
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: my-api
+  namespace: production
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: my-api
+      version: ">=1.0.0"
+      sourceRef:
+        kind: HelmRepository
+        name: internal-charts
+  values:
+    replicaCount: 3
+    image:
+      tag: 1.8.2
+  valuesFrom:
+  - kind: ConfigMap
+    name: cluster-config   # cluster-specific overrides (region, env)</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#127381; 8.10 Emerging Trends — The Next 3-5 Years</h3>
+<p>The cloud industry is evolving rapidly. Understanding emerging directions helps engineers make architecture decisions that age well.</p>
+<div style="margin:1rem 0">
+    <span class="trend-pill tp-hot">HOT NOW</span>
+    <span class="trend-pill tp-rise">RISING</span>
+    <span class="trend-pill tp-grow">GROWING</span>
+</div>
+<ul class="styled-list">
+<li><span class="trend-pill tp-hot">HOT NOW</span> <strong>AI/LLM infrastructure:</strong> GPU clusters, vector databases, RAG pipelines, and LLM observability are defining new cloud architecture patterns. Every product team now has a "how do we use AI?" mandate.</li>
+<li><span class="trend-pill tp-hot">HOT NOW</span> <strong>Platform Engineering + IDP:</strong> After years of "you build it, you run it", teams are recognising that cognitive overhead kills velocity. IDPs are the solution for scaling DevOps practices.</li>
+<li><span class="trend-pill tp-hot">HOT NOW</span> <strong>eBPF-native networking:</strong> Cilium replacing kube-proxy and traditional service meshes. Lower overhead, kernel-level observability, no sidecar injection.</li>
+<li><span class="trend-pill tp-rise">RISING</span> <strong>WebAssembly on the server:</strong> WASM + WASI is maturing rapidly. Spin, Wasmtime, and WasmEdge are production-ready. Expect WASM to compete with containers for microservices within 2-3 years.</li>
+<li><span class="trend-pill tp-rise">RISING</span> <strong>Confidential computing:</strong> AMD SEV, Intel TDX — hardware-level memory encryption. Workloads run in Trusted Execution Environments (TEEs) that even the cloud provider cannot inspect.</li>
+<li><span class="trend-pill tp-rise">RISING</span> <strong>Sustainability and Green Cloud:</strong> Scope 3 emissions reporting, carbon-aware scheduling (run batch workloads when the grid is greenest), and cloud provider sustainability SLAs.</li>
+<li><span class="trend-pill tp-grow">GROWING</span> <strong>Durable execution platforms:</strong> Temporal, Restate, Durable Functions — reliable, stateful long-running workflows without managing distributed state manually.</li>
+<li><span class="trend-pill tp-grow">GROWING</span> <strong>Kubernetes everywhere (and less Kubernetes):</strong> K8s is the standard for complex workloads; serverless containers (Fargate, Cloud Run) are absorbing simpler ones. The operator model is extending to manage AI/ML, databases, and networking.</li>
+</ul>
+</div>
+
+<div class="content-card">
+<h3>&#127968; 8.11 Confidential Computing and Zero-Trust Hardware</h3>
+<ul class="styled-list">
+<li><strong>Trusted Execution Environments (TEEs):</strong> Secure enclaves (Intel SGX, AMD SEV-SNP, AWS Nitro Enclaves) isolate workloads in hardware-encrypted memory that the hypervisor and cloud provider cannot access.</li>
+<li><strong>AWS Nitro Enclaves:</strong> Isolated EC2 compute with no persistent storage, no network access, and no SSH. Cryptographic attestation proves the code running inside has not been tampered with. Used for key management, PII processing, and payment card handling.</li>
+<li><strong>Attestation:</strong> Cryptographic proof that a specific, unmodified code image is running in a TEE — verifiable by the client without trusting the cloud provider.</li>
+<li><strong>Use cases:</strong> Genomics processing (HIPAA + GDPR), financial transaction signing, machine learning on sensitive training data, multi-party computation.</li>
+</ul>
+<pre><code># AWS Nitro Enclave -- launch and interact via vsock
+# Build enclave image
+nitro-cli build-enclave \
+  --docker-uri 123456789.dkr.ecr.eu-west-1.amazonaws.com/enclave-app:latest \
+  --output-file enclave.eif
+
+# Run enclave (isolated, no network, no external storage)
+nitro-cli run-enclave \
+  --eif-path enclave.eif \
+  --memory 2048 \
+  --cpu-count 2 \
+  --enclave-cid 16
+
+# Attest the enclave (get PCR measurements)
+nitro-cli describe-enclaves | jq '.[] | .Measurements'</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#9874;&#65039; 8.12 Durable Execution — Temporal and Reliable Workflows</h3>
+<p>Distributed systems fail partially. When a workflow spans multiple services over minutes or days, how do you ensure it completes reliably — even when individual services crash, networks partition, or deployments happen mid-flow?</p>
+<ul class="styled-list">
+<li><strong>Temporal.io:</strong> Open-source durable execution platform. Write business logic as plain code (Go, Java, Python, TypeScript); Temporal handles retries, timeouts, state persistence, and resumption automatically.</li>
+<li><strong>Workflows as code:</strong> No YAML state machines. Your workflow is a function that can sleep for days, wait for external signals, and call child workflows — all durable.</li>
+<li><strong>Temporal vs Step Functions:</strong> Temporal offers code-based workflows (more expressive), self-hosting option, and better developer experience for complex logic. Step Functions is managed and integrates natively with 200+ AWS services.</li>
+<li><strong>Restate:</strong> Newer durable execution runtime built on WASM — sub-millisecond overhead, runs at the edge.</li>
+</ul>
+<pre><code">// Temporal workflow -- order fulfilment (TypeScript)
+import { defineSignal, setHandler, sleep } from '@temporalio/workflow';
+
+export const paymentConfirmedSignal = defineSignal('paymentConfirmed');
+
+export async function fulfillOrderWorkflow(orderId: string) {
+  let paymentReceived = false;
+
+  // Wait up to 30 minutes for payment signal
+  setHandler(paymentConfirmedSignal, () => { paymentReceived = true; });
+  await condition(() => paymentReceived, '30 minutes');
+
+  if (!paymentReceived) {
+    await cancelOrder(orderId);
+    return;
+  }
+
+  // These activity calls are automatically retried on failure
+  await reserveInventory(orderId);
+  await scheduleShipment(orderId);
+
+  // Wait 3 days for delivery confirmation
+  await sleep('3 days');
+  await sendDeliveryConfirmation(orderId);
+}</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#9889; 8.13 Carbon-Aware Cloud Architecture</h3>
+<p>Cloud providers publish real-time carbon intensity data for their regions. Carbon-aware scheduling routes workloads to where and when electricity is greenest — often with zero cost increase.</p>
+<ul class="styled-list">
+<li><strong>Carbon intensity:</strong> Grams of CO2 equivalent per kWh of electricity. Varies by region (Nordic hydro vs coal-heavy grid) and time of day (solar midday vs evening peak).</li>
+<li><strong>Carbon-aware SDK:</strong> Open-source library from the Green Software Foundation — query carbon intensity forecasts and shift batch workloads to low-carbon windows.</li>
+<li><strong>AWS Customer Carbon Footprint Tool:</strong> Track Scope 1, 2, and 3 emissions from AWS usage. Available in Cost Explorer.</li>
+<li><strong>Batch workload shifting:</strong> ML training, ETL jobs, and backup runs can be shifted by hours without user impact. Targeting low-carbon windows can reduce grid emissions 20-40%.</li>
+</ul>
+<pre><code"># Carbon-aware batch scheduling (Python + Carbon SDK)
+from carbon_aware_sdk import CarbonAwareClient
+
+client  = CarbonAwareClient()
+windows = client.get_best_execution_time(
+    location      = "westeurope",
+    data_start_at = datetime.utcnow(),
+    data_end_at   = datetime.utcnow() + timedelta(hours=12),
+    window_size   = timedelta(hours=2)
+)
+
+best_window = windows[0]  # lowest carbon intensity window
+print(f"Best time: {best_window.time}, intensity: {best_window.rating} gCO2/kWh")
+
+# Schedule AWS Batch job for the optimal window
+schedule_batch_job(start_time=best_window.time)</code></pre>
+</div>
+
+<div class="content-card" style="border-left:5px solid var(--cyan)">
+<h3>&#9989; 8.14 Module Summary &amp; Journey Complete</h3>
+<p>Congratulations on completing the full BitJourney Cloud track. After this final module you understand:</p>
+<ul class="styled-list">
+<li>Edge computing architecture: PoPs, Wavelength, Outposts, and ultra-low latency design.</li>
+<li>Lambda@Edge and CloudFront Functions — when each applies and how to implement auth and A/B at the edge.</li>
+<li>Cloudflare Workers: V8 isolates, KV, Durable Objects, and Workers AI.</li>
+<li>WebAssembly: WASM + WASI, Spin, Wasmtime, and WASM containers in Kubernetes.</li>
+<li>Advanced serverless: Step Functions state machines, Lambda SnapStart, Fargate, and Cloud Run.</li>
+<li>AI/ML infrastructure: GPU instances, SageMaker, Bedrock, vector databases, and Spot training.</li>
+<li>Multi-cloud: active-active vs active-passive, Crossplane, and when multi-cloud genuinely helps.</li>
+<li>Platform Engineering: Backstage, golden path templates, and Internal Developer Platforms.</li>
+<li>GitOps at scale: Flux, ArgoCD ApplicationSets, and fleet management patterns.</li>
+<li>Confidential computing: Nitro Enclaves, TEEs, and hardware attestation.</li>
+<li>Durable execution: Temporal workflows as reliable, stateful distributed systems.</li>
+<li>Emerging trends: eBPF, carbon-aware scheduling, durable execution, and the next 3-5 years of cloud.</li>
+</ul>
+<div style="margin-top:1.5rem;padding:1rem;background:rgba(0,212,255,0.06);border-radius:8px;border:1px solid rgba(0,212,255,0.2);text-align:center">
+    <p style="color:var(--cyan);font-weight:700;font-size:1.1rem">&#127881; Cloud Journey Complete!</p>
+    <p style="color:var(--text-secondary);margin-top:0.5rem;font-size:0.9rem">You have covered all 8 modules — Architecture, IaC, Automation, Security, Networking, Observability, FinOps, and Edge &amp; Future. You now have the foundations to design, build, operate, and optimise production cloud systems.</p>
+</div>
+</div>
+
+        </div>
+
+        <!-- LAB -->
+        <div id="lab" class="tab-panel">
+            <h3 style="margin-bottom:0.5rem">Lab: Future Architecture Designer</h3>
+            <p style="color:var(--text-secondary);margin-bottom:1.25rem;font-size:0.9rem">Describe your application profile and click Run to get an architecture recommendation spanning edge, serverless, AI/ML, and multi-cloud patterns.</p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header-bar">APPLICATION PROFILE</div>
+                    <textarea class="lab-textarea" id="lab-input">const app = {
+  name:            "Global Commerce Platform",
+  users:           "worldwide",        // "regional" | "worldwide"
+  latencyTarget:   10,                 // ms p99 target
+  hasMLFeatures:   true,               // recommendation engine?
+  hasEdgeLogic:    true,               // auth/personalisation at edge?
+  workloadType:    "mixed",            // "realtime" | "batch" | "mixed"
+  complianceNeeds: ["gdpr","pci"],     // [] | ["gdpr"] | ["hipaa"] | ["pci"]
+  trafficPattern:  "spiky",            // "steady" | "spiky" | "bursty"
+  multiCloud:      false,              // deliberate multi-cloud?
+  teamSize:        "medium",           // "small" | "medium" | "large"
+};</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header-bar">ARCHITECTURE RECOMMENDATIONS</div>
+                    <div class="lab-output" id="lab-output">Click "Run" to generate your future architecture recommendations...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem" onclick="runLab()">&#9658; Generate Architecture</button>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: Edge &amp; Future Architectures</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">15 questions covering edge computing, serverless patterns, WebAssembly, AI/ML infrastructure, multi-cloud, platform engineering, and emerging trends.</p>
+                <form id="quiz-form">
+
+<div class="quiz-item"><p class="quiz-question">1. What is the key architectural difference between running compute in a cloud region versus running it at an edge PoP?</p>
+<label class="quiz-option"><input type="radio" name="q1" value="A"><span class="option-text">A) Edge PoPs use ARM processors; cloud regions use x86 only</span></label>
+<label class="quiz-option"><input type="radio" name="q1" value="B" data-correct="true"><span class="option-text">B) Edge PoPs are geographically distributed close to end users, reducing network round-trip latency from 100-200ms to under 10ms, but with fewer resources and less compute power than a full region</span></label>
+<label class="quiz-option"><input type="radio" name="q1" value="C"><span class="option-text">C) Edge PoPs run dedicated bare-metal servers; cloud regions run virtualised</span></label>
+<label class="quiz-option"><input type="radio" name="q1" value="D"><span class="option-text">D) Edge PoPs are cheaper versions of cloud regions with the same capabilities</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">2. What is the key difference between CloudFront Functions and Lambda@Edge?</p>
+<label class="quiz-option"><input type="radio" name="q2" value="A"><span class="option-text">A) CloudFront Functions support Python; Lambda@Edge only supports Node.js</span></label>
+<label class="quiz-option"><input type="radio" name="q2" value="B" data-correct="true"><span class="option-text">B) CloudFront Functions are ultra-lightweight (sub-ms, no external calls, cheaper) for simple request manipulation; Lambda@Edge is a full runtime supporting external API calls with longer timeouts for complex logic</span></label>
+<label class="quiz-option"><input type="radio" name="q2" value="C"><span class="option-text">C) CloudFront Functions run at the origin; Lambda@Edge runs at edge PoPs</span></label>
+<label class="quiz-option"><input type="radio" name="q2" value="D"><span class="option-text">D) They are identical products with different billing models</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">3. Cloudflare Workers use V8 Isolates instead of containers. What is the main benefit of this approach?</p>
+<label class="quiz-option"><input type="radio" name="q3" value="A"><span class="option-text">A) V8 isolates support more programming languages than containers</span></label>
+<label class="quiz-option"><input type="radio" name="q3" value="B"><span class="option-text">B) V8 isolates provide stronger security isolation than containers</span></label>
+<label class="quiz-option"><input type="radio" name="q3" value="C" data-correct="true"><span class="option-text">C) Cold start under 1ms -- no OS process to boot. Thousands of isolates share one process, enabling massive density with near-instant startup versus 100ms-1s for containers</span></label>
+<label class="quiz-option"><input type="radio" name="q3" value="D"><span class="option-text">D) V8 isolates have no memory limit restrictions unlike containers</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">4. What does WASI stand for and what problem does it solve for WebAssembly?</p>
+<label class="quiz-option"><input type="radio" name="q4" value="A"><span class="option-text">A) WebAssembly Server Interface -- provides HTTP server capabilities</span></label>
+<label class="quiz-option"><input type="radio" name="q4" value="B"><span class="option-text">B) Web Application Security Interface -- sandboxes WASM from the network</span></label>
+<label class="quiz-option"><input type="radio" name="q4" value="C" data-correct="true"><span class="option-text">C) WebAssembly System Interface -- a capability-based standard API giving WASM modules controlled access to OS-like functions (filesystem, sockets, clocks) outside the browser</span></label>
+<label class="quiz-option"><input type="radio" name="q4" value="D"><span class="option-text">D) WASM Integration Standard -- allows WASM modules to call native C libraries</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">5. Which AWS service allows you to orchestrate complex multi-step workflows with retries, parallel branches, and wait-for-callback patterns without managing state?</p>
+<label class="quiz-option"><input type="radio" name="q5" value="A"><span class="option-text">A) AWS EventBridge -- event routing between services</span></label>
+<label class="quiz-option"><input type="radio" name="q5" value="B"><span class="option-text">B) AWS SQS -- message queue for decoupling services</span></label>
+<label class="quiz-option"><input type="radio" name="q5" value="C" data-correct="true"><span class="option-text">C) AWS Step Functions -- managed state machine orchestration with visual workflow editor, retries, error handling, and 200+ native AWS service integrations</span></label>
+<label class="quiz-option"><input type="radio" name="q5" value="D"><span class="option-text">D) AWS Lambda -- serverless functions chained together via environment variables</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">6. Why are ML training jobs considered an ideal use case for Spot Instances?</p>
+<label class="quiz-option"><input type="radio" name="q6" value="A"><span class="option-text">A) ML training jobs do not use network I/O, which is what Spot interruptions affect</span></label>
+<label class="quiz-option"><input type="radio" name="q6" value="B" data-correct="true"><span class="option-text">B) Training jobs can checkpoint their state to S3 every N iterations -- on Spot interruption they restart from the last checkpoint, losing minimal progress while saving 70-90% on GPU costs</span></label>
+<label class="quiz-option"><input type="radio" name="q6" value="C"><span class="option-text">C) ML frameworks handle Spot interruptions natively without any code changes</span></label>
+<label class="quiz-option"><input type="radio" name="q6" value="D"><span class="option-text">D) AWS never interrupts P-family GPU Spot instances during training</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">7. What is Amazon Bedrock and what infrastructure problem does it solve?</p>
+<label class="quiz-option"><input type="radio" name="q7" value="A"><span class="option-text">A) A managed GPU cluster service for training custom LLMs from scratch</span></label>
+<label class="quiz-option"><input type="radio" name="q7" value="B"><span class="option-text">B) A database service for storing LLM conversation history</span></label>
+<label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"><span class="option-text">C) A managed API for foundation models (Claude, Llama, Titan) -- eliminates GPU provisioning, model deployment, scaling, and patching. Pay per token with no infrastructure to manage</span></label>
+<label class="quiz-option"><input type="radio" name="q7" value="D"><span class="option-text">D) A vector database service for storing embeddings used in RAG pipelines</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">8. What is a vector database used for in modern AI architectures?</p>
+<label class="quiz-option"><input type="radio" name="q8" value="A"><span class="option-text">A) Storing and querying structured ML training datasets</span></label>
+<label class="quiz-option"><input type="radio" name="q8" value="B"><span class="option-text">B) Caching LLM responses to reduce API costs</span></label>
+<label class="quiz-option"><input type="radio" name="q8" value="C" data-correct="true"><span class="option-text">C) Storing high-dimensional numerical embeddings and performing similarity searches -- enabling RAG (Retrieval-Augmented Generation) by finding semantically relevant context for LLM prompts</span></label>
+<label class="quiz-option"><input type="radio" name="q8" value="D"><span class="option-text">D) Optimising SQL query execution for ML feature pipelines</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">9. Which of the following is the most accurate reason to adopt a multi-cloud strategy?</p>
+<label class="quiz-option"><input type="radio" name="q9" value="A"><span class="option-text">A) To eliminate cloud provider pricing entirely by playing providers against each other monthly</span></label>
+<label class="quiz-option"><input type="radio" name="q9" value="B"><span class="option-text">B) Multi-cloud always reduces costs because you can always switch to the cheaper option</span></label>
+<label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"><span class="option-text">C) Genuine regulatory data residency requirements, catastrophic-failure DR protection, or best-of-breed service selection -- not vague "avoiding lock-in" which rarely justifies the added operational complexity</span></label>
+<label class="quiz-option"><input type="radio" name="q9" value="D"><span class="option-text">D) Multi-cloud is always simpler than single-cloud because Kubernetes abstracts all differences</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">10. What is Crossplane and what Kubernetes concept does it extend?</p>
+<label class="quiz-option"><input type="radio" name="q10" value="A"><span class="option-text">A) A Helm chart repository for multi-cloud deployments</span></label>
+<label class="quiz-option"><input type="radio" name="q10" value="B" data-correct="true"><span class="option-text">B) A Kubernetes-native control plane that extends the Kubernetes API with CRDs to provision and manage cloud resources (AWS RDS, GCP Pub/Sub, Azure SQL) using kubectl and GitOps workflows</span></label>
+<label class="quiz-option"><input type="radio" name="q10" value="C"><span class="option-text">C) A Terraform alternative that uses Kubernetes pods to run cloud provisioning jobs</span></label>
+<label class="quiz-option"><input type="radio" name="q10" value="D"><span class="option-text">D) A multi-cloud load balancer that routes Kubernetes workloads across AWS and GCP</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">11. What is the primary goal of an Internal Developer Platform (IDP)?</p>
+<label class="quiz-option"><input type="radio" name="q11" value="A"><span class="option-text">A) Replace the cloud provider console with a custom UI</span></label>
+<label class="quiz-option"><input type="radio" name="q11" value="B"><span class="option-text">B) Enforce security policies by restricting developer access to cloud resources</span></label>
+<label class="quiz-option"><input type="radio" name="q11" value="C" data-correct="true"><span class="option-text">C) Reduce cognitive load on application developers by providing self-service infrastructure with security, observability, and cost tagging built in by default -- making the right way the easy way</span></label>
+<label class="quiz-option"><input type="radio" name="q11" value="D"><span class="option-text">D) Centralise all infrastructure management in a dedicated platform team</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">12. What makes Temporal different from AWS Step Functions for workflow orchestration?</p>
+<label class="quiz-option"><input type="radio" name="q12" value="A"><span class="option-text">A) Temporal only supports Python; Step Functions supports all AWS Lambda runtimes</span></label>
+<label class="quiz-option"><input type="radio" name="q12" value="B"><span class="option-text">B) Temporal requires more YAML configuration than Step Functions JSON state machines</span></label>
+<label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"><span class="option-text">C) Temporal uses code-based workflows (Go, Java, Python, TypeScript) that are more expressive than YAML/JSON state machines, can be self-hosted, and provide a richer developer experience for complex business logic</span></label>
+<label class="quiz-option"><input type="radio" name="q12" value="D"><span class="option-text">D) Temporal is only suitable for sub-second workflows; Step Functions handles long-running ones</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">13. What is the security guarantee provided by AWS Nitro Enclaves?</p>
+<label class="quiz-option"><input type="radio" name="q13" value="A"><span class="option-text">A) Network traffic to/from the enclave is automatically encrypted with AES-256</span></label>
+<label class="quiz-option"><input type="radio" name="q13" value="B"><span class="option-text">B) The enclave has full network isolation and can only communicate via VPC endpoints</span></label>
+<label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"><span class="option-text">C) The enclave runs in isolated memory with no persistent storage, no SSH, and no network -- even AWS operators cannot inspect the data. Cryptographic attestation proves the exact code image running inside</span></label>
+<label class="quiz-option"><input type="radio" name="q13" value="D"><span class="option-text">D) The enclave automatically rotates encryption keys every 24 hours</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">14. What advantage does WebAssembly (WASM) offer over OCI containers for edge computing workloads?</p>
+<label class="quiz-option"><input type="radio" name="q14" value="A"><span class="option-text">A) WASM supports more programming languages than Docker containers</span></label>
+<label class="quiz-option"><input type="radio" name="q14" value="B"><span class="option-text">B) WASM containers have better Kubernetes integration than OCI containers</span></label>
+<label class="quiz-option"><input type="radio" name="q14" value="C" data-correct="true"><span class="option-text">C) Sub-millisecond cold starts (no OS to boot), smaller binary size (1-10MB vs 50-200MB), sandboxed by default, and portable across any WASM runtime regardless of host OS or architecture</span></label>
+<label class="quiz-option"><input type="radio" name="q14" value="D"><span class="option-text">D) WASM has better GPU support than containers for ML inference workloads</span></label>
+</div>
+
+<div class="quiz-item"><p class="quiz-question">15. What does "carbon-aware scheduling" mean in a cloud context?</p>
+<label class="quiz-option"><input type="radio" name="q15" value="A"><span class="option-text">A) Automatically shutting down non-critical workloads to reduce energy consumption at all times</span></label>
+<label class="quiz-option"><input type="radio" name="q15" value="B"><span class="option-text">B) Routing all traffic through AWS regions powered by 100% renewable energy</span></label>
+<label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"><span class="option-text">C) Scheduling flexible (non-time-sensitive) workloads like batch jobs and ML training to run when and where electricity grid carbon intensity is lowest -- reducing emissions 20-40% with no user impact</span></label>
+<label class="quiz-option"><input type="radio" name="q15" value="D"><span class="option-text">D) Purchasing carbon offsets equal to cloud resource consumption</span></label>
+</div>
+
+                </form>
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+                <div id="quiz-results" class="quiz-results" style="display:none">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback" class="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESOURCES -->
+        <div id="resources" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem">Support Materials</h3>
+            <div class="content-card">
+                <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem">Official documentation and deep-dive references:</p>
+                <a href="https://developers.cloudflare.com/workers/" target="_blank" class="resource-link">&#8594; Cloudflare Workers Documentation</a>
+                <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-edge.html" target="_blank" class="resource-link">&#8594; AWS Lambda@Edge Documentation</a>
+                <a href="https://webassembly.org/" target="_blank" class="resource-link">&#8594; WebAssembly Official Site</a>
+                <a href="https://wasi.dev/" target="_blank" class="resource-link">&#8594; WASI (WebAssembly System Interface)</a>
+                <a href="https://developer.fermyon.com/spin/v2/index" target="_blank" class="resource-link">&#8594; Spin (Fermyon) -- WASM Serverless Framework</a>
+                <a href="https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html" target="_blank" class="resource-link">&#8594; AWS Step Functions Developer Guide</a>
+                <a href="https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html" target="_blank" class="resource-link">&#8594; Amazon SageMaker Documentation</a>
+                <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html" target="_blank" class="resource-link">&#8594; Amazon Bedrock Documentation</a>
+                <a href="https://docs.crossplane.io/" target="_blank" class="resource-link">&#8594; Crossplane Documentation</a>
+                <a href="https://backstage.io/docs/overview/what-is-backstage" target="_blank" class="resource-link">&#8594; Backstage (IDP) Documentation</a>
+                <a href="https://temporal.io/docs" target="_blank" class="resource-link">&#8594; Temporal.io Documentation</a>
+                <a href="https://docs.aws.amazon.com/enclaves/latest/user/nitro-enclave.html" target="_blank" class="resource-link">&#8594; AWS Nitro Enclaves Documentation</a>
+                <a href="https://greensoftware.foundation/articles/carbon-aware-sdk" target="_blank" class="resource-link">&#8594; Carbon-Aware SDK -- Green Software Foundation</a>
+            </div>
+        </div>
+
+        <!-- EVALUATION -->
+        <div id="evaluation" class="tab-panel">
+            <div class="content-card">
+                <h3>&#127919; Domain Criteria: Edge &amp; Future Architectures</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">To complete this final module, demonstrate understanding across these three competency levels:</p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>&#128306;</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>Edge computing: why it exists and key latency benefits</li>
+                            <li>Lambda@Edge vs CloudFront Functions -- use cases for each</li>
+                            <li>What WebAssembly is and its core properties (portable, sandboxed, fast cold start)</li>
+                            <li>WASI -- what it adds to WASM for server-side use</li>
+                            <li>AWS Step Functions -- state machine orchestration concept</li>
+                            <li>AI/ML infra basics: GPU instances, SageMaker, Bedrock</li>
+                            <li>Multi-cloud: active-active vs active-passive patterns</li>
+                            <li>Platform Engineering: IDP purpose and Backstage role</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>&#11088;</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Cloudflare Workers: V8 isolates, KV, and Durable Objects</li>
+                            <li>WASM containers in Kubernetes via RuntimeClass</li>
+                            <li>Lambda SnapStart and response streaming</li>
+                            <li>Spot instances for ML training with S3 checkpointing</li>
+                            <li>Vector databases: purpose in RAG architectures</li>
+                            <li>Crossplane: cloud resources as Kubernetes CRDs</li>
+                            <li>Temporal vs Step Functions -- trade-offs</li>
+                            <li>Carbon-aware scheduling: what it is and which workloads apply</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>&#128640;</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>AWS Nitro Enclaves: TEE, attestation, and use cases</li>
+                            <li>Confidential computing: Intel TDX, AMD SEV-SNP</li>
+                            <li>Spin/Fermyon: WASM microservices in production</li>
+                            <li>Flux CD fleet management + ArgoCD ApplicationSets</li>
+                            <li>AWS Wavelength for 5G ultra-low latency architecture</li>
+                            <li>Backstage golden path templates and self-service infra</li>
+                            <li>Score workload specification for cloud-agnostic services</li>
+                            <li>Restate durable execution on WASM at the edge</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function openTab(evt, tabName) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
+    const map = { learn:25, lab:50, quiz:75, resources:90, evaluation:100 };
+    document.getElementById('progress-fill').style.width = map[tabName] + '%';
+    document.getElementById('progress-text').innerText = map[tabName] + '%';
+    window.scrollTo({ top:150, behavior:'smooth' });
+}
+
+function runLab() {
+    const input = document.getElementById('lab-input').value;
+    const out   = document.getElementById('lab-output');
+    const get   = (k,d) => { const m=input.match(new RegExp(k+'\\s*:\\s*["\']?([^,"\'\n}]+)["\']?')); return m?m[1].trim().replace(/['"]/g,''):d; };
+
+    const name      = get('name','Platform');
+    const users     = get('users','regional');
+    const latency   = parseFloat(get('latencyTarget','50'))||50;
+    const hasML     = input.includes('hasMLFeatures: true')||input.includes("hasMLFeatures:true");
+    const hasEdge   = input.includes('hasEdgeLogic: true')||input.includes("hasEdgeLogic:true");
+    const workload  = get('workloadType','mixed');
+    const traffic   = get('trafficPattern','steady');
+    const mc        = input.includes('multiCloud: true')||input.includes("multiCloud:true");
+    const teamSize  = get('teamSize','medium');
+    const compliance= input.match(/complianceNeeds.*?\[(.*?)\]/)?.[1]?.replace(/['"]/g,'')||'none';
+
+    const global    = users==='worldwide';
+    const needsEdge = latency < 20 || hasEdge;
+    const needsIDP  = teamSize==='medium'||teamSize==='large';
+
+    let recs = `Architecture Recommendations: ${name}\n${'='.repeat(52)}\n\n`;
+
+    recs += `EDGE LAYER\n${'─'.repeat(52)}\n`;
+    if (needsEdge && global) {
+        recs += `  Strategy:    Global edge with CloudFront + Lambda@Edge\n`;
+        recs += `  Runtime:     CloudFront Functions (URL rewrite, A/B, headers)\n`;
+        recs += `               Lambda@Edge (auth, personalisation, SSR)\n`;
+        recs += `  Alternative: Cloudflare Workers for sub-1ms logic + Workers KV\n`;
+        recs += `  Ratency target ${latency}ms: ${latency<5?'requires Cloudflare Workers or 5G edge':latency<20?'achievable with CloudFront edge compute':'achievable with CDN caching alone'}\n\n`;
+    } else {
+        recs += `  No edge compute required for regional traffic.\n`;
+        recs += `  Use CloudFront CDN for static assets and API caching.\n\n`;
+    }
+
+    recs += `COMPUTE LAYER\n${'─'.repeat(52)}\n`;
+    if (traffic==='spiky'||traffic==='bursty') {
+        recs += `  Primary:     AWS Lambda (scale-to-zero, no idle cost)\n`;
+        recs += `               or AWS Fargate (longer requests, stateful)\n`;
+        recs += `  Workflows:   AWS Step Functions (order/approval flows)\n`;
+        recs += `  Consider:    Lambda SnapStart for Java if cold starts matter\n\n`;
+    } else {
+        recs += `  Primary:     EKS with Karpenter (Spot + On-Demand mix)\n`;
+        recs += `               Savings Plans for baseline EC2/Fargate\n\n`;
+    }
+
+    recs += `AI / ML LAYER\n${'─'.repeat(52)}\n`;
+    if (hasML) {
+        recs += `  Inference:   Amazon Bedrock (managed, pay-per-token)\n`;
+        recs += `               or Inferentia2 endpoints for custom models\n`;
+        recs += `  Training:    SageMaker + Spot (P3/P4 GPU, checkpoint to S3)\n`;
+        recs += `  RAG:         OpenSearch or pgvector for embedding storage\n`;
+        recs += `  Observability: Prometheus + custom LLM latency/token metrics\n\n`;
+    } else {
+        recs += `  No ML features detected -- skip AI/ML infrastructure.\n\n`;
+    }
+
+    recs += `COMPLIANCE\n${'─'.repeat(52)}\n`;
+    if (compliance.includes('gdpr')) recs += `  GDPR:  Data residency enforced via Route53 geolocation routing.\n         DPA signed with AWS. EU-only regions for EU user data.\n`;
+    if (compliance.includes('pci'))  recs += `  PCI:   Nitro Enclaves for card data processing.\n         WAF + Shield Advanced. VPC with private subnets for PCI scope.\n`;
+    if (compliance.includes('hipaa'))recs += `  HIPAA: BAA with AWS. Encryption at rest (KMS CMK) and in transit.\n         CloudTrail + Config for audit. Nitro Enclaves for PHI processing.\n`;
+    if (!compliance||compliance==='none') recs += `  No compliance requirements specified.\n`;
+    recs += '\n';
+
+    recs += `MULTI-CLOUD\n${'─'.repeat(52)}\n`;
+    recs += mc
+        ? `  Active-Passive DR: AWS primary + GCP/Azure standby.\n  Use Crossplane for cloud-agnostic resource provisioning.\n  Kubernetes (EKS + GKE) with shared Helm charts via GitOps.\n\n`
+        : `  Single-cloud recommended for this profile.\n  Focus on HA within AWS (multi-AZ + multi-region failover).\n\n`;
+
+    recs += `PLATFORM ENGINEERING\n${'─'.repeat(52)}\n`;
+    if (needsIDP) {
+        recs += `  Deploy Backstage IDP with golden path templates.\n`;
+        recs += `  Self-service: new service = 1 CLI command with\n`;
+        recs += `  Terraform module, CI/CD, tagging, and observability.\n`;
+        recs += `  Use Flux CD for GitOps fleet management.\n\n`;
+    } else {
+        recs += `  Small team: Shared Terraform modules + ArgoCD sufficient.\n\n`;
+    }
+
+    recs += `EMERGING TECH TO WATCH\n${'─'.repeat(52)}\n`;
+    recs += `  * WebAssembly (Spin/Cloudflare): evaluate for edge microservices\n`;
+    recs += `  * Temporal.io: replace Step Functions for complex business workflows\n`;
+    recs += `  * eBPF/Cilium: replace kube-proxy + consider sidecar-less mesh\n`;
+    if (hasML) recs += `  * LLM observability: trace token usage, latency, and cost per request\n`;
+    recs += `  * Carbon-aware scheduling: shift batch/training to low-carbon windows\n`;
+
+    out.textContent = recs;
+}
+
+const questionsData = {
+    q1: {correct:'B',exp:'Edge PoPs (Points of Presence) sit physically close to end users -- often in the same city or telecom facility. This reduces the network round-trip from 100-200ms (to a distant cloud region) to under 10ms. The trade-off is fewer resources and a more limited runtime environment than a full cloud region.'},
+    q2: {correct:'B',exp:'CloudFront Functions run at every PoP in sub-millisecond, support only JS, and cannot make external calls -- ideal for simple manipulation like URL rewrites, cookie checks, and header injection. Lambda@Edge runs full Node.js/Python, supports external API calls, and has longer timeouts -- use it for JWT auth, server-side rendering, or complex logic.'},
+    q3: {correct:'C',exp:'V8 Isolates are lightweight JavaScript execution contexts that share a single OS process. Unlike containers (which each need their own OS process and can take 100ms-1s to start), isolates start in under 1ms because there is nothing to boot. Cloudflare can run thousands of Worker instances on a single machine.'},
+    q4: {correct:'C',exp:'WASI is the WebAssembly System Interface -- a capability-based standard for granting WASM modules access to OS-like features (filesystem reads, network sockets, random numbers, clocks) in a controlled way. Without WASI, WASM has no access to anything outside the sandbox, making server-side use cases impossible.'},
+    q5: {correct:'C',exp:'AWS Step Functions is a managed state machine service. You define states (Task, Choice, Parallel, Wait, Succeed, Fail) in JSON (ASL). It handles state persistence, retries with exponential backoff, parallel branches, and wait-for-callback patterns natively -- without any custom state management code.'},
+    q6: {correct:'B',exp:'ML training is ideal for Spot because: 1) training jobs are long-running, giving good value per instance, 2) frameworks like PyTorch support saving/loading checkpoints to S3, 3) if interrupted, the job restarts from the last checkpoint losing only minutes of work, while saving 70-90% on GPU costs compared to On-Demand.'},
+    q7: {correct:'C',exp:'Amazon Bedrock is a managed API service for foundation models including Claude, Llama, Titan, and Stability AI. You call an API endpoint and pay per token -- no GPU instances to provision, no model deployment to manage, no scaling to configure, no patching. It dramatically reduces the infrastructure overhead of adding AI to applications.'},
+    q8: {correct:'C',exp:'Vector databases (Pinecone, Weaviate, pgvector, OpenSearch k-NN) store embeddings -- high-dimensional float vectors representing semantic meaning. For RAG, you embed your knowledge base, then at query time embed the user question and find the k most similar chunks to add as context to the LLM prompt.'},
+    q9: {correct:'C',exp:'The most valid reasons for multi-cloud are: regulatory requirements (data cannot leave a jurisdiction that only one provider covers), genuine DR protection against cloud-provider-level failures, or needing best-of-breed services. "Avoiding lock-in" as a primary driver rarely justifies doubled operational complexity -- Kubernetes helps portability but cloud-managed services (RDS, Pub/Sub) are still provider-specific.'},
+    q10:{correct:'B',exp:'Crossplane extends the Kubernetes API with Custom Resource Definitions (CRDs) for cloud resources. You kubectl apply a RDSInstance or GCPPubSubTopic and Crossplane\'s controllers reconcile those against the actual cloud APIs -- the same GitOps and RBAC patterns you use for application workloads now manage your cloud infrastructure.'},
+    q11:{correct:'C',exp:'An IDP removes the cognitive overhead of "how do I do this correctly?" from every application developer. Security, tagging, observability, and CI/CD are pre-configured in golden path templates. The result: new services are faster to create, more consistent, and inherently compliant -- without requiring every developer to be an infrastructure expert.'},
+    q12:{correct:'C',exp:'Temporal workflows are written as plain code functions in Go, Java, Python, or TypeScript -- much more expressive than JSON/YAML state machines. Temporal can be self-hosted (important for compliance), supports very complex branching logic naturally, and the developer experience for testing workflows is significantly better. Step Functions\' advantage is fully managed + 200+ native AWS integrations.'},
+    q13:{correct:'C',exp:'Nitro Enclaves provide hardware-isolated memory with no persistent storage, no SSH access, and no network interfaces (only a vsock channel to the parent EC2 instance). Even AWS operators cannot access the enclave\'s memory. Cryptographic attestation lets clients verify the exact code image running inside, ensuring no tampering has occurred.'},
+    q14:{correct:'C',exp:'WASM\'s key advantages over containers for edge: cold starts under 1ms (no OS process to boot), binary sizes of 1-10MB (vs 50-200MB for container images), sandboxed by default without elevated privileges, and compile-once-run-anywhere portability across any host OS or CPU architecture that has a WASM runtime.'},
+    q15:{correct:'C',exp:'Carbon-aware scheduling shifts time-flexible workloads (ML training, batch ETL, backups, large data processing) to run when and where electricity grid carbon intensity is lowest -- e.g., Nordic hydro on a Sunday morning. Users are unaffected. Studies show 20-40% emissions reduction for batch-heavy workloads with zero additional cost.'}
+};
+
+document.getElementById('submit-quiz').addEventListener('click', () => {
+    const form = document.getElementById('quiz-form');
+    const data = new FormData(form);
+    let score = 0, feedbackHTML = '';
+    Object.keys(questionsData).forEach((key,i) => {
+        const ua = data.get(key);
+        const ok = ua === questionsData[key].correct;
+        if (ok) score++;
+        feedbackHTML += `<div class="feedback-item ${ok?'feedback-correct':'feedback-incorrect'}">
+            <span class="feedback-icon">${ok?'&#10003;':'&#10007;'}</span>
+            <div><strong>Question ${i+1}:</strong> ${questionsData[key].exp}
+            ${!ok?`<br><small class="correct-answer">Correct: Option ${questionsData[key].correct}</small>`:''}</div></div>`;
+    });
+    const total = Object.keys(questionsData).length;
+    const pct   = Math.round((score/total)*100);
+    const cls   = pct>=80?'score-excellent':pct>=53?'score-good':'score-poor';
+    const msg   = pct>=80
+        ? '&#127881; Outstanding! You have completed the full Cloud Journey. You are ready to design production cloud systems.'
+        : pct>=53
+        ? '&#128077; Good work. Review edge compute, WASM, and AI/ML infrastructure sections and try again.'
+        : '&#128218; This module covers cutting-edge topics -- review edge computing, WebAssembly, and multi-cloud patterns carefully.';
+    document.getElementById('quiz-score').innerHTML = `<div class="${cls}">${score}/${total} (${pct}%)</div><p style="color:var(--text-secondary);margin-top:0.5rem">${msg}</p>`;
+    document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+    const r = document.getElementById('quiz-results');
+    r.style.display = 'block';
+    r.scrollIntoView({ behavior:'smooth' });
+});
+
+document.getElementById('clear-quiz').addEventListener('click', () => {
+    document.getElementById('quiz-form').reset();
+    document.getElementById('quiz-results').style.display = 'none';
+    window.scrollTo({ top:0, behavior:'smooth' });
+});
+</script>
+</body>
+</html>

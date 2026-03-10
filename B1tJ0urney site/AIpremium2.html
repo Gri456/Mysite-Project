@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - AI Logic & Search</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #ff2d78;
+            --purple: #ff85c2;
+            --cyan: #e0006e;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(91, 124, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255, 0, 191, 0.168) 0%, rgba(255, 0, 128, 0.185) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11,13,20,0.8); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 0.75rem 0; }
+        .styled-list li { margin-bottom: 0.6rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Agent types grid */
+        .agent-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .agent-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .agent-name { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem; color: var(--cyan); }
+        .agent-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
+
+        /* Algorithm comparison table */
+        .algo-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .algo-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; font-weight: 600; }
+        .algo-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+        .algo-table tr:hover td { background: rgba(255,255,255,0.03); color: var(--text-light); }
+        .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .badge-yes { background: rgba(16,185,129,0.15); color: #10b981; }
+        .badge-no { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .badge-maybe { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+        /* Formula box */
+        .formula-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(91,124,255,0.3); border-radius: 8px; padding: 1rem 1.5rem; margin: 1rem 0; font-family: 'Courier New', monospace; font-size: 0.95rem; color: var(--cyan); text-align: center; }
+
+        /* Applications grid */
+        .app-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .app-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; text-align: center; }
+        .app-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+        .app-title { font-weight: 600; font-size: 0.82rem; color: var(--cyan); margin-bottom: 0.25rem; }
+        .app-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3; }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 440px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header-bar { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); border-radius: 8px 8px 0 0; }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.82rem; border-radius: 0 0 8px 8px; line-height: 1.6; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; font-size: 0.9rem; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Quiz */
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05)); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; background: rgba(255,255,255,0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        /* NEW */
+        .info-box { background: rgba(91,124,255,0.07); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+        .info-box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--purple); }
+        .section-divider { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .concept-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .concept-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 0.35rem; }
+        .concept-title { font-weight: 600; font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.4rem; }
+        .concept-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .agent-grid, .app-grid, .concept-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 280px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .algo-table { font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-ai.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: AI Logic & Search</h1>
+            <p class="course-description">
+                Before Machine Learning, AI was built on logic, reasoning, and search algorithms. Master intelligent agents, BFS, DFS, A*, propositional logic, first-order logic, and constraint satisfaction — the classical foundations every AI engineer must know.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• Agents • Search • BFS/DFS/A* • Logic • CSPs</span></div>
+                <div class="meta-item"><span>📌</span><span>Prerequisite: AI Foundations</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event,'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event,'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event,'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event,'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- LEARN -->
+            <div id="aprender" class="tab-panel active">
+
+                <div class="content-card">
+                    <h3>Why Logic & Reasoning Matter in AI</h3>
+                    <p>Before Machine Learning, Neural Networks, and LLMs existed, AI relied on logic, symbolic reasoning, and search algorithms. These foundations are still essential today because they explain:</p>
+                    <ul class="styled-list">
+                        <li>How machines make decisions step by step</li>
+                        <li>How intelligent agents perceive and act in environments</li>
+                        <li>How to solve problems algorithmically without training data</li>
+                        <li>How pathfinding and planning work (GPS, games, robotics)</li>
+                        <li>How rules, constraints, and knowledge are represented formally</li>
+                    </ul>
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p>Even modern AI systems use these concepts — especially in planning, robotics, navigation, and game AI. A* pathfinding still powers GPS apps today. FOL underpins knowledge graphs used by Google.</p>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem;">There are two major paradigms in AI that have competed and coexisted throughout history:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Paradigm 1</div>
+                            <div class="concept-title">Symbolic AI (GOFAI)</div>
+                            <div class="concept-desc">"Good Old-Fashioned AI" — knowledge represented as symbols, rules, and logic. Explainable and auditable, but brittle when facing noisy real-world data. This module covers this paradigm.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Paradigm 2</div>
+                            <div class="concept-title">Connectionist AI (ML/DL)</div>
+                            <div class="concept-desc">Knowledge emerges from statistical patterns learned from data. Powerful and flexible, but often opaque ("black box"). This is the basis of modern neural networks and LLMs.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Paradigm 3</div>
+                            <div class="concept-title">Neuro-Symbolic AI</div>
+                            <div class="concept-desc">A growing hybrid approach combining deep learning with symbolic reasoning — combining the strengths of both paradigms. Active research area at DeepMind, IBM, and MIT.</div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="margin-top: 0.5rem;">
+                        <div class="info-box-title">📌 Why study classical AI in the age of LLMs?</div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Modern LLMs cannot guarantee correctness, plan reliably, or reason about formal constraints. Symbolic methods are used <em>alongside</em> LLMs in robotics (motion planning), compilers (constraint solving), logistics (scheduling), and safety-critical systems where correctness must be verified.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Intelligent Agents – The Core of Classical AI</h3>
+                    <p>An intelligent agent is anything that <strong>perceives its environment, makes decisions, takes actions,</strong> and <strong>tries to maximize performance.</strong></p>
+                    <p style="margin-top: 0.75rem;"><strong>Examples:</strong> Self-driving car · Robot vacuum · Chess engine · NPC in a game · Search engine</p>
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Sensors</span> — what the agent perceives (camera, microphone, game state)<br>
+                        <span class="highlight">Actuators</span> — what the agent does (move, speak, click, API call)<br>
+                        <span class="highlight">Agent Function / Policy</span> — the logic mapping states → actions</p>
+                    </div>
+                    <p style="margin-top: 1rem;"><strong>Five types of agents:</strong></p>
+                    <div class="agent-grid">
+                        <div class="agent-card">
+                            <div class="agent-name">Simple Reflex</div>
+                            <div class="agent-desc">Reacts to conditions using rules.<br><em>IF obstacle THEN turn-left</em></div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-name">Model-Based</div>
+                            <div class="agent-desc">Maintains internal state about the environment over time.</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-name">Goal-Based</div>
+                            <div class="agent-desc">Selects actions to reach a specific goal state.</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-name">Utility-Based</div>
+                            <div class="agent-desc">Chooses the "best" action by scoring outcomes with a utility function.</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-name">Learning Agent</div>
+                            <div class="agent-desc">Improves behavior over time through experience and feedback.</div>
+                        </div>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Environments also vary in complexity — and the type of environment determines which agent design is appropriate:</p>
+                    <table class="algo-table">
+                        <thead>
+                            <tr><th>Property</th><th>Type A</th><th>Type B</th><th>Impact</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Observability</td><td>Fully observable</td><td>Partially observable</td><td>Partial obs. requires internal state tracking</td></tr>
+                            <tr><td>Agents</td><td>Single agent</td><td>Multi-agent</td><td>Multi-agent requires modeling others' behavior</td></tr>
+                            <tr><td>Determinism</td><td>Deterministic</td><td>Stochastic</td><td>Stochastic requires probability handling</td></tr>
+                            <tr><td>Time</td><td>Episodic</td><td>Sequential</td><td>Sequential: past actions affect future choices</td></tr>
+                            <tr><td>Change</td><td>Static</td><td>Dynamic</td><td>Dynamic: environment changes while agent thinks</td></tr>
+                            <tr><td>Actions</td><td>Discrete</td><td>Continuous</td><td>Continuous requires different planning methods</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="info-box" style="margin-top: 0.5rem;">
+                        <div class="info-box-title">💡 Real examples</div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Chess: fully observable, deterministic, discrete. Self-driving car: partially observable, stochastic, continuous, dynamic. These differences massively affect which algorithms are viable.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Problem Solving & Search – How AI Finds Solutions</h3>
+                    <p>Early AI focused on solving problems by exploring a <strong>state space</strong> — all possible configurations of a problem.</p>
+                    <div class="code-explanation" style="margin-top: 0.75rem;">
+                        <p><span class="highlight">State Space Representation:</span><br>
+                        States → all possible configurations<br>
+                        Initial state → where we start<br>
+                        Goal state → what we want to reach<br>
+                        Actions → what moves us from one state to another</p>
+                    </div>
+                    <p style="margin-top: 0.75rem; color: var(--text-secondary);">Example: A maze — each cell is a state, moving up/down/left/right are actions. A search algorithm explores the maze to find a path from entrance to exit.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">A well-defined search problem has five formal components:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Component 1</div>
+                            <div class="concept-title">Initial State</div>
+                            <div class="concept-desc">The starting configuration. In a 8-puzzle: the scrambled tile arrangement. In navigation: your current GPS position.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Component 2</div>
+                            <div class="concept-title">Actions</div>
+                            <div class="concept-desc">The set of possible moves from any given state. Must be defined precisely — e.g., "slide tile left" only if there's an empty space.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Component 3</div>
+                            <div class="concept-title">Transition Model</div>
+                            <div class="concept-desc">Defines the result of each action: RESULT(state, action) → new_state. This is what builds the state space graph.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Component 4</div>
+                            <div class="concept-title">Goal Test</div>
+                            <div class="concept-desc">A function that checks if the current state is the goal. Can be an exact match or a condition (e.g., "all tiles in order").</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Component 5</div>
+                            <div class="concept-title">Path Cost</div>
+                            <div class="concept-desc">A numeric value for each path. Used to find the cheapest solution — e.g., distance in km, time in minutes, or uniform cost 1 per step.</div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="margin-top: 0.5rem;">
+                        <div class="info-box-title">🔁 How search algorithms work in practice</div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">All search algorithms maintain a <strong>frontier</strong> (nodes to explore next) and an <strong>explored set</strong> (nodes already visited). The key difference between algorithms is <em>how they order the frontier</em>: BFS uses a queue (FIFO), DFS uses a stack (LIFO), UCS uses a priority queue by cost, A* uses a priority queue by f(n) = g(n) + h(n).</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Uninformed Search Algorithms (Blind Search)</h3>
+                    <p>These algorithms explore without any extra knowledge about the problem — they only know the structure of the state space.</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Breadth-First Search (BFS)</span> — explores all nodes level by level.<br>
+                        Guarantees the <strong>shortest path</strong> in unweighted graphs.<br>
+                        Uses: social networks, shortest path, peer-to-peer networks.</p>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">Depth-First Search (DFS)</span> — explores deep before exploring wide.<br>
+                        Fast and memory-efficient, but can get stuck in infinite branches.<br>
+                        Uses: solving mazes, tree traversal, checking graph connectivity.</p>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">Uniform Cost Search (UCS)</span> — finds the <strong>cheapest path</strong> when each step has a different cost.<br>
+                        Expands the lowest-cost node first. Optimal when all step costs are positive.</p>
+                    </div>
+
+                    <table class="algo-table" style="margin-top: 1.25rem;">
+                        <thead>
+                            <tr><th>Algorithm</th><th>Complete?</th><th>Optimal?</th><th>Memory</th><th>Time</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>BFS</td><td><span class="badge badge-yes">Yes</span></td><td><span class="badge badge-yes">Yes (unweighted)</span></td><td>High (all nodes)</td><td>O(b<sup>d</sup>)</td></tr>
+                            <tr><td>DFS</td><td><span class="badge badge-maybe">Maybe</span></td><td><span class="badge badge-no">No</span></td><td>Low (one path)</td><td>O(b<sup>m</sup>)</td></tr>
+                            <tr><td>UCS</td><td><span class="badge badge-yes">Yes</span></td><td><span class="badge badge-yes">Yes</span></td><td>High</td><td>O(b<sup>d</sup>)</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.5rem;">b = branching factor, d = depth of solution, m = maximum depth</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Two important variants that address specific limitations:</p>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Iterative Deepening DFS (IDDFS)</span> — combines BFS's completeness and optimality with DFS's low memory footprint. It runs DFS repeatedly with increasing depth limits (1, 2, 3…) until it finds the goal. Counter-intuitively, the repeated work is negligible because tree size grows exponentially — the last iteration dominates.<br>
+                        <small style="color: var(--text-secondary);">Memory: O(bd) — same as DFS. Optimal: Yes (like BFS). This is often the preferred uninformed algorithm in practice.</small></p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Bidirectional Search</span> — runs two simultaneous searches: one from the start forward, one from the goal backward, until they meet in the middle. Complexity drops from O(b<sup>d</sup>) to O(b<sup>d/2</sup>), which is a massive improvement.<br>
+                        <small style="color: var(--text-secondary);">Used in: advanced GPS routing, social network connection search (e.g., LinkedIn "degrees of connection").</small></p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Informed Search — Heuristics & A*</h3>
+                    <p>Informed search uses <strong>heuristics</strong> — estimated guesses about how close we are to the goal — to search more efficiently.</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Greedy Best-First Search</span> — uses only the heuristic h(n). Very fast, but not guaranteed to find the optimal path. Greedy means it always goes toward what looks closest to the goal.</p>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">A* Search — The King of Pathfinding</span><br>
+                        The most widely used search algorithm. Combines actual path cost with heuristic estimate:</p>
+                    </div>
+                    <div class="formula-box">f(n) = g(n) + h(n)</div>
+                    <div class="code-explanation">
+                        <p><strong>g(n)</strong> = cost from start to current node (actual path cost so far)<br>
+                        <strong>h(n)</strong> = heuristic estimate from current node to goal<br>
+                        <strong>f(n)</strong> = total estimated cost through this node</p>
+                        <p style="margin-top: 0.5rem;">A* is <strong>optimal</strong> when the heuristic is <em>admissible</em> — it never overestimates the true cost to the goal.</p>
+                    </div>
+                    <p style="margin-top: 0.75rem;"><strong>Real-world uses of A*:</strong> Video game AI pathfinding · GPS route calculation · Robot navigation · Route optimization logistics</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Choosing the right heuristic is critical — it directly determines A*'s speed and accuracy:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Heuristic Type</div>
+                            <div class="concept-title">Manhattan Distance</div>
+                            <div class="concept-desc">|x₁-x₂| + |y₁-y₂| — counts horizontal + vertical steps. Perfect for grid-based movement where diagonal is not allowed (tile puzzles, city blocks).</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Heuristic Type</div>
+                            <div class="concept-title">Euclidean Distance</div>
+                            <div class="concept-desc">√((x₁-x₂)² + (y₁-y₂)²) — straight-line distance. Better when movement is unrestricted (open terrain, flying drones, Euclidean space).</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Heuristic Type</div>
+                            <div class="concept-title">Chebyshev Distance</div>
+                            <div class="concept-desc">max(|x₁-x₂|, |y₁-y₂|) — allows 8-directional movement. Used in chess (king moves) and grid games where diagonal steps are allowed.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Key Property</div>
+                            <div class="concept-title">Admissibility</div>
+                            <div class="concept-desc">A heuristic is admissible if it never overestimates the true cost. All three distance metrics above are admissible in their respective contexts.</div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="margin-top: 0.5rem;">
+                        <div class="info-box-title">⚡ A* Variants for Large-Scale Problems</div>
+                        <ul class="styled-list" style="margin-top: 0.3rem;">
+                            <li><strong style="color: var(--text-light);">IDA* (Iterative Deepening A*)</strong> — A* with depth-limited search to reduce memory. Used in chess engines and robotics.</li>
+                            <li><strong style="color: var(--text-light);">Weighted A*</strong> — uses f(n) = g(n) + w·h(n) where w > 1, trading optimality for speed. Used in real-time games.</li>
+                            <li><strong style="color: var(--text-light);">D* (Dynamic A*)</strong> — recalculates paths as the environment changes in real time. Used in self-driving cars and Mars rovers.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Local Search & Optimization</h3>
+                    <!-- NEW CARD -->
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary); line-height: 1.6;">Not all problems require finding a path — sometimes we just need to find the <em>best configuration</em> from a vast space of possibilities. Local search algorithms work by starting with a solution and iteratively improving it.</p>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">Hill Climbing</span> — start with a random solution and move to the best neighboring state. Simple and fast, but vulnerable to getting stuck in <em>local maxima</em> (good but not globally best solutions) and <em>plateaus</em> (flat regions with no improvement).</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Simulated Annealing</span> — like hill climbing, but occasionally accepts worse solutions with a probability that decreases over time (the "temperature"). This allows escaping local maxima. Inspired by the annealing process in metallurgy.<br>
+                        <small style="color: var(--text-secondary);">Used in: chip design, protein folding, traveling salesman problem, logistics optimization.</small></p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Genetic Algorithms</span> — inspired by evolution. A population of candidate solutions is evolved through selection, crossover (combining two solutions), and mutation over many generations. Excellent for large, complex search spaces.<br>
+                        <small style="color: var(--text-secondary);">Used in: engineering design, hyperparameter optimization, scheduling, game strategy evolution.</small></p>
+                    </div>
+
+                    <div class="info-box" style="margin-top: 0.75rem;">
+                        <div class="info-box-title">🌐 Local vs Global Search</div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">BFS/DFS/A* are <em>systematic</em> — they explore the full state space and guarantee finding a solution. Local search is <em>incomplete</em> — it may get stuck — but it can handle huge spaces (like optimizing millions of parameters) where systematic search is computationally impossible. Modern ML training (gradient descent) is a form of local search.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Adversarial Search — Game-Playing AI</h3>
+                    <!-- NEW CARD -->
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary); line-height: 1.6;">In adversarial settings (games with opponents), the agent must plan not just for its own moves but also account for an opponent trying to minimize its score.</p>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">Minimax Algorithm</span> — models two-player zero-sum games. The AI (MAX player) tries to maximize its score; the opponent (MIN player) tries to minimize it. The algorithm builds a complete game tree and selects the move that leads to the best worst-case outcome.<br>
+                        <small style="color: var(--text-secondary);">Used in: chess, checkers, tic-tac-toe, Go.</small></p>
+                    </div>
+                    <div class="formula-box" style="text-align: left; line-height: 2;">
+                        minimax(state) = max over actions of min(minimax(result(state, action)))
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Alpha-Beta Pruning</span> — a major optimization of minimax. It prunes branches that cannot possibly influence the final decision, reducing the number of nodes evaluated from O(b<sup>d</sup>) to O(b<sup>d/2</sup>) in the best case — effectively doubling the searchable depth for the same computation.<br>
+                        <small style="color: var(--text-secondary);">Used in: all serious chess engines. Deep Blue used alpha-beta with custom evaluation functions.</small></p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Monte Carlo Tree Search (MCTS)</span> — instead of exhaustive search, MCTS uses random simulations to estimate the value of moves. It has four phases: Selection → Expansion → Simulation → Backpropagation.<br>
+                        <small style="color: var(--text-secondary);">Used in: AlphaGo, AlphaZero, and games where the state space is too large for minimax.</small></p>
+                    </div>
+
+                    <div class="info-box" style="margin-top: 0.75rem;">
+                        <div class="info-box-title">♟️ Evolution of Game AI</div>
+                        <ul class="styled-list" style="margin-top: 0.3rem;">
+                            <li><strong style="color: var(--text-light);">Deep Blue (1997)</strong> — minimax + alpha-beta pruning + hand-crafted evaluation. Defeated Kasparov in chess.</li>
+                            <li><strong style="color: var(--text-light);">AlphaGo (2016)</strong> — MCTS + deep neural networks for position evaluation. First AI to defeat a world Go champion.</li>
+                            <li><strong style="color: var(--text-light);">AlphaZero (2017)</strong> — purely self-play reinforcement learning. Mastered chess, Go, and shogi in hours with zero human knowledge.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Logic in AI – The Origin of Machine Reasoning</h3>
+                    <p>Before ML, AI used symbolic logic to represent and reason about knowledge. Logic is still used in knowledge graphs, expert systems, and robotics planning.</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Propositional Logic</span> — statements are either TRUE or FALSE. Rules take the form:<br>
+                        <code>IF A AND B THEN C</code><br>
+                        <code>IF rain THEN take_umbrella</code><br>
+                        Used in: expert systems, automated testing, game logic, compliance rules.</p>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">First-Order Logic (FOL)</span> — extends propositional logic with:<br>
+                        <strong>Variables</strong> (objects) · <strong>Predicates</strong> (properties/relations) · <strong>Quantifiers</strong> (∀ = "for all", ∃ = "there exists")</p>
+                    </div>
+
+                    <div class="formula-box" style="text-align: left; line-height: 2;">
+                        ∀x Human(x) → Mortal(x)<br>
+                        Human(Socrates)<br>
+                        ∴ Mortal(Socrates)
+                    </div>
+
+                    <div class="code-explanation">
+                        <p>AI uses FOL for: <span class="highlight">Knowledge graphs</span> · <span class="highlight">Semantic search</span> · <span class="highlight">Robotics planning</span> · <span class="highlight">Automated reasoning</span></p>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Key logical connectives and their meanings in AI rule systems:</p>
+                    <table class="algo-table">
+                        <thead>
+                            <tr><th>Symbol</th><th>Name</th><th>Meaning</th><th>Example</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>∧</td><td>AND (Conjunction)</td><td>Both must be true</td><td>Rain ∧ Cold → WearCoat</td></tr>
+                            <tr><td>∨</td><td>OR (Disjunction)</td><td>At least one must be true</td><td>Tired ∨ Sick → StayHome</td></tr>
+                            <tr><td>¬</td><td>NOT (Negation)</td><td>Inverts the truth value</td><td>¬Rain → Sunny</td></tr>
+                            <tr><td>→</td><td>Implies</td><td>If left is true, right follows</td><td>Human(x) → Mortal(x)</td></tr>
+                            <tr><td>↔</td><td>Biconditional</td><td>True when both sides match</td><td>Day ↔ ¬Night</td></tr>
+                            <tr><td>∀</td><td>For All</td><td>Statement applies to every object</td><td>∀x Dog(x) → Animal(x)</td></tr>
+                            <tr><td>∃</td><td>There Exists</td><td>At least one object satisfies this</td><td>∃x King(x) ∧ Wise(x)</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="info-box" style="margin-top: 0.75rem;">
+                        <div class="info-box-title">🔍 Inference Methods in Logic</div>
+                        <ul class="styled-list" style="margin-top: 0.3rem;">
+                            <li><strong style="color: var(--text-light);">Modus Ponens</strong> — the most fundamental rule: if P → Q and P is true, then Q is true. Used in every rule-based system.</li>
+                            <li><strong style="color: var(--text-light);">Resolution</strong> — a complete inference algorithm for FOL. Converts statements to clausal form and derives new facts. Basis of Prolog and automated theorem provers.</li>
+                            <li><strong style="color: var(--text-light);">Unification</strong> — the process of finding variable substitutions that make two FOL expressions identical. Central to logic programming and Prolog.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Constraint Satisfaction Problems (CSPs)</h3>
+                    <p>A CSP is a problem where you must assign values to variables such that all constraints are satisfied simultaneously.</p>
+                    <p style="margin-top: 0.75rem;"><strong>Classic examples:</strong></p>
+                    <ul class="styled-list">
+                        <li>Sudoku — each row, column, and box must contain digits 1–9 exactly once</li>
+                        <li>Map coloring — adjacent regions must have different colors</li>
+                        <li>University scheduling — no professor in two classes at once</li>
+                        <li>Resource allocation — tasks assigned without conflicts</li>
+                    </ul>
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Solving techniques:</span><br>
+                        <strong>Backtracking</strong> — try assignments, undo if they fail, try another<br>
+                        <strong>Forward Checking</strong> — remove impossible values early as assignments are made<br>
+                        <strong>AC-3 Arc Consistency</strong> — propagate constraints to eliminate values before search begins</p>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Two key strategies that dramatically improve CSP performance:</p>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Minimum Remaining Values (MRV) Heuristic</span> — when choosing which variable to assign next, always choose the one with the <em>fewest remaining legal values</em> in its domain. This "fail-first" strategy detects dead ends early, reducing wasted computation.<br>
+                        <small style="color: var(--text-secondary);">Example: In Sudoku, fill cells with only one possible value first before tackling cells with many options.</small></p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Least Constraining Value (LCV) Heuristic</span> — when choosing which value to assign, pick the one that <em>rules out the fewest choices</em> for neighboring variables. This keeps options open for future assignments.<br>
+                        <small style="color: var(--text-secondary);">MRV chooses which variable — LCV chooses which value. Together they can reduce solve time by orders of magnitude.</small></p>
+                    </div>
+
+                    <div class="info-box" style="margin-top: 0.5rem;">
+                        <div class="info-box-title">🏭 CSPs in Industry</div>
+                        <ul class="styled-list" style="margin-top: 0.3rem;">
+                            <li><strong style="color: var(--text-light);">Operations Research</strong> — airline scheduling, crew assignment, supply chain logistics — all formulated as CSPs with millions of constraints.</li>
+                            <li><strong style="color: var(--text-light);">Chip Design (EDA)</strong> — placing billions of transistors on a chip while satisfying electrical and thermal constraints.</li>
+                            <li><strong style="color: var(--text-light);">Configuration Systems</strong> — SAP and Oracle use constraint engines to generate valid product configurations from customer requirements.</li>
+                            <li><strong style="color: var(--text-light);">Automated Planning (STRIPS)</strong> — robotics and game AI use CSP-like planners to sequence actions toward goals.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Real-World Applications of Classical AI</h3>
+                    <div class="app-grid">
+                        <div class="app-card">
+                            <div class="app-icon">🎮</div>
+                            <div class="app-title">Game AI</div>
+                            <div class="app-desc">A* pathfinding, decision trees, rule-based NPC behavior</div>
+                        </div>
+                        <div class="app-card">
+                            <div class="app-icon">🗺️</div>
+                            <div class="app-title">GPS Navigation</div>
+                            <div class="app-desc">Fastest route via A* + real-time traffic heuristics</div>
+                        </div>
+                        <div class="app-card">
+                            <div class="app-icon">🤖</div>
+                            <div class="app-title">Robotics</div>
+                            <div class="app-desc">Motion planning, obstacle avoidance, task sequencing</div>
+                        </div>
+                        <div class="app-card">
+                            <div class="app-icon">🧩</div>
+                            <div class="app-title">Puzzle Solving</div>
+                            <div class="app-desc">Sudoku, 8-puzzle, planning problems via CSP backtracking</div>
+                        </div>
+                        <div class="app-card">
+                            <div class="app-icon">🔍</div>
+                            <div class="app-title">Knowledge Graphs</div>
+                            <div class="app-desc">Google Knowledge Graph built on FOL and semantic relations</div>
+                        </div>
+                        <div class="app-card">
+                            <div class="app-icon">📅</div>
+                            <div class="app-title">Scheduling</div>
+                            <div class="app-desc">Timetables, resource allocation via constraint propagation</div>
+                        </div>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Classical AI techniques are actively used <em>inside</em> modern AI pipelines:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Inside LLMs</div>
+                            <div class="concept-title">Beam Search</div>
+                            <div class="concept-desc">LLMs use a modified BFS/heuristic search called beam search to generate text — keeping the top-k most probable token sequences at each step.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">AI Agents</div>
+                            <div class="concept-title">Planning & PDDL</div>
+                            <div class="concept-desc">Modern AI agents (like AutoGPT) combine LLMs with symbolic planners (PDDL) to break complex goals into ordered action sequences.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Compilers</div>
+                            <div class="concept-title">Constraint Solving</div>
+                            <div class="concept-desc">Program verification, compiler optimization, and SAT solvers (Boolean satisfiability) are direct descendants of classical CSP methods.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Healthcare</div>
+                            <div class="concept-title">Clinical Decision Support</div>
+                            <div class="concept-desc">Rule-based expert systems (propositional + FOL) are still used in drug interaction checking and diagnostic decision support in hospitals.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                    <h3>Section Conclusion</h3>
+                    <p>You now understand the classical foundations of AI:</p>
+                    <ul class="styled-list">
+                        <li>Intelligent agents — types, components, and behaviors</li>
+                        <li>State space search — how AI explores problems</li>
+                        <li>Blind search — BFS, DFS, and Uniform Cost Search</li>
+                        <li>Informed search — Greedy and A* with heuristics</li>
+                        <li>Propositional logic and First-Order Logic</li>
+                        <li>Constraint Satisfaction Problems and backtracking</li>
+                        <li>Real applications in games, GPS, robotics, and scheduling</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">This knowledge is crucial before studying Machine Learning and Deep Learning, where data replaces explicit rules.</p>
+                </div>
+
+            </div>
+
+            <!-- LAB -->
+            <div id="laboratorio" class="tab-panel">
+                <h3 style="margin-bottom: 1rem;">Search Algorithm Simulator</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">Configure a pathfinding problem and compare how different search algorithms would solve it — including whether they're complete, optimal, and how many nodes they'd explore.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header-bar">PROBLEM CONFIGURATION</div>
+                        <textarea class="lab-textarea" id="lab-input">// Define your search problem
+
+const problem = {
+  algorithm: "astar",    // bfs | dfs | ucs | greedy | astar
+  gridSize: 5,           // grid dimensions (5 = 5x5 maze)
+  hasWeights: true,      // true = different step costs
+  heuristicType: "manhattan" // manhattan | euclidean | zero (uninformed)
+};
+
+// Click "Run Simulation" to analyze the algorithm!</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header-bar">ALGORITHM ANALYSIS</div>
+                        <div class="lab-output" id="lab-output">
+                            Click "Run Simulation" to analyze the search algorithm...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runLab()">▶ Run Simulation</button>
+            </div>
+
+            <!-- QUIZ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Quiz: AI Logic & Search</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge of intelligent agents, search algorithms, logic, and constraint satisfaction. Answer all 15 questions.</p>
+
+                    <form id="quiz-form">
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">1. What is an intelligent agent?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) A database management system</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) A program that only stores data</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) An entity that perceives its environment and takes actions to maximize performance</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) A hardware device that processes images</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">2. What role does a sensor play in an intelligent agent?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) It executes physical actions</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) It stores the agent's long-term memory</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) It perceives information from the environment and feeds it to the agent</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) It makes final decisions</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">3. What is a simple reflex agent?</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) An agent that learns from experience</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) An agent that reacts to current conditions using fixed if-then rules</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) An agent that plans future actions ahead of time</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) An agent with full knowledge of the world</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">4. What is a state space in problem solving?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) The RAM used by the agent during computation</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) The physical space where a robot operates</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) The set of all possible configurations a problem can be in</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) A list of final goals</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">5. What is Breadth-First Search (BFS) best known for?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Sorting data efficiently</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Searching the deepest path first</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Finding the shortest path in unweighted graphs</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Optimizing heuristic functions</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">6. Does Depth-First Search (DFS) guarantee the shortest path?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Yes, always</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B"> B) Only in weighted graphs</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) No — DFS does not guarantee the shortest path</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Only when used with heuristics</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">7. What makes A* optimal compared to Greedy search?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Faster hardware</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Random node selection</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) An admissible heuristic that combines actual cost g(n) and estimated cost h(n)</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Depth-first traversal order</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">8. What is a heuristic function in search?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) A function guaranteed to find the exact solution</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) A random value used for exploration</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) A function that estimates the remaining cost to reach the goal from a given node</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) A stored optimal path</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">9. What is the key difference between UCS and Greedy Best-First?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) UCS uses heuristics; Greedy does not</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Greedy guarantees optimality; UCS does not</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) UCS considers actual path cost g(n); Greedy uses only the heuristic h(n)</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Greedy is always slower than UCS</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">10. What is propositional logic?</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Logic that includes variables and quantifiers</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Logic that handles probabilistic uncertainty</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) A system of logic where statements are either TRUE or FALSE, connected by AND/OR/NOT/IF-THEN</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Fuzzy logic using partial truth values</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">11. What does First-Order Logic (FOL) add over propositional logic?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Only simple boolean values</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Variables, predicates, quantifiers (∀, ∃), and relationships between objects</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Image recognition capabilities</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Game-playing strategies</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">12. What is a Constraint Satisfaction Problem (CSP)?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) A problem with no rules or constraints</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) A problem of assigning values to variables so that all given constraints are satisfied</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) A probabilistic model for uncertain outcomes</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) A search without a defined state space</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">13. Name one real-world application of A* search.</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Email spam filtering</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Pathfinding in GPS navigation and video games</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Natural language translation</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Image compression</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">14. What does arc consistency (AC-3) do in CSP solving?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) It draws arcs between graph nodes visually</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B"> B) It propagates constraints to eliminate impossible values before the search begins</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) It selects random values for variables</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) It converts propositional logic to first-order logic</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">15. Which type of agent improves its behavior over time through experience?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Simple reflex agent</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Model-based agent</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Learning agent</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Goal-based agent</label>
+                        </div>
+
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display: none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div id="recursos" class="tab-panel">
+                <h3 style="margin-bottom: 1.5rem;">Support Materials</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ AIMA – Artificial Intelligence: A Modern Approach (Russell & Norvig) — The definitive AI textbook</a>
+                    <a href="#" class="resource-link">→ Stanford CS221 – AI: Principles and Techniques (free lecture notes)</a>
+                    <a href="#" class="resource-link">→ Red Blob Games – A* Pathfinding Interactive Visual Guide</a>
+                    <a href="#" class="resource-link">→ 3Blue1Brown – Neural Networks (complement: why we moved beyond logic)</a>
+                    <a href="#" class="resource-link">→ Wikipedia – A* Search Algorithm with pseudocode</a>
+                    <a href="#" class="resource-link">→ CS188 Berkeley – Intro to AI: Search, Games, Logic (free course)</a>
+                    <a href="#" class="resource-link">→ BFS vs DFS: Visualized Interactive Demo – VisuAlgo</a>
+                    <a href="#" class="resource-link">→ First-Order Logic Primer – Stanford Encyclopedia of Philosophy</a>
+                    <a href="#" class="resource-link">→ Backtracking & CSP – GeeksForGeeks with code examples</a>
+                    <a href="#" class="resource-link">→ Google Knowledge Graph – Real-world FOL application (overview)</a>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: AI Logic & Search</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        To successfully complete this module, demonstrate understanding across the following competency levels:
+                    </p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>What an intelligent agent is: sensors, actuators, policy</li>
+                                <li>The five types of agents: reflex, model-based, goal-based, utility-based, learning</li>
+                                <li>What a state space is (states, initial, goal, actions)</li>
+                                <li>BFS — how it works and when it finds the shortest path</li>
+                                <li>DFS — how it works and why it's not optimal</li>
+                                <li>What a heuristic is and its role in informed search</li>
+                                <li>A* formula: f(n) = g(n) + h(n)</li>
+                                <li>Propositional logic: TRUE/FALSE, IF-THEN rules</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Uniform Cost Search and when to use it over BFS</li>
+                                <li>What makes a heuristic admissible (and why it matters for A*)</li>
+                                <li>Greedy Best-First Search vs A* — trade-offs</li>
+                                <li>First-Order Logic: variables, predicates, quantifiers (∀, ∃)</li>
+                                <li>FOL example: ∀x Human(x) → Mortal(x)</li>
+                                <li>Define a CSP and identify variables, domains, constraints</li>
+                                <li>Backtracking in CSPs — how it works</li>
+                                <li>Real-world application of A* (GPS, games, robotics)</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Implement BFS and DFS in Python with a graph representation</li>
+                                <li>Implement A* with a priority queue and custom heuristic</li>
+                                <li>Analyze time/space complexity of each search algorithm</li>
+                                <li>Implement a CSP solver with backtracking + forward checking</li>
+                                <li>Apply AC-3 arc consistency to prune a CSP before search</li>
+                                <li>Write FOL statements for a real-world knowledge domain</li>
+                                <li>Design a game NPC using rule-based + search-based AI</li>
+                                <li>Evaluate heuristic quality for a given problem (Manhattan vs Euclidean)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+            document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runLab() {
+            const input = document.getElementById('lab-input').value.toLowerCase();
+            const output = document.getElementById('lab-output');
+
+            const algoMatch = input.match(/algorithm:\s*["'](\w+)["']/);
+            const sizeMatch = input.match(/gridsize:\s*(\d+)/);
+            const weightMatch = input.match(/hasweights:\s*(true|false)/);
+            const heurMatch = input.match(/heuristictype:\s*["'](\w+)["']/);
+
+            const algo = algoMatch ? algoMatch[1] : 'astar';
+            const size = sizeMatch ? parseInt(sizeMatch[1]) : 5;
+            const weighted = weightMatch ? weightMatch[1] === 'true' : false;
+            const heur = heurMatch ? heurMatch[1] : 'manhattan';
+
+            const totalNodes = size * size;
+
+            const profiles = {
+                bfs: {
+                    name: 'Breadth-First Search (BFS)',
+                    complete: true, optimal: !weighted,
+                    nodesExplored: Math.round(totalNodes * 0.85),
+                    pathLength: 'Shortest (unweighted)',
+                    memory: 'High — stores all frontier nodes',
+                    complexity: `O(b^d) ≈ O(${Math.pow(4, Math.floor(size/2))})`,
+                    usesHeuristic: false,
+                    strength: 'Guarantees shortest path in unweighted graphs',
+                    weakness: 'Very memory intensive — unsuitable for large graphs'
+                },
+                dfs: {
+                    name: 'Depth-First Search (DFS)',
+                    complete: false, optimal: false,
+                    nodesExplored: Math.round(totalNodes * 0.6),
+                    pathLength: 'Not guaranteed shortest',
+                    memory: 'Low — only stores current path',
+                    complexity: `O(b^m) ≈ O(${Math.pow(4, size - 1)})`,
+                    usesHeuristic: false,
+                    strength: 'Low memory usage — good for deep, sparse graphs',
+                    weakness: 'Can get stuck in infinite branches; not optimal'
+                },
+                ucs: {
+                    name: 'Uniform Cost Search (UCS)',
+                    complete: true, optimal: true,
+                    nodesExplored: Math.round(totalNodes * 0.9),
+                    pathLength: 'Cheapest cost path',
+                    memory: 'High — priority queue of all frontier nodes',
+                    complexity: `O(b^(1+⌊C*/ε⌋))`,
+                    usesHeuristic: false,
+                    strength: 'Optimal for weighted graphs — finds cheapest path',
+                    weakness: 'Explores in all directions equally — slow without guidance'
+                },
+                greedy: {
+                    name: 'Greedy Best-First Search',
+                    complete: false, optimal: false,
+                    nodesExplored: Math.round(totalNodes * 0.35),
+                    pathLength: 'Not guaranteed optimal',
+                    memory: 'Moderate',
+                    complexity: 'O(b^m) best case much faster',
+                    usesHeuristic: true,
+                    strength: 'Very fast — uses only h(n) to jump toward goal',
+                    weakness: 'Not complete or optimal — can be misled by heuristic'
+                },
+                astar: {
+                    name: 'A* Search',
+                    complete: true, optimal: true,
+                    nodesExplored: Math.round(totalNodes * 0.45),
+                    pathLength: 'Optimal (admissible heuristic)',
+                    memory: 'Moderate — priority queue ordered by f(n)',
+                    complexity: `O(b^d) with good heuristic ≈ O(${Math.round(totalNodes * 0.45)}) nodes`,
+                    usesHeuristic: true,
+                    strength: 'Best of both worlds — optimal AND faster than BFS/UCS',
+                    weakness: 'Memory intensive for very large graphs; heuristic quality matters'
+                }
+            };
+
+            const p = profiles[algo] || profiles['astar'];
+
+            const heurDesc = {
+                manhattan: 'Manhattan distance — sum of horizontal + vertical steps. Good for grid problems.',
+                euclidean: 'Euclidean distance — straight-line distance. Better for open spaces without grid constraints.',
+                zero: 'h(n) = 0 — turns A* into Uniform Cost Search. Optimal but slow.'
+            };
+
+            const heurNote = p.usesHeuristic
+                ? `\n<strong style="color:#b6c0de;">Heuristic used:</strong> ${heur.charAt(0).toUpperCase() + heur.slice(1)}\n<span style="color:#e8ecf8;">${heurDesc[heur] || 'Custom heuristic.'}</span>\n`
+                : `\n<span style="color:#6272a4;">This algorithm does not use a heuristic.</span>\n`;
+
+            output.innerHTML = `
+<span style="color:#28e0ff;font-weight:bold;">▶ Algorithm: ${p.name}</span>
+
+<strong style="color:#b6c0de;">Grid size:</strong> <span style="color:#e8ecf8;">${size}×${size} = ${totalNodes} nodes</span>
+<strong style="color:#b6c0de;">Weighted edges:</strong> <span style="color:${weighted ? '#f59e0b' : '#10b981'}">${weighted ? 'Yes' : 'No'}</span>
+
+<strong style="color:#b6c0de;">Complete?</strong> <span style="color:${p.complete ? '#10b981' : '#ef4444'}">${p.complete ? '✓ Yes — guaranteed to find a solution if one exists' : '✗ No — may miss solutions or loop'}</span>
+<strong style="color:#b6c0de;">Optimal?</strong> <span style="color:${p.optimal ? '#10b981' : '#ef4444'}">${p.optimal ? '✓ Yes — guaranteed to find the best path' : '✗ No — may not find the shortest/cheapest path'}</span>
+<strong style="color:#b6c0de;">Nodes explored:</strong> <span style="color:#e8ecf8;">~${p.nodesExplored} of ${totalNodes}</span>
+<strong style="color:#b6c0de;">Path length:</strong> <span style="color:#e8ecf8;">${p.pathLength}</span>
+<strong style="color:#b6c0de;">Memory usage:</strong> <span style="color:#e8ecf8;">${p.memory}</span>
+<strong style="color:#b6c0de;">Complexity:</strong> <span style="color:#f8f8f2;">${p.complexity}</span>
+${heurNote}
+<strong style="color:#50fa7b;">✓ Strength:</strong> <span style="color:#e8ecf8;">${p.strength}</span>
+<strong style="color:#ff5555;">✗ Weakness:</strong> <span style="color:#e8ecf8;">${p.weakness}</span>
+
+<em style="color:#6272a4;">Tip: Try changing algorithm to "bfs", "dfs", "ucs", or "greedy" and re-run to compare!</em>
+            `.trim().replace(/\n/g, '<br>');
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questionsData = {
+                    q1:  { correct: 'C', exp: 'An intelligent agent perceives its environment through sensors, processes that information, and takes actions through actuators to maximize its performance measure.' },
+                    q2:  { correct: 'C', exp: 'Sensors are the perception components of an agent — they gather information from the environment (camera, microphone, game state) and feed it to the agent\'s decision-making logic.' },
+                    q3:  { correct: 'B', exp: 'A simple reflex agent reacts directly to current conditions using fixed if-then rules: IF obstacle detected THEN turn-left. It has no memory or planning.' },
+                    q4:  { correct: 'C', exp: 'The state space is the complete set of all possible configurations a problem can be in. Each state represents one configuration; actions transition between states.' },
+                    q5:  { correct: 'C', exp: 'BFS explores nodes level by level, which guarantees it finds the shortest path in unweighted graphs — the path with the fewest edges.' },
+                    q6:  { correct: 'C', exp: 'DFS does not guarantee the shortest path. It explores as deep as possible before backtracking, meaning it may find a long solution while a shorter one exists elsewhere.' },
+                    q7:  { correct: 'C', exp: 'A* is optimal because it uses f(n) = g(n) + h(n), combining actual path cost with a heuristic. As long as h(n) is admissible (never overestimates), A* finds the optimal path.' },
+                    q8:  { correct: 'C', exp: 'A heuristic h(n) estimates the remaining cost to reach the goal from node n. It guides the search toward the goal without guaranteeing exactness — just a useful approximation.' },
+                    q9:  { correct: 'C', exp: 'UCS expands nodes by actual accumulated cost g(n) — it finds the optimal (cheapest) path. Greedy uses only h(n) — it rushes toward the goal but may miss the optimal route.' },
+                    q10: { correct: 'C', exp: 'Propositional logic works with statements that are either TRUE or FALSE. It uses connectives like AND, OR, NOT, and IF-THEN to build logical rules and derive conclusions.' },
+                    q11: { correct: 'B', exp: 'First-Order Logic adds variables (objects), predicates (properties/relations), and quantifiers (∀ = "for all", ∃ = "there exists"). This enables much richer knowledge representation than propositional logic.' },
+                    q12: { correct: 'B', exp: 'A CSP defines variables, their possible domains (values), and constraints. The goal is to assign a value to each variable such that all constraints are simultaneously satisfied.' },
+                    q13: { correct: 'B', exp: 'A* is the backbone of GPS navigation (finding optimal routes) and video game pathfinding (moving characters efficiently around obstacles). It\'s one of the most widely deployed AI algorithms.' },
+                    q14: { correct: 'B', exp: 'AC-3 propagates constraint information through the CSP graph to eliminate values that cannot possibly be part of a valid solution — reducing search space before backtracking begins.' },
+                    q15: { correct: 'C', exp: 'A learning agent improves its behavior over time by learning from experience and feedback. The other agent types (reflex, model-based, goal-based, utility-based) do not self-improve.' }
+                };
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0, feedbackHTML = '';
+
+                Object.keys(this.questionsData).forEach((key, index) => {
+                    const userAnswer = formData.get(key);
+                    const isCorrect = userAnswer === this.questionsData[key].correct;
+                    if (isCorrect) score++;
+
+                    feedbackHTML += `
+                        <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                            <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                            <div>
+                                <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                ${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+                            </div>
+                        </div>`;
+                });
+
+                this.displayResults(score, feedbackHTML);
+            }
+
+            displayResults(score, feedbackHTML) {
+                const total = Object.keys(this.questionsData).length;
+                const percent = Math.round((score / total) * 100);
+                const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+
+                document.getElementById('quiz-score').innerHTML = `
+                    <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                    <p style="color:var(--text-secondary)">${percent >= 70
+                        ? 'Excellent! You understand the classical foundations of AI — ready to advance to Machine Learning.'
+                        : 'Review the agents, search algorithms, and logic sections and try again.'}</p>`;
+
+                document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                const resultsDiv = document.getElementById('quiz-results');
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            clearQuiz() {
+                document.getElementById('quiz-form').reset();
+                document.getElementById('quiz-results').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+</body>
+</html>

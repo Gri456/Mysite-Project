@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Social Engineering &amp; Human Security</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --orange: #ff6200;
+            --yellow: #ffcc00;
+            --amber: #ff8c00;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255, 98, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 98, 0, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1;
+        }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+
+        body::after {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255,140,0,0.12) 0%, rgba(255,204,0,0.06) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,20,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,140,0,0.15); border: 1px solid rgba(255,140,0,0.3); color: var(--yellow); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .nav-buttons { display: flex; gap: 1rem; align-items: center; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,140,0,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: #0f172a; box-shadow: 0 4px 15px rgba(255,98,0,0.35); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,0.45); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--orange), var(--amber), var(--yellow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-section { margin-bottom: 2rem; }
+        .progress-label { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--orange), var(--yellow)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(255,98,0,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--orange), var(--yellow)); }
+
+        .tab-content { padding: 2rem; min-height: 400px; }
+        .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
+        .content-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-light); }
+        .content-text { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+
+        .code-block { background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.875rem; line-height: 1.5; color: var(--text-light); }
+        .code-block .tag { color: #ff6b6b; }
+        .code-block .attr { color: #4ecdc4; }
+        .code-block .string { color: #95e1d3; }
+        .code-block .comment { color: #6c757d; font-style: italic; }
+        .code-block .keyword { color: #ffcc00; }
+        .code-block .value { color: #a8e6cf; }
+        .code-block .section { color: #ff8c00; font-weight: 600; }
+
+        .learn-section { margin-bottom: 2rem; }
+        .learn-intro { background: linear-gradient(135deg, rgba(255,98,0,0.12), rgba(255,204,0,0.06)); border: 1px solid rgba(255,140,0,0.25); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .learn-intro h4 { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .learn-intro p { color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem; }
+
+        .code-explanation { background: rgba(255,255,255,0.02); border-left: 3px solid var(--orange); padding: 1rem 1.5rem; margin: 1rem 0; border-radius: 0 8px 8px 0; }
+        .code-explanation h5 { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .code-explanation p { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; }
+
+        .concept-section { margin-bottom: 2.5rem; }
+        .concept-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+        .concept-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+        .concept-icon.orange { background: rgba(255,98,0,0.2); }
+        .concept-icon.yellow { background: rgba(255,204,0,0.2); }
+        .concept-icon.green  { background: rgba(76,175,80,0.2); }
+        .concept-icon.red    { background: rgba(244,67,54,0.2); }
+        .concept-icon.blue   { background: rgba(33,150,243,0.2); }
+        .concept-icon.purple { background: rgba(156,39,176,0.2); }
+        .concept-header h3 { font-size: 1.2rem; font-weight: 700; color: var(--text-light); }
+
+        .pipeline-visual { display: flex; align-items: center; gap: 0; margin: 1.5rem 0; overflow-x: auto; padding-bottom: 0.5rem; }
+        .pipeline-step { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; min-width: 90px; flex: 1; }
+        .pipeline-box { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.6rem 0.8rem; text-align: center; font-size: 0.75rem; font-weight: 600; color: var(--text-light); width: 100%; transition: all 0.3s; }
+        .pipeline-box:hover { border-color: var(--orange); background: rgba(255,98,0,0.08); }
+        .pipeline-box.highlight { border-color: var(--orange); background: rgba(255,98,0,0.12); color: var(--yellow); }
+        .pipeline-label { font-size: 0.65rem; color: var(--text-secondary); text-align: center; }
+        .pipeline-arrow { color: var(--orange); font-size: 1.2rem; flex-shrink: 0; margin: 0 2px; padding-bottom: 1.2rem; }
+
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+        .compare-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; }
+        .compare-card.sast { border-top: 3px solid #4ecdc4; }
+        .compare-card.dast { border-top: 3px solid #ff6b6b; }
+        .compare-card.sca  { border-top: 3px solid #ffcc00; }
+        .compare-card.iast { border-top: 3px solid #a8e6cf; }
+        .compare-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .compare-card.sast .compare-title { color: #4ecdc4; }
+        .compare-card.dast .compare-title { color: #ff6b6b; }
+        .compare-card.sca  .compare-title { color: #ffcc00; }
+        .compare-card.iast .compare-title { color: #a8e6cf; }
+        .compare-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+        .compare-list li { font-size: 0.8rem; color: var(--text-secondary); padding-left: 1rem; position: relative; line-height: 1.4; }
+        .compare-list li::before { content: '▸'; position: absolute; left: 0; color: var(--orange); }
+
+        .info-box { border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; display: flex; gap: 0.75rem; align-items: flex-start; }
+        .info-box.warning { background: rgba(255,152,0,0.1); border: 1px solid rgba(255,152,0,0.25); }
+        .info-box.danger  { background: rgba(244,67,54,0.1); border: 1px solid rgba(244,67,54,0.25); }
+        .info-box.success { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.25); }
+        .info-box.info    { background: rgba(33,150,243,0.1); border: 1px solid rgba(33,150,243,0.25); }
+        .info-box-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .info-box-text { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; }
+        .info-box-text strong { color: var(--text-light); display: block; margin-bottom: 0.25rem; }
+
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .tool-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; transition: all 0.3s; }
+        .tool-card:hover { border-color: rgba(255,140,0,0.4); background: rgba(255,140,0,0.05); transform: translateY(-2px); }
+        .tool-name { font-size: 0.9rem; font-weight: 700; color: var(--yellow); margin-bottom: 0.25rem; }
+        .tool-category { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--orange); margin-bottom: 0.5rem; }
+        .tool-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
+
+        .timeline { position: relative; padding-left: 2rem; margin: 1.5rem 0; }
+        .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--orange), var(--yellow)); opacity: 0.4; }
+        .timeline-item { position: relative; margin-bottom: 1.5rem; }
+        .timeline-item::before { content: ''; position: absolute; left: -1.65rem; top: 0.4rem; width: 10px; height: 10px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 8px rgba(255,98,0,0.5); }
+        .timeline-title { font-size: 0.95rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.35rem; }
+        .timeline-text { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.5; }
+
+        .section-divider { display: flex; align-items: center; gap: 1rem; margin: 2rem 0 1.5rem; }
+        .section-divider-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--border-color), transparent); }
+        .section-divider-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--orange); white-space: nowrap; }
+
+        .checklist { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin: 1rem 0; }
+        .checklist li { display: flex; align-items: flex-start; gap: 0.75rem; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.4; }
+        .check-icon { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .check-icon.done { background: rgba(76,175,80,0.2); color: #4caf50; }
+        .check-icon.warn { background: rgba(255,152,0,0.2); color: #ff9800; }
+        .check-icon.bad  { background: rgba(244,67,54,0.2); color: #f44336; }
+
+        .real-example { background: linear-gradient(135deg, rgba(11,13,20,0.8), rgba(255,98,0,0.04)); border: 1px solid rgba(255,140,0,0.2); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
+        .real-example-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--orange); margin-bottom: 0.75rem; }
+        .real-example-title { font-size: 1rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.5rem; }
+        .real-example-text { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; }
+
+        .lab-container { display: flex; gap: 1rem; height: 600px; margin-bottom: 1rem; }
+        .lab-editor { flex: 1; display: flex; flex-direction: column; }
+        .lab-preview { flex: 1; display: flex; flex-direction: column; }
+        .lab-header { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-bottom: none; border-radius: 8px 8px 0 0; padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; padding: 1rem; color: var(--text-light); font-family: 'Courier New', monospace; font-size: 0.875rem; line-height: 1.5; resize: none; outline: none; }
+        .lab-textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 2px rgba(255,140,0,0.2); }
+        .lab-iframe { flex: 1; background: white; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; width: 100%; }
+        .lab-controls { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+        .btn-execute { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255,140,0,0.3); }
+        .btn-execute:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,0.4); }
+        .btn-reset { background: rgba(255,255,255,0.1); color: var(--text-light); border: 1px solid var(--border-color); padding: 0.75rem 1.5rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
+        .btn-reset:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .lab-instructions { background: rgba(40,224,255,0.1); border: 1px solid rgba(40,224,255,0.2); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: var(--text-secondary); }
+
+        .quiz-question { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .question-title { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+        .quiz-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all 0.3s ease; }
+        .quiz-option:hover { background: rgba(255,255,255,0.08); border-color: var(--orange); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--orange); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(255,140,0,0.12), rgba(255,204,0,0.06)); border: 1px solid rgba(255,140,0,0.25); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 0.875rem; }
+        .feedback-correct { border-left: 3px solid #4caf50; }
+        .feedback-incorrect { border-left: 3px solid #f44336; }
+        .feedback-icon { font-size: 1.1rem; font-weight: bold; }
+        .feedback-correct .feedback-icon { color: #4caf50; }
+        .feedback-incorrect .feedback-icon { color: #f44336; }
+        .score-excellent { color: #4caf50; }
+        .score-good { color: #28e0ff; }
+        .score-fair { color: #ff9800; }
+        .score-poor { color: #f44336; }
+
+        .resources-list { margin: 1.5rem 0; }
+        .resource-category { margin-bottom: 2rem; }
+        .category-title { color: var(--yellow); font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        .resource-links { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+        .resource-link { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0; border-radius: 4px; transition: all 0.3s ease; font-size: 0.875rem; position: relative; padding-left: 1.5rem; }
+        .resource-link::before { content: '→'; position: absolute; left: 0; color: var(--orange); font-weight: bold; }
+        .resource-link:hover { color: var(--text-light); padding-left: 2rem; }
+        .resources-note { background: rgba(255,140,0,0.1); border: 1px solid rgba(255,140,0,0.2); border-radius: 8px; padding: 1rem; margin-top: 2rem; font-size: 0.875rem; }
+        .resources-note p { color: var(--text-secondary); margin: 0; }
+
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,140,0,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--yellow); border-bottom-color: var(--yellow); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-icon { font-size: 1.1rem; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: #28e0ff; }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .header-content { padding: 1rem; flex-direction: column; gap: 1rem; }
+            .nav-buttons { width: 100%; justify-content: center; }
+            .course-title { font-size: 2rem; }
+            .course-meta { flex-direction: column; gap: 0.75rem; }
+            .main-content { padding: 1rem; }
+            .tab-nav { flex-direction: column; }
+            .tab-button { flex: none; text-align: left; }
+            .tab-content { padding: 1rem; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .lab-controls { justify-content: center; }
+            .compare-grid { grid-template-columns: 1fr; }
+            .pipeline-visual { flex-wrap: wrap; gap: 0.5rem; }
+            .pipeline-arrow { display: none; }
+            .evaluation-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">BitJourney</div>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav class="nav-buttons">
+                <a href="premium-cyber-progress.html" class="btn btn-back">← Back to Journey</a>
+                <a href="browse.html" class="btn btn-primary">Explore</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Social Engineering &amp; Human Security</h1>
+            <p class="course-description">
+                Understand how attackers exploit human psychology rather than technology. Learn to recognise, simulate and defend against social engineering — the most successful attack vector in cybersecurity.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>Phishing • Pretexting • Vishing • Awareness Training</span></div>
+                <div class="meta-item"><span>📌</span><span>The human firewall — your most important defence</span></div>
+            </div>
+            <div class="progress-section">
+                <div class="progress-label">Progress: <span id="progress-text">0%</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav" role="tablist">
+                <button class="tab-button active" data-tab="learn" role="tab" aria-selected="true">Learn</button>
+                <button class="tab-button" data-tab="lab" role="tab" aria-selected="false">Lab</button>
+                <button class="tab-button" data-tab="quiz" role="tab" aria-selected="false">Quiz</button>
+                <button class="tab-button" data-tab="resources" role="tab" aria-selected="false">Resources</button>
+                <button class="tab-button" data-tab="evaluation" role="tab" aria-selected="false">Evaluation</button>
+            </nav>
+
+            <div class="tab-content">
+
+                <!-- LEARN TAB -->
+                <div id="panel-learn" class="tab-panel active" role="tabpanel">
+                    <div class="learn-section">
+
+                        <div class="learn-intro">
+                            <h4>🧠 Social Engineering &amp; Human Security</h4>
+                            <p>
+                                Over <strong>85% of data breaches</strong> involve a human element — not an unpatched server or a zero-day exploit. Attackers exploit
+                                cognitive biases, emotions and trust to bypass even the most sophisticated technical controls. A single well-crafted phishing email
+                                can render millions in security investment irrelevant.
+                            </p>
+                            <p>
+                                In this module you will learn the psychology behind social engineering, the main attack techniques (phishing, vishing, pretexting,
+                                baiting, tailgating), how to design and run simulated phishing campaigns, and how to build an effective human security awareness programme.
+                            </p>
+                        </div>
+
+                        <!-- 1. Psychology of Social Engineering -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon orange">🧠</div>
+                                <h3>1. The Psychology Behind Social Engineering</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Social engineering does not exploit software — it exploits <strong>cognitive biases</strong> and psychological principles that are hardwired into human behaviour.
+                                Robert Cialdini's six principles of influence are the foundation of virtually every social engineering attack.
+                            </p>
+
+                            <div class="section-divider">
+                                <div class="section-divider-line"></div>
+                                <span class="section-divider-label">Cialdini's 6 Principles — How Attackers Use Them</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+
+                            <div class="compare-grid">
+                                <div class="compare-card sast">
+                                    <div class="compare-title">⚡ Urgency &amp; Scarcity</div>
+                                    <ul class="compare-list">
+                                        <li>Creates time pressure so victims act before thinking</li>
+                                        <li>"Your account will be suspended in 24 hours"</li>
+                                        <li>"Act now — limited access window closing"</li>
+                                        <li>Bypasses rational evaluation by triggering anxiety</li>
+                                        <li>Most common trigger in phishing emails</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card dast">
+                                    <div class="compare-title">🏛️ Authority</div>
+                                    <ul class="compare-list">
+                                        <li>People comply with perceived authority figures</li>
+                                        <li>"This is the IT department — your password must be reset immediately"</li>
+                                        <li>Impersonating CEO, CISO, bank, tax authority, police</li>
+                                        <li>Uniform, title and confident tone amplify authority</li>
+                                        <li>BEC (Business Email Compromise) exploits this heavily</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card sca">
+                                    <div class="compare-title">🤝 Social Proof &amp; Liking</div>
+                                    <ul class="compare-list">
+                                        <li>We do what others around us do (herd behaviour)</li>
+                                        <li>"Your colleague already approved this transfer"</li>
+                                        <li>Liking: people comply more with those they find likeable</li>
+                                        <li>Attackers build rapport over days/weeks before asking</li>
+                                        <li>Romance scams and LinkedIn attacks exploit liking</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card iast">
+                                    <div class="compare-title">🎁 Reciprocity &amp; Commitment</div>
+                                    <ul class="compare-list">
+                                        <li>Reciprocity: we feel obliged to return favours</li>
+                                        <li>"I helped you last week — I just need this one thing"</li>
+                                        <li>Commitment: once we agree to small requests, we escalate</li>
+                                        <li>Foot-in-the-door technique starts with trivial asks</li>
+                                        <li>Long-con attacks build reciprocity systematically</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="info-box warning">
+                                <span class="info-box-icon">⚠️</span>
+                                <div class="info-box-text">
+                                    <strong>These biases are not weaknesses — they are features</strong>
+                                    Urgency, trust in authority and social proof are adaptive human behaviours. Social engineering weaponises them.
+                                    Training cannot eliminate these biases, but it can teach people to <em>pause and verify</em> when these triggers are activated.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Attack Types -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon red">🎭</div>
+                                <h3>2. Social Engineering Attack Taxonomy</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Social engineering attacks span digital, voice and physical channels. Understanding each type — and how they chain together — is essential for both defence and simulated testing.
+                            </p>
+
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-title">📧 Phishing (Email)</div>
+                                    <div class="timeline-text">Mass or targeted fraudulent emails that trick recipients into clicking malicious links, downloading malware or submitting credentials. The most common initial access vector in breaches. Subtypes: spear phishing (targeted individual), whaling (targeting executives), clone phishing (duplicating a legitimate email).</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">📱 Smishing (SMS) &amp; Vishing (Voice)</div>
+                                    <div class="timeline-text">Smishing uses SMS/text messages to deliver malicious links or requests. Vishing uses phone calls — attackers impersonate banks, IT support, government agencies. AI voice cloning now makes vishing significantly more convincing, enabling attackers to synthesise the CEO's voice from public audio.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">🎭 Pretexting</div>
+                                    <div class="timeline-text">Creating a fabricated scenario (pretext) to extract information or access. Examples: posing as an IT technician needing remote access, a new employee needing onboarding help, or a vendor requiring payment details. Requires prior OSINT research to be believable.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">💾 Baiting</div>
+                                    <div class="timeline-text">Leaving physical media (USB drives, charging cables) or offering digital downloads that install malware when used. USB drop attacks in car parks remain highly effective — curiosity reliably overrides caution. In 2016, researchers dropped 300 USB drives on a university campus; 48% were plugged in within hours.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">🚪 Tailgating &amp; Piggybacking</div>
+                                    <div class="timeline-text">Physically following an authorised person through a controlled access point without presenting credentials. Relies on social norms (people hold doors for each other). Tailgating is unaware (victim doesn't notice); piggybacking is aware (victim knowingly lets someone in).</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">🌐 Watering Hole Attacks</div>
+                                    <div class="timeline-text">Compromising a website frequently visited by the target audience (e.g. an industry forum) rather than attacking targets directly. When targets visit the compromised site, malware is delivered. Named after predators waiting at watering holes in nature.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Phishing Anatomy -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon yellow">📧</div>
+                                <h3>3. Anatomy of a Phishing Email</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Understanding how phishing emails are constructed is essential for both recognising attacks and designing effective simulated campaigns for awareness training.
+                            </p>
+
+                            <div class="content-card">
+                                <h3 class="content-title">Phishing Email — Annotated Structure</h3>
+                                <div class="code-block">
+<pre><code><span class="section">FROM:</span>    <span class="tag">it-support@company-helpdesk.net</span>   <span class="comment"># ← lookalike domain (not company.com)</span>
+<span class="section">TO:</span>      <span class="value">john.smith@targetcompany.com</span>
+<span class="section">SUBJECT:</span> <span class="keyword">URGENT: Your account will be disabled in 2 hours</span>  <span class="comment"># ← urgency trigger</span>
+<span class="section">DATE:</span>    <span class="value">Friday 17:45</span>  <span class="comment"># ← sent at end-of-day to reduce scrutiny</span>
+
+<span class="comment">────────────────────────────────────────────────────</span>
+
+<span class="value">Dear John,</span>                                              <span class="comment"># ← personalised (spear phish)</span>
+
+<span class="value">Our security team has detected unusual login activity</span>  <span class="comment"># ← fear trigger</span>
+<span class="value">on your account from IP 185.123.45.67 (Russia).</span>       <span class="comment"># ← false detail adds credibility</span>
+
+<span class="value">To protect your account, you must verify your</span>
+<span class="value">identity within 2 hours or access will be suspended.</span>  <span class="comment"># ← artificial deadline</span>
+
+<span class="tag">[ VERIFY MY ACCOUNT NOW ]</span>                              <span class="comment"># ← button links to credential harvester</span>
+
+<span class="comment"># Hover URL reveals: http://company-it-secure.net/login</span>
+<span class="comment"># Legitimate URL would be: https://company.com/login</span>
+
+<span class="value">IT Security Team</span>
+<span class="value">CompanyName Help Desk</span>                                   <span class="comment"># ← mimics legitimate signature</span>
+<span class="string">Tel: +1 (555) 000-1234</span>                                  <span class="comment"># ← fake number adds legitimacy</span></code></pre>
+                                </div>
+                                <div class="code-explanation">
+                                    <h5>Red flags to spot in every suspicious email:</h5>
+                                    <p>
+                                        <strong>Sender domain</strong> — Does it exactly match the organisation's real domain? Lookalikes: company-helpdesk.net vs company.com<br>
+                                        <strong>Urgency + threat</strong> — Legitimate IT departments do not suspend accounts with 2-hour warnings via email<br>
+                                        <strong>Hover before clicking</strong> — Always hover over links to preview the actual destination URL before clicking<br>
+                                        <strong>Generic vs specific</strong> — Spear phishing uses your real name and role; mass phishing uses "Dear Customer"<br>
+                                        <strong>Request type</strong> — Legitimate services never ask for passwords, MFA codes or payment details by email
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="tools-grid">
+                                <div class="tool-card">
+                                    <div class="tool-name">GoPhish</div>
+                                    <div class="tool-category">Phishing Simulation</div>
+                                    <div class="tool-desc">Open-source phishing framework for running authorised simulation campaigns. Tracks open rates, click rates and credential submissions.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">SET (Social-Engineer Toolkit)</div>
+                                    <div class="tool-category">SE Framework</div>
+                                    <div class="tool-desc">Comprehensive toolkit for social engineering attacks including credential harvesting, spear phishing and infectious media generation.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">Evilginx2</div>
+                                    <div class="tool-category">Phishing + MFA Bypass</div>
+                                    <div class="tool-desc">Man-in-the-middle phishing framework that can bypass MFA by capturing session cookies in real time during the login flow.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">KnowBe4</div>
+                                    <div class="tool-category">Awareness Platform</div>
+                                    <div class="tool-desc">Enterprise security awareness training platform with phishing simulation, training modules and risk scoring per employee.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">PhishTool</div>
+                                    <div class="tool-category">Phishing Analysis</div>
+                                    <div class="tool-desc">Analyse suspicious emails by extracting headers, URLs and attachments for indicators of compromise. Free community version available.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">MailHog / MXToolbox</div>
+                                    <div class="tool-category">Email Security</div>
+                                    <div class="tool-desc">Verify SPF, DKIM and DMARC records. Email authentication misconfiguration is a primary enabler of email spoofing attacks.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. BEC and Advanced Attacks -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon blue">💼</div>
+                                <h3>4. Business Email Compromise (BEC) and Advanced Attacks</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Business Email Compromise is the most financially damaging cybercrime category — costing organisations over <strong>$50 billion globally since 2013</strong> according to the FBI.
+                                Unlike mass phishing, BEC is highly targeted, well-researched and often involves no malware — just social engineering.
+                            </p>
+
+                            <div class="compare-grid">
+                                <div class="compare-card sast">
+                                    <div class="compare-title">💸 CEO Fraud</div>
+                                    <ul class="compare-list">
+                                        <li>Attacker impersonates the CEO or CFO</li>
+                                        <li>Requests urgent wire transfer to a new account</li>
+                                        <li>"This is confidential — don't mention it to anyone"</li>
+                                        <li>Often timed around executive travel or M&amp;A activity</li>
+                                        <li>Average loss per incident: $120,000+</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card dast">
+                                    <div class="compare-title">🧾 Invoice Fraud</div>
+                                    <ul class="compare-list">
+                                        <li>Compromise or spoof a legitimate supplier's email</li>
+                                        <li>Intercept an existing invoice thread</li>
+                                        <li>Change bank account details on the invoice</li>
+                                        <li>Payment goes to attacker's account</li>
+                                        <li>Victim doesn't know until supplier chases payment</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card sca">
+                                    <div class="compare-title">🤖 AI Voice Cloning</div>
+                                    <ul class="compare-list">
+                                        <li>Clone an executive's voice from public recordings</li>
+                                        <li>Call finance staff to authorise urgent transfers</li>
+                                        <li>In 2019: $243K stolen via cloned CEO voice (first confirmed case)</li>
+                                        <li>AI tools now need as little as 3 seconds of audio</li>
+                                        <li>Verify via callback to known number, not the caller's</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card iast">
+                                    <div class="compare-title">💬 Deepfake Video</div>
+                                    <ul class="compare-list">
+                                        <li>Synthesise video of executives in fake meetings</li>
+                                        <li>2024: $25M stolen via deepfake video conference (Hong Kong)</li>
+                                        <li>Victim joined a multi-person fake Zoom call</li>
+                                        <li>Every "colleague" on the call was AI-generated</li>
+                                        <li>Verification: establish out-of-band code words for executives</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="real-example">
+                                <div class="real-example-label">📰 Real Case</div>
+                                <div class="real-example-title">Twitter Hack (2020) — Phone Vishing on IT Staff</div>
+                                <div class="real-example-text">
+                                    Attackers called Twitter employees posing as IT support staff, convincing them to provide credentials to an internal admin tool. Once inside, they hijacked accounts belonging to Barack Obama, Elon Musk, Joe Biden and Apple — posting a Bitcoin scam that collected $120,000 in minutes. No technical exploit was used: just a phone call and a convincing pretext. Three teenagers were ultimately responsible.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Email Authentication -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon purple">📮</div>
+                                <h3>5. Email Authentication — SPF, DKIM and DMARC</h3>
+                            </div>
+
+                            <p class="content-text">
+                                The primary technical defence against email spoofing is correct configuration of three DNS-based authentication standards.
+                                Without these, anyone can send email appearing to come from your domain.
+                            </p>
+
+                            <div class="content-card">
+                                <h3 class="content-title">SPF, DKIM and DMARC — Configuration Reference</h3>
+                                <div class="code-block">
+<pre><code><span class="comment"># ── SPF (Sender Policy Framework) ──────────────────────────────</span>
+<span class="comment"># DNS TXT record declaring which servers may send email for your domain</span>
+<span class="section">yourcompany.com. TXT</span>
+  <span class="string">"v=spf1 include:_spf.google.com include:mailchimp.com ip4:203.0.113.10 -all"</span>
+<span class="comment"># -all = hard fail (reject), ~all = soft fail (mark as spam), +all = accept all (⚠️ never use)</span>
+
+<span class="comment"># ── DKIM (DomainKeys Identified Mail) ──────────────────────────</span>
+<span class="comment"># Cryptographic signature added to outgoing emails, verified by receiver</span>
+<span class="section">selector._domainkey.yourcompany.com. TXT</span>
+  <span class="string">"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC..."</span>
+<span class="comment"># The private key signs outgoing mail; receivers verify with the public key above</span>
+
+<span class="comment"># ── DMARC (Domain-based Message Authentication) ─────────────────</span>
+<span class="comment"># Policy: what to do when SPF/DKIM fail + reporting</span>
+<span class="section">_dmarc.yourcompany.com. TXT</span>
+  <span class="string">"v=DMARC1; p=reject; rua=mailto:dmarc@yourcompany.com; pct=100"</span>
+
+<span class="comment"># p=none    → monitor only (start here)</span>
+<span class="comment"># p=quarantine → send to spam</span>
+<span class="comment"># p=reject  → block the email completely (goal state)</span>
+
+<span class="comment"># ── Verify your configuration ───────────────────────────────────</span>
+<span class="keyword">dig TXT</span> <span class="value">yourcompany.com</span>          <span class="comment"># check SPF</span>
+<span class="keyword">dig TXT</span> <span class="value">_dmarc.yourcompany.com</span>   <span class="comment"># check DMARC</span>
+<span class="comment"># Or use: https://mxtoolbox.com/EmailHeaders.aspx</span></code></pre>
+                                </div>
+                                <div class="code-explanation">
+                                    <h5>Why all three are needed:</h5>
+                                    <p>
+                                        <strong>SPF alone</strong> — Can be bypassed; only checks the envelope sender, not the "From" header visible to users<br>
+                                        <strong>DKIM alone</strong> — Proves integrity but doesn't prevent domain spoofing in the visible From header<br>
+                                        <strong>DMARC</strong> — Enforces alignment between SPF/DKIM and the visible From domain, and specifies what to do when they don't match<br>
+                                        <strong>p=reject</strong> — The gold standard: unauthorised emails claiming to be from your domain are rejected before reaching the inbox
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6. Pretexting and Physical SE -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon green">🎭</div>
+                                <h3>6. Pretexting, Vishing and Physical Attacks</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Physical and voice-based social engineering attacks are less common but often more impactful — they can bypass all digital security controls entirely.
+                            </p>
+
+                            <div class="content-card">
+                                <h3 class="content-title">Vishing Script Structure — IT Support Impersonation</h3>
+                                <div class="code-block">
+<pre><code><span class="comment"># Attacker pre-call OSINT: LinkedIn → victim name, role, manager name</span>
+<span class="comment">#                           Company website → IT support process</span>
+<span class="comment">#                           Glassdoor → internal tool names</span>
+
+<span class="section">CALL STRUCTURE:</span>
+
+<span class="keyword">Opening (establish authority):</span>
+  <span class="value">"Hi Sarah, this is Mike from the IT Security team.</span>
+   <span class="value">I'm working with [manager name] on a security incident."</span>
+
+<span class="keyword">Create urgency:</span>
+  <span class="value">"We've detected unusual activity on your workstation</span>
+   <span class="value">and need to resolve this before the end of business today."</span>
+
+<span class="keyword">Make a small ask first (commitment):</span>
+  <span class="value">"Can you confirm your employee ID? Just to verify I have</span>
+   <span class="value">the right account."</span>  <span class="comment"># harmless — foot in the door</span>
+
+<span class="keyword">Escalate the ask:</span>
+  <span class="value">"I need you to open a browser and go to this support URL</span>
+   <span class="value">so I can push a security patch remotely."</span>
+  <span class="comment"># URL installs RAT (remote access trojan)</span>
+
+<span class="section">VICTIM DEFENCE — how to respond:</span>
+  <span class="tag">STOP:</span>   <span class="value">Never give credentials, install software or visit</span>
+           <span class="value">URLs from unsolicited callers, regardless of who they claim to be</span>
+  <span class="tag">VERIFY:</span> <span class="value">Hang up. Call IT support back on the official number</span>
+           <span class="value">from the company intranet — not a number the caller provides</span>
+  <span class="tag">REPORT:</span> <span class="value">Report the call to your security team immediately</span></code></pre>
+                                </div>
+                            </div>
+
+                            <ul class="checklist">
+                                <li><div class="check-icon done">✓</div><span>Verify all unexpected IT requests by calling back on a known, official number</span></li>
+                                <li><div class="check-icon done">✓</div><span>Challenge all visitors at reception — even those wearing uniforms or carrying equipment</span></li>
+                                <li><div class="check-icon done">✓</div><span>Never allow tailgating through badge-controlled doors, even to "help" someone with their hands full</span></li>
+                                <li><div class="check-icon done">✓</div><span>Report lost or found USB drives to IT immediately — never plug them in</span></li>
+                                <li><div class="check-icon warn">!</div><span>Be especially vigilant on Fridays and public holiday eves — attackers exploit reduced-scrutiny periods</span></li>
+                                <li><div class="check-icon bad">✗</div><span>Do not share internal information (tool names, project names, org structure) on LinkedIn or social media</span></li>
+                            </ul>
+                        </div>
+
+                        <!-- 7. Simulated Phishing Campaigns -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon yellow">🎯</div>
+                                <h3>7. Running a Simulated Phishing Campaign</h3>
+                            </div>
+
+                            <p class="content-text">
+                                Simulated phishing campaigns measure real susceptibility and immediately train employees who click. They are one of the most evidence-based methods for improving human security behaviour.
+                            </p>
+
+                            <div class="section-divider">
+                                <div class="section-divider-line"></div>
+                                <span class="section-divider-label">Campaign Lifecycle</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+
+                            <div class="pipeline-visual">
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box">📋 Scope</div>
+                                    <div class="pipeline-label">Get HR/Legal sign-off</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box highlight">🎨 Design</div>
+                                    <div class="pipeline-label">Template + Pretext</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box highlight">🚀 Send</div>
+                                    <div class="pipeline-label">Randomised schedule</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box highlight">📊 Track</div>
+                                    <div class="pipeline-label">Opens / Clicks / Creds</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box">🎓 Train</div>
+                                    <div class="pipeline-label">Just-in-time education</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box">📈 Report</div>
+                                    <div class="pipeline-label">Click rate over time</div>
+                                </div>
+                            </div>
+
+                            <div class="content-card">
+                                <h3 class="content-title">GoPhish — Campaign Setup Reference</h3>
+                                <div class="code-block">
+<pre><code><span class="comment"># Install GoPhish (open-source phishing simulation)</span>
+<span class="keyword">wget</span> <span class="value">https://github.com/gophish/gophish/releases/latest/gophish.zip</span>
+<span class="keyword">unzip</span> <span class="value">gophish.zip && ./gophish</span>
+<span class="comment"># Admin panel: https://localhost:3333 (default)</span>
+
+<span class="section">CAMPAIGN COMPONENTS IN GOPHISH:</span>
+
+<span class="keyword">1. Sending Profile</span>
+   <span class="value">SMTP server, from name, from address</span>
+   <span class="comment"># Use a domain similar to but not impersonating your company</span>
+   <span class="comment"># Set up SPF/DKIM on the sending domain to avoid spam filters</span>
+
+<span class="keyword">2. Email Template</span>
+   <span class="value">Subject, HTML body, attachments</span>
+   <span class="value">Use {{.FirstName}} {{.LastName}} for personalisation</span>
+   <span class="value">Track: {{.Tracker}} (invisible pixel)</span>
+   <span class="value">Link: {{.URL}} (your landing page)</span>
+
+<span class="keyword">3. Landing Page</span>
+   <span class="value">Clone target login page or create credential harvester</span>
+   <span class="value">Redirect to training page after submission</span>
+   <span class="comment"># Best practice: redirect to awareness training, not just a "gotcha" page</span>
+
+<span class="keyword">4. Target Group</span>
+   <span class="value">CSV import: First Name, Last Name, Email, Position</span>
+
+<span class="section">KEY METRICS TO TRACK:</span>
+  <span class="tag">Email Open Rate</span>     <span class="comment"># % who opened the email</span>
+  <span class="tag">Click Rate</span>          <span class="comment"># % who clicked the link (primary KPI)</span>
+  <span class="tag">Submission Rate</span>     <span class="comment"># % who entered credentials</span>
+  <span class="tag">Report Rate</span>         <span class="comment"># % who reported to security team (often ignored — track this!)</span></code></pre>
+                                </div>
+                            </div>
+
+                            <div class="info-box danger">
+                                <span class="info-box-icon">🚫</span>
+                                <div class="info-box-text">
+                                    <strong>Ethical guardrails for simulated campaigns</strong>
+                                    Never name and shame employees who click. Never use emotionally manipulative pretexts (fake job loss, fake family emergency).
+                                    Always disclose to HR and legal before running. Use results for education, not punishment. The goal is behaviour change, not blame.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 8. Security Awareness Programme -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon blue">🏫</div>
+                                <h3>8. Building an Effective Security Awareness Programme</h3>
+                            </div>
+
+                            <p class="content-text">
+                                A one-time annual compliance training is largely ineffective — research shows retention drops to near zero within weeks. Effective security awareness is <strong>continuous, contextual and behaviour-focused</strong>.
+                            </p>
+
+                            <div class="compare-grid">
+                                <div class="compare-card sast">
+                                    <div class="compare-title">❌ What Doesn't Work</div>
+                                    <ul class="compare-list">
+                                        <li>Annual 2-hour compliance click-through courses</li>
+                                        <li>Generic "don't click links" posters</li>
+                                        <li>Fear-based messaging without empowerment</li>
+                                        <li>Blaming users when they fall for phishing</li>
+                                        <li>Measuring completion rate instead of behaviour change</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card dast">
+                                    <div class="compare-title">✅ What Works</div>
+                                    <ul class="compare-list">
+                                        <li>Monthly bite-sized micro-training (5 min modules)</li>
+                                        <li>Just-in-time training triggered by clicking simulated phish</li>
+                                        <li>Positive reinforcement: reward reporters, not just catching clickers</li>
+                                        <li>Real incident examples relevant to your industry</li>
+                                        <li>Track phishing click rates over 12+ months</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card sca">
+                                    <div class="compare-title">📊 Key Metrics</div>
+                                    <ul class="compare-list">
+                                        <li>Phishing Simulation Click Rate (target: &lt;5%)</li>
+                                        <li>Phishing Report Rate (employees alerting security)</li>
+                                        <li>Mean time to report a suspicious email</li>
+                                        <li>Repeat clickers (high-risk individuals)</li>
+                                        <li>Department-level risk scoring</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card iast">
+                                    <div class="compare-title">🔧 Technical Controls (Complements Training)</div>
+                                    <ul class="compare-list">
+                                        <li>MFA on all accounts — mitigates credential theft</li>
+                                        <li>DMARC p=reject on all owned domains</li>
+                                        <li>Email banners for external senders</li>
+                                        <li>Browser URL/link sandboxing</li>
+                                        <li>Disable macros in Office documents by default</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="real-example">
+                                <div class="real-example-label">📰 Real Case</div>
+                                <div class="real-example-title">MGM Resorts Breach (2023) — 10-Minute Vishing Call</div>
+                                <div class="real-example-text">
+                                    Attackers found an MGM employee on LinkedIn, then called the IT helpdesk impersonating that employee to reset their Okta MFA. The entire attack — from LinkedIn research to active session — took approximately 10 minutes. The breach disrupted MGM operations for 10+ days and cost an estimated $100 million. The Scattered Spider group behind the attack was known for targeting IT helpdesks specifically. MGM had no strict callback verification protocol for MFA resets.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="content-card">
+                            <h3 class="content-title">✅ Summary and Next Steps</h3>
+                            <p class="content-text">
+                                In this module you covered the psychology behind social engineering (Cialdini's principles), the full attack taxonomy (phishing, vishing, pretexting, baiting, tailgating, watering hole), phishing email anatomy, BEC and AI-powered deepfake attacks, email authentication (SPF/DKIM/DMARC), simulated phishing campaigns with GoPhish, and the principles of building an effective security awareness programme.
+                            </p>
+                            <div class="info-box info">
+                                <span class="info-box-icon">💡</span>
+                                <div class="info-box-text">
+                                    <strong>Keep learning</strong>
+                                    Use the <strong>Lab</strong> to build a phishing awareness decision card, test your knowledge in the <strong>Quiz</strong>,
+                                    and explore the training platforms and research in the <strong>Resources</strong> section. Remember: the goal of human security is to make people the strongest link — not the weakest.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- LAB TAB -->
+                <div id="panel-lab" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Lab — Phishing Awareness Decision Card</h3>
+                        <p class="content-text">
+                            Build an interactive phishing awareness reference card in HTML. The starter code simulates a quick-reference decision tool employees can use to evaluate suspicious emails. Edit the red flags, add new indicators, or customise the styling.
+                        </p>
+                        <div class="lab-instructions">
+                            <strong>Instructions:</strong> The template is an interactive awareness card. Try adding a new red flag category, changing the colour scheme, or adding an interactive "suspicious or safe?" checklist. Press <strong>Ctrl+Enter</strong> to render.
+                        </div>
+                        <div class="lab-controls">
+                            <button id="execute-btn" class="btn-execute">Run</button>
+                            <button id="reset-btn" class="btn-reset">Reset</button>
+                        </div>
+                        <div class="lab-container">
+                            <div class="lab-editor">
+                                <div class="lab-header">HTML Editor</div>
+                                <textarea id="code-editor" class="lab-textarea"><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Phishing Awareness — Decision Card</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f4f8; color: #1a1a2e; }
+        h2 { text-align: center; color: #c0392b; margin-bottom: 0.25rem; }
+        .subtitle { text-align: center; color: #555; font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .card { background: white; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 5px solid; }
+        .card.red    { border-color: #e74c3c; }
+        .card.orange { border-color: #e67e22; }
+        .card.green  { border-color: #27ae60; }
+        .card h3 { margin-bottom: 8px; font-size: 0.95rem; }
+        .card.red h3    { color: #c0392b; }
+        .card.orange h3 { color: #d35400; }
+        .card.green h3  { color: #1e8449; }
+        .flag { display: flex; align-items: flex-start; gap: 8px; margin: 6px 0; font-size: 0.82rem; color: #444; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+        .dot.red    { background: #e74c3c; }
+        .dot.orange { background: #e67e22; }
+        .dot.green  { background: #27ae60; }
+        .rule-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 14px; text-align: center; font-size: 0.85rem; color: #856404; margin-top: 12px; }
+        .rule-box strong { display: block; font-size: 1rem; margin-bottom: 4px; color: #533f03; }
+        .checklist-card { background: white; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .checklist-card h3 { color: #2c3e50; margin-bottom: 10px; font-size: 0.95rem; }
+        label { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #444; margin: 6px 0; cursor: pointer; }
+        input[type=checkbox] { accent-color: #e74c3c; width: 15px; height: 15px; }
+        #verdict { margin-top: 10px; font-weight: bold; font-size: 0.9rem; padding: 8px 12px; border-radius: 6px; display: none; }
+        .v-suspicious { background: #fde8e8; color: #c0392b; }
+        .v-safe        { background: #d5f5e3; color: #1e8449; }
+    </style>
+</head>
+<body>
+    <h2>🎣 Phishing Awareness — Quick Decision Card</h2>
+    <p class="subtitle">When in doubt, use this card before clicking any link or replying.</p>
+
+    <div class="card red">
+        <h3>🚨 Immediate Red Flags — Do NOT proceed</h3>
+        <div class="flag"><span class="dot red"></span>Sender domain doesn't exactly match the organisation (e.g. company-it.net vs company.com)</div>
+        <div class="flag"><span class="dot red"></span>Request for password, MFA code or payment details via email</div>
+        <div class="flag"><span class="dot red"></span>Urgent deadline: "respond within 2 hours or your account is suspended"</div>
+        <div class="flag"><span class="dot red"></span>Link URL doesn't match the organisation when you hover over it</div>
+        <div class="flag"><span class="dot red"></span>Unexpected attachment — especially .exe, .zip, .doc with macros</div>
+    </div>
+
+    <div class="card orange">
+        <h3>⚠️ Caution Signals — Verify before acting</h3>
+        <div class="flag"><span class="dot orange"></span>Unexpected email from someone you know asking for something unusual</div>
+        <div class="flag"><span class="dot orange"></span>Email references a project or event you weren't expecting to hear about</div>
+        <div class="flag"><span class="dot orange"></span>Reply-to address is different from the sender address</div>
+        <div class="flag"><span class="dot orange"></span>Generic greeting ("Dear Customer") on an email that should know your name</div>
+        <div class="flag"><span class="dot orange"></span>Minor spelling errors in the domain or company name</div>
+    </div>
+
+    <div class="card green">
+        <h3>✅ Signs a Message is Likely Legitimate</h3>
+        <div class="flag"><span class="dot green"></span>You initiated the interaction (e.g. you requested a password reset)</div>
+        <div class="flag"><span class="dot green"></span>Sender domain exactly matches the organisation's known domain</div>
+        <div class="flag"><span class="dot green"></span>No urgency, no threats, no requests for credentials</div>
+        <div class="flag"><span class="dot green"></span>You can verify the request via a separate channel (phone call)</div>
+    </div>
+
+    <div class="checklist-card">
+        <h3>🔍 Quick Suspicion Checker — tick all that apply to this email:</h3>
+        <label><input type="checkbox" onchange="checkScore()"> Unexpected sender or unfamiliar domain</label>
+        <label><input type="checkbox" onchange="checkScore()"> Creates urgency or uses threatening language</label>
+        <label><input type="checkbox" onchange="checkScore()"> Asks for credentials, payment or sensitive data</label>
+        <label><input type="checkbox" onchange="checkScore()"> Contains a link with a suspicious or mismatched URL</label>
+        <label><input type="checkbox" onchange="checkScore()"> Has an unexpected attachment</label>
+        <div id="verdict"></div>
+    </div>
+
+    <div class="rule-box">
+        <strong>🥇 The Golden Rule</strong>
+        When in doubt — don't click. Pick up the phone and verify with the sender directly using a known number. Then report to your security team.
+    </div>
+
+    <script>
+        function checkScore() {
+            const boxes = document.querySelectorAll('input[type=checkbox]');
+            const count = Array.from(boxes).filter(b => b.checked).length;
+            const v = document.getElementById('verdict');
+            v.style.display = 'block';
+            if (count >= 2) {
+                v.className = 'v-suspicious';
+                v.textContent = '⚠️ ' + count + '/5 flags checked — treat this email as SUSPICIOUS. Do not click. Report to security.';
+            } else if (count === 1) {
+                v.className = 'v-suspicious';
+                v.textContent = '🔍 1 flag checked — proceed with caution. Verify via phone before acting.';
+            } else {
+                v.className = 'v-safe';
+                v.textContent = '✅ No flags checked — appears low-risk. Stay vigilant.';
+            }
+        }
+    </script>
+</body>
+</html></textarea>
+                            </div>
+                            <div class="lab-preview">
+                                <div class="lab-header">Preview</div>
+                                <iframe id="preview-iframe" class="lab-iframe" sandbox="allow-scripts"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QUIZ TAB -->
+                <div id="panel-quiz" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Social Engineering &amp; Human Security Quiz</h3>
+                        <p class="content-text">
+                            Test your understanding of social engineering techniques, psychological triggers, defences and awareness programme design. Answer all 15 questions and receive immediate feedback.
+                        </p>
+
+                        <div id="quiz-container">
+                            <form id="quiz-form">
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">1. According to the Verizon DBIR, what percentage of data breaches involve a human element?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q1" value="a"><span class="option-text">Around 20%</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="b"><span class="option-text">Around 50%</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="c"><span class="option-text">Over 85%</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="d"><span class="option-text">Less than 10%</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">2. A phishing email states "Your account will be suspended in 2 hours unless you verify now." Which psychological principle is being exploited?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q2" value="a"><span class="option-text">Reciprocity</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="b"><span class="option-text">Social proof</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="c"><span class="option-text">Urgency / Scarcity</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="d"><span class="option-text">Liking</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">3. What is "spear phishing" and how does it differ from regular phishing?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q3" value="a"><span class="option-text">Spear phishing only targets email; regular phishing also uses SMS</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="b"><span class="option-text">Spear phishing is highly targeted at specific individuals using personalised information gathered via OSINT; regular phishing is mass and generic</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="c"><span class="option-text">Spear phishing always includes malware attachments; regular phishing uses links</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="d"><span class="option-text">They are the same — spear phishing is just a technical term for phishing</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">4. What is a "pretexting" attack?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q4" value="a"><span class="option-text">An attack that sends a text message with a malicious link</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="b"><span class="option-text">A fabricated scenario used to manipulate a target into disclosing information or performing an action</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="c"><span class="option-text">A technical attack that exploits a pre-authentication vulnerability</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="d"><span class="option-text">An automated phishing campaign using templates</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">5. What is the correct response when an unsolicited caller claims to be from IT and asks you to install remote access software?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q5" value="a"><span class="option-text">Comply if they can name your manager correctly</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="b"><span class="option-text">Politely decline, hang up, and call IT back on the official number from the company intranet to verify</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="c"><span class="option-text">Ask them to send an email instead and follow the email instructions</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="d"><span class="option-text">Install the software but monitor what they do on screen</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">6. What does DMARC's "p=reject" policy enforce?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q6" value="a"><span class="option-text">All emails from your domain are automatically encrypted</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="b"><span class="option-text">Emails claiming to be from your domain that fail SPF/DKIM alignment are rejected before reaching the recipient's inbox</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="c"><span class="option-text">Outgoing emails are blocked unless signed by the CISO</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="d"><span class="option-text">Recipients cannot reply to emails from your domain</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">7. What is "Business Email Compromise" (BEC)?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q7" value="a"><span class="option-text">Malware that encrypts a business's email server</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="b"><span class="option-text">A targeted attack where the attacker impersonates a trusted executive or vendor to manipulate employees into transferring money or sensitive data</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="c"><span class="option-text">A phishing campaign targeting businesses rather than consumers</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="d"><span class="option-text">An attack that compromises a company's email server infrastructure</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">8. A colleague drops a USB drive they found in the car park on your desk and says "check if this has anything important." What should you do?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q8" value="a"><span class="option-text">Plug it into an air-gapped machine to safely check the contents</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="b"><span class="option-text">Do not plug it in. Hand it to the IT/security team — it may be a baiting attack designed to install malware</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="c"><span class="option-text">Scan it with your antivirus before opening</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="d"><span class="option-text">Open it in a virtual machine</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">9. What is the "foot-in-the-door" technique in social engineering?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q9" value="a"><span class="option-text">Physically blocking a door to prevent someone from leaving</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="b"><span class="option-text">Starting with a small, harmless request to establish compliance, then escalating to increasingly larger asks</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="c"><span class="option-text">Exploiting a door access control vulnerability</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="d"><span class="option-text">Sending phishing emails in rapid succession</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">10. Which of the following is the most effective defence against BEC CEO fraud?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q10" value="a"><span class="option-text">Requiring all wire transfers above a threshold to be verbally confirmed via a known phone number through an out-of-band process</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="b"><span class="option-text">Blocking all emails from external senders</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="c"><span class="option-text">Training employees to check the CEO's email signature carefully</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="d"><span class="option-text">Encrypting all outgoing wire transfer emails</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">11. What is the difference between "tailgating" and "piggybacking" in physical security?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q11" value="a"><span class="option-text">They are the same attack with different names</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="b"><span class="option-text">Tailgating: the victim is unaware someone followed them through; piggybacking: the victim knowingly allows an unauthorised person to enter</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="c"><span class="option-text">Tailgating involves physical force; piggybacking is consensual</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="d"><span class="option-text">Tailgating targets executives; piggybacking targets general staff</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">12. Which approach to security awareness training is most likely to be ineffective?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q12" value="a"><span class="option-text">Monthly bite-sized micro-training modules</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="b"><span class="option-text">Just-in-time training triggered when an employee clicks a simulated phish</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="c"><span class="option-text">An annual 2-hour compliance click-through course with no follow-up</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="d"><span class="option-text">Rewarding employees who report suspicious emails</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">13. In the 2023 MGM Resorts breach, how did the attackers gain initial access?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q13" value="a"><span class="option-text">By exploiting an unpatched CVE in MGM's VPN appliance</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="b"><span class="option-text">By calling the IT helpdesk, impersonating an employee found on LinkedIn, and social engineering the helpdesk into resetting their MFA</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="c"><span class="option-text">By sending a phishing email to the CISO's personal Gmail account</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="d"><span class="option-text">By deploying a watering hole attack on an MGM supplier website</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">14. What is "MFA fatigue" (also called MFA bombing) as an attack technique?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q14" value="a"><span class="option-text">An attack that overloads the MFA server with authentication requests to take it offline</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="b"><span class="option-text">Sending repeated MFA push notifications to a victim until they approve one out of confusion or exhaustion, bypassing MFA without needing the code</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="c"><span class="option-text">Cracking the TOTP algorithm to predict future MFA codes</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="d"><span class="option-text">Registering a new MFA device using a stolen SIM card</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">15. What is the most important metric to track in a simulated phishing campaign programme over time?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q15" value="a"><span class="option-text">The total number of emails sent per campaign</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="b"><span class="option-text">The phishing simulation click rate trend over 12+ months — measuring whether training is actually reducing susceptibility</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="c"><span class="option-text">The completion rate of annual security awareness training modules</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="d"><span class="option-text">The number of employees who opened the simulated phishing email</span></label>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+
+                        <div class="quiz-controls">
+                            <button id="submit-quiz" class="btn-execute" type="button">Submit</button>
+                            <button id="clear-quiz" class="btn-reset" type="button">Clear</button>
+                        </div>
+
+                        <div id="quiz-results" class="quiz-results" style="display: none;">
+                            <h4 class="results-title">Quiz Results</h4>
+                            <div id="quiz-score" class="quiz-score"></div>
+                            <div id="quiz-feedback" class="quiz-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RESOURCES TAB -->
+                <div id="panel-resources" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Recommended Resources</h3>
+                        <p class="content-text">
+                            A curated selection of essential resources for understanding, simulating and defending against social engineering attacks.
+                        </p>
+                        <div class="resources-list">
+                            <div class="resource-category">
+                                <h4 class="category-title">Foundational Reading</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">Cialdini — Influence: The Psychology of Persuasion (book)</a></li>
+                                    <li><a href="#" class="resource-link">Kevin Mitnick — The Art of Deception (book)</a></li>
+                                    <li><a href="#" class="resource-link">Verizon Data Breach Investigations Report (DBIR) — annual</a></li>
+                                    <li><a href="#" class="resource-link">SANS Security Awareness Report — annual human risk trends</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Frameworks &amp; Standards</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">NIST SP 800-50 — Building an IT Security Awareness Programme</a></li>
+                                    <li><a href="#" class="resource-link">MITRE ATT&amp;CK — TA0001 Initial Access (Phishing techniques)</a></li>
+                                    <li><a href="#" class="resource-link">Social Engineering Framework (Social-Engineer.org)</a></li>
+                                    <li><a href="#" class="resource-link">CISA Phishing Guidance — Stopping the Attack Cycle</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Tools &amp; Platforms</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">GoPhish — Open-source phishing simulation framework</a></li>
+                                    <li><a href="#" class="resource-link">KnowBe4 — Enterprise security awareness &amp; phishing simulation</a></li>
+                                    <li><a href="#" class="resource-link">Proofpoint Security Awareness Training</a></li>
+                                    <li><a href="#" class="resource-link">MXToolbox — SPF, DKIM &amp; DMARC verification</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Technical Email Security</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">DMARC.org — Implementation guide and policy reference</a></li>
+                                    <li><a href="#" class="resource-link">Google Postmaster Tools — Monitor SPF/DKIM/DMARC health</a></li>
+                                    <li><a href="#" class="resource-link">PhishTool — Free email header and phishing analysis</a></li>
+                                    <li><a href="#" class="resource-link">CISA DMARC Guidance for Federal Agencies</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="resources-note">
+                            <p>💡 <strong>Note:</strong> Social engineering simulations must always be run with HR and legal sign-off. The goal is education, not entrapment.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EVALUATION TAB -->
+                <div id="panel-evaluation" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Evaluation Criteria</h3>
+                        <p class="content-text">
+                            Criteria organised by importance level to assess your mastery of Social Engineering &amp; Human Security.
+                        </p>
+                        <div class="evaluation-grid">
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title essential">
+                                    <span class="evaluation-icon">💠</span>
+                                    Essential
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>Why humans are the primary attack vector (DBIR statistic)</li>
+                                    <li>The 6 psychological principles used in SE attacks</li>
+                                    <li>Phishing, smishing, vishing — definitions and differences</li>
+                                    <li>How to recognise a phishing email (red flags)</li>
+                                    <li>Correct response to a suspicious call or email</li>
+                                    <li>What DMARC p=reject does and why it matters</li>
+                                </ul>
+                            </div>
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title important">
+                                    <span class="evaluation-icon">⭐</span>
+                                    Important
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>Pretexting, baiting and tailgating attack mechanics</li>
+                                    <li>BEC — CEO fraud and invoice fraud methods</li>
+                                    <li>SPF, DKIM and DMARC — what each does and how they interlock</li>
+                                    <li>GoPhish campaign components and metrics</li>
+                                    <li>Why annual compliance training fails (and what works instead)</li>
+                                    <li>Physical security: tailgating vs piggybacking</li>
+                                </ul>
+                            </div>
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title advanced">
+                                    <span class="evaluation-icon">🚀</span>
+                                    Advanced
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>AI voice cloning and deepfake video threat landscape</li>
+                                    <li>MFA fatigue / push bombing technique and mitigations</li>
+                                    <li>Evilginx2 / adversary-in-the-middle phishing and session hijacking</li>
+                                    <li>Watering hole attack design and detection</li>
+                                    <li>Security culture metrics: behavioural science approach</li>
+                                    <li>Red team social engineering — OSINT pre-engagement methodology</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentProgress = 0;
+
+        function updateProgress(percentage) {
+            currentProgress = percentage;
+            document.getElementById('progress-text').textContent = percentage + '%';
+            document.getElementById('progress-fill').style.width = percentage + '%';
+        }
+
+        class TabSystem {
+            constructor() {
+                this.currentTab = 'learn';
+                this.tabs = ['learn', 'lab', 'quiz', 'resources', 'evaluation'];
+                this.init();
+            }
+
+            init() {
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+                });
+                window.addEventListener('hashchange', () => this.handleHashChange());
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+                this.handleHashChange();
+            }
+
+            switchTab(tabId) {
+                if (!this.tabs.includes(tabId)) return;
+                this.currentTab = tabId;
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    const isActive = button.dataset.tab === tabId;
+                    button.classList.toggle('active', isActive);
+                    button.setAttribute('aria-selected', isActive);
+                });
+                document.querySelectorAll('.tab-panel').forEach(panel => {
+                    panel.classList.toggle('active', panel.id === `panel-${tabId}`);
+                });
+                history.replaceState(null, null, `#${tabId}`);
+                this.updateProgressForTab(tabId);
+            }
+
+            handleHashChange() {
+                const hash = window.location.hash.slice(1);
+                if (hash && this.tabs.includes(hash)) this.switchTab(hash);
+            }
+
+            handleKeyboard(e) {
+                if (!e.target.classList.contains('tab-button')) return;
+                const currentIndex = this.tabs.indexOf(this.currentTab);
+                let newIndex = currentIndex;
+                switch(e.key) {
+                    case 'ArrowLeft': e.preventDefault(); newIndex = currentIndex > 0 ? currentIndex - 1 : this.tabs.length - 1; break;
+                    case 'ArrowRight': e.preventDefault(); newIndex = currentIndex < this.tabs.length - 1 ? currentIndex + 1 : 0; break;
+                    case 'Home': e.preventDefault(); newIndex = 0; break;
+                    case 'End': e.preventDefault(); newIndex = this.tabs.length - 1; break;
+                }
+                if (newIndex !== currentIndex) {
+                    this.switchTab(this.tabs[newIndex]);
+                    document.querySelector(`[data-tab="${this.tabs[newIndex]}"]`).focus();
+                }
+            }
+
+            updateProgressForTab(tabId) {
+                const progressMap = { 'learn': 20, 'lab': 40, 'quiz': 60, 'resources': 80, 'evaluation': 100 };
+                updateProgress(Math.max(currentProgress, progressMap[tabId] || 0));
+            }
+        }
+
+        class LabEditor {
+            constructor() {
+                this.editor = document.getElementById('code-editor');
+                this.iframe = document.getElementById('preview-iframe');
+                this.executeBtn = document.getElementById('execute-btn');
+                this.resetBtn = document.getElementById('reset-btn');
+                this.defaultCode = this.editor.value;
+                this.init();
+            }
+
+            init() {
+                this.executeBtn.addEventListener('click', () => this.executeCode());
+                this.resetBtn.addEventListener('click', () => this.resetCode());
+                this.editor.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); this.executeCode(); }
+                });
+                setTimeout(() => this.executeCode(), 500);
+            }
+
+            executeCode() {
+                const blob = new Blob([this.editor.value], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                this.iframe.src = url;
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                this.executeBtn.textContent = 'Executed!';
+                this.executeBtn.style.background = 'linear-gradient(135deg, #4caf50, #8bc34a)';
+                setTimeout(() => {
+                    this.executeBtn.textContent = 'Run';
+                    this.executeBtn.style.background = 'linear-gradient(135deg, var(--orange), var(--yellow))';
+                }, 1000);
+            }
+
+            resetCode() {
+                this.editor.value = this.defaultCode;
+                this.executeCode();
+                this.resetBtn.textContent = 'Cleared!';
+                setTimeout(() => { this.resetBtn.textContent = 'Reset'; }, 1000);
+            }
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questions = [
+                    { question: 1,  correct: 'c', explanation: 'According to the Verizon DBIR (Data Breach Investigations Report), over 85% of data breaches involve a human element — meaning social engineering, credential theft or human error is a factor. This is why human security is considered the most critical layer of defence.' },
+                    { question: 2,  correct: 'c', explanation: 'The "your account will be suspended" message exploits Urgency (one of Cialdini\'s six principles of influence). Creating artificial time pressure forces victims to act before engaging rational thought — bypassing critical evaluation of the email\'s legitimacy.' },
+                    { question: 3,  correct: 'b', explanation: 'Spear phishing is a targeted, personalised attack against a specific individual or organisation, using information gathered via OSINT (LinkedIn, company website, social media) to make the email highly convincing. Regular phishing is mass, generic and untargeted.' },
+                    { question: 4,  correct: 'b', explanation: 'Pretexting involves creating a fabricated but plausible scenario to manipulate the target. Examples include posing as IT support, a new employee needing onboarding access, or an external auditor. It requires prior research to be credible.' },
+                    { question: 5,  correct: 'b', explanation: 'The correct response is to hang up and call IT using the official number from the company intranet — not any number the caller provides. This is called out-of-band verification. Never install software or visit URLs from unsolicited callers, regardless of how convincing they seem.' },
+                    { question: 6,  correct: 'b', explanation: 'DMARC p=reject instructs receiving mail servers to reject emails that claim to be from your domain but fail SPF/DKIM alignment. This prevents attackers from sending spoofed emails that appear to come from your domain, which is the primary technical defence against email-based impersonation.' },
+                    { question: 7,  correct: 'b', explanation: 'Business Email Compromise (BEC) is a targeted social engineering attack — typically involving impersonation of executives or vendors — to manipulate finance or HR staff into transferring money or sensitive data. It is the most financially damaging cybercrime category, costing billions globally each year.' },
+                    { question: 8,  correct: 'b', explanation: 'This is a classic baiting attack — leaving USB drives in physical locations to exploit human curiosity. Never plug in found USB devices. Even plugging one into an air-gapped machine can be dangerous (as proven by Stuxnet). Always hand found media to the IT/security team.' },
+                    { question: 9,  correct: 'b', explanation: 'The foot-in-the-door technique exploits the commitment and consistency principle: once a person agrees to a small, harmless request, they are psychologically inclined to comply with increasingly larger requests from the same source. It\'s why attackers start by asking for innocuous information.' },
+                    { question: 10, correct: 'a', explanation: 'Out-of-band verification — calling the requester back on a known, pre-verified phone number — is the most effective defence against BEC. It cannot be spoofed by email. This should be a mandatory process for all wire transfers above a defined threshold, regardless of how urgent or authoritative the email appears.' },
+                    { question: 11, correct: 'b', explanation: 'Tailgating: the victim is unaware that an unauthorised person followed them through a controlled access point. Piggybacking: the victim knowingly allows an unauthorised person to enter, often because social norms make refusing seem impolite. Both require employee training to prevent.' },
+                    { question: 12, correct: 'c', explanation: 'Research consistently shows that annual compliance training is largely ineffective — retention drops to near zero within weeks. Effective awareness programmes are continuous (monthly micro-training), contextual (just-in-time triggered by simulated phish clicks), and behaviour-focused rather than knowledge-focused.' },
+                    { question: 13, correct: 'b', explanation: 'The 2023 MGM breach was executed by the Scattered Spider group, who found an MGM employee on LinkedIn, then called the IT helpdesk impersonating that employee. They social engineered the helpdesk into resetting the employee\'s Okta MFA — granting access to MGM\'s systems in approximately 10 minutes, without any technical exploit.' },
+                    { question: 14, correct: 'b', explanation: 'MFA fatigue (push bombing) works by repeatedly sending MFA push notification requests to the victim\'s phone. After receiving many unwanted notifications, users often approve one accidentally or out of frustration. Countermeasures include: number matching (show a code the user must confirm), phishing-resistant MFA (FIDO2/passkeys), and limiting push notification attempts.' },
+                    { question: 15, correct: 'b', explanation: 'The phishing simulation click rate trend over 12+ months is the most meaningful metric — it shows whether your programme is actually changing human behaviour over time. Completion rates measure activity, not behaviour change. A programme that reduces click rate from 25% to 4% over 12 months is demonstrably effective.' }
+                ];
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0;
+                const feedback = [];
+                this.questions.forEach(q => {
+                    const userAnswer = formData.get(`q${q.question}`);
+                    const isCorrect = userAnswer === q.correct;
+                    if (isCorrect) score++;
+                    feedback.push({ question: q.question, correct: isCorrect, explanation: q.explanation, correctAnswer: q.correct });
+                });
+                this.displayResults(score, feedback);
+            }
+
+            displayResults(score, feedback) {
+                const resultsDiv = document.getElementById('quiz-results');
+                const scoreDiv = document.getElementById('quiz-score');
+                const feedbackDiv = document.getElementById('quiz-feedback');
+                const percentage = Math.round((score / this.questions.length) * 100);
+
+                let scoreClass, message;
+                if (percentage >= 90) { scoreClass = 'score-excellent'; message = 'Excellent! You have a strong understanding of social engineering techniques and human security defences!'; }
+                else if (percentage >= 70) { scoreClass = 'score-good'; message = 'Well done! You have a solid grasp of the fundamentals. Review the advanced attack types.'; }
+                else if (percentage >= 50) { scoreClass = 'score-fair'; message = 'Not bad, but review the psychological principles, BEC attacks and email authentication sections.'; }
+                else { scoreClass = 'score-poor'; message = 'You need more study. Start with the psychology section and work through each attack type carefully.'; }
+
+                scoreDiv.innerHTML = `
+                    <div class="${scoreClass}">${score}/${this.questions.length} (${percentage}%)</div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">${message}</div>
+                `;
+
+                feedbackDiv.innerHTML = feedback.map(item => `
+                    <div class="feedback-item ${item.correct ? 'feedback-correct' : 'feedback-incorrect'}">
+                        <span class="feedback-icon">${item.correct ? '✓' : '✗'}</span>
+                        <span>
+                            <strong>Question ${item.question}:</strong> ${item.explanation}
+                            ${!item.correct ? `<br><span style="margin-top: 0.3rem; display: inline-block; font-size: 0.82rem; color: #c0392b; font-weight: 600;">Correct answer: ${item.correctAnswer.toUpperCase()}</span>` : ''}
+                        </span>
+                    </div>
+                `).join('');
+
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            clearQuiz() {
+                document.querySelectorAll('#quiz-form input[type="radio"]').forEach(i => i.checked = false);
+                document.getElementById('quiz-results').style.display = 'none';
+                const btn = document.getElementById('clear-quiz');
+                btn.textContent = 'Cleared!';
+                setTimeout(() => { btn.textContent = 'Clear'; }, 1000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new TabSystem();
+            new LabEditor();
+            new QuizManager();
+        });
+    </script>
+</body>
+</html>
