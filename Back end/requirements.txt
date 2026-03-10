@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+alembic
+pymysql
+passlib[bcrypt]
+pyjwt
+python-dotenv
