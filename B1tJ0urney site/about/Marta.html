@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B1tJ0urney | Escolhe a tua Jornada</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 10% 20%, #0a1f3b, #030614);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        /* Fundo digital */
+        .digital-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00aaff, #6a0dad, #00ffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .btn-wrapper {
+            position: relative;
+            padding: 3px;
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            border-radius: 0.9em;
+            transition: all 0.4s ease;
+            display: inline-block;
+        }
+
+        .btn-wrapper:hover::before {
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            filter: blur(1.2em);
+        }
+
+        .btn-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            border-radius: 0.9em;
+            z-index: -10;
+            filter: blur(0);
+            transition: filter 0.4s ease;
+        }
+
+        .btn-wrapper .nav-btn {
+            font-size: 1.1em;
+            padding: 0.6em 1.2em;
+            border-radius: 0.7em;
+            border: none;
+            background-color: #000;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 2px 2px 3px #000000b4;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Header da página */
+        .page-header {
+            text-align: center;
+            padding: 4rem 0 2rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #00aaff, #00ffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #b0e0ff;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .discovery-badge {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid gold;
+            color: gold;
+            padding: 0.5rem 2rem;
+            border-radius: 40px;
+            font-weight: 700;
+            margin: 2rem 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: pulse-gold 2s infinite;
+        }
+
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.5); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+
+        /* Separadores de secção */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 4rem 0 2rem;
+        }
+
+        .section-divider h2 {
+            font-size: 2rem;
+            color: #fff;
+        }
+
+        .section-divider .line {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+        }
+
+        .section-icon {
+            font-size: 2rem;
+            color: #00ffff;
+        }
+
+        /* Grid de cursos */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .course-card {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+            border-radius: 30px;
+            padding: 2rem 1.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00aaff, #6a0dad, #00ffff);
+            border-radius: 30px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .course-card:hover::before {
+            opacity: 1;
+        }
+
+        .course-card.selected {
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .course-card.premium {
+            cursor: pointer;
+            border: 2px solid gold;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .course-card.premium:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 30px gold;
+        }
+
+        .premium-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: gold;
+            color: #030614;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .course-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .course-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .course-price {
+            font-size: 1.2rem;
+            color: #00ffff;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .original-price {
+            font-size: 0.9rem;
+            color: #808080;
+            text-decoration: line-through;
+        }
+
+        /* Painel de seleção */
+        .selection-panel {
+            background: rgba(10, 20, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 2rem;
+            margin: 3rem 0;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .selected-courses {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            min-height: 60px;
+        }
+
+        .selected-tag {
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            padding: 0.8rem 1.5rem;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 600;
+            animation: slideIn 0.3s;
+        }
+
+        .selected-tag i {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .selected-tag i:hover {
+            color: #ff4444;
+            transform: scale(1.2);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Bundle descoberto */
+        .bundle-discovered {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 140, 0, 0.2));
+            border: 3px solid gold;
+            border-radius: 30px;
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); }
+            100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        }
+
+        .bundle-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .bundle-icon {
+            font-size: 2.5rem;
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .bundle-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, gold, orange);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .bundle-price {
+            display: flex;
+            align-items: baseline;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .bundle-price .original {
+            font-size: 1.5rem;
+            color: #808080;
+            text-decoration: line-through;
+        }
+
+        .bundle-price .discounted {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: gold;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .bundle-price .savings {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            color: gold;
+            font-weight: 600;
+        }
+
+        /* Carrinho */
+        .cart-summary {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 30px;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 3rem 0;
+        }
+
+        .total-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #00ffff;
+        }
+
+        .total-price span {
+            font-size: 1rem;
+            color: #808080;
+            font-weight: 400;
+        }
+
+        .checkout-btn {
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .checkout-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 170, 255, 0.5);
+            border-color: #00ffff;
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Tooltips e hints */
+        .hint {
+            text-align: center;
+            color: #808080;
+            font-size: 0.9rem;
+            margin: 2rem 0;
+            padding: 1rem;
+            border: 2px dashed rgba(255, 215, 0, 0.3);
+            border-radius: 20px;
+        }
+
+        .hint i {
+            color: gold;
+            margin-right: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .cart-summary { flex-direction: column; }
+            .bundle-price { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="digital-bg"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/" class="logo" style="text-decoration:none; color:inherit;">B1tJ0urney</a>
+        <div class="nav-links">
+            <div class="btn-wrapper"><a href="#" class="nav-btn">Início</a></div>
+            <div class="btn-wrapper"><a href="#" class="nav-btn">Cursos</a></div>
+            <div class="btn-wrapper"><a href="#" class="nav-btn active">Comprar</a></div>
+            <div class="btn-wrapper"><a href="#" class="nav-btn">Equipa</a></div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1>⚡ Constrói a tua Jornada</h1>
+            <p class="subtitle">Seleciona os cursos que queres. Junta-os. Descobre combinações secretas e poupa ainda mais.</p>
+            <div class="discovery-badge">
+                <i class="fas fa-compass"></i> Modo Explorador: Ativo
+            </div>
+        </div>
+
+        <!-- SECÇÃO 1: CURSOS NÃO ADQUIRIDOS -->
+        <div class="section-divider">
+            <i class="fas fa-lock-open section-icon"></i>
+            <h2>Cursos Disponíveis</h2>
+            <div class="line"></div>
+        </div>
+
+        <div class="courses-grid" id="availableCourses"></div>
+
+        <!-- Painel de Seleção (para compra) -->
+        <div class="selection-panel">
+            <h3 style="margin-bottom: 1rem; color: #00ffff;">
+                <i class="fas fa-shopping-basket"></i> A tua seleção
+            </h3>
+            <div class="selected-courses" id="selectedCourses"></div>
+
+            <!-- Área de Bundles (aparece quando descobre) -->
+            <div id="bundleArea"></div>
+
+            <!-- Hint interativo -->
+            <div class="hint">
+                <i class="fas fa-lightbulb"></i>
+                <span id="hintText">Tenta combinar cursos relacionados... Quem sabe não encontras um desconto secreto? 🕵️</span>
+            </div>
+        </div>
+
+        <!-- Resumo e Checkout -->
+        <div class="cart-summary">
+            <div>
+                <div style="color: #808080; margin-bottom: 0.3rem;">Total da jornada</div>
+                <div class="total-price" id="totalPrice">€0 <span>EUR</span></div>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn" disabled>
+                <i class="fas fa-rocket"></i> Comprar Seleção
+            </button>
+        </div>
+
+        <!-- SECÇÃO 2: CURSOS ADQUIRIDOS -->
+        <div class="section-divider" style="margin-top: 6rem;">
+            <i class="fas fa-crown section-icon" style="color: gold;"></i>
+            <h2 style="color: gold;">A tua Coleção Premium</h2>
+            <div class="line" style="background: linear-gradient(90deg, transparent, gold, transparent);"></div>
+        </div>
+
+        <div class="courses-grid" id="ownedCourses">
+            <!-- Os cursos adquiridos aparecerão aqui -->
+            <div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: #808080;">
+                <i class="fas fa-lock" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p>Ainda não tens cursos adquiridos. Compra o teu primeiro curso para começar a jornada premium!</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <a href="/" class="logo" style="text-decoration:none; color:inherit;">B1tJ0urney</a>
+        <p style="margin-top: 2rem;">© 2025 B1tJ0urney. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        // Dados dos cursos
+        const courses = [
+            { id: 1, name: 'Data Science', icon: '📊', price: 299, category: 'data' },
+            { id: 2, name: 'Artificial Intelligence', icon: '🤖', price: 349, category: 'ai' },
+            { id: 3, name: 'Web Development', icon: '🌐', price: 279, category: 'web' },
+            { id: 4, name: 'Cyber Security', icon: '🔐', price: 329, category: 'security' },
+            { id: 5, name: 'Cloud Computing', icon: '☁️', price: 289, category: 'cloud' },
+            { id: 6, name: 'Mobile Development', icon: '📱', price: 299, category: 'mobile' }
+        ];
+
+        // Bundles secretos (combinações que ativam descontos)
+        const bundles = [
+            { 
+                name: 'Cloud ☁️ + Mobile 📱', 
+                courses: ['cloud', 'mobile'],
+                discount: 150,
+                icon: '🚀',
+                description: 'Cloud & Mobile: O poder nas nuvens, na tua mão'
+            },
+            { 
+                name: 'Cyber Security 🔐 + Web Development 🌐', 
+                courses: ['security', 'web'],
+                discount: 180,
+                icon: '🛡️',
+                description: 'Protege e constrói: Full Stack Security'
+            },
+            { 
+                name: 'Data Science 📊 + Artificial Intelligence 🤖', 
+                courses: ['data', 'ai'],
+                discount: 200,
+                icon: '🧠',
+                description: 'O Futuro dos Dados: AI + Data Science'
+            }
+        ];
+
+        // Estado da aplicação
+        let selectedCourses = [];
+        let ownedCourses = []; // Cursos já comprados (simulação - idealmente viria de backend)
+        let activeBundle = null;
+
+        // Simular alguns cursos adquiridos (para teste)
+        // ownedCourses = [courses[0], courses[2]]; // Descomenta para testar
+
+        // Renderizar cursos disponíveis
+        function renderAvailableCourses() {
+            const grid = document.getElementById('availableCourses');
+            const available = courses.filter(c => !ownedCourses.find(o => o.id === c.id));
+            
+            if (available.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 4rem;">
+                        <i class="fas fa-check-circle" style="font-size: 3rem; color: #00ffff; margin-bottom: 1rem;"></i>
+                        <p style="color: #808080;">Já adquiriste todos os cursos disponíveis! 🎉</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = available.map(course => `
+                <div class="course-card ${selectedCourses.find(c => c.id === course.id) ? 'selected' : ''}" 
+                     data-id="${course.id}" 
+                     data-category="${course.category}" 
+                     onclick="toggleCourse(${course.id})">
+                    <div class="course-icon">${course.icon}</div>
+                    <div class="course-name">${course.name}</div>
+                    <div class="course-price">
+                        €${course.price}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Renderizar cursos adquiridos
+        function renderOwnedCourses() {
+            const grid = document.getElementById('ownedCourses');
+            
+            if (ownedCourses.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: #808080;">
+                        <i class="fas fa-lock" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <p>Ainda não tens cursos adquiridos. Compra o teu primeiro curso para começar a jornada premium!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = ownedCourses.map(course => `
+                <div class="course-card premium" onclick="goToPremium(${course.id})">
+                    <div class="premium-badge">
+                        <i class="fas fa-crown"></i> PREMIUM
+                    </div>
+                    <div class="course-icon">${course.icon}</div>
+                    <div class="course-name">${course.name}</div>
+                    <div style="color: gold; margin-top: 1rem;">
+                        <i class="fas fa-star"></i> Acesso Vitalício
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Ir para página premium do curso
+        window.goToPremium = function(courseId) {
+            const course = courses.find(c => c.id === courseId);
+            // Redirecionar para página premium do curso
+            window.location.href = `premium-${course.name.toLowerCase().replace(/\s+/g, '-')}.html`;
+            alert(`A entrar no curso premium: ${course.name}`); // Simulação
+        };
+
+        // Toggle seleção de curso
+        window.toggleCourse = function(courseId) {
+            // Verificar se já tem o curso
+            if (ownedCourses.find(c => c.id === courseId)) {
+                alert('Já tens este curso! Vai à secção "A tua Coleção Premium" para aceder.');
+                return;
+            }
+
+            const course = courses.find(c => c.id === courseId);
+            const card = document.querySelector(`[data-id="${courseId}"]`);
+            
+            if (selectedCourses.find(c => c.id === courseId)) {
+                selectedCourses = selectedCourses.filter(c => c.id !== courseId);
+                if (card) card.classList.remove('selected');
+            } else {
+                selectedCourses.push(course);
+                if (card) card.classList.add('selected');
+            }
+            
+            checkForBundles();
+            updateSelectedDisplay();
+            updateTotal();
+            updateCheckoutButton();
+        };
+
+        // Verificar se descobriu algum bundle
+        function checkForBundles() {
+            const selectedCategories = selectedCourses.map(c => c.category);
+            activeBundle = null;
+
+            for (let bundle of bundles) {
+                const hasAllCourses = bundle.courses.every(cat => selectedCategories.includes(cat));
+                if (hasAllCourses && selectedCourses.length === bundle.courses.length) {
+                    activeBundle = bundle;
+                    break;
+                }
+            }
+
+            displayBundle();
+        }
+
+        // Mostrar bundle descoberto
+        function displayBundle() {
+            const bundleArea = document.getElementById('bundleArea');
+            const hintText = document.getElementById('hintText');
+
+            if (activeBundle) {
+                const originalTotal = selectedCourses.reduce((sum, c) => sum + c.price, 0);
+                const discountedTotal = originalTotal - activeBundle.discount;
+                const savings = activeBundle.discount;
+
+                bundleArea.innerHTML = `
+                    <div class="bundle-discovered">
+                        <div class="bundle-header">
+                            <span class="bundle-icon">🎁</span>
+                            <span class="bundle-title">BUNDLE DESCOBERTO!</span>
+                        </div>
+                        <p style="color: gold; font-size: 1.2rem; margin-bottom: 1rem;">${activeBundle.description}</p>
+                        <div class="bundle-price">
+                            <span class="original">€${originalTotal}</span>
+                            <span class="discounted">€${discountedTotal}</span>
+                            <span class="savings">Poupas €${savings}</span>
+                        </div>
+                    </div>
+                `;
+
+                hintText.innerHTML = '🎯 Bundle ativado! Continua a explorar, há mais combinações secretas...';
+            } else {
+                bundleArea.innerHTML = '';
+                
+                if (selectedCourses.length >= 2) {
+                    hintText.innerHTML = '🔍 Quase lá! Tenta combinar áreas relacionadas... (ex: Web + Segurança)';
+                } else {
+                    hintText.innerHTML = '💡 Tenta combinar cursos relacionados... Quem sabe não encontras um desconto secreto?';
+                }
+            }
+        }
+
+        // Atualizar display dos cursos selecionados
+        function updateSelectedDisplay() {
+            const container = document.getElementById('selectedCourses');
+            
+            if (selectedCourses.length === 0) {
+                container.innerHTML = '<div style="color: #808080; padding: 1rem;">Nenhum curso selecionado</div>';
+                return;
+            }
+
+            container.innerHTML = selectedCourses.map(course => `
+                <div class="selected-tag">
+                    ${course.icon} ${course.name} (€${course.price})
+                    <i class="fas fa-times" onclick="removeCourse(${course.id})"></i>
+                </div>
+            `).join('');
+        }
+
+        // Remover curso específico
+        window.removeCourse = function(courseId) {
+            const card = document.querySelector(`[data-id="${courseId}"]`);
+            selectedCourses = selectedCourses.filter(c => c.id !== courseId);
+            if (card) card.classList.remove('selected');
+            checkForBundles();
+            updateSelectedDisplay();
+            updateTotal();
+            updateCheckoutButton();
+        };
+
+        // Calcular total
+        function calculateTotal() {
+            if (selectedCourses.length === 0) return 0;
+            
+            const subtotal = selectedCourses.reduce((sum, c) => sum + c.price, 0);
+            
+            if (activeBundle) {
+                return subtotal - activeBundle.discount;
+            }
+            
+            return subtotal;
+        }
+
+        // Atualizar total no ecrã
+        function updateTotal() {
+            const total = calculateTotal();
+            document.getElementById('totalPrice').innerHTML = `€${total} <span>EUR</span>`;
+        }
+
+        // Atualizar botão de checkout
+        function updateCheckoutButton() {
+            const btn = document.getElementById('checkoutBtn');
+            btn.disabled = selectedCourses.length === 0;
+            
+            if (selectedCourses.length > 0) {
+                btn.innerHTML = `<i class="fas fa-rocket"></i> Comprar ${selectedCourses.length} curso${selectedCourses.length > 1 ? 's' : ''}`;
+            } else {
+                btn.innerHTML = `<i class="fas fa-rocket"></i> Comprar Seleção`;
+            }
+        }
+
+        // Processar compra
+        document.getElementById('checkoutBtn').addEventListener('click', function() {
+            if (selectedCourses.length === 0) return;
+            
+            // Adicionar cursos comprados à coleção
+            ownedCourses = [...ownedCourses, ...selectedCourses];
+            
+            // Limpar seleção
+            selectedCourses = [];
+            activeBundle = null;
+            
+            // Re-renderizar tudo
+            renderAvailableCourses();
+            renderOwnedCourses();
+            updateSelectedDisplay();
+            updateTotal();
+            updateCheckoutButton();
+            document.getElementById('bundleArea').innerHTML = '';
+            
+            // Feedback
+            alert('🎉 Cursos adquiridos com sucesso! Consulta a secção "A tua Coleção Premium" para aceder.');
+        });
+
+        // Inicializar
+        renderAvailableCourses();
+        renderOwnedCourses();
+        updateSelectedDisplay();
+    </script>
+</body>
+</html>

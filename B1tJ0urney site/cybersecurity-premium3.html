@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Linux & Command Line Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --orange: #ff6200;
+            --yellow: #ffcc00;
+            --amber: #ff8c00;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --green: #4ade80;
+            --red: #f87171;
+            --blue: #60a5fa;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(255, 98, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 98, 0, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255, 140, 0, 0.12) 0%, rgba(255, 204, 0, 0.06) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255,140,0,0.15); border: 1px solid rgba(255,140,0,0.3);
+            color: var(--yellow); padding: 0.25rem 0.75rem; border-radius: 50px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+
+        .nav-buttons { display: flex; gap: 1rem; align-items: center; }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,140,0,0.15); transform: translateY(-1px); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            color: #0f172a; box-shadow: 0 4px 15px rgba(255,98,0,0.35);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,0.45); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--orange), var(--amber), var(--yellow));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+
+        .progress-section { margin-bottom: 2rem; }
+        .progress-label { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--orange), var(--yellow)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .tab-nav {
+            display: flex; background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border-color); overflow-x: auto;
+        }
+
+        .tab-button {
+            flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none;
+            color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.3s ease; position: relative; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(255,98,0,0.1); }
+        .tab-button.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+        }
+
+        .tab-content { padding: 2rem; min-height: 400px; }
+        .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-card {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;
+        }
+
+        .content-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-light); }
+        .content-text { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+
+        .code-block {
+            background: rgba(0,0,0,0.4); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1.5rem; margin: 1rem 0; overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block pre {
+            margin: 0; font-family: 'Courier New', monospace;
+            font-size: 0.875rem; line-height: 1.5; color: var(--text-light);
+        }
+
+        .code-label {
+            display: block; font-size: 0.7rem; color: var(--text-secondary);
+            font-family: 'Courier New', monospace; margin-bottom: 0.75rem;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem;
+        }
+
+        .code-block .cm  { color: #6c757d; font-style: italic; }
+        .code-block .hl  { color: #ff6b6b; }
+        .code-block .ok  { color: #4ecdc4; }
+        .code-block .str { color: #95e1d3; }
+        .code-block .kw  { color: #c3e88d; }
+        .code-block .nb  { color: #ffcc00; }
+        .code-block .fn  { color: #82aaff; }
+
+        .learn-intro {
+            background: linear-gradient(135deg, rgba(255,98,0,0.12), rgba(255,204,0,0.06));
+            border: 1px solid rgba(255,140,0,0.25); border-radius: 8px;
+            padding: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .learn-intro h4 { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .learn-intro p  { color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem; }
+
+        .code-explanation {
+            background: rgba(255,255,255,0.02); border-left: 3px solid var(--orange);
+            padding: 1rem 1.5rem; margin: 1rem 0; border-radius: 0 8px 8px 0;
+        }
+        .code-explanation h5 { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .code-explanation p  { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; }
+
+        /* ── Section divider ── */
+        .section-divider {
+            display: flex; align-items: center; margin: 2rem 0 1rem; gap: 1rem;
+        }
+        .section-divider::before, .section-divider::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,140,0,0.4), transparent);
+        }
+        .section-divider span {
+            color: var(--yellow); font-size: 0.85rem; font-weight: 600;
+            white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+
+        /* ── File system tree ── */
+        .fs-tree {
+            background: rgba(0,0,0,0.4); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1.25rem; margin: 1rem 0;
+            font-family: 'Courier New', monospace; font-size: 0.82rem; line-height: 1.8;
+            white-space: pre;
+        }
+        .fs-dir       { color: #82aaff; font-weight: 600; }
+        .fs-important { color: #ffcc00; font-weight: 600; }
+        .fs-file      { color: #95e1d3; }
+        .fs-desc      { color: #6c757d; font-style: italic; }
+
+        /* ── Permissions grid ── */
+        .perms-grid {
+            display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0;
+        }
+        .perm-group {
+            flex: 1; min-width: 120px; background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 1rem; text-align: center;
+        }
+        .perm-group-title { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; }
+        .perm-bits { display: flex; gap: 0.5rem; justify-content: center; }
+        .perm-bit {
+            width: 2rem; height: 2rem; border-radius: 6px; display: flex; align-items: center;
+            justify-content: center; font-family: 'Courier New', monospace; font-weight: 700; font-size: 1rem;
+        }
+        .perm-on  { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+        .perm-off { background: rgba(255,255,255,0.05); color: #4b5563; border: 1px solid rgba(255,255,255,0.08); }
+
+        /* ── Visual table ── */
+        .visual-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+        .visual-table th {
+            background: rgba(255,140,0,0.12); color: var(--yellow);
+            padding: 0.75rem 1rem; text-align: left; font-weight: 600;
+            border-bottom: 1px solid rgba(255,140,0,0.25);
+        }
+        .visual-table td { padding: 0.65rem 1rem; color: var(--text-secondary); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .visual-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+        /* ── Pills ── */
+        .pill { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; }
+        .pill-green  { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+        .pill-orange { background: rgba(251,146,60,0.15); color: #fb923c; border: 1px solid rgba(251,146,60,0.3); }
+        .pill-red    { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+
+        /* ── Callouts ── */
+        .callout { display: flex; gap: 0.75rem; padding: 1rem 1.25rem; border-radius: 8px; margin: 1rem 0; align-items: flex-start; }
+        .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .callout-body { font-size: 0.875rem; line-height: 1.5; color: var(--text-secondary); }
+        .callout-body strong { color: var(--text-light); display: block; margin-bottom: 0.3rem; }
+        .callout.tip    { background: rgba(255,204,0,0.08);  border: 1px solid rgba(255,204,0,0.2); }
+        .callout.info   { background: rgba(96,165,250,0.08); border: 1px solid rgba(96,165,250,0.2); }
+        .callout.warn   { background: rgba(251,146,60,0.08); border: 1px solid rgba(251,146,60,0.2); }
+        .callout.danger { background: rgba(248,113,113,0.08);border: 1px solid rgba(248,113,113,0.2); }
+
+        /* ── Diagram / flow ── */
+        .diagram { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; text-align: center; }
+        .diagram-title { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .flow { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5rem; }
+        .flow-node { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.82rem; color: var(--text-light); font-weight: 500; }
+        .flow-node.red    { border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.08); }
+        .flow-node.yellow { border-color: rgba(255,204,0,0.4);   background: rgba(255,204,0,0.08); }
+        .flow-node.blue   { border-color: rgba(96,165,250,0.4);  background: rgba(96,165,250,0.08); }
+        .flow-arrow { color: var(--orange); font-weight: 700; font-size: 0.9rem; }
+
+        /* ── Lab styles ── */
+        .lab-container { display: flex; gap: 1rem; height: 600px; margin-bottom: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; }
+        .lab-header { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-bottom: none; border-radius: 8px 8px 0 0; padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; padding: 1rem; color: var(--text-light); font-family: 'Courier New', monospace; font-size: 0.875rem; line-height: 1.5; resize: none; outline: none; }
+        .lab-textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 2px rgba(255,140,0,0.2); }
+        .lab-iframe { flex: 1; background: white; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; width: 100%; }
+        .lab-controls { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+
+        .btn-execute { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255,140,0,0.3); }
+        .btn-execute:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,0.4); }
+        .btn-reset { background: rgba(255,255,255,0.1); color: var(--text-light); border: 1px solid var(--border-color); padding: 0.75rem 1.5rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
+        .btn-reset:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+
+        .lab-instructions { background: rgba(40,224,255,0.1); border: 1px solid rgba(40,224,255,0.2); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: var(--text-secondary); }
+
+        /* ── Quiz styles ── */
+        .quiz-question { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .question-title { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+        .quiz-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all 0.3s ease; }
+        .quiz-option:hover { background: rgba(255,255,255,0.08); border-color: var(--orange); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--orange); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; font-family: 'Courier New', monospace; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(255,140,0,0.12), rgba(255,204,0,0.06)); border: 1px solid rgba(255,140,0,0.25); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 0.875rem; }
+        .feedback-correct { border-left: 3px solid #4caf50; }
+        .feedback-incorrect { border-left: 3px solid #f44336; }
+        .feedback-icon { font-size: 1.1rem; font-weight: bold; }
+        .feedback-correct .feedback-icon { color: #4caf50; }
+        .feedback-incorrect .feedback-icon { color: #f44336; }
+        .score-excellent { color: #4caf50; }
+        .score-good      { color: #28e0ff; }
+        .score-fair      { color: #ff9800; }
+        .score-poor      { color: #f44336; }
+
+        /* ── Resources styles ── */
+        .resources-list { margin: 1.5rem 0; }
+        .resource-category { margin-bottom: 2rem; }
+        .category-title { color: var(--yellow); font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        .resource-links { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+        .resource-link { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0; border-radius: 4px; transition: all 0.3s ease; font-size: 0.875rem; position: relative; padding-left: 1.5rem; }
+        .resource-link::before { content: '→'; position: absolute; left: 0; color: var(--orange); font-weight: bold; }
+        .resource-link:hover { color: var(--text-light); padding-left: 2rem; }
+        .resources-note { background: rgba(255,140,0,0.1); border: 1px solid rgba(255,140,0,0.2); border-radius: 8px; padding: 1rem; margin-top: 2rem; font-size: 0.875rem; }
+        .resources-note p { color: var(--text-secondary); margin: 0; }
+
+        /* ── Evaluation styles ── */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,140,0,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--yellow); border-bottom-color: var(--yellow); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced  { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-icon { font-size: 1.1rem; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: #28e0ff; }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .header-content { padding: 1rem; flex-direction: column; gap: 1rem; }
+            .nav-buttons { width: 100%; justify-content: center; }
+            .course-title { font-size: 2rem; }
+            .course-meta { flex-direction: column; gap: 0.75rem; }
+            .main-content { padding: 1rem; }
+            .tab-nav { flex-direction: column; }
+            .tab-button { flex: none; text-align: left; }
+            .tab-content { padding: 1rem; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .lab-controls { justify-content: center; }
+            .evaluation-grid { grid-template-columns: 1fr; }
+            .perms-grid { flex-direction: column; }
+            .fs-tree { font-size: 0.72rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav class="nav-buttons">
+                <a href="premium-cyber-progress.html" class="btn btn-back">← Back to Journey</a>
+                <a href="browse.html" class="btn btn-primary">Explore</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Linux & Command Line Tools — Cybersecurity</h1>
+            <p class="course-description">
+                Master the fundamentals of Linux and the command line, essential for working in cybersecurity, system administration and attack analysis.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>Linux • Bash • CLI • Security</span></div>
+                <div class="meta-item"><span>📌</span><span>Basic cyber concepts</span></div>
+            </div>
+            <div class="progress-section">
+                <div class="progress-label">Progress: <span id="progress-text">0%</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav" role="tablist">
+                <button class="tab-button active" data-tab="learn" role="tab" aria-selected="true" aria-controls="panel-learn">Learn</button>
+                <button class="tab-button" data-tab="lab" role="tab" aria-selected="false" aria-controls="panel-lab">Lab</button>
+                <button class="tab-button" data-tab="quiz" role="tab" aria-selected="false" aria-controls="panel-quiz">Quiz</button>
+                <button class="tab-button" data-tab="resources" role="tab" aria-selected="false" aria-controls="panel-resources">Resources</button>
+                <button class="tab-button" data-tab="evaluation" role="tab" aria-selected="false" aria-controls="panel-evaluation">Evaluation</button>
+            </nav>
+
+            <div class="tab-content">
+
+                <!-- ══════════════════════════
+                     LEARN TAB
+                ══════════════════════════ -->
+                <div id="panel-learn" class="tab-panel active" role="tabpanel">
+
+                    <div class="learn-intro">
+                        <h4>🐧 Why Linux in Cybersecurity?</h4>
+                        <p>Linux is the dominant operating system on servers, cloud, IoT devices and critical infrastructure. Most cybersecurity tools — Nmap, Wireshark, Metasploit, Burp Suite — run natively on Linux.</p>
+                        <p>Distributions like <strong>Kali Linux</strong> and <strong>Parrot OS</strong> were created specifically for pentesting and come with hundreds of pre-installed tools. Without mastering the command line, you cannot use most of those tools effectively.</p>
+                    </div>
+
+                    <!-- FILE SYSTEM -->
+                    <div class="section-divider"><span>File System Structure</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">The Linux File System</h3>
+                        <p class="content-text">
+                            Unlike Windows (C:\, D:\), Linux has a single directory tree starting at <code style="color:#82aaff">/</code> (root).
+                            Knowing this structure is essential for locating logs, configuration files and binaries.
+                        </p>
+
+                        <div class="fs-tree"><span class="fs-dir">/</span>  <span class="fs-desc">← root of the entire file system</span>
+├── <span class="fs-important">/bin</span>       <span class="fs-desc">← essential binaries (ls, cp, mv, grep...)</span>
+├── <span class="fs-important">/etc</span>       <span class="fs-desc">← system configuration files</span>
+│   ├── <span class="fs-file">passwd</span>    <span class="fs-desc">← list of users</span>
+│   ├── <span class="fs-file">shadow</span>    <span class="fs-desc">← hashed passwords (root-only read)</span>
+│   └── <span class="fs-file">ssh/</span>      <span class="fs-desc">← SSH server configuration</span>
+├── <span class="fs-important">/var/log</span>   <span class="fs-desc">← system logs (CRITICAL for security)</span>
+│   ├── <span class="fs-file">syslog</span>    <span class="fs-desc">← general system log</span>
+│   ├── <span class="fs-file">auth.log</span>  <span class="fs-desc">← login attempts and authentication</span>
+│   └── <span class="fs-file">nginx/</span>    <span class="fs-desc">← web server logs</span>
+├── <span class="fs-dir">/home</span>      <span class="fs-desc">← users' home folders (/home/john)</span>
+├── <span class="fs-dir">/root</span>      <span class="fs-desc">← root user's home folder</span>
+├── <span class="fs-dir">/tmp</span>       <span class="fs-desc">← temporary files (deleted on reboot)</span>
+├── <span class="fs-dir">/usr</span>       <span class="fs-desc">← user-installed programmes</span>
+├── <span class="fs-dir">/proc</span>      <span class="fs-desc">← information about running processes</span>
+└── <span class="fs-dir">/dev</span>       <span class="fs-desc">← hardware devices (disks, terminals)</span></div>
+
+                        <div class="callout danger">
+                            <span class="callout-icon">🚨</span>
+                            <div class="callout-body">
+                                <strong>/etc/shadow — The most sensitive file</strong>
+                                Contains the hashed passwords of all users. If an attacker gains access to this file, they can attempt to crack the hashes offline with tools like John the Ripper or Hashcat. That is why only root can read it — always verify with <code style="color:#c3e88d">ls -la /etc/shadow</code>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NAVIGATION -->
+                    <div class="section-divider"><span>Navigation &amp; File Management</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">Essential Navigation Commands</h3>
+
+                        <table class="visual-table">
+                            <thead><tr><th>Command</th><th>Description</th><th>Example</th></tr></thead>
+                            <tbody>
+                                <tr><td>pwd</td><td>Shows the current directory (Print Working Directory)</td><td>pwd → /home/john</td></tr>
+                                <tr><td>ls</td><td>Lists files and directories</td><td>ls /var/log</td></tr>
+                                <tr><td>ls -la</td><td>Lists with permissions, size and hidden files</td><td>ls -la /etc</td></tr>
+                                <tr><td>cd</td><td>Changes directory (Change Directory)</td><td>cd /var/log</td></tr>
+                                <tr><td>cd ..</td><td>Goes up one level in the tree</td><td>cd .. (from /var/log → /var)</td></tr>
+                                <tr><td>cd ~</td><td>Goes to the home folder</td><td>cd ~ → /home/john</td></tr>
+                                <tr><td>mkdir</td><td>Creates a directory</td><td>mkdir reports</td></tr>
+                                <tr><td>touch</td><td>Creates an empty file</td><td>touch notes.txt</td></tr>
+                                <tr><td>cp</td><td>Copies file(s)</td><td>cp config.bak config.txt</td></tr>
+                                <tr><td>mv</td><td>Moves or renames file(s)</td><td>mv old.txt new.txt</td></tr>
+                                <tr><td>rm</td><td>Deletes file(s)</td><td>rm file.txt</td></tr>
+                                <tr><td>rm -rf</td><td>Recursively deletes directory and contents</td><td>rm -rf /tmp/folder <span style="color:#f87171">(⚠️ careful!)</span></td></tr>
+                            </tbody>
+                        </table>
+
+                        <div class="code-block">
+                            <span class="code-label">bash — navigation</span>
+                            <pre><code><span class="cm"># Basic navigation — typical investigation sequence</span>
+
+<span class="ok">$</span> <span class="fn">pwd</span>
+/home/john
+
+<span class="ok">$</span> <span class="fn">cd</span> /var/log          <span class="cm"># go to system logs</span>
+<span class="ok">$</span> <span class="fn">ls</span> -la              <span class="cm"># see all files with details</span>
+total 48
+drwxr-xr-x  5 root root  4096 Jan 15 10:23 <span class="fn">.</span>
+-rw-r--r--  1 root root 18432 Jan 15 10:22 <span class="str">syslog</span>
+-rw-r-----  1 root adm   8192 Jan 15 09:15 <span class="str">auth.log</span>
+-rw-r--r--  1 root root  2048 Jan 14 23:00 <span class="str">dpkg.log</span>
+
+<span class="ok">$</span> <span class="fn">cat</span> auth.log         <span class="cm"># view login attempts</span>
+<span class="ok">$</span> <span class="fn">tail</span> -n 50 syslog   <span class="cm"># view last 50 lines</span>
+<span class="ok">$</span> <span class="fn">head</span> -n 20 syslog   <span class="cm"># view first 20 lines</span>
+</code></pre>
+                        </div>
+
+                        <div class="code-explanation">
+                            <h5>What each part means:</h5>
+                            <p>
+                                <strong>drwxr-xr-x</strong> — file permissions (explained in the next section).<br>
+                                <strong>5 root root</strong> — number of links, owner, group.<br>
+                                <strong>4096</strong> — size in bytes.<br>
+                                <strong>Jan 15 10:23</strong> — date of last modification (useful for investigating attacks).<br>
+                                <strong>tail -n 50</strong> — viewing the last lines is more useful than the whole file — the most recent events are at the bottom.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- PERMISSIONS -->
+                    <div class="section-divider"><span>File Permissions — chmod &amp; chown</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">Linux Permission System</h3>
+                        <p class="content-text">
+                            Every file has 3 sets of permissions: for the <strong>owner</strong>, for the <strong>group</strong> and for <strong>others</strong>.
+                            Each set has 3 bits: <strong>r</strong> (read), <strong>w</strong> (write), <strong>x</strong> (execute).
+                        </p>
+
+                        <div class="diagram">
+                            <div class="diagram-title">Reading Permissions: -rwxr-xr--</div>
+                            <div class="flow">
+                                <div class="flow-node red">-</div>
+                                <div style="color:var(--text-secondary);font-size:0.75rem">type</div>
+                                <div class="flow-node" style="border-color:rgba(74,222,128,0.4);background:rgba(74,222,128,0.08)">rwx</div>
+                                <div style="color:var(--text-secondary);font-size:0.75rem">owner</div>
+                                <div class="flow-node" style="border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.08)">r-x</div>
+                                <div style="color:var(--text-secondary);font-size:0.75rem">group</div>
+                                <div class="flow-node" style="border-color:rgba(255,204,0,0.4);background:rgba(255,204,0,0.08)">r--</div>
+                                <div style="color:var(--text-secondary);font-size:0.75rem">others</div>
+                            </div>
+                            <div style="margin-top:0.75rem;font-size:0.8rem;color:var(--text-secondary);text-align:center">
+                                Owner: read + write + execute &nbsp;|&nbsp; Group: read + execute &nbsp;|&nbsp; Others: read only
+                            </div>
+                        </div>
+
+                        <div class="perms-grid">
+                            <div class="perm-group">
+                                <div class="perm-group-title">👤 Owner</div>
+                                <div class="perm-bits">
+                                    <div class="perm-bit perm-on">r</div>
+                                    <div class="perm-bit perm-on">w</div>
+                                    <div class="perm-bit perm-on">x</div>
+                                </div>
+                                <div style="margin-top:0.5rem;font-size:0.75rem;color:#4ade80">7 = rwx</div>
+                            </div>
+                            <div class="perm-group">
+                                <div class="perm-group-title">👥 Group</div>
+                                <div class="perm-bits">
+                                    <div class="perm-bit perm-on">r</div>
+                                    <div class="perm-bit perm-off">-</div>
+                                    <div class="perm-bit perm-on">x</div>
+                                </div>
+                                <div style="margin-top:0.5rem;font-size:0.75rem;color:#60a5fa">5 = r-x</div>
+                            </div>
+                            <div class="perm-group">
+                                <div class="perm-group-title">🌍 Others</div>
+                                <div class="perm-bits">
+                                    <div class="perm-bit perm-on">r</div>
+                                    <div class="perm-bit perm-off">-</div>
+                                    <div class="perm-bit perm-off">-</div>
+                                </div>
+                                <div style="margin-top:0.5rem;font-size:0.75rem;color:#ffa040">4 = r--</div>
+                            </div>
+                        </div>
+
+                        <table class="visual-table" style="margin-top:1rem">
+                            <thead><tr><th>Octal value</th><th>Permission</th><th>Binary</th><th>Typical use</th></tr></thead>
+                            <tbody>
+                                <tr><td>7</td><td>rwx</td><td>111</td><td>Owner's executable scripts</td></tr>
+                                <tr><td>6</td><td>rw-</td><td>110</td><td>Configuration files</td></tr>
+                                <tr><td>5</td><td>r-x</td><td>101</td><td>Shared executables</td></tr>
+                                <tr><td>4</td><td>r--</td><td>100</td><td>Read-only files</td></tr>
+                                <tr><td>0</td><td>---</td><td>000</td><td>No access</td></tr>
+                            </tbody>
+                        </table>
+
+                        <div class="code-block">
+                            <span class="code-label">bash — chmod &amp; chown</span>
+                            <pre><code><span class="cm"># Change permissions with chmod</span>
+<span class="ok">$</span> <span class="fn">chmod</span> <span class="nb">755</span> script.sh    <span class="cm"># owner: rwx, group: r-x, others: r-x</span>
+<span class="ok">$</span> <span class="fn">chmod</span> <span class="nb">600</span> key.pem      <span class="cm"># owner: rw-, group: ---, others: --- (SSH keys!)</span>
+<span class="ok">$</span> <span class="fn">chmod</span> <span class="nb">644</span> config.txt   <span class="cm"># owner: rw-, group: r--, others: r--</span>
+<span class="ok">$</span> <span class="fn">chmod</span> +x script.sh      <span class="cm"># add execute permission</span>
+<span class="ok">$</span> <span class="fn">chmod</span> -w file.txt       <span class="cm"># remove write permission</span>
+
+<span class="cm"># Change owner with chown</span>
+<span class="ok">$</span> <span class="fn">chown</span> john:john file.txt          <span class="cm"># owner and group → john</span>
+<span class="ok">$</span> <span class="fn">chown</span> -R www-data /var/www/html   <span class="cm"># recursive: entire web folder</span>
+
+<span class="cm"># View detailed permissions</span>
+<span class="ok">$</span> <span class="fn">ls</span> -la /etc/shadow
+-rw-r----- <span class="nb">1</span> root shadow 1024 Jan 15 auth.log
+<span class="cm">#          ^ only root and shadow group can read!</span>
+</code></pre>
+                        </div>
+
+                        <div class="callout warn">
+                            <span class="callout-icon">⚠️</span>
+                            <div class="callout-body">
+                                <strong>chmod 777 is a security anti-pattern</strong>
+                                Granting full permissions to everyone (rwxrwxrwx) is a common beginner mistake. Any compromised user or process can modify or execute those files. Always use the minimum permissions necessary — principle of least privilege.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- USERS & SUDO -->
+                    <div class="section-divider"><span>Users, Groups &amp; Sudo</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">Root, Sudo and User Management</h3>
+                        <p class="content-text">
+                            Linux clearly separates normal users from the superuser <strong>root</strong>. Root has full access to the system — which is why you should never work directly as root in day-to-day use. <strong>sudo</strong> allows executing specific commands with root privileges in a controlled way.
+                        </p>
+
+                        <div class="diagram">
+                            <div class="diagram-title">Privilege Hierarchy</div>
+                            <div class="flow">
+                                <div class="flow-node red">👑 root<br><small>full access</small></div>
+                                <div class="flow-arrow">↓ delegates via sudoers</div>
+                                <div class="flow-node yellow">🛡️ sudo users<br><small>specific commands</small></div>
+                                <div class="flow-arrow">↓ separated from</div>
+                                <div class="flow-node blue">👤 normal users<br><small>their folder only</small></div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <span class="code-label">bash — users &amp; sudo</span>
+                            <pre><code><span class="cm"># Check the current user</span>
+<span class="ok">$</span> <span class="fn">whoami</span>
+john
+<span class="ok">$</span> <span class="fn">id</span>
+uid=1000(john) gid=1000(john) groups=1000(john),27(sudo)
+
+<span class="cm"># Run command as root with sudo</span>
+<span class="ok">$</span> <span class="fn">sudo</span> apt update
+<span class="ok">$</span> <span class="fn">sudo</span> cat /etc/shadow     <span class="cm"># view root-only file</span>
+<span class="ok">$</span> <span class="fn">sudo</span> -l                  <span class="cm"># list what you can do with sudo</span>
+
+<span class="cm"># User management</span>
+<span class="ok">$</span> <span class="fn">sudo useradd</span> -m -s /bin/bash new_user    <span class="cm"># create user</span>
+<span class="ok">$</span> <span class="fn">sudo passwd</span> new_user                     <span class="cm"># set password</span>
+<span class="ok">$</span> <span class="fn">sudo usermod</span> -aG sudo new_user            <span class="cm"># add to sudo group</span>
+<span class="ok">$</span> <span class="fn">sudo userdel</span> -r username                  <span class="cm"># delete user and home folder</span>
+
+<span class="cm"># View system users</span>
+<span class="ok">$</span> <span class="fn">cat</span> /etc/passwd | <span class="fn">grep</span> -v nologin        <span class="cm"># users with a shell</span>
+<span class="ok">$</span> <span class="fn">last</span>                                      <span class="cm"># login history</span>
+<span class="ok">$</span> <span class="fn">who</span>                                       <span class="cm"># who is logged in right now</span>
+</code></pre>
+                        </div>
+
+                        <div class="callout danger">
+                            <span class="callout-icon">🚨</span>
+                            <div class="callout-body">
+                                <strong>Privilege Escalation</strong>
+                                One of the main goals of an attacker after compromising a system is to escalate from a normal user to root. Tools like LinPEAS and linux-exploit-suggester automate the search for escalation vectors: misconfigured SUID files, misconfigured sudo, services running as root, etc.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GREP & LOGS -->
+                    <div class="section-divider"><span>Search, Grep &amp; Log Analysis</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">grep, find, pipes — The investigation tools</h3>
+                        <p class="content-text">
+                            In cybersecurity, you spend a lot of time analysing logs looking for suspicious patterns.
+                            <strong>grep</strong>, <strong>find</strong> and <strong>pipes</strong> (|) are your main tools.
+                        </p>
+
+                        <div class="code-block">
+                            <span class="code-label">bash — grep</span>
+                            <pre><code><span class="cm"># grep — search for patterns in text</span>
+<span class="ok">$</span> <span class="fn">grep</span> <span class="str">"Failed password"</span> /var/log/auth.log          <span class="cm"># failed login attempts</span>
+<span class="ok">$</span> <span class="fn">grep</span> -i <span class="str">"error"</span> /var/log/syslog                   <span class="cm"># -i ignores case</span>
+<span class="ok">$</span> <span class="fn">grep</span> -n <span class="str">"root"</span> /etc/passwd                        <span class="cm"># -n shows line number</span>
+<span class="ok">$</span> <span class="fn">grep</span> -r <span class="str">"password"</span> /var/www/html/                  <span class="cm"># -r recursive search</span>
+<span class="ok">$</span> <span class="fn">grep</span> -v <span class="str">"#"</span> /etc/ssh/sshd_config                  <span class="cm"># -v excludes lines with #</span>
+<span class="ok">$</span> <span class="fn">grep</span> -E <span class="str">"[0-9]{1,3}\.[0-9]{1,3}"</span> access.log        <span class="cm"># regex: find IPs</span>
+
+<span class="cm"># Pipes — chain commands together</span>
+<span class="ok">$</span> <span class="fn">cat</span> auth.log | <span class="fn">grep</span> <span class="str">"Failed"</span> | <span class="fn">wc</span> -l              <span class="cm"># count failed attempts</span>
+<span class="ok">$</span> <span class="fn">cat</span> auth.log | <span class="fn">grep</span> <span class="str">"Failed"</span> | <span class="fn">awk</span> <span class="str">'{print $11}'</span> | <span class="fn">sort</span> | <span class="fn">uniq</span> -c | <span class="fn">sort</span> -rn
+<span class="cm">#                                       attacker IP     count unique IPs  sort by frequency</span>
+</code></pre>
+                        </div>
+
+                        <div class="code-block">
+                            <span class="code-label">bash — find</span>
+                            <pre><code><span class="cm"># find — search for files in the system</span>
+<span class="ok">$</span> <span class="fn">find</span> /home -name <span class="str">"*.txt"</span>                           <span class="cm"># find .txt files</span>
+<span class="ok">$</span> <span class="fn">find</span> / -name <span class="str">"passwd"</span> 2>/dev/null                   <span class="cm"># search entire system</span>
+<span class="ok">$</span> <span class="fn">find</span> / -perm -4000 2>/dev/null                      <span class="cm"># SUID files (escalation risk!)</span>
+<span class="ok">$</span> <span class="fn">find</span> /var/log -mtime -1                             <span class="cm"># logs modified in last 24h</span>
+<span class="ok">$</span> <span class="fn">find</span> /tmp -type f -executable                       <span class="cm"># executables in /tmp (suspicious!)</span>
+<span class="ok">$</span> <span class="fn">find</span> / -user root -writable 2>/dev/null             <span class="cm"># root files you can write to</span>
+</code></pre>
+                        </div>
+
+                        <div class="code-explanation">
+                            <h5>Real auth.log analysis — detecting brute force:</h5>
+                            <p>
+                                <strong>grep "Failed password" auth.log</strong> — finds all SSH authentication failure lines.<br>
+                                <strong>awk '{print $11}'</strong> — extracts only the IP address field (column 11).<br>
+                                <strong>sort | uniq -c</strong> — counts how many times each IP appears.<br>
+                                <strong>sort -rn</strong> — sorts from most frequent to least frequent.<br>
+                                Result: you instantly see which IPs are brute-forcing your server.
+                            </p>
+                        </div>
+
+                        <div class="callout tip">
+                            <span class="callout-icon">💡</span>
+                            <div class="callout-body">
+                                <strong>Most important logs for security</strong>
+                                <code style="color:#c3e88d">/var/log/auth.log</code> — SSH logins, sudo, authentication failures.<br>
+                                <code style="color:#c3e88d">/var/log/syslog</code> — general system events.<br>
+                                <code style="color:#c3e88d">/var/log/nginx/access.log</code> — HTTP requests to the web server.<br>
+                                <code style="color:#c3e88d">/var/log/fail2ban.log</code> — automatically blocked IPs.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NETWORK -->
+                    <div class="section-divider"><span>Network Commands in Linux</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">Network Diagnostics and Monitoring</h3>
+
+                        <table class="visual-table">
+                            <thead><tr><th>Command</th><th>Description</th><th>Security use</th></tr></thead>
+                            <tbody>
+                                <tr><td>ip a</td><td>Shows network interfaces and IPs</td><td>See system IP</td></tr>
+                                <tr><td>ip r</td><td>Shows routing table</td><td>Understand traffic flow</td></tr>
+                                <tr><td>ss -tuln</td><td>Open ports and listening services</td><td>Detect suspicious services</td></tr>
+                                <tr><td>netstat -an</td><td>Active network connections</td><td>See suspicious connections</td></tr>
+                                <tr><td>ping</td><td>Tests connectivity with a host</td><td>Verify if host is alive</td></tr>
+                                <tr><td>traceroute</td><td>Shows the path to a destination</td><td>Diagnose network blocks</td></tr>
+                                <tr><td>curl</td><td>Makes HTTP requests from the command line</td><td>Test APIs and web servers</td></tr>
+                                <tr><td>wget</td><td>Downloads files from the internet</td><td>Download tools/scripts</td></tr>
+                                <tr><td>nmap</td><td>Port and service scanner</td><td>Network reconnaissance</td></tr>
+                                <tr><td>tcpdump</td><td>Captures network traffic</td><td>Real-time packet analysis</td></tr>
+                            </tbody>
+                        </table>
+
+                        <div class="code-block">
+                            <span class="code-label">bash — network</span>
+                            <pre><code><span class="cm"># View open ports — essential for hardening</span>
+<span class="ok">$</span> <span class="fn">ss</span> -tuln
+Netid  State   Local Address:Port
+tcp    LISTEN  0.0.0.0:<span class="nb">22</span>          <span class="cm">← SSH (ok if you need it)</span>
+tcp    LISTEN  0.0.0.0:<span class="nb">80</span>          <span class="cm">← HTTP</span>
+tcp    LISTEN  0.0.0.0:<span class="nb">3306</span>        <span class="cm">← MySQL (DANGER if public!)</span>
+
+<span class="cm"># View active connections</span>
+<span class="ok">$</span> <span class="fn">ss</span> -tn state established
+
+<span class="cm"># Capture traffic with tcpdump</span>
+<span class="ok">$</span> <span class="fn">sudo tcpdump</span> -i eth0 -n port <span class="nb">80</span>          <span class="cm"># capture HTTP</span>
+<span class="ok">$</span> <span class="fn">sudo tcpdump</span> -i eth0 -w capture.pcap     <span class="cm"># save for Wireshark analysis</span>
+
+<span class="cm"># Test connection to a port</span>
+<span class="ok">$</span> <span class="fn">curl</span> -I https://example.com              <span class="cm"># see HTTP headers</span>
+<span class="ok">$</span> <span class="fn">curl</span> -v https://example.com/api/login    <span class="cm"># verbose — see full exchange</span>
+</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- SSH -->
+                    <div class="section-divider"><span>SSH — Secure Remote Access</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">SSH — Secure Shell</h3>
+                        <p class="content-text">
+                            SSH is the standard protocol for secure remote access to Linux servers. It completely replaces Telnet (insecure) and is encrypted with TLS.
+                        </p>
+
+                        <div class="code-block">
+                            <span class="code-label">bash — SSH</span>
+                            <pre><code><span class="cm"># Connect to a remote server</span>
+<span class="ok">$</span> <span class="fn">ssh</span> john@192.168.1.10              <span class="cm"># with password</span>
+<span class="ok">$</span> <span class="fn">ssh</span> -i key.pem john@server.com     <span class="cm"># with private key (more secure)</span>
+<span class="ok">$</span> <span class="fn">ssh</span> -p 2222 john@server.com        <span class="cm"># custom port</span>
+
+<span class="cm"># Generate SSH key pair</span>
+<span class="ok">$</span> <span class="fn">ssh-keygen</span> -t ed25519 -C <span class="str">"john@company.com"</span>
+<span class="cm"># Creates: ~/.ssh/id_ed25519 (private) and ~/.ssh/id_ed25519.pub (public)</span>
+
+<span class="cm"># Copy public key to server</span>
+<span class="ok">$</span> <span class="fn">ssh-copy-id</span> john@server.com
+<span class="cm"># Then you can connect without a password!</span>
+
+<span class="cm"># Protect the private key (MANDATORY)</span>
+<span class="ok">$</span> <span class="fn">chmod</span> <span class="nb">600</span> ~/.ssh/id_ed25519
+<span class="ok">$</span> <span class="fn">chmod</span> <span class="nb">700</span> ~/.ssh/
+</code></pre>
+                        </div>
+
+                        <table class="visual-table">
+                            <thead><tr><th>SSH Best Practice</th><th>How to implement</th><th>Why</th></tr></thead>
+                            <tbody>
+                                <tr><td>Disable root login</td><td>PermitRootLogin no in /etc/ssh/sshd_config</td><td>Attackers try root first</td></tr>
+                                <tr><td>Use keys instead of passwords</td><td>PasswordAuthentication no</td><td>Immune to password brute force</td></tr>
+                                <tr><td>Change default port</td><td>Port 2222 in sshd_config</td><td>Reduces automated scans</td></tr>
+                                <tr><td>Use Fail2Ban</td><td>sudo apt install fail2ban</td><td>Blocks IPs after X attempts</td></tr>
+                                <tr><td>Ed25519 keys</td><td>ssh-keygen -t ed25519</td><td>More secure than RSA-2048</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- BASH SCRIPTING -->
+                    <div class="section-divider"><span>Basic Bash Scripting</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">Automating Tasks with Bash</h3>
+                        <p class="content-text">
+                            A Bash script is a text file with commands that are executed in sequence. In cybersecurity, you use scripts to automate log analysis, scans, backups and hardening.
+                        </p>
+
+                        <div class="code-block">
+                            <span class="code-label">bash — log analysis script</span>
+                            <pre><code><span class="hl">#!/bin/bash</span>
+<span class="cm"># analyse_logs.sh — Detects SSH brute force attempts</span>
+
+<span class="nb">LOG</span>=<span class="str">"/var/log/auth.log"</span>
+<span class="nb">LIMIT</span>=<span class="nb">10</span>          <span class="cm"># more than 10 attempts = suspicious</span>
+
+<span class="fn">echo</span> <span class="str">"=== SSH Login Attempt Analysis ==="</span>
+<span class="fn">echo</span> <span class="str">"Date: $(date)"</span>
+<span class="fn">echo</span> <span class="str">""</span>
+
+<span class="cm"># Count total failures</span>
+<span class="nb">TOTAL</span>=$(<span class="fn">grep</span> <span class="str">"Failed password"</span> <span class="nb">$LOG</span> | <span class="fn">wc</span> -l)
+<span class="fn">echo</span> <span class="str">"Total failed attempts: $TOTAL"</span>
+
+<span class="cm"># List suspicious IPs</span>
+<span class="fn">echo</span> <span class="str">""</span>
+<span class="fn">echo</span> <span class="str">"IPs with more than $LIMIT attempts:"</span>
+<span class="fn">grep</span> <span class="str">"Failed password"</span> <span class="nb">$LOG</span> \
+  | <span class="fn">awk</span> <span class="str">'{print $11}'</span> \
+  | <span class="fn">sort</span> | <span class="fn">uniq</span> -c | <span class="fn">sort</span> -rn \
+  | <span class="fn">awk</span> -v lim=<span class="nb">$LIMIT</span> <span class="str">'$1 > lim {print "  "$1" attempts - IP: "$2}'</span>
+
+<span class="cm"># Check if fail2ban is active</span>
+<span class="kw">if</span> <span class="fn">systemctl</span> is-active --quiet fail2ban; <span class="kw">then</span>
+    <span class="fn">echo</span> <span class="str">""</span>
+    <span class="fn">echo</span> <span class="str">"✅ Fail2Ban is active — IPs blocked automatically"</span>
+<span class="kw">else</span>
+    <span class="fn">echo</span> <span class="str">"⚠️  Fail2Ban is NOT active — install with: sudo apt install fail2ban"</span>
+<span class="kw">fi</span>
+</code></pre>
+                        </div>
+
+                        <div class="code-explanation">
+                            <h5>Script structure:</h5>
+                            <p>
+                                <strong>#!/bin/bash</strong> — shebang: tells the system this file is a Bash script.<br>
+                                <strong>VARIABLE=value</strong> — define variables (no spaces around =).<br>
+                                <strong>$VARIABLE</strong> — use the value of a variable.<br>
+                                <strong>$(command)</strong> — command substitution: run a command and use its output.<br>
+                                <strong>if ... then ... else ... fi</strong> — conditional structure.<br>
+                                <strong>systemctl is-active</strong> — check whether a service is active.
+                            </p>
+                        </div>
+
+                        <div class="callout tip">
+                            <span class="callout-icon">💡</span>
+                            <div class="callout-body">
+                                <strong>How to run a Bash script:</strong>
+                                <code style="color:#c3e88d">chmod +x analyse_logs.sh</code> — grant execute permission.<br>
+                                <code style="color:#c3e88d">./analyse_logs.sh</code> — run it.<br>
+                                <code style="color:#c3e88d">sudo ./analyse_logs.sh</code> — run as root (required to read auth.log).
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HARDENING -->
+                    <div class="section-divider"><span>Basic Linux Hardening</span></div>
+
+                    <div class="content-card">
+                        <h3 class="content-title">Hardening — Reducing the Attack Surface</h3>
+                        <p class="content-text">
+                            Hardening is the process of making a system more resistant to attacks by removing what is unnecessary and correctly configuring what remains.
+                        </p>
+
+                        <table class="visual-table">
+                            <thead><tr><th>Action</th><th>Command</th><th>Impact</th></tr></thead>
+                            <tbody>
+                                <tr><td>Update the system</td><td>sudo apt update &amp;&amp; sudo apt upgrade</td><td><span class="pill pill-green">High</span> — fixes known vulnerabilities</td></tr>
+                                <tr><td>Disable unnecessary services</td><td>sudo systemctl disable service</td><td><span class="pill pill-green">High</span> — reduces attack surface</td></tr>
+                                <tr><td>Configure UFW firewall</td><td>sudo ufw enable &amp;&amp; sudo ufw default deny</td><td><span class="pill pill-green">High</span> — blocks unnecessary ports</td></tr>
+                                <tr><td>Install Fail2Ban</td><td>sudo apt install fail2ban</td><td><span class="pill pill-green">High</span> — auto-blocks brute force</td></tr>
+                                <tr><td>Disable SSH root login</td><td>PermitRootLogin no in sshd_config</td><td><span class="pill pill-green">High</span> — eliminates main attack vector</td></tr>
+                                <tr><td>Remove unused packages</td><td>sudo apt autoremove</td><td><span class="pill pill-orange">Medium</span> — less software = fewer vulnerabilities</td></tr>
+                                <tr><td>Check SUID files</td><td>find / -perm -4000 2>/dev/null</td><td><span class="pill pill-orange">Medium</span> — misconfigured SUID → privilege escalation</td></tr>
+                            </tbody>
+                        </table>
+
+                        <div class="callout info">
+                            <span class="callout-icon">🔍</span>
+                            <div class="callout-body">
+                                <strong>Quick security audit with Lynis</strong>
+                                Lynis is a security auditing tool for Linux. It analyses the system and gives a hardening score with concrete recommendations.<br>
+                                <code style="color:#c3e88d">sudo apt install lynis &amp;&amp; sudo lynis audit system</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NEXT STEPS -->
+                    <div class="content-card" style="background:linear-gradient(135deg,rgba(255,98,0,0.08),rgba(255,204,0,0.04));border-color:rgba(255,140,0,0.2)">
+                        <h3 class="content-title">🚀 Next Steps</h3>
+                        <p class="content-text">Practise in the <strong>Lab</strong> with the terminal simulator, test yourself in the <strong>Quiz</strong> and consult the <strong>Resources</strong>.</p>
+                        <p class="content-text">In <strong>Goal 4</strong> you will enter Offensive Security — OSINT, Nmap, OWASP Top 10 and your first CTFs.</p>
+                    </div>
+
+                </div><!-- /panel-learn -->
+
+                <!-- LAB TAB -->
+                <div id="panel-lab" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Code Lab</h3>
+                        <p class="content-text">Experiment with HTML and CSS in real time. Write your code in the editor on the left and see the result instantly in the preview panel.</p>
+                        <div class="lab-instructions">
+                            <strong>Instructions:</strong> Write HTML (with optional CSS and JavaScript) in the editor.
+                            Click <strong>"Run"</strong> or press <strong>Ctrl+Enter</strong> to see the result. Use <strong>"Reset"</strong> to clear the editor.
+                        </div>
+                        <div class="lab-controls">
+                            <button id="execute-btn" class="btn-execute">Run</button>
+                            <button id="reset-btn" class="btn-reset">Reset</button>
+                        </div>
+                        <div class="lab-container">
+                            <div class="lab-editor">
+                                <div class="lab-header">HTML Editor</div>
+                                <textarea id="code-editor" class="lab-textarea" placeholder="Write your HTML code here..."><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        h1 { color: #333; text-align: center; }
+        .highlight { background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Hello, HTML!</h1>
+    <div class="highlight">
+        <p>This is a basic HTML example with CSS.</p>
+        <p>Try changing the code and click "Run"!</p>
+    </div>
+    <script>console.log('JavaScript works too!');</script>
+</body>
+</html></textarea>
+                            </div>
+                            <div class="lab-preview">
+                                <div class="lab-header">Preview</div>
+                                <iframe id="preview-iframe" class="lab-iframe" sandbox="allow-scripts"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QUIZ TAB -->
+                <div id="panel-quiz" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Linux & Command Line Knowledge Quiz</h3>
+                        <p class="content-text">Test your knowledge of Linux and command line tools. Answer all 15 questions and receive immediate feedback.</p>
+                        <div id="quiz-container">
+                            <form id="quiz-form">
+                                <div class="quiz-question"><h4 class="question-title">1. Which command shows the current working directory?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q1" value="a"><span class="option-text">ls</span></label><label class="quiz-option"><input type="radio" name="q1" value="b"><span class="option-text">pwd</span></label><label class="quiz-option"><input type="radio" name="q1" value="c"><span class="option-text">cd</span></label><label class="quiz-option"><input type="radio" name="q1" value="d"><span class="option-text">whoami</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">2. Which command lists files with detailed permissions, including hidden files?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q2" value="a"><span class="option-text">ls</span></label><label class="quiz-option"><input type="radio" name="q2" value="b"><span class="option-text">ls -la</span></label><label class="quiz-option"><input type="radio" name="q2" value="c"><span class="option-text">pwd</span></label><label class="quiz-option"><input type="radio" name="q2" value="d"><span class="option-text">chmod</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">3. What does the sudo command do?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q3" value="a"><span class="option-text">Deletes files</span></label><label class="quiz-option"><input type="radio" name="q3" value="b"><span class="option-text">Executes commands with administrator (root) privileges</span></label><label class="quiz-option"><input type="radio" name="q3" value="c"><span class="option-text">Shows running processes</span></label><label class="quiz-option"><input type="radio" name="q3" value="d"><span class="option-text">Creates new users</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">4. Which command changes file permissions?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q4" value="a"><span class="option-text">chown</span></label><label class="quiz-option"><input type="radio" name="q4" value="b"><span class="option-text">chmod</span></label><label class="quiz-option"><input type="radio" name="q4" value="c"><span class="option-text">ls</span></label><label class="quiz-option"><input type="radio" name="q4" value="d"><span class="option-text">grep</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">5. Which command searches for text inside files?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q5" value="a"><span class="option-text">find</span></label><label class="quiz-option"><input type="radio" name="q5" value="b"><span class="option-text">grep</span></label><label class="quiz-option"><input type="radio" name="q5" value="c"><span class="option-text">cat</span></label><label class="quiz-option"><input type="radio" name="q5" value="d"><span class="option-text">nano</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">6. What does the chown command do?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q6" value="a"><span class="option-text">Changes file permissions</span></label><label class="quiz-option"><input type="radio" name="q6" value="b"><span class="option-text">Changes the owner of a file or directory</span></label><label class="quiz-option"><input type="radio" name="q6" value="c"><span class="option-text">Compresses files into an archive</span></label><label class="quiz-option"><input type="radio" name="q6" value="d"><span class="option-text">Copies files to another location</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">7. Where are system log files typically stored in Linux?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q7" value="a"><span class="option-text">/etc</span></label><label class="quiz-option"><input type="radio" name="q7" value="b"><span class="option-text">/home</span></label><label class="quiz-option"><input type="radio" name="q7" value="c"><span class="option-text">/var/log</span></label><label class="quiz-option"><input type="radio" name="q7" value="d"><span class="option-text">/usr/bin</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">8. What do the three permission characters "rwx" represent?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q8" value="a"><span class="option-text">Root, Write, Execute</span></label><label class="quiz-option"><input type="radio" name="q8" value="b"><span class="option-text">Read, Write, Execute</span></label><label class="quiz-option"><input type="radio" name="q8" value="c"><span class="option-text">Run, Work, eXit</span></label><label class="quiz-option"><input type="radio" name="q8" value="d"><span class="option-text">Read, Work, eXecute</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">9. Which command is used to securely connect to a remote server via SSH?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q9" value="a"><span class="option-text">connect user@server</span></label><label class="quiz-option"><input type="radio" name="q9" value="b"><span class="option-text">ftp user@server</span></label><label class="quiz-option"><input type="radio" name="q9" value="c"><span class="option-text">ssh user@server</span></label><label class="quiz-option"><input type="radio" name="q9" value="d"><span class="option-text">telnet user@server</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">10. Which command installs packages on a Debian-based Linux system?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q10" value="a"><span class="option-text">yum install</span></label><label class="quiz-option"><input type="radio" name="q10" value="b"><span class="option-text">apt install</span></label><label class="quiz-option"><input type="radio" name="q10" value="c"><span class="option-text">pip install</span></label><label class="quiz-option"><input type="radio" name="q10" value="d"><span class="option-text">brew install</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">11. What does the pipe operator | do in Linux?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q11" value="a"><span class="option-text">Deletes the output of a command</span></label><label class="quiz-option"><input type="radio" name="q11" value="b"><span class="option-text">Sends the output of one command as input to another</span></label><label class="quiz-option"><input type="radio" name="q11" value="c"><span class="option-text">Runs two commands simultaneously</span></label><label class="quiz-option"><input type="radio" name="q11" value="d"><span class="option-text">Appends output to a file</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">12. Which command displays running processes on a Linux system?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q12" value="a"><span class="option-text">run</span></label><label class="quiz-option"><input type="radio" name="q12" value="b"><span class="option-text">jobs</span></label><label class="quiz-option"><input type="radio" name="q12" value="c"><span class="option-text">ps aux</span></label><label class="quiz-option"><input type="radio" name="q12" value="d"><span class="option-text">list</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">13. What is the purpose of the /etc/passwd file in Linux?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q13" value="a"><span class="option-text">Stores encrypted user passwords</span></label><label class="quiz-option"><input type="radio" name="q13" value="b"><span class="option-text">Stores user account information such as usernames, UIDs and home directories</span></label><label class="quiz-option"><input type="radio" name="q13" value="c"><span class="option-text">Logs failed login attempts</span></label><label class="quiz-option"><input type="radio" name="q13" value="d"><span class="option-text">Configures network interfaces</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">14. Which operator redirects command output to a file, overwriting any existing content?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q14" value="a"><span class="option-text">&gt;&gt;</span></label><label class="quiz-option"><input type="radio" name="q14" value="b"><span class="option-text">|</span></label><label class="quiz-option"><input type="radio" name="q14" value="c"><span class="option-text">&gt;</span></label><label class="quiz-option"><input type="radio" name="q14" value="d"><span class="option-text">&amp;</span></label></div></div>
+                                <div class="quiz-question"><h4 class="question-title">15. Which command is used to display the last few lines of a log file in real time?</h4><div class="quiz-options"><label class="quiz-option"><input type="radio" name="q15" value="a"><span class="option-text">head -f</span></label><label class="quiz-option"><input type="radio" name="q15" value="b"><span class="option-text">cat -f</span></label><label class="quiz-option"><input type="radio" name="q15" value="c"><span class="option-text">tail -f</span></label><label class="quiz-option"><input type="radio" name="q15" value="d"><span class="option-text">less -f</span></label></div></div>
+                            </form>
+                        </div>
+                        <div class="quiz-controls">
+                            <button id="submit-quiz" class="btn-execute" type="button">Submit</button>
+                            <button id="clear-quiz" class="btn-reset" type="button">Clear</button>
+                        </div>
+                        <div id="quiz-results" class="quiz-results" style="display:none;">
+                            <h4 class="results-title">Quiz Results</h4>
+                            <div id="quiz-score" class="quiz-score"></div>
+                            <div id="quiz-feedback" class="quiz-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RESOURCES TAB -->
+                <div id="panel-resources" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Recommended Resources</h3>
+                        <p class="content-text">Here is a curated list of essential resources to deepen your knowledge of Linux &amp; Command Line Tools.</p>
+                        <div class="resources-list">
+                            <div class="resource-category">
+                                <h4 class="category-title">Official Documentation</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">Linux man pages — online reference</a></li>
+                                    <li><a href="#" class="resource-link">The Linux Command Line — William Shotts (free)</a></li>
+                                    <li><a href="#" class="resource-link">Kali Linux Documentation</a></li>
+                                    <li><a href="#" class="resource-link">Ubuntu Server Guide</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Guides &amp; Tutorials</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">OverTheWire: Bandit — Linux wargame for beginners</a></li>
+                                    <li><a href="#" class="resource-link">TryHackMe — Linux Fundamentals path</a></li>
+                                    <li><a href="#" class="resource-link">Bash Scripting Guide — tldp.org</a></li>
+                                    <li><a href="#" class="resource-link">Linux Privilege Escalation — GTFOBins</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Tools &amp; References</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">explainshell.com — explain any command</a></li>
+                                    <li><a href="#" class="resource-link">tldr.sh — simplified man pages</a></li>
+                                    <li><a href="#" class="resource-link">Lynis — Linux security audit tool</a></li>
+                                    <li><a href="#" class="resource-link">LinPEAS — privilege escalation checker</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Quick References</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">Linux Command Cheat Sheet</a></li>
+                                    <li><a href="#" class="resource-link">Bash Scripting Cheat Sheet</a></li>
+                                    <li><a href="#" class="resource-link">chmod / chown Reference</a></li>
+                                    <li><a href="#" class="resource-link">SSH Configuration Guide</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="resources-note">
+                            <p>💡 <strong>Note:</strong> You can edit this list in the future to add your own favourite resources.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EVALUATION TAB -->
+                <div id="panel-evaluation" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Evaluation Criteria</h3>
+                        <p class="content-text">Here are the criteria organised by importance level to assess your mastery of Linux &amp; Command Line Tools.</p>
+                        <div class="evaluation-grid">
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title essential"><span class="evaluation-icon">💠</span>Essential</h4>
+                                <ul class="evaluation-list">
+                                    <li>What Linux is and its use in cybersecurity</li>
+                                    <li>File system structure</li>
+                                    <li>Terminal navigation (pwd, ls, cd)</li>
+                                    <li>File management (touch, cp, rm, mkdir)</li>
+                                    <li>Basic file permissions</li>
+                                    <li>Root user</li>
+                                    <li>Viewing files (cat, less, nano)</li>
+                                    <li>Concept of shell and terminal</li>
+                                </ul>
+                            </div>
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title important"><span class="evaluation-icon">⭐</span>Important</h4>
+                                <ul class="evaluation-list">
+                                    <li>Permission management (chmod, chown)</li>
+                                    <li>Searching with find and grep</li>
+                                    <li>Process monitoring</li>
+                                    <li>Output redirection</li>
+                                    <li>Package management (apt)</li>
+                                    <li>System logs</li>
+                                    <li>Basic SSH usage</li>
+                                    <li>Network commands</li>
+                                </ul>
+                            </div>
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title advanced"><span class="evaluation-icon">🚀</span>Advanced</h4>
+                                <ul class="evaluation-list">
+                                    <li>User and group management</li>
+                                    <li>Basic Bash scripting</li>
+                                    <li>Monitoring with journalctl</li>
+                                    <li>Linux hardening</li>
+                                    <li>Special permissions</li>
+                                    <li>Security tools (nmap, tcpdump)</li>
+                                    <li>Service management</li>
+                                    <li>Process control</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentProgress = 0;
+
+        function updateProgress(percentage) {
+            currentProgress = percentage;
+            document.getElementById('progress-text').textContent = percentage + '%';
+            document.getElementById('progress-fill').style.width = percentage + '%';
+        }
+
+        class TabSystem {
+            constructor() {
+                this.currentTab = 'learn';
+                this.tabs = ['learn', 'lab', 'quiz', 'resources', 'evaluation'];
+                this.init();
+            }
+            init() {
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+                });
+                window.addEventListener('hashchange', () => this.handleHashChange());
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+                this.handleHashChange();
+            }
+            switchTab(tabId) {
+                if (!this.tabs.includes(tabId)) return;
+                this.currentTab = tabId;
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    const isActive = button.dataset.tab === tabId;
+                    button.classList.toggle('active', isActive);
+                    button.setAttribute('aria-selected', isActive);
+                });
+                document.querySelectorAll('.tab-panel').forEach(panel => {
+                    panel.classList.toggle('active', panel.id === `panel-${tabId}`);
+                });
+                history.replaceState(null, null, `#${tabId}`);
+                this.updateProgressForTab(tabId);
+            }
+            handleHashChange() {
+                const hash = window.location.hash.slice(1);
+                if (hash && this.tabs.includes(hash)) this.switchTab(hash);
+            }
+            handleKeyboard(e) {
+                if (!e.target.classList.contains('tab-button')) return;
+                const currentIndex = this.tabs.indexOf(this.currentTab);
+                let newIndex = currentIndex;
+                switch(e.key) {
+                    case 'ArrowLeft': e.preventDefault(); newIndex = currentIndex > 0 ? currentIndex - 1 : this.tabs.length - 1; break;
+                    case 'ArrowRight': e.preventDefault(); newIndex = currentIndex < this.tabs.length - 1 ? currentIndex + 1 : 0; break;
+                    case 'Home': e.preventDefault(); newIndex = 0; break;
+                    case 'End': e.preventDefault(); newIndex = this.tabs.length - 1; break;
+                }
+                if (newIndex !== currentIndex) {
+                    this.switchTab(this.tabs[newIndex]);
+                    document.querySelector(`[data-tab="${this.tabs[newIndex]}"]`).focus();
+                }
+            }
+            updateProgressForTab(tabId) {
+                const progressMap = { 'learn': 20, 'lab': 40, 'quiz': 60, 'resources': 80, 'evaluation': 100 };
+                const newProgress = Math.max(currentProgress, progressMap[tabId] || 0);
+                updateProgress(newProgress);
+            }
+        }
+
+        class LabEditor {
+            constructor() {
+                this.editor = document.getElementById('code-editor');
+                this.iframe = document.getElementById('preview-iframe');
+                this.executeBtn = document.getElementById('execute-btn');
+                this.resetBtn = document.getElementById('reset-btn');
+                this.defaultCode = this.editor.value;
+                this.init();
+            }
+            init() {
+                this.executeBtn.addEventListener('click', () => this.executeCode());
+                this.resetBtn.addEventListener('click', () => this.resetCode());
+                this.editor.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); this.executeCode(); }
+                });
+                setTimeout(() => this.executeCode(), 500);
+            }
+            executeCode() {
+                const code = this.editor.value;
+                const blob = new Blob([code], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                this.iframe.src = url;
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                this.executeBtn.textContent = 'Executed!';
+                this.executeBtn.style.background = 'linear-gradient(135deg, #4caf50, #8bc34a)';
+                setTimeout(() => { this.executeBtn.textContent = 'Run'; this.executeBtn.style.background = 'linear-gradient(135deg, var(--orange), var(--yellow))'; }, 1000);
+            }
+            resetCode() {
+                this.editor.value = this.defaultCode;
+                this.executeCode();
+                this.resetBtn.textContent = 'Cleared!';
+                setTimeout(() => { this.resetBtn.textContent = 'Reset'; }, 1000);
+            }
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questions = [
+                    { question: 1,  correct: 'b', explanation: 'pwd (print working directory) displays the full path of your current location in the file system.' },
+                    { question: 2,  correct: 'b', explanation: 'ls -la lists all files including hidden ones, showing detailed permissions, owner, size and timestamps.' },
+                    { question: 3,  correct: 'b', explanation: 'sudo (superuser do) allows a permitted user to run commands with root/administrator privileges.' },
+                    { question: 4,  correct: 'b', explanation: 'chmod (change mode) modifies the read, write and execute permissions of a file or directory.' },
+                    { question: 5,  correct: 'b', explanation: 'grep searches for patterns or text strings within files — essential for log analysis and incident response.' },
+                    { question: 6,  correct: 'b', explanation: 'chown (change owner) changes the user and/or group ownership of a file or directory.' },
+                    { question: 7,  correct: 'c', explanation: '/var/log is the standard Linux directory for system and application log files, critical for security monitoring.' },
+                    { question: 8,  correct: 'b', explanation: 'rwx stands for Read, Write, Execute — the three fundamental permission types applied to owner, group and others.' },
+                    { question: 9,  correct: 'c', explanation: 'ssh user@server establishes an encrypted secure shell connection to a remote server.' },
+                    { question: 10, correct: 'b', explanation: 'apt install is the package manager command used on Debian-based systems (Ubuntu, Kali Linux, etc.).' },
+                    { question: 11, correct: 'b', explanation: 'The pipe | operator chains commands together, passing the output of one command as the input to the next.' },
+                    { question: 12, correct: 'c', explanation: 'ps aux lists all running processes with their PID, CPU usage, memory usage and command name.' },
+                    { question: 13, correct: 'b', explanation: '/etc/passwd stores user account information (username, UID, GID, home directory, shell) — not encrypted passwords, which are in /etc/shadow.' },
+                    { question: 14, correct: 'c', explanation: 'The > operator redirects output to a file, overwriting it. Use >> to append without overwriting.' },
+                    { question: 15, correct: 'c', explanation: 'tail -f follows a log file in real time, displaying new lines as they are written — invaluable for live monitoring.' }
+                ];
+                this.init();
+            }
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+            submitQuiz() {
+                const form = document.getElementById('quiz-form');
+                const formData = new FormData(form);
+                let score = 0;
+                const feedback = [];
+                this.questions.forEach(q => {
+                    const userAnswer = formData.get(`q${q.question}`);
+                    const isCorrect = userAnswer === q.correct;
+                    if (isCorrect) score++;
+                    feedback.push({ question: q.question, correct: isCorrect, explanation: q.explanation, correctAnswer: q.correct });
+                });
+                this.displayResults(score, feedback);
+            }
+            displayResults(score, feedback) {
+                const resultsDiv = document.getElementById('quiz-results');
+                const scoreDiv = document.getElementById('quiz-score');
+                const feedbackDiv = document.getElementById('quiz-feedback');
+                const percentage = Math.round((score / this.questions.length) * 100);
+                let scoreClass, message;
+                if (percentage >= 90)      { scoreClass = 'score-excellent'; message = 'Excellent! You have a strong grasp of Linux & Command Line Tools!'; }
+                else if (percentage >= 70) { scoreClass = 'score-good';      message = 'Well done! You have a good understanding of Linux fundamentals.'; }
+                else if (percentage >= 50) { scoreClass = 'score-fair';      message = 'Not bad, but there is room to improve. Review the concepts again.'; }
+                else                       { scoreClass = 'score-poor';      message = 'You need more study. Go back to the learning content.'; }
+                scoreDiv.innerHTML = `<div class="${scoreClass}">${score}/${this.questions.length} (${percentage}%)</div><div style="color:var(--text-secondary);font-size:0.875rem;margin-top:0.5rem">${message}</div>`;
+                feedbackDiv.innerHTML = feedback.map(item => `
+                    <div class="feedback-item ${item.correct ? 'feedback-correct' : 'feedback-incorrect'}">
+                        <span class="feedback-icon">${item.correct ? '✓' : '✗'}</span>
+                        <span><strong>Question ${item.question}:</strong> ${item.explanation}
+                        ${!item.correct ? `<br><span style="margin-top:0.3rem;display:inline-block;font-size:0.82rem;color:#c0392b;font-weight:600">Correct answer: ${item.correctAnswer.toUpperCase()}</span>` : ''}</span>
+                    </div>`).join('');
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            clearQuiz() {
+                document.querySelectorAll('#quiz-form input[type="radio"]').forEach(input => { input.checked = false; });
+                document.getElementById('quiz-results').style.display = 'none';
+                const clearBtn = document.getElementById('clear-quiz');
+                clearBtn.textContent = 'Cleared!';
+                setTimeout(() => { clearBtn.textContent = 'Clear'; }, 1000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new TabSystem();
+            new LabEditor();
+            new QuizManager();
+        });
+    </script>
+</body>
+</html>
+

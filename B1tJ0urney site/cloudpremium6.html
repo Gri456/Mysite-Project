@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Observability & SRE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #020d12;
+            --blue: #00d4ff; --purple: #00aacc; --cyan: #00e5ff;
+            --text-light: #e8f8fc; --text-secondary: #8cc8d8;
+            --card-bg: rgba(0,212,255,0.04); --border-color: rgba(0,212,255,0.15);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; overflow-x: hidden; }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0,212,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(0,180,220,0.07) 1px, transparent 1px);
+            background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1;
+        }
+        @keyframes gridMove { 0%{transform:translate(0,0)} 100%{transform:translate(50px,50px)} }
+        body::after {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(0,180,220,0.08) 0%, rgba(0,212,255,0.04) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(2,13,18,0.88); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(0,212,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: #001a20; font-weight: 700; box-shadow: 0 4px 15px rgba(0,212,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,212,255,0.45); }
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(to right, #00b8d4, #00e5ff, #00acc1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(0,212,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; font-family: 'Inter', sans-serif; }
+        .tab-button:hover { color: var(--text-light); background: rgba(0,212,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(0,212,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .content-card { background: rgba(0,212,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; color: #00b8d4; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.7; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); line-height: 1.5; }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+        pre { background: rgba(0,0,0,0.45); border: 1px solid var(--border-color); border-radius: 6px; padding: 1.1rem; overflow-x: auto; margin: 1rem 0; }
+        code { font-family: 'Courier New', monospace; font-size: 0.88rem; color: #a0e8f4; line-height: 1.6; }
+        .quiz-item { background: rgba(0,212,255,0.02); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .quiz-question { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(0,212,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all 0.3s ease; margin-bottom: 0.5rem; }
+        .quiz-option:hover { background: rgba(0,212,255,0.08); border-color: var(--blue); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); flex-shrink: 0; }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; font-family: 'Courier New', monospace; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,229,255,0.04)); border: 1px solid rgba(0,212,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; background: rgba(255,255,255,0.02); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer { color: #ef4444; font-weight: 600; }
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .evaluation-column { background: rgba(0,212,255,0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); }
+        .evaluation-title { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; font-size: 1rem; font-weight: 600; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .essential { color: var(--cyan); border-bottom-color: var(--cyan) !important; }
+        .important { color: #ffd700; border-bottom-color: #ffd700 !important; }
+        .advanced { color: #ff6b6b; border-bottom-color: #ff6b6b !important; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.875rem; color: var(--text-secondary); }
+        .evaluation-list li { padding-left: 1.2rem; position: relative; line-height: 1.4; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.6rem 0; font-size: 0.95rem; transition: opacity 0.2s; }
+        .resource-link:hover { text-decoration: underline; opacity: 0.85; }
+        .lab-container { display: flex; gap: 1rem; height: 430px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .lab-header-bar { background: rgba(0,212,255,0.08); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.5px; }
+        .lab-textarea { flex: 1; background: #000d12; color: #00d4ff; font-family: 'Courier New', monospace; padding: 1rem; border: none; resize: none; outline: none; font-size: 0.88rem; line-height: 1.6; }
+        .lab-output { flex: 1; background: #001018; color: #a0e8f4; padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; }
+        .arch-diagram { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; font-family: 'Courier New', monospace; font-size: 0.83rem; color: #a0e8f4; line-height: 1.9; overflow-x: auto; }
+        .tag-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.75rem 0; }
+        .tag { font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 999px; border: 1px solid rgba(0,212,255,0.25); color: #a0e8f4; background: rgba(0,212,255,0.06); }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media (max-width: 750px) { .two-col,.three-col { grid-template-columns: 1fr; } .lab-container { flex-direction: column; height: auto; } .lab-editor,.lab-preview { height: 260px; } }
+        .mini-card { background: rgba(0,212,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mini-card h4 { color: var(--cyan); font-size: 0.88rem; margin-bottom: 0.5rem; }
+        .mini-card p { color: var(--text-secondary); font-size: 0.82rem; line-height: 1.5; }
+        .slo-bar { height: 22px; border-radius: 4px; margin: 6px 0; display: flex; align-items: center; padding: 0 10px; font-size: 0.78rem; font-weight: 600; }
+        .slo-ok    { background: rgba(16,185,129,0.2); border: 1px solid #10b981; color: #10b981; }
+        .slo-warn  { background: rgba(245,158,11,0.2); border: 1px solid #f59e0b; color: #f59e0b; }
+        .slo-crit  { background: rgba(239,68,68,0.2);  border: 1px solid #ef4444;  color: #ef4444; }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+            <span class="premium-badge">Premium • Cloud</span>
+        </div>
+        <nav style="display:flex;gap:.75rem">
+            <a href="premium-cloud.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objective: Observability & SRE</h1>
+        <p class="course-description">
+            Build systems you can understand, debug, and improve. Master the three pillars of observability — logs, metrics, and traces — then apply SRE principles to define reliability targets, manage incidents, and systematically eliminate toil.
+        </p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>6–8h</span></div>
+            <div class="meta-item"><span>🎯</span><span>OpenTelemetry · Prometheus · Grafana · Datadog · SLI/SLO/SLA · Incident Management</span></div>
+            <div class="meta-item"><span>📌</span><span>Requires: Cloud Architecture + Kubernetes basics</span></div>
+        </div>
+        <div class="tag-row">
+            <span class="tag">OpenTelemetry</span>
+            <span class="tag">Prometheus</span>
+            <span class="tag">Grafana</span>
+            <span class="tag">Loki</span>
+            <span class="tag">Tempo</span>
+            <span class="tag">Datadog</span>
+            <span class="tag">SLI</span>
+            <span class="tag">SLO</span>
+            <span class="tag">Error Budget</span>
+            <span class="tag">Incident Management</span>
+            <span class="tag">Toil</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary)">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'learn')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'lab')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'resources')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'evaluation')">Evaluation</button>
+        </nav>
+
+        <!-- ══════════════════════════ LEARN ══════════════════════════ -->
+        <div id="learn" class="tab-panel active">
+
+            <div class="content-card">
+                <h3>🔭 6.1 What is Observability?</h3>
+                <p>Observability is the ability to understand the internal state of a system by examining its external outputs. It goes beyond monitoring — instead of asking "is it up?", you ask "why is it behaving this way?".</p>
+                <div class="code-explanation">
+                    <strong>Monitoring</strong> tells you <span class="highlight">when</span> something is wrong (alert fires).<br>
+                    <strong>Observability</strong> tells you <span class="highlight">why</span> it is wrong and helps you investigate anything — including problems you didn't predict.
+                </div>
+                <div class="arch-diagram">
+The Three Pillars of Observability:
+
+  📋 LOGS      — discrete, timestamped events
+                 "2024-03-05 14:32:01 ERROR payment service timeout after 5000ms"
+                 Best for: debugging specific errors, audit trails
+
+  📊 METRICS   — numeric measurements over time (aggregated)
+                 http_requests_total{status="500"} = 42
+                 Best for: alerting, dashboards, capacity planning
+
+  🔍 TRACES    — end-to-end journey of a single request across services
+                 GET /checkout → [auth:12ms] → [cart:8ms] → [payment:TIMEOUT 5000ms]
+                 Best for: latency debugging, dependency mapping
+
+  Together they let you: detect → investigate → understand → fix</div>
+            </div>
+
+            <div class="content-card">
+                <h3>📋 6.2 Logs — Structured Logging Best Practices</h3>
+                <p>Logs are the most familiar signal. Unstructured logs are hard to query at scale. Structured logging — JSON output — makes logs machine-readable and searchable.</p>
+                <div class="two-col">
+                    <div class="mini-card">
+                        <h4>❌ Unstructured (bad)</h4>
+                        <p>ERROR: Payment failed for user 1234 after 5002ms — connection refused to stripe-api:443</p>
+                    </div>
+                    <div class="mini-card">
+                        <h4>✅ Structured JSON (good)</h4>
+                        <p>{"level":"error","service":"payment","user_id":1234,"duration_ms":5002,"error":"connection refused","target":"stripe-api:443","trace_id":"abc123"}</p>
+                    </div>
+                </div>
+                <ul class="styled-list">
+                    <li><strong>Always include:</strong> timestamp (ISO 8601), severity level, service name, trace_id, span_id, and a correlation ID for cross-service requests.</li>
+                    <li><strong>Log levels:</strong> DEBUG (dev only), INFO (normal operations), WARN (unexpected but handled), ERROR (failure requiring attention), FATAL (process cannot continue).</li>
+                    <li><strong>Never log:</strong> passwords, API keys, PII (names, emails, credit cards) — a breach of a log store is a data breach.</li>
+                    <li><strong>Log aggregation:</strong> Collect logs from all pods/instances centrally — Fluent Bit → Loki/Elasticsearch/CloudWatch.</li>
+                </ul>
+                <pre><code># Fluent Bit DaemonSet config — forward K8s logs to Loki
+[INPUT]
+    Name              tail
+    Path              /var/log/containers/*.log
+    Parser            docker
+    Tag               kube.*
+    Refresh_Interval  5
+    Mem_Buf_Limit     50MB
+
+[FILTER]
+    Name              kubernetes
+    Match             kube.*
+    Merge_Log         On
+    Keep_Log          Off
+    K8S-Logging.Parser On
+
+[OUTPUT]
+    Name              loki
+    Match             kube.*
+    Host              loki.monitoring.svc.cluster.local
+    Port              3100
+    Labels            job=fluentbit, namespace=$kubernetes['namespace_name']
+    Label_Keys        $kubernetes['pod_name'],$kubernetes['container_name']</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>📊 6.3 Metrics — Prometheus and PromQL</h3>
+                <p>Prometheus is the de facto standard for cloud-native metrics. It scrapes metrics from instrumented targets at regular intervals and stores them as time-series data.</p>
+                <div class="arch-diagram">
+Prometheus Architecture:
+
+  [App /metrics]  ←── scrape every 15s ── [Prometheus]
+  [Node Exporter]                                │
+  [kube-state-metrics]                     [TSDB storage]
+  [Alertmanager ←── firing rules]               │
+                                          [Grafana] ← PromQL queries
+                                          [Thanos / Mimir] ← long-term storage</div>
+                <ul class="styled-list">
+                    <li><strong>Counter:</strong> Monotonically increasing value — total requests, total errors. Never decreases (resets on restart). Use <code>rate()</code> to get per-second rate.</li>
+                    <li><strong>Gauge:</strong> Value that goes up and down — current memory usage, active connections, queue depth.</li>
+                    <li><strong>Histogram:</strong> Samples observations into buckets — request duration, response size. Enables percentile calculation (<code>histogram_quantile()</code>).</li>
+                    <li><strong>Summary:</strong> Like histogram but calculates percentiles client-side — cannot be aggregated across instances.</li>
+                </ul>
+                <pre><code># Prometheus metric instrumentation (Go)
+var (
+  httpRequestsTotal = prometheus.NewCounterVec(
+    prometheus.CounterOpts{
+      Name: "http_requests_total",
+      Help: "Total HTTP requests by method, path, and status code",
+    },
+    []string{"method", "path", "status"},
+  )
+  httpDuration = prometheus.NewHistogramVec(
+    prometheus.HistogramOpts{
+      Name:    "http_request_duration_seconds",
+      Help:    "HTTP request duration in seconds",
+      Buckets: []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5},
+    },
+    []string{"method", "path"},
+  )
+)
+
+# PromQL queries
+# Request rate (last 5 minutes)
+rate(http_requests_total[5m])
+
+# Error rate as percentage
+sum(rate(http_requests_total{status=~"5.."}[5m]))
+  / sum(rate(http_requests_total[5m])) * 100
+
+# p99 latency
+histogram_quantile(0.99,
+  sum(rate(http_request_duration_seconds_bucket[5m])) by (le, path)
+)
+
+# Requests per second by service
+sum by (service) (rate(http_requests_total[1m]))</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🔍 6.4 Distributed Tracing</h3>
+                <p>Tracing follows a single request as it flows through multiple microservices, recording the timing of each operation. It answers: "where is the latency coming from?"</p>
+                <div class="arch-diagram">
+Trace: GET /checkout  (trace_id: abc123)  Total: 187ms
+│
+├─ [auth-service]       span_id:001   12ms   ✅
+├─ [cart-service]       span_id:002    8ms   ✅
+│  └─ [redis]           span_id:003    2ms   ✅
+├─ [inventory-service]  span_id:004   45ms   ✅
+│  └─ [postgres]        span_id:005   38ms   ⚠️  slow query!
+└─ [payment-service]    span_id:006  122ms   🔴 timeout
+   └─ [stripe-api]      span_id:007  120ms   🔴 external call</div>
+                <ul class="styled-list">
+                    <li><strong>Span:</strong> A single unit of work — one service handling one request. Has start time, duration, status, and attributes.</li>
+                    <li><strong>Trace:</strong> A tree of spans sharing the same trace_id — the complete journey of one request.</li>
+                    <li><strong>Context propagation:</strong> trace_id and span_id are injected into HTTP headers (W3C TraceContext, B3) so downstream services continue the trace.</li>
+                    <li><strong>Sampling:</strong> Tracing 100% of requests is expensive. Head-based sampling (decide at ingress) or tail-based sampling (keep slow/errored traces) reduce volume.</li>
+                    <li><strong>Backends:</strong> Jaeger, Zipkin, Grafana Tempo, AWS X-Ray, Datadog APM.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>🌐 6.5 OpenTelemetry — The Unified Standard</h3>
+                <p>OpenTelemetry (OTel) is a CNCF project that provides a single, vendor-neutral SDK and collector for all three observability signals. It solves vendor lock-in.</p>
+                <div class="arch-diagram">
+Before OTel:  App → Datadog SDK  (change vendor = rewrite instrumentation)
+              App → Jaeger SDK
+              App → Prometheus client
+
+With OTel:    App → OTel SDK → OTel Collector → Prometheus  (metrics)
+                                              → Tempo/Jaeger (traces)
+                                              → Loki         (logs)
+                                              → Datadog      (all three)
+              One SDK. Any backend. No rewrite needed.</div>
+                <ul class="styled-list">
+                    <li><strong>OTel SDK:</strong> Language-specific libraries (Go, Java, Python, JS, .NET, Rust) to instrument your application. Auto-instrumentation available for popular frameworks.</li>
+                    <li><strong>OTel Collector:</strong> A vendor-agnostic agent/gateway that receives, processes, and exports telemetry. Runs as a DaemonSet in Kubernetes.</li>
+                    <li><strong>OTLP (OpenTelemetry Protocol):</strong> The wire protocol — gRPC or HTTP/JSON. All modern backends support OTLP natively.</li>
+                    <li><strong>Semantic conventions:</strong> Standardised attribute names — <code>http.method</code>, <code>db.system</code>, <code>messaging.system</code> — so dashboards and alerts are portable.</li>
+                </ul>
+                <pre><code># OTel Collector config — receive OTLP, export to Prometheus + Tempo
+receivers:
+  otlp:
+    protocols:
+      grpc: { endpoint: "0.0.0.0:4317" }
+      http: { endpoint: "0.0.0.0:4318" }
+
+processors:
+  batch:
+    timeout: 10s
+    send_batch_size: 1000
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  otlp/tempo:
+    endpoint: "tempo.monitoring.svc.cluster.local:4317"
+    tls: { insecure: true }
+  loki:
+    endpoint: "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus]
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/tempo]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [loki]</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>📈 6.6 Grafana Stack — Visualization and the LGTM Stack</h3>
+                <p>Grafana is the open-source visualisation platform. Combined with Loki, Grafana Tempo, and Mimir, it forms the <strong>LGTM stack</strong> — a fully open-source observability suite.</p>
+                <div class="three-col">
+                    <div class="mini-card">
+                        <h4>🔵 Grafana</h4>
+                        <p>Dashboards, alerting, and data exploration. Connects to Prometheus, Loki, Tempo, Elasticsearch, CloudWatch, Datadog, and 60+ other data sources.</p>
+                    </div>
+                    <div class="mini-card">
+                        <h4>📋 Loki</h4>
+                        <p>"Prometheus for logs" — indexes only labels (not content), making it cheap to operate. Query with LogQL. Integrates natively with Grafana. Fluent Bit or Promtail as agents.</p>
+                    </div>
+                    <div class="mini-card">
+                        <h4>🔍 Tempo</h4>
+                        <p>Distributed tracing backend. Stores traces cheaply in object storage (S3, GCS). No indexing — search by trace_id or via Prometheus exemplars. Replaces Jaeger/Zipkin.</p>
+                    </div>
+                </div>
+                <pre><code># LogQL — query Loki for errors in the payment service (last 15m)
+{namespace="production", app="payment"} |= "ERROR"
+  | json
+  | duration_ms > 1000
+  | line_format "{{.level}} | {{.trace_id}} | {{.error}}"
+
+# LogQL — error rate over time
+sum(rate({namespace="production"} |= "ERROR" [5m])) by (app)
+
+# Grafana alert rule — p99 latency > 1s for 5 minutes
+expr: >
+  histogram_quantile(0.99,
+    sum(rate(http_request_duration_seconds_bucket{
+      namespace="production"
+    }[5m])) by (le, service)
+  ) > 1
+for: 5m
+labels:
+  severity: warning
+annotations:
+  summary: "p99 latency > 1s for {{ $labels.service }}"</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🐶 6.7 Datadog — Unified Observability Platform</h3>
+                <p>Datadog is a cloud-native SaaS observability platform that unifies metrics, logs, traces, and security in one product — with deep AWS/Azure/GCP integrations and AI-powered insights.</p>
+                <ul class="styled-list">
+                    <li><strong>Agent-based:</strong> Datadog Agent runs on every host/pod as a DaemonSet — collects metrics, logs, and traces with minimal configuration.</li>
+                    <li><strong>APM (Application Performance Monitoring):</strong> Auto-instrumentation for popular frameworks. Service map, flame graphs, and trace-to-log correlation.</li>
+                    <li><strong>Infrastructure:</strong> Live host map, container map, process monitoring, and network performance monitoring (NPM).</li>
+                    <li><strong>Log Management:</strong> Ingest, parse, index, and archive logs. Log-based metrics and anomaly detection.</li>
+                    <li><strong>Monitors and alerting:</strong> Threshold, anomaly, forecast, and composite monitors. Integrates with PagerDuty, Opsgenie, Slack.</li>
+                    <li><strong>When to choose Datadog vs OSS:</strong> Datadog for teams wanting managed, opinionated, correlated observability. OSS stack (Prometheus + Grafana + Loki + Tempo) for cost control and full data ownership.</li>
+                </ul>
+                <pre><code># Datadog Agent DaemonSet configuration (Kubernetes)
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: datadog-agent
+spec:
+  template:
+    spec:
+      containers:
+      - name: agent
+        image: gcr.io/datadoghq/agent:7
+        env:
+        - name: DD_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: datadog-secret
+              key: api-key
+        - name: DD_LOGS_ENABLED
+          value: "true"
+        - name: DD_APM_ENABLED
+          value: "true"
+        - name: DD_PROCESS_AGENT_ENABLED
+          value: "true"
+        - name: DD_KUBERNETES_KUBELET_NODENAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🎯 6.8 SLI, SLO, and SLA — The Reliability Contract</h3>
+                <p>Site Reliability Engineering defines reliability in measurable terms that align engineering work with user experience and business needs.</p>
+                <div class="code-explanation">
+                    <strong>SLI (Service Level Indicator):</strong> A quantitative measure of a service behaviour. <span class="highlight">What you measure.</span><br><br>
+                    <strong>SLO (Service Level Objective):</strong> A target value for an SLI over a rolling window. <span class="highlight">What you aim for.</span><br><br>
+                    <strong>SLA (Service Level Agreement):</strong> A legal contract with users/customers — consequences (credits, penalties) if SLOs are violated. <span class="highlight">What you commit to externally.</span>
+                </div>
+                <div style="margin:1.2rem 0">
+                    <p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:0.6rem">Example SLO visualisation — 30-day rolling window:</p>
+                    <div class="slo-bar slo-ok">Availability SLO: 99.9% target — Current: 99.97% ✅  Error budget remaining: 87%</div>
+                    <div class="slo-bar slo-warn">Latency SLO: p99 &lt; 500ms — Current: 487ms ⚠️  Error budget remaining: 23%</div>
+                    <div class="slo-bar slo-crit">Checkout SLO: 99.95% target — Current: 99.91% 🔴  Error budget EXHAUSTED (−43%)</div>
+                </div>
+                <pre><code># Common SLI types
+Availability:
+  SLI = good_requests / total_requests
+  SLO = 99.9% over rolling 30 days
+
+Latency:
+  SLI = requests_under_500ms / total_requests
+  SLO = 95% of requests complete in < 500ms
+
+Freshness (data pipelines):
+  SLI = percentage of data updated within SLA window
+  SLO = 99% of records fresh within 1 hour
+
+Error rate:
+  SLI = 1 - (error_requests / total_requests)
+  SLO = error rate < 0.1% over 7 days
+
+# Error budget calculation
+SLO window:     30 days = 43,200 minutes
+Allowed downtime: (1 - 0.999) × 43,200 = 43.2 minutes/month
+Current burn:     18 minutes used = 41.7% consumed</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🔥 6.9 Error Budgets and Burn Rate Alerts</h3>
+                <p>The error budget is the allowed amount of unreliability within the SLO window. It bridges the gap between reliability and feature velocity.</p>
+                <div class="code-explanation">
+                    <strong>Key insight:</strong> If the error budget is healthy, the team can take risks and deploy faster. If the budget is nearly exhausted, reliability work takes priority over new features. <span class="highlight">The error budget makes the trade-off explicit and data-driven.</span>
+                </div>
+                <ul class="styled-list">
+                    <li><strong>Burn rate:</strong> How fast you are consuming the error budget relative to the SLO window. A burn rate of 1 means you will exactly exhaust the budget at end of window. Burn rate 10 means 10× faster — budget exhausted in 3 days on a 30-day window.</li>
+                    <li><strong>Multi-window alerts:</strong> Google's SRE book recommends alerting on high burn rate over both a short window (1h) AND a longer window (6h) — reduces false positives while staying fast.</li>
+                    <li><strong>Budget reset:</strong> At the end of each SLO window (typically 28 or 30 days) the budget resets — past incidents are forgiven.</li>
+                </ul>
+                <pre><code># Prometheus — multi-window burn rate alert (30-day SLO, 99.9%)
+groups:
+- name: slo.checkout
+  rules:
+  # Fast burn: 14.4× burn rate over 1h AND 6h (page immediately)
+  - alert: CheckoutSLOFastBurn
+    expr: |
+      (
+        rate(http_requests_total{service="checkout",status=~"5.."}[1h])
+        / rate(http_requests_total{service="checkout"}[1h])
+      ) > (14.4 * 0.001)
+      and
+      (
+        rate(http_requests_total{service="checkout",status=~"5.."}[6h])
+        / rate(http_requests_total{service="checkout"}[6h])
+      ) > (14.4 * 0.001)
+    for: 2m
+    labels:
+      severity: critical
+      team: checkout
+    annotations:
+      summary: "Checkout SLO fast burn — p99 error budget exhausting in ~2h"
+
+  # Slow burn: 3× burn rate over 6h AND 3d (ticket, no page)
+  - alert: CheckoutSLOSlowBurn
+    expr: |
+      (
+        rate(http_requests_total{service="checkout",status=~"5.."}[6h])
+        / rate(http_requests_total{service="checkout"}[6h])
+      ) > (3 * 0.001)
+    for: 1h
+    labels:
+      severity: warning</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🚨 6.10 Incident Management</h3>
+                <p>Incidents are unplanned disruptions to service reliability. A well-defined incident management process minimises impact and maximises learning.</p>
+                <div class="arch-diagram">
+Incident Lifecycle:
+
+  DETECT      → Alert fires (Prometheus/Datadog/PagerDuty)
+  TRIAGE      → Assess severity, assemble response team
+  RESPOND     → Incident commander declared, comms channel opened
+  MITIGATE    → Reduce customer impact (rollback, reroute, scale)
+  RESOLVE     → Root cause fixed, monitors green
+  POSTMORTEM  → Blameless review, action items, runbook updated</div>
+                <ul class="styled-list">
+                    <li><strong>Severity levels:</strong> SEV1 (total outage, all hands), SEV2 (major degradation, paging), SEV3 (minor issue, ticket), SEV4 (cosmetic).</li>
+                    <li><strong>Incident Commander (IC):</strong> Single person responsible for coordination — not fixing the issue, but directing the response and communications.</li>
+                    <li><strong>Blameless postmortem:</strong> Focus on systems and processes, not individuals. The goal is learning, not punishment. Ask "what failed?" not "who failed?".</li>
+                    <li><strong>MTTD (Mean Time To Detect):</strong> How long from incident start to alert firing. Reduce with better SLO-based alerting.</li>
+                    <li><strong>MTTR (Mean Time To Resolve):</strong> How long from alert to service restored. Reduce with runbooks, chaos engineering, and on-call practice.</li>
+                    <li><strong>PagerDuty / Opsgenie:</strong> On-call scheduling, escalation policies, and alert routing. Integrate with Prometheus Alertmanager, Datadog, and Grafana.</li>
+                </ul>
+                <pre><code># Prometheus Alertmanager — route SEV1 to PagerDuty, SEV2 to Slack
+route:
+  receiver: default
+  group_by: [alertname, service]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+  - match:
+      severity: critical
+    receiver: pagerduty-sev1
+    continue: false
+  - match:
+      severity: warning
+    receiver: slack-sev2
+
+receivers:
+- name: pagerduty-sev1
+  pagerduty_configs:
+  - routing_key: ${PAGERDUTY_KEY}
+    description: "{{ .CommonAnnotations.summary }}"
+    severity: critical
+
+- name: slack-sev2
+  slack_configs:
+  - api_url: ${SLACK_WEBHOOK}
+    channel: "#incidents"
+    title: "⚠️ {{ .CommonLabels.alertname }}"
+    text: "{{ .CommonAnnotations.summary }}"</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🤖 6.11 Eliminating Toil — The SRE Core Principle</h3>
+                <p>Toil is work that is manual, repetitive, automatable, tactical (no lasting value), and O(n) — it grows with service scale. SRE teams target keeping toil below 50% of time.</p>
+                <div class="code-explanation">
+                    <strong>Toil examples:</strong> Manually restarting services, acknowledging routine alerts that self-resolve, running deployment scripts by hand, manually scaling instances during traffic spikes, rotating secrets by SSH-ing into servers.<br><br>
+                    <strong>How to eliminate it:</strong> Automate restarts (K8s self-healing) → auto-scaling (HPA/KEDA) → GitOps deployments (ArgoCD) → automated secret rotation (Vault) → better alerting (fewer noisy alerts).
+                </div>
+                <ul class="styled-list">
+                    <li><strong>Runbooks → automation:</strong> If you have a runbook for an alert, that runbook should become a script or an automated remediation action.</li>
+                    <li><strong>Alert quality:</strong> Every alert should be actionable, urgent, and require human judgement. If you can automate the response, automate it — don't page a human.</li>
+                    <li><strong>Capacity planning:</strong> Use metrics to predict when you will hit resource limits — provision ahead of time, not reactively.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>📐 6.12 The Four Golden Signals</h3>
+                <p>Google's SRE book identifies four golden signals — the minimum set of metrics you must instrument for any user-facing service.</p>
+                <div class="three-col">
+                    <div class="mini-card">
+                        <h4>⚡ Latency</h4>
+                        <p>Time to serve a request. Track both successful requests AND failed requests (slow failures are worse than fast ones). Measure p50, p95, p99 — averages hide tail latency.</p>
+                    </div>
+                    <div class="mini-card">
+                        <h4>🔄 Traffic</h4>
+                        <p>Demand on the system — requests/second, active users, messages/second. Establishes baseline for anomaly detection and capacity planning.</p>
+                    </div>
+                    <div class="mini-card">
+                        <h4>❌ Errors</h4>
+                        <p>Rate of failed requests — explicit (5xx status), implicit (wrong data returned), and policy-based (latency > SLO). Error rate drives your SLI calculation.</p>
+                    </div>
+                </div>
+                <div style="margin-top:1rem">
+                    <div class="mini-card">
+                        <h4>📦 Saturation</h4>
+                        <p style="font-size:0.82rem">How full is the service? CPU, memory, disk, connections, queue depth. Saturation predicts imminent degradation. At 100% saturation most services fail. Alert before you reach it.</p>
+                    </div>
+                </div>
+                <pre><code># Grafana dashboard — Four Golden Signals (PromQL)
+
+# 1. Latency (p99)
+histogram_quantile(0.99,
+  sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service))
+
+# 2. Traffic (RPS)
+sum(rate(http_requests_total[1m])) by (service)
+
+# 3. Error rate (%)
+sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+/ sum(rate(http_requests_total[5m])) by (service) * 100
+
+# 4. Saturation (CPU utilisation %)
+100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🧪 6.13 Chaos Engineering</h3>
+                <p>Chaos Engineering is the practice of deliberately injecting failures into a system in a controlled way to validate that it behaves correctly under adverse conditions — before a real incident occurs.</p>
+                <ul class="styled-list">
+                    <li><strong>Principles:</strong> Define steady state (baseline metrics) → hypothesise it will hold → run the experiment in production (or staging) → validate or learn.</li>
+                    <li><strong>Chaos Mesh / LitmusChaos:</strong> Kubernetes-native chaos engineering platforms. Inject pod failures, network latency, DNS errors, and disk pressure via CRDs.</li>
+                    <li><strong>AWS Fault Injection Service (FIS):</strong> Managed chaos experiments for AWS services — terminate EC2 instances, introduce API throttling, inject latency on ECS tasks.</li>
+                    <li><strong>Game Days:</strong> Scheduled chaos exercises where the whole team practises responding to failures — builds muscle memory and validates runbooks.</li>
+                    <li><strong>Blast radius:</strong> Start small (single pod in staging) and expand confidence before running in production.</li>
+                </ul>
+                <pre><code># Chaos Mesh — inject 200ms network latency into payment service
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: payment-latency-experiment
+  namespace: production
+spec:
+  action: delay
+  mode: one
+  selector:
+    namespaces: [production]
+    labelSelectors:
+      app: payment-service
+  delay:
+    latency: "200ms"
+    correlation: "25"
+    jitter: "50ms"
+  duration: "5m"</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>📡 6.14 Alerting Philosophy — Signal vs Noise</h3>
+                <ul class="styled-list">
+                    <li><strong>Alert on symptoms, not causes:</strong> Alert when users are affected (high error rate, slow latency), not on internal signals (high CPU) that might not impact users.</li>
+                    <li><strong>Every alert must be actionable:</strong> If you can't tell an on-call engineer what to do about an alert, it should not page. Convert to a dashboard or log event.</li>
+                    <li><strong>Alert fatigue is deadly:</strong> Teams that receive too many alerts start ignoring all of them — including the critical ones. Audit alerts monthly and delete the ones that resolve without action.</li>
+                    <li><strong>Avoid flapping:</strong> Use <code>for: 5m</code> in Prometheus to require the condition to persist before alerting. One data point above threshold is not an incident.</li>
+                    <li><strong>Dead Man's Switch:</strong> An alert that fires if your alerting pipeline itself goes silent — ensures your monitoring system is actually running.</li>
+                </ul>
+            </div>
+
+            <div class="content-card" style="border-left:5px solid var(--cyan)">
+                <h3>✅ 6.15 Module Summary</h3>
+                <p>After this module you should be able to:</p>
+                <ul class="styled-list">
+                    <li>Explain the three pillars of observability and when each is most useful.</li>
+                    <li>Write structured logs with all required fields and appropriate log levels.</li>
+                    <li>Instrument an application with Prometheus counters, gauges, and histograms.</li>
+                    <li>Write PromQL queries for rate, error rate, and p99 latency.</li>
+                    <li>Understand distributed tracing — spans, traces, and context propagation.</li>
+                    <li>Configure the OpenTelemetry Collector to route signals to multiple backends.</li>
+                    <li>Build Grafana dashboards using Prometheus, Loki, and Tempo.</li>
+                    <li>Define SLIs and SLOs for availability, latency, and error rate.</li>
+                    <li>Calculate error budgets and configure multi-window burn rate alerts.</li>
+                    <li>Run an incident to resolution using the IC model, then lead a blameless postmortem.</li>
+                    <li>Identify toil and create a plan to automate it.</li>
+                    <li>Instrument the four golden signals and write actionable alert rules.</li>
+                </ul>
+                <p style="margin-top:0.75rem"><strong>Next:</strong> FinOps — understanding and optimising your cloud spend.</p>
+            </div>
+
+        </div>
+
+        <!-- ══════════════════════════ LAB ══════════════════════════ -->
+        <div id="lab" class="tab-panel">
+            <h3 style="margin-bottom:0.5rem">Lab: SLO Calculator & Alert Generator</h3>
+            <p style="color:var(--text-secondary);margin-bottom:1.25rem;font-size:0.9rem">
+                Define your SLO parameters below and click Run to calculate your error budget, allowed downtime, and generate ready-to-use Prometheus burn-rate alert rules.
+            </p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header-bar">SLO CONFIGURATION</div>
+                    <textarea class="lab-textarea" id="lab-input">const slo = {
+  service:      "checkout-api",
+  sliType:      "availability",   // "availability" | "latency"
+  target:       99.9,             // percentage (e.g. 99.9 = 99.9%)
+  windowDays:   30,               // rolling window in days
+  // Optional: latency threshold (only used if sliType = "latency")
+  latencyMs:    500,
+
+  // Current measured values (simulate real state)
+  currentValue: 99.93,            // current measured SLI %
+  metricName:   "http_requests_total",
+  serviceLabel: "checkout",
+};</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header-bar">SLO ANALYSIS & ALERT RULES</div>
+                    <div class="lab-output" id="lab-output">Click "▶ Calculate" to generate your SLO analysis and alert rules...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem" onclick="runLab()">▶ Calculate SLO</button>
+        </div>
+
+        <!-- ══════════════════════════ QUIZ ══════════════════════════ -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: Observability & SRE</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">
+                    15 questions covering the three pillars of observability, Prometheus, OpenTelemetry, SLIs/SLOs/SLAs, error budgets, incident management, and SRE principles.
+                </p>
+                <form id="quiz-form">
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">1. What is the fundamental difference between monitoring and observability?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"><span class="option-text">A) Monitoring uses metrics; observability uses logs</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B" data-correct="true"><span class="option-text">B) Monitoring tells you WHEN something is wrong; observability lets you understand WHY — including novel, unpredicted failures</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C"><span class="option-text">C) Observability is only about distributed tracing; monitoring covers everything else</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"><span class="option-text">D) They are synonyms — modern teams use them interchangeably</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">2. Which Prometheus metric type should you use to track total HTTP requests served since the application started?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A"><span class="option-text">A) Gauge — because request count fluctuates</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B" data-correct="true"><span class="option-text">B) Counter — monotonically increasing value that only resets on process restart</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C"><span class="option-text">C) Histogram — to track distribution of request counts</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"><span class="option-text">D) Summary — for statistical analysis of request rates</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">3. You want to calculate the p99 latency from Prometheus. Which metric type must the application instrument, and which PromQL function do you use?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"><span class="option-text">A) Gauge + avg() — average is sufficient for latency analysis</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B"><span class="option-text">B) Counter + rate() — counters track cumulative duration</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C" data-correct="true"><span class="option-text">C) Histogram + histogram_quantile(0.99, ...) — histograms bucket observations, enabling server-side percentile calculation and aggregation across instances</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"><span class="option-text">D) Summary + quantile() — summaries are always preferred for percentiles</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">4. In distributed tracing, what is the difference between a "trace" and a "span"?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"><span class="option-text">A) A trace is one service operation; a span is the full request across all services</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B" data-correct="true"><span class="option-text">B) A span is a single unit of work in one service; a trace is the complete tree of spans sharing the same trace_id — the full journey of one request</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C"><span class="option-text">C) Traces are for errors only; spans are for all request types</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"><span class="option-text">D) They are the same concept — "span" is the Jaeger term and "trace" is the Zipkin term</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">5. What problem does OpenTelemetry (OTel) primarily solve for engineering teams?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"><span class="option-text">A) It replaces Prometheus and makes PromQL unnecessary</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B"><span class="option-text">B) It provides a managed SaaS observability backend at no cost</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C" data-correct="true"><span class="option-text">C) Vendor lock-in — OTel provides a single, vendor-neutral SDK so teams can switch observability backends without rewriting instrumentation code</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"><span class="option-text">D) It automatically generates SLOs from application telemetry</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">6. In the Grafana LGTM stack, what does Loki store and index differently from Elasticsearch?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"><span class="option-text">A) Loki indexes the full log content; Elasticsearch only indexes labels</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B" data-correct="true"><span class="option-text">B) Loki indexes only labels (metadata), not log content — making it cheaper to operate. Log content is compressed and queried by brute-force scan at query time</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C"><span class="option-text">C) Loki stores logs in memory only; it does not persist to disk</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"><span class="option-text">D) Loki is only for Kubernetes logs; Elasticsearch handles all other log sources</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">7. What is an SLI (Service Level Indicator)?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"><span class="option-text">A) A legal contract that defines penalty clauses for service outages</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B"><span class="option-text">B) The target reliability percentage that the team aims to maintain</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"><span class="option-text">C) A quantitative measurement of service behaviour — e.g., the ratio of successful requests to total requests over a time window</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"><span class="option-text">D) An automated alert threshold configured in Prometheus</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">8. A service has a 99.9% monthly availability SLO. How many minutes of downtime are allowed in a 30-day month?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"><span class="option-text">A) 4.38 minutes</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"><span class="option-text">B) 43.2 minutes — (1 − 0.999) × 43,200 minutes in 30 days</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C"><span class="option-text">C) 432 minutes</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"><span class="option-text">D) 8.76 hours</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">9. What does an error budget burn rate of 10 mean in practice?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"><span class="option-text">A) The service has already used 10% of its error budget</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B"><span class="option-text">B) There have been 10 incidents in the current SLO window</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"><span class="option-text">C) The budget is being consumed 10× faster than the SLO window allows — a 30-day budget would be exhausted in 3 days at this rate</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"><span class="option-text">D) The error rate is exactly 10% above the SLO threshold</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">10. What is the role of the Incident Commander (IC) during an active SEV1 incident?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"><span class="option-text">A) To write the postmortem document during the incident</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B"><span class="option-text">B) To personally fix the root cause as the most senior engineer on the call</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C" data-correct="true"><span class="option-text">C) To coordinate the response — assign tasks, manage communications, and ensure the team stays focused — not to personally fix the issue</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"><span class="option-text">D) To decide whether to roll back or deploy a hotfix</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">11. What makes a postmortem "blameless"?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"><span class="option-text">A) It does not mention which team was responsible for the outage</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B" data-correct="true"><span class="option-text">B) It focuses on systems, processes, and contributing factors — not on punishing or naming individual engineers — with the goal of learning and preventing recurrence</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C"><span class="option-text">C) All participants are anonymous so no one can be identified</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"><span class="option-text">D) It is only written if the incident was caused by a bug, not a configuration error</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">12. According to Google's SRE book, what are the Four Golden Signals?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"><span class="option-text">A) CPU, memory, disk, and network utilisation</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B"><span class="option-text">B) Uptime, MTTD, MTTR, and error rate</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"><span class="option-text">C) Latency, Traffic, Errors, and Saturation</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"><span class="option-text">D) Requests, Failures, Duration, and Throughput</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">13. What is "toil" in SRE terminology, and why must it be controlled?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"><span class="option-text">A) Technical debt accumulated in the codebase — must be refactored quarterly</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B" data-correct="true"><span class="option-text">B) Manual, repetitive, automatable operational work that scales with service growth — if uncontrolled it consumes engineering capacity and crowds out reliability improvements</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C"><span class="option-text">C) Unnecessary feature requests from product teams</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"><span class="option-text">D) Alert noise — false positive alerts that waste on-call time</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">14. What is the purpose of a "Dead Man's Switch" alert in observability?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"><span class="option-text">A) An alert that fires when a service crashes unexpectedly</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"><span class="option-text">B) An alert for when an engineer's on-call rotation ends without acknowledgement</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C" data-correct="true"><span class="option-text">C) An alert that fires when the alerting pipeline itself goes silent — ensuring your monitoring system is actually running and sending alerts</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"><span class="option-text">D) A circuit breaker that pauses all alerts during a declared maintenance window</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">15. In Chaos Engineering, what does "blast radius" refer to?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"><span class="option-text">A) The number of engineers required to respond to an incident caused by a chaos experiment</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"><span class="option-text">B) The total number of alerts generated during a chaos experiment run</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"><span class="option-text">C) The scope of impact of a chaos experiment — how many services, users, or systems could be affected if the hypothesis is wrong. Start small and expand as confidence grows</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D"><span class="option-text">D) The maximum allowed error rate during a Game Day exercise</span></label>
+                    </div>
+
+                </form>
+
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+
+                <div id="quiz-results" class="quiz-results" style="display:none">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback" class="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════ RESOURCES ══════════════════════════ -->
+        <div id="resources" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem">Support Materials</h3>
+            <div class="content-card">
+                <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem">Official documentation, books, and deep-dive references:</p>
+                <a href="https://opentelemetry.io/docs/" target="_blank" class="resource-link">→ OpenTelemetry Official Documentation</a>
+                <a href="https://prometheus.io/docs/introduction/overview/" target="_blank" class="resource-link">→ Prometheus Documentation</a>
+                <a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" class="resource-link">→ PromQL Query Language Reference</a>
+                <a href="https://grafana.com/docs/grafana/latest/" target="_blank" class="resource-link">→ Grafana Documentation</a>
+                <a href="https://grafana.com/docs/loki/latest/" target="_blank" class="resource-link">→ Grafana Loki Documentation</a>
+                <a href="https://grafana.com/docs/tempo/latest/" target="_blank" class="resource-link">→ Grafana Tempo (Tracing) Documentation</a>
+                <a href="https://docs.datadoghq.com/" target="_blank" class="resource-link">→ Datadog Documentation</a>
+                <a href="https://sre.google/sre-book/table-of-contents/" target="_blank" class="resource-link">→ Google SRE Book (free online)</a>
+                <a href="https://sre.google/workbook/table-of-contents/" target="_blank" class="resource-link">→ Google SRE Workbook (free online)</a>
+                <a href="https://sre.google/workbook/alerting-on-slos/" target="_blank" class="resource-link">→ Alerting on SLOs — Multi-Window Burn Rate Guide</a>
+                <a href="https://chaos-mesh.org/docs/" target="_blank" class="resource-link">→ Chaos Mesh Documentation</a>
+                <a href="https://aws.amazon.com/fis/" target="_blank" class="resource-link">→ AWS Fault Injection Service (FIS)</a>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════ EVALUATION ══════════════════════════ -->
+        <div id="evaluation" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Domain Criteria: Observability & SRE</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">
+                    To successfully complete this module, demonstrate understanding across these three competency levels:
+                </p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>Three pillars: logs, metrics, traces — purpose of each</li>
+                            <li>Structured logging — required fields and log levels</li>
+                            <li>Prometheus metric types: counter, gauge, histogram, summary</li>
+                            <li>Basic PromQL: rate(), sum(), avg(), histogram_quantile()</li>
+                            <li>What a distributed trace shows and why it is useful</li>
+                            <li>SLI vs SLO vs SLA — definitions and relationships</li>
+                            <li>Error budget concept — what it is and who owns it</li>
+                            <li>Four Golden Signals: latency, traffic, errors, saturation</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>OpenTelemetry Collector: receivers, processors, exporters pipelines</li>
+                            <li>LogQL basics — filter, parse, and aggregate log streams in Loki</li>
+                            <li>Grafana dashboard design — combining metrics, logs, and traces</li>
+                            <li>Error budget burn rate — calculation and multi-window alerting</li>
+                            <li>Incident severity levels and the Incident Commander role</li>
+                            <li>Blameless postmortem — structure and goals</li>
+                            <li>Toil definition and how to identify and eliminate it</li>
+                            <li>Alert design principles — actionable, symptomatic, non-flapping</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>Prometheus histogram_quantile() accuracy and bucket design</li>
+                            <li>Trace sampling strategies: head-based vs tail-based</li>
+                            <li>OTel semantic conventions and auto-instrumentation</li>
+                            <li>Thanos / Mimir for long-term Prometheus storage and federation</li>
+                            <li>Chaos Engineering: Chaos Mesh CRDs and blast radius control</li>
+                            <li>Alertmanager: routing trees, inhibition, and silences</li>
+                            <li>SLO-based capacity planning and budget-driven feature gating</li>
+                            <li>Dead Man's Switch alert implementation in Prometheus</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+/* ── Tab navigation ── */
+function openTab(evt, tabName) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
+    const map = { learn: 25, lab: 50, quiz: 75, resources: 90, evaluation: 100 };
+    document.getElementById('progress-fill').style.width = map[tabName] + '%';
+    document.getElementById('progress-text').innerText = map[tabName] + '%';
+    window.scrollTo({ top: 150, behavior: 'smooth' });
+}
+
+/* ── Lab — SLO Calculator ── */
+function runLab() {
+    const input = document.getElementById('lab-input').value;
+    const out   = document.getElementById('lab-output');
+
+    const get = (key, def) => {
+        const m = input.match(new RegExp(key + '\\s*:\\s*["\']?([^,"\'\n}]+)["\']?'));
+        return m ? m[1].trim() : def;
+    };
+
+    const service      = get('service', 'my-service');
+    const sliType      = get('sliType', 'availability').replace(/['"]/g,'');
+    const target       = parseFloat(get('target', '99.9'));
+    const windowDays   = parseInt(get('windowDays', '30')) || 30;
+    const current      = parseFloat(get('currentValue', target));
+    const metricName   = get('metricName', 'http_requests_total').replace(/['"]/g,'');
+    const svcLabel     = get('serviceLabel', service).replace(/['"]/g,'');
+    const latencyMs    = parseInt(get('latencyMs', '500')) || 500;
+
+    const windowMins   = windowDays * 24 * 60;
+    const allowedError = (1 - target / 100);
+    const allowedMins  = (allowedError * windowMins).toFixed(1);
+    const allowedReqs  = (allowedError * 1000000).toFixed(0); // per 1M requests
+
+    // Budget status
+    const consumed     = Math.max(0, target - current);
+    const budgetTotal  = (1 - target / 100) * 100;
+    const budgetPct    = budgetTotal > 0 ? Math.max(0, 100 - (consumed / budgetTotal * 100)).toFixed(1) : '100.0';
+    const burnRate     = budgetTotal > 0 ? (consumed / budgetTotal * windowDays).toFixed(1) : '0';
+    const status       = parseFloat(budgetPct) > 50 ? '✅ HEALTHY' : parseFloat(budgetPct) > 10 ? '⚠️  AT RISK' : '🔴 EXHAUSTED';
+
+    // Error rate threshold for alerts
+    const errRate      = (1 - target / 100);
+    const fastBurn     = (14.4 * errRate).toExponential(3);
+    const slowBurn     = (3 * errRate).toExponential(3);
+    const ticketBurn   = (1 * errRate).toExponential(3);
+
+    const sliExpr = sliType === 'latency'
+        ? `histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service="${svcLabel}"}[5m])) by (le)) < ${latencyMs/1000}`
+        : `1 - (sum(rate(${metricName}{service="${svcLabel}",status=~"5.."}[5m])) / sum(rate(${metricName}{service="${svcLabel}"}[5m])))`;
+
+    out.textContent =
+`SLO Analysis: ${service}
+${'═'.repeat(50)}
+
+SLI TYPE:      ${sliType.toUpperCase()}
+SLO TARGET:    ${target}%
+WINDOW:        ${windowDays} days (${windowMins.toLocaleString()} minutes)
+CURRENT SLI:   ${current}%
+
+ERROR BUDGET
+${'─'.repeat(50)}
+  Budget total:     ${(allowedError * 100).toFixed(4)}% of requests
+  Allowed downtime: ${allowedMins} minutes / ${windowDays} days
+  Per 1M requests:  ${Number(allowedReqs).toLocaleString()} allowed failures
+
+BUDGET STATUS:  ${status}
+  Budget remaining: ${budgetPct}%
+  Budget consumed:  ${(100 - parseFloat(budgetPct)).toFixed(1)}%
+  Current burn rate: ~${burnRate}× (relative to window)
+
+${'─'.repeat(50)}
+GENERATED PROMETHEUS ALERT RULES
+${'─'.repeat(50)}
+
+groups:
+- name: slo.${svcLabel}
+  rules:
+
+  # ── FAST BURN (page immediately)
+  # 14.4× burn rate over 1h AND 6h
+  # Budget exhausted in ~2 hours at this rate
+  - alert: ${service.replace(/-/g,'_').replace(/[^a-zA-Z0-9_]/g,'')}SLOFastBurn
+    expr: |
+      (
+        1 - (
+          sum(rate(${metricName}{service="${svcLabel}",status=~"5.."}[1h]))
+          / sum(rate(${metricName}{service="${svcLabel}"}[1h]))
+        )
+      ) < ${(target/100 - 14.4 * errRate).toFixed(6)}
+      and
+      (
+        1 - (
+          sum(rate(${metricName}{service="${svcLabel}",status=~"5.."}[6h]))
+          / sum(rate(${metricName}{service="${svcLabel}"}[6h]))
+        )
+      ) < ${(target/100 - 14.4 * errRate).toFixed(6)}
+    for: 2m
+    labels:
+      severity: critical
+      team: ${svcLabel}
+    annotations:
+      summary: "${service} SLO fast burn — budget exhausting in ~2h"
+      runbook: "https://runbooks.internal/${svcLabel}/slo-fast-burn"
+
+  # ── SLOW BURN (create ticket)
+  # 3× burn rate over 6h AND 3 days
+  - alert: ${service.replace(/-/g,'_').replace(/[^a-zA-Z0-9_]/g,'')}SLOSlowBurn
+    expr: |
+      (
+        1 - (
+          sum(rate(${metricName}{service="${svcLabel}",status=~"5.."}[6h]))
+          / sum(rate(${metricName}{service="${svcLabel}"}[6h]))
+        )
+      ) < ${(target/100 - 3 * errRate).toFixed(6)}
+    for: 1h
+    labels:
+      severity: warning
+      team: ${svcLabel}
+    annotations:
+      summary: "${service} SLO slow burn — review within 24h"
+
+SLI EXPRESSION (for recording rule):
+  expr: ${sliExpr}
+
+RECOMMENDATIONS:
+  ${parseFloat(budgetPct) > 50 ? '✅ Budget healthy — safe to deploy and take risks.' : ''}${parseFloat(budgetPct) <= 50 && parseFloat(budgetPct) > 10 ? '⚠️  Budget at risk — slow down releases, focus on reliability.' : ''}${parseFloat(budgetPct) <= 10 ? '🔴 Budget near exhaustion — freeze non-critical deploys immediately.' : ''}
+  → Review error budget weekly in team planning.
+  → Set SLA at ${Math.max(target - 0.5, 99).toFixed(2)}% (below SLO with safety margin).
+  → Add runbook link to all alert annotations.`;
+}
+
+/* ── Quiz ── */
+const questionsData = {
+    q1:  { correct: 'B', exp: 'Monitoring tells you a symptom ("error rate is high"), but not the cause. Observability lets you ask arbitrary questions about system behaviour and investigate anything — including failures you never anticipated.' },
+    q2:  { correct: 'B', exp: 'A Counter is the correct type for total request count — it only increases (or resets on restart). Use rate() to derive per-second throughput. Gauge is for values that go up and down (like current queue depth).' },
+    q3:  { correct: 'C', exp: 'Histograms record observations in configurable buckets and can be aggregated across multiple instances — critical in distributed systems. histogram_quantile(0.99, ...) calculates the p99 from those buckets. Summary calculates percentiles client-side and cannot be aggregated.' },
+    q4:  { correct: 'B', exp: 'A span represents one service performing one operation (has a start time, end time, and attributes). A trace is the complete tree of all spans for a single request, identified by a shared trace_id. Together they show the full request journey.' },
+    q5:  { correct: 'C', exp: 'OpenTelemetry provides a single open-source SDK for all languages and all signals. Before OTel, switching from Datadog to Jaeger required rewriting all instrumentation. With OTel you change only the exporter configuration in the Collector.' },
+    q6:  { correct: 'B', exp: 'Loki\'s key design choice is to index only labels (like namespace, app, pod) and store log content compressed in object storage. This makes it 10× cheaper than Elasticsearch. The trade-off is that full-text search is slower — acceptable for most debugging workflows.' },
+    q7:  { correct: 'C', exp: 'An SLI is the raw measurement — "what fraction of requests succeeded in the last 30 days?". It is the input to your SLO. Without a well-defined SLI you cannot have a meaningful SLO.' },
+    q8:  { correct: 'B', exp: '30 days = 43,200 minutes. Error budget = (1 − 0.999) × 43,200 = 0.001 × 43,200 = 43.2 minutes. This is the total allowed downtime in a 30-day window for a 99.9% availability SLO.' },
+    q9:  { correct: 'C', exp: 'Burn rate is the ratio of current error rate to the allowed error rate. A burn rate of 10 means you are consuming the error budget 10× faster than the window allows. On a 30-day window, the budget is exhausted in 3 days (30 ÷ 10 = 3).' },
+    q10: { correct: 'C', exp: 'The IC role is coordination, not technical fixing. The IC assigns roles (communications lead, technical lead), keeps the team focused, makes go/no-go calls on mitigation actions, and sends status updates — while others diagnose and fix.' },
+    q11: { correct: 'B', exp: 'Blameless means the postmortem analyses the system and process failures that allowed the incident to occur, not the actions of any individual. People act rationally given the information they had — the system should prevent individuals from causing outages.' },
+    q12: { correct: 'C', exp: 'The Four Golden Signals from the Google SRE book are: Latency (how long requests take), Traffic (how much demand), Errors (how many requests fail), and Saturation (how full is the service). These four cover the essential health of any user-facing service.' },
+    q13: { correct: 'B', exp: 'Toil is manual, repetitive, automatable work that scales with the service — the more services you have, the more toil. SRE teams cap toil at 50% of time. Beyond that, teams lose the capacity to improve reliability and build automation.' },
+    q14: { correct: 'C', exp: 'A Dead Man\'s Switch (also called a heartbeat alert) is a Prometheus alert rule that fires if a certain metric stops being reported. It detects silent failures in the monitoring pipeline itself — ensuring the system would actually alert during an incident.' },
+    q15: { correct: 'C', exp: 'Blast radius is the potential scope of impact if a chaos experiment goes wrong — or reveals a real failure mode. Best practice is to start with a single pod in staging, then expand to a single service in production, then to a full environment as confidence in recovery mechanisms grows.' }
+};
+
+document.getElementById('submit-quiz').addEventListener('click', () => {
+    const form = document.getElementById('quiz-form');
+    const data = new FormData(form);
+    let score = 0;
+    let feedbackHTML = '';
+
+    Object.keys(questionsData).forEach((key, index) => {
+        const userAnswer = data.get(key);
+        const isCorrect  = userAnswer === questionsData[key].correct;
+        if (isCorrect) score++;
+
+        feedbackHTML += `
+        <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+            <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+            <div>
+                <strong>Question ${index + 1}:</strong> ${questionsData[key].exp}
+                ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${questionsData[key].correct}</small>` : ''}
+            </div>
+        </div>`;
+    });
+
+    const total   = Object.keys(questionsData).length;
+    const percent = Math.round((score / total) * 100);
+    const cls     = percent >= 80 ? 'score-excellent' : percent >= 53 ? 'score-good' : 'score-poor';
+    const msg     = percent >= 80
+        ? '🎉 Excellent! Strong grasp of observability and SRE principles. Move on to FinOps.'
+        : percent >= 53
+        ? '👍 Good progress. Review SLO error budgets, burn rate alerting, and the Four Golden Signals.'
+        : '📖 Observability is foundational — revisit the three pillars, PromQL, and SLI/SLO/SLA sections.';
+
+    document.getElementById('quiz-score').innerHTML = `
+        <div class="${cls}">${score}/${total} (${percent}%)</div>
+        <p style="color:var(--text-secondary);margin-top:0.5rem">${msg}</p>`;
+    document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+
+    const results = document.getElementById('quiz-results');
+    results.style.display = 'block';
+    results.scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('clear-quiz').addEventListener('click', () => {
+    document.getElementById('quiz-form').reset();
+    document.getElementById('quiz-results').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
+

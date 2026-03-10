@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Feature Engineering & Modeling</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+    --bg-dark: #0b0d14;
+
+    /* Nova paleta verde */
+    --green-primary: #22c55e;     /* verde principal */
+    --green-secondary: #4ade80;   /* verde claro */
+    --green-accent: #16a34a;      /* verde forte */
+    --green-cyan: #2dd4bf;        /* verde-água (mantém vibe tech) */
+    --cyan: #28e0ff;              /* ciano para detalhes e destaques */
+
+    --text-light: #e8ecf8;
+    --text-secondary: #b6c0de;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px; font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary {
+    background: linear-gradient(135deg, var(--green-primary), var(--green-cyan));
+    color: white;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente: from-lime-500 via-green-400 to-lime-400 */
+    background: linear-gradient(to right, #84cc16, #4ade80, #a3e635);
+
+    /* Faz o gradiente aplicar apenas ao texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback para browsers antigos */
+}
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill {
+    height: 100%;background: linear-gradient(90deg, var(--green-primary), var(--green-cyan));width: 0%; transition: width 0.3s ease;
+}
+
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active {
+    background: rgba(15, 155, 67, 0.3);
+} 
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--green-primary), var(--green-cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--green-primary);; display: flex; align-items: center; gap: 10px; }
+        .content-card h4 { margin: 1.2rem 0 0.6rem; color: var(--green-cyan);; font-size: 1rem; }
+        .code-explanation { border-left: 3px solid var(--green-primary);; padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--green-cyan);; font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Code block */
+        .code-block {
+            background: #0a0c12;
+            border: 1px solid rgba(91,124,255,0.3);
+            border-radius: 8px; padding: 1.2rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; }
+        .code-block code { font-family: 'Courier New', Consolas, monospace; font-size: 0.875rem; line-height: 1.7; color: #c9d1d9; }
+        .code-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: block; }
+
+        /* Tip / Warning boxes */
+        .tip-box { background: rgba(34, 197, 94, 0.08);
+    border-left: 4px solid var(--green-primary); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .tip-box strong { color: var(--green-primary); }
+        .warning-box { background: rgba(255, 165, 0, 0.07); border-left: 4px solid #ffa500; border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .warning-box strong { color: #ffa500; }
+
+        /* Two-column grid */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+        .mini-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mini-card h5 { color: var(--cyan); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .mini-card p, .mini-card li { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+
+        /* Chapter header */
+        .chapter-header {
+            background: linear-gradient(
+                135deg,
+                rgba(34, 197, 94, 0.15),
+                rgba(45, 212, 191, 0.08)
+            );
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; margin-top: 2.5rem;
+        }
+        .chapter-header:first-child { margin-top: 0; }
+        .chapter-header h2 { font-size: 1.4rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.4rem; }
+        .chapter-header p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-secondary); font-size: 0.88rem; }
+        .data-table thead tr { border-bottom: 2px solid var(--border-color); text-align: left; }
+        .data-table th { padding: 10px; font-weight: 600; color: var(--text-light); }
+        .data-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .data-table td { padding: 10px; }
+
+        /* Inline formula highlight */
+        .formula { font-family: monospace; background: rgba(40,224,255,0.1); padding: 2px 8px; border-radius: 4px; color: var(--cyan); font-size: 0.9rem; }
+
+        /* Quiz */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(40, 224, 255, 0.05)); border: 1px solid rgba(34, 197, 94, 0.08); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #0a0c12; color: #c9d1d9; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-data-science.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objective: Feature Engineering & Modeling</h1>
+            <p class="course-description">
+                Transform data into intelligence. Learn to create strategic variables and train Machine Learning models that convert historical patterns into future predictions.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item">
+                    <span>⏱</span>
+                    <span>6–8h</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>• Feature Engineering • Machine Learning • Scikit-Learn</span>
+                </div>
+                <div class="meta-item">
+                    <span>📌</span>
+                    <span>Creation of Features and Construction of Predictive Models</span>
+                </div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Laboratory</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Evaluation</button>
+            </nav>
+
+            <div id="aprender" class="tab-panel active">
+
+    <!-- 5.1 -->
+    <div class="content-card">
+        <h3>🚀 5.1 The Leap into Prediction</h3>
+        <p>After cleaning and exploring the data in the EDA phase, we now enter the most exciting stage of the Data Science pipeline: <strong>transforming knowledge into prediction power</strong>. This is where your understanding of the domain, the data, and the business truly comes together.</p>
+        <p style="margin-top:1rem;">Models don't learn from "raw" data — they learn from well-constructed <strong>features</strong>. A feature is any measurable property of the phenomenon you are trying to model. Think of features as the ingredients in a recipe: the better and more relevant the ingredients, the better the final dish.</p>
+        <div class="code-explanation" style="margin-top:1rem;">
+            <strong>🎯 What you'll master in this module:</strong>
+            <br><br>• <span class="highlight">Feature Engineering:</span> Create and transform variables to extract maximum predictive power from your raw data.
+            <br>• <span class="highlight">Machine Learning Algorithms:</span> Understand when and why to use specific algorithms to solve real-world problems.
+            <br>• <span class="highlight">Types of Learning:</span> Clearly distinguish between supervised, unsupervised, and reinforcement models.
+            <br>• <span class="highlight">Model Validation:</span> Guarantee that the model generalises to new, unseen data — avoiding the traps of Overfitting and Underfitting.
+            <br>• <span class="highlight">Evaluation Metrics:</span> Choose the right metric for the right problem (Accuracy, RMSE, AUC-ROC, F1...).
+            <br>• <span class="highlight">Pipeline Construction:</span> Build end-to-end, reproducible workflows using Scikit-Learn.
+        </div>
+        <div style="background: rgba(91,124,255,0.08); border-radius:8px; padding:1rem; margin-top:1rem; border:1px solid rgba(91,124,255,0.2);">
+            <strong style="color:var(--cyan);">💡 Real-world analogy:</strong>
+            <p style="margin-top:0.5rem; color:var(--text-secondary);">Imagine you want to predict whether a customer will cancel their subscription. The raw data has: "sign-up date", "last login date", "plan type". These alone are hard for an algorithm to interpret. But if you <em>engineer</em> the feature <code>days_since_last_login</code> = (today − last_login), suddenly the algorithm sees a clear signal: users who haven't logged in for 60 days are much more likely to churn. <strong>That's Feature Engineering at work.</strong></p>
+        </div>
+    </div>
+
+    <!-- 5.2 -->
+    <div class="content-card">
+        <h3>🛠️ 5.2 Feature Engineering: The Art of Creating Variables</h3>
+        <p>Feature Engineering is arguably <strong>the most impactful skill</strong> a Data Scientist can develop. Research and competitions (like Kaggle) consistently show that better features beat better algorithms. A simple Linear Regression model with excellent features will often outperform a complex Neural Network trained on poor ones.</p>
+        <p style="margin-top:0.8rem;">The process is guided by <em>curiosity</em> and <em>domain knowledge</em> — asking "what information, if exposed clearly, would help a model predict the outcome?"</p>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">📐 Technique 1 — Numeric Transformations</h4>
+        <p>Raw numeric columns may have very different scales (e.g., "age" ranges 0–100, "salary" ranges 20,000–200,000). Without adjustment, algorithms that rely on distance or gradient (like KNN, SVM, Neural Networks) will be dominated by the larger-scale features.</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.75rem;">
+            <div style="background:rgba(40,224,255,0.05); border:1px solid rgba(40,224,255,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan);">Min-Max Normalisation</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.5rem;">Scales all values to a [0, 1] range. Best when you know the boundaries of your data and there are no extreme outliers.</p>
+                <code style="font-size:0.8rem; color:#ffb86c; display:block; margin-top:0.5rem;">x_norm = (x − x_min) / (x_max − x_min)</code>
+                <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.75rem; margin-top:0.5rem;">from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+df[['age','salary']] = scaler.fit_transform(df[['age','salary']])</pre>
+            </div>
+            <div style="background:rgba(122,75,255,0.05); border:1px solid rgba(122,75,255,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--purple);">Standardisation (Z-Score)</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.5rem;">Centers data around mean 0 with std deviation 1. More robust to outliers than Min-Max. Preferred for most ML algorithms.</p>
+                <code style="font-size:0.8rem; color:#ffb86c; display:block; margin-top:0.5rem;">x_std = (x − μ) / σ</code>
+                <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.75rem; margin-top:0.5rem;">from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+df[['age','salary']] = scaler.fit_transform(df[['age','salary']])</pre>
+            </div>
+        </div>
+        <div style="background:rgba(255,184,108,0.06); border:1px solid rgba(255,184,108,0.25); border-radius:8px; padding:1rem; margin-top:1rem;">
+            <strong style="color:#ffb86c;">Log Transform</strong> — Used when data is heavily skewed (like income or website traffic). Compresses extreme values and can reveal patterns hidden by outliers.
+            <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.75rem; margin-top:0.5rem;">import numpy as np
+df['log_revenue'] = np.log1p(df['revenue'])   # log1p avoids log(0) errors</pre>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🔤 Technique 2 — Categorical Encoding</h4>
+        <p>Machine Learning algorithms work exclusively with numbers. Categorical columns like "City", "Product Type", or "Payment Method" must be converted. Choosing the <em>wrong</em> encoding is a common mistake.</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-top:0.75rem;">
+            <div style="background:rgba(40,224,255,0.04); border:1px solid rgba(40,224,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan); font-size:0.9rem;">One-Hot Encoding</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem;">Creates a binary column for each category. Best for <em>nominal</em> data (no order). Avoid with high-cardinality columns (+50 categories).</p>
+                <pre style="background:#000; color:#0f0; padding:0.6rem; border-radius:6px; font-size:0.72rem; margin-top:0.5rem;">pd.get_dummies(df, columns=['city'])</pre>
+            </div>
+            <div style="background:rgba(122,75,255,0.04); border:1px solid rgba(122,75,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--purple); font-size:0.9rem;">Label Encoding</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem;">Assigns a number to each category. Best for <em>ordinal</em> data (e.g., Low=0, Medium=1, High=2). Dangerous if used with nominal data.</p>
+                <pre style="background:#000; color:#0f0; padding:0.6rem; border-radius:6px; font-size:0.72rem; margin-top:0.5rem;">from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+df['rank_enc'] = le.fit_transform(df['rank'])</pre>
+            </div>
+            <div style="background:rgba(255,107,107,0.04); border:1px solid rgba(255,107,107,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:#ff6b6b; font-size:0.9rem;">Target Encoding</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem;">Replaces each category with the mean of the target variable for that group. Powerful but requires care to avoid data leakage.</p>
+                <pre style="background:#000; color:#0f0; padding:0.6rem; border-radius:6px; font-size:0.72rem; margin-top:0.5rem;">mean_enc = df.groupby('city')['price'].mean()
+df['city_enc'] = df['city'].map(mean_enc)</pre>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">📅 Technique 3 — Derived & Temporal Variables</h4>
+        <p>Date columns are among the richest sources of new features. A timestamp alone tells an algorithm almost nothing — but its components tell everything.</p>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.8rem; margin-top:0.5rem;">import pandas as pd
+
+df['date'] = pd.to_datetime(df['date'])
+
+# Extract temporal components
+df['year']          = df['date'].dt.year
+df['month']         = df['date'].dt.month
+df['day_of_week']   = df['date'].dt.dayofweek     # 0=Monday, 6=Sunday
+df['is_weekend']    = df['day_of_week'].isin([5,6]).astype(int)
+df['quarter']       = df['date'].dt.quarter
+df['hour']          = df['date'].dt.hour           # For hourly data
+
+# Calculate time since a reference event
+df['days_since_signup'] = (pd.Timestamp.today() - df['signup_date']).dt.days</pre>
+        <div style="background:rgba(91,124,255,0.08); border-radius:8px; padding:0.75rem; margin-top:0.75rem;">
+            <strong style="color:var(--blue);">💡 Why does this matter?</strong> A model given the raw date "2024-12-25" has no idea it's Christmas. But with <code>is_weekend=1</code>, <code>month=12</code>, and <code>day=25</code>, it can learn holiday shopping patterns with ease.
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">📊 Technique 4 — Aggregation Features</h4>
+        <p>Group-level statistics are incredibly powerful for capturing context. Instead of looking at a single transaction, you look at the customer's entire history.</p>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.8rem; margin-top:0.5rem;"># Customer-level aggregations (typical in churn prediction)
+customer_stats = df.groupby('customer_id').agg(
+    total_purchases   = ('order_id', 'count'),
+    avg_order_value   = ('order_value', 'mean'),
+    max_order_value   = ('order_value', 'max'),
+    total_spent       = ('order_value', 'sum'),
+    days_since_last   = ('order_date', lambda x: (pd.Timestamp.today() - x.max()).days)
+).reset_index()
+
+df = df.merge(customer_stats, on='customer_id', how='left')</pre>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🔗 Technique 5 — Interaction Features</h4>
+        <p>Sometimes, the relationship between two variables together is more informative than each alone. Interaction features capture this combined effect.</p>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.8rem;">df['price_per_sqm']   = df['price'] / df['area']         # House price per m²
+df['bmi']             = df['weight'] / (df['height'] ** 2)  # Medical BMI
+df['revenue_per_user']= df['revenue'] / df['active_users']</pre>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">✂️ Technique 6 — Feature Selection</h4>
+        <p>Not all features help — some introduce noise or redundancy (multicollinearity). Selecting only the most relevant features improves model performance, reduces training time, and makes models more interpretable.</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.75rem;">
+            <div style="background:rgba(40,224,255,0.04); border:1px solid rgba(40,224,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan);">Correlation Filter</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem;">Drop features highly correlated with each other (|r| > 0.9) as they carry duplicate information.</p>
+                <pre style="background:#000; color:#0f0; padding:0.6rem; border-radius:6px; font-size:0.72rem; margin-top:0.5rem;">corr_matrix = df.corr().abs()
+upper = corr_matrix.where(
+    np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+to_drop = [c for c in upper.columns if any(upper[c] > 0.9)]
+df.drop(columns=to_drop, inplace=True)</pre>
+            </div>
+            <div style="background:rgba(122,75,255,0.04); border:1px solid rgba(122,75,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--purple);">Feature Importance (Tree-based)</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem;">Train a Random Forest and inspect which features contribute most to predictions.</p>
+                <pre style="background:#000; color:#0f0; padding:0.6rem; border-radius:6px; font-size:0.72rem; margin-top:0.5rem;">from sklearn.ensemble import RandomForestClassifier
+model = RandomForestClassifier()
+model.fit(X_train, y_train)
+importances = pd.Series(model.feature_importances_, index=X_train.columns)
+importances.sort_values(ascending=False).head(10)</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.3 -->
+    <div class="content-card">
+        <h3>🤖 5.3 Introduction to Modeling</h3>
+        <p>Modeling is the process of teaching a mathematical algorithm to recognise patterns in historical data so it can make predictions on new, unseen data. The goal is not to pick the most complex model — it's to pick the most <strong>appropriate</strong> one for the problem at hand.</p>
+        <p style="margin-top:0.8rem;">Every ML model is fundamentally a <em>function approximator</em>: it learns a function <code>f(X) → y</code>, where X are your features and y is what you want to predict.</p>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">Three Fundamental Task Types</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
+            <div style="background:rgba(40,224,255,0.05); border:1px solid rgba(40,224,255,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan);">📈 Regression</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.5rem;">Predicts a <em>continuous numerical value</em>.</p>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem;">
+                    <li>House price prediction</li>
+                    <li>Sales forecasting</li>
+                    <li>Temperature prediction</li>
+                    <li>Stock price estimation</li>
+                </ul>
+                <p style="font-size:0.78rem; color:#ffb86c; margin-top:0.5rem;"><strong>Algorithms:</strong> Linear Regression, Random Forest Regressor, XGBoost, Neural Networks</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.05); border:1px solid rgba(122,75,255,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--purple);">🏷️ Classification</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.5rem;">Predicts which <em>category/class</em> something belongs to.</p>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem;">
+                    <li>Spam detection (spam / not spam)</li>
+                    <li>Disease diagnosis (positive / negative)</li>
+                    <li>Churn prediction (will churn / won't)</li>
+                    <li>Image recognition (cat / dog / bird)</li>
+                </ul>
+                <p style="font-size:0.78rem; color:#ffb86c; margin-top:0.5rem;"><strong>Algorithms:</strong> Logistic Regression, Decision Tree, Random Forest, SVM, XGBoost</p>
+            </div>
+            <div style="background:rgba(255,107,107,0.05); border:1px solid rgba(255,107,107,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:#ff6b6b;">🔵 Clustering</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.5rem;">Groups data into <em>natural clusters</em> without pre-defined labels.</p>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem;">
+                    <li>Customer segmentation</li>
+                    <li>Anomaly/fraud detection</li>
+                    <li>Document topic grouping</li>
+                    <li>Image compression</li>
+                </ul>
+                <p style="font-size:0.78rem; color:#ffb86c; margin-top:0.5rem;"><strong>Algorithms:</strong> K-Means, DBSCAN, Hierarchical Clustering, Gaussian Mixture Models</p>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🔍 Key Algorithms Explained</h4>
+
+        <div style="margin-bottom:1rem; background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:8px; padding:1rem;">
+            <strong style="color:var(--cyan);">Linear Regression</strong> — The foundation of all prediction
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">Fits a straight line (or hyperplane in multiple dimensions) through the data. It assumes a linear relationship between features and the target. Fast, interpretable, and a great baseline for regression problems.</p>
+            <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">from sklearn.linear_model import LinearRegression
+model = LinearRegression()
+model.fit(X_train, y_train)
+predictions = model.predict(X_test)
+print(model.coef_)         # Feature weights — interpretable!
+print(model.intercept_)    # The bias term</pre>
+        </div>
+
+        <div style="margin-bottom:1rem; background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:8px; padding:1rem;">
+            <strong style="color:var(--purple);">Decision Tree</strong> — Logic in a tree structure
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">Splits the data based on feature thresholds, forming a branching tree of decisions. Extremely interpretable — you can literally print the rules. The main weakness is tendency to overfit.</p>
+            <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">from sklearn.tree import DecisionTreeClassifier, export_text
+model = DecisionTreeClassifier(max_depth=4, random_state=42)
+model.fit(X_train, y_train)
+print(export_text(model, feature_names=list(X_train.columns)))</pre>
+        </div>
+
+        <div style="margin-bottom:1rem; background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:8px; padding:1rem;">
+            <strong style="color:#ffb86c;">Random Forest</strong> — Wisdom of the crowd
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">Builds hundreds of Decision Trees on random subsets of data and averages their predictions. Much more robust than a single tree. Handles missing values and high dimensionality well. The go-to baseline for many problems.</p>
+            <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">from sklearn.ensemble import RandomForestClassifier
+model = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+model.fit(X_train, y_train)
+print(f"Train Accuracy: {model.score(X_train, y_train):.3f}")
+print(f"Test Accuracy:  {model.score(X_test, y_test):.3f}")</pre>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:8px; padding:1rem;">
+            <strong style="color:#ff6b6b;">K-Means Clustering</strong> — Finding natural groups
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">Partitions data into K clusters by minimising the distance between each data point and its cluster's centroid. You choose K — use the "Elbow Method" to find the optimal number.</p>
+            <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# Find optimal K with Elbow Method
+inertias = []
+for k in range(1, 11):
+    km = KMeans(n_clusters=k, random_state=42)
+    km.fit(X_scaled)
+    inertias.append(km.inertia_)
+
+# Train final model
+model = KMeans(n_clusters=4, random_state=42)
+df['cluster'] = model.fit_predict(X_scaled)</pre>
+        </div>
+    </div>
+
+    <!-- 5.4 -->
+    <div class="content-card">
+        <h3>🧠 5.4 Types of Machine Learning — Deep Dive</h3>
+        <p>Understanding the three paradigms of Machine Learning is critical to framing any problem correctly before touching the data.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div style="background:rgba(40,224,255,0.05); padding:1.25rem; border-radius:8px; border:1px solid var(--cyan);">
+                <h4 style="color:var(--cyan); margin-top:0;">🔹 Supervised Learning</h4>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">Uses <strong>labeled data</strong> — we know the correct answer for every training example. The model learns to map inputs to outputs by minimising error against the known labels.</p>
+                <p style="font-size:0.83rem; margin-top:0.5rem;"><strong>Real examples:</strong></p>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); padding-left:1rem; margin-top:0.25rem;">
+                    <li>Email → Spam / Not Spam (Classification)</li>
+                    <li>House features → Price in € (Regression)</li>
+                    <li>Patient data → Disease risk score (Regression)</li>
+                    <li>Image → Object label (Classification)</li>
+                </ul>
+                <p style="font-size:0.78rem; color:#ffb86c; margin-top:0.75rem;"><strong>Common algorithms:</strong> Linear/Logistic Regression, Decision Trees, Random Forest, SVM, XGBoost, Neural Networks</p>
+            </div>
+            <div style="background:rgba(255,184,108,0.05); padding:1.25rem; border-radius:8px; border:1px solid #ffb86c;">
+                <h4 style="color:#ffb86c; margin-top:0;">🔸 Unsupervised Learning</h4>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">Works with <strong>unlabeled data</strong> — the algorithm discovers hidden structure, patterns, or groups on its own without any pre-defined "correct" answers.</p>
+                <p style="font-size:0.83rem; margin-top:0.5rem;"><strong>Real examples:</strong></p>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); padding-left:1rem; margin-top:0.25rem;">
+                    <li>Customer segmentation (who are my groups?)</li>
+                    <li>Anomaly/fraud detection</li>
+                    <li>Topic modelling in text</li>
+                    <li>Dimensionality reduction for visualisation</li>
+                </ul>
+                <p style="font-size:0.78rem; color:#ffb86c; margin-top:0.75rem;"><strong>Common algorithms:</strong> K-Means, DBSCAN, PCA, t-SNE, Autoencoders</p>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div style="background:rgba(122,75,255,0.05); padding:1.25rem; border-radius:8px; border:1px solid var(--purple);">
+                <h4 style="color:var(--purple); margin-top:0;">🔮 Reinforcement Learning</h4>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">An <strong>agent</strong> learns by interacting with an environment, taking actions, and receiving <em>rewards</em> or <em>penalties</em>. Over time, it learns the optimal strategy (policy) to maximise cumulative reward.</p>
+                <p style="font-size:0.83rem; margin-top:0.5rem;"><strong>Real examples:</strong></p>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); padding-left:1rem; margin-top:0.25rem;">
+                    <li>Game playing (Chess, Go, video games)</li>
+                    <li>Autonomous vehicle navigation</li>
+                    <li>Robot movement control</li>
+                    <li>Dynamic pricing systems</li>
+                </ul>
+            </div>
+            <div style="background:rgba(255,107,107,0.05); padding:1.25rem; border-radius:8px; border:1px solid #ff6b6b;">
+                <h4 style="color:#ff6b6b; margin-top:0;">🔀 Semi-Supervised & Self-Supervised</h4>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">Hybrid approaches where <strong>a small amount of labeled data</strong> is combined with a large pool of unlabeled data. Common in NLP (like GPT pre-training) and medical imaging where labeling is expensive.</p>
+                <p style="font-size:0.83rem; margin-top:0.5rem;"><strong>Real examples:</strong></p>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); padding-left:1rem; margin-top:0.25rem;">
+                    <li>Large Language Models (pre-training + fine-tuning)</li>
+                    <li>Medical image classification (few labeled scans)</li>
+                    <li>Web content classification</li>
+                </ul>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🗺️ How to Choose the Right Approach?</h4>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+                <thead>
+                    <tr style="color:var(--cyan); border-bottom:1px solid var(--border-color);">
+                        <th style="text-align:left; padding:0.5rem;">Question to Ask</th>
+                        <th style="text-align:left; padding:0.5rem;">If YES →</th>
+                        <th style="text-align:left; padding:0.5rem;">Use</th>
+                    </tr>
+                </thead>
+                <tbody style="color:var(--text-secondary);">
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;">Do I have labeled data & want to predict a number?</td>
+                        <td style="padding:0.5rem;">Price, score, quantity</td>
+                        <td style="padding:0.5rem; color:#ffb86c;">Supervised Regression</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;">Do I have labeled data & want to predict a category?</td>
+                        <td style="padding:0.5rem;">Yes/No, A/B/C</td>
+                        <td style="padding:0.5rem; color:#ffb86c;">Supervised Classification</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;">Do I have NO labels & want to find groups?</td>
+                        <td style="padding:0.5rem;">Customer segments</td>
+                        <td style="padding:0.5rem; color:#ffb86c;">Unsupervised Clustering</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.5rem;">Do I want an agent to learn through interaction?</td>
+                        <td style="padding:0.5rem;">Games, robotics</td>
+                        <td style="padding:0.5rem; color:#ffb86c;">Reinforcement Learning</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5.5 -->
+    <div class="content-card">
+        <h3>⚖️ 5.5 Overfitting vs. Underfitting — The Core Trade-Off</h3>
+        <p>The single greatest challenge in Machine Learning is building a model that <strong>generalises</strong> — one that performs well not just on data it has seen, but on new, real-world data. The enemies of generalisation are Overfitting and Underfitting.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div style="background:rgba(255,107,107,0.08); border:1px solid rgba(255,107,107,0.3); border-radius:8px; padding:1.25rem;">
+                <h4 style="color:#ff6b6b; margin-top:0;">🔴 Overfitting</h4>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">The model is <strong>too complex</strong>. It learns every detail and noise in the training data — essentially memorising it. Performance on training data is excellent, but it collapses on new data.</p>
+                <p style="font-size:0.8rem; margin-top:0.75rem;"><strong>Symptoms:</strong></p>
+                <ul style="font-size:0.78rem; color:var(--text-secondary); padding-left:1rem;">
+                    <li>Train accuracy: 99% | Test accuracy: 65%</li>
+                    <li>Very deep Decision Trees</li>
+                    <li>Too many parameters vs. data points</li>
+                </ul>
+                <p style="font-size:0.8rem; margin-top:0.75rem;"><strong style="color:#ff6b6b;">Fixes:</strong></p>
+                <ul style="font-size:0.78rem; color:var(--text-secondary); padding-left:1rem;">
+                    <li>Get more training data</li>
+                    <li>Reduce model complexity (max_depth, etc.)</li>
+                    <li>Apply regularisation (L1/L2)</li>
+                    <li>Use Dropout (Neural Networks)</li>
+                    <li>Apply Cross-Validation</li>
+                </ul>
+            </div>
+            <div style="background:rgba(91,124,255,0.08); border:1px solid rgba(91,124,255,0.3); border-radius:8px; padding:1.25rem;">
+                <h4 style="color:var(--blue); margin-top:0;">✅ Just Right</h4>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">The model captures the <strong>true underlying patterns</strong> without memorising noise. There is a small and acceptable gap between training and test performance.</p>
+                <p style="font-size:0.8rem; margin-top:0.75rem;"><strong>Signs of good fit:</strong></p>
+                <ul style="font-size:0.78rem; color:var(--text-secondary); padding-left:1rem;">
+                    <li>Train accuracy: 88% | Test accuracy: 85%</li>
+                    <li>Consistent metrics across CV folds</li>
+                    <li>Model predictions make business sense</li>
+                    <li>Errors are distributed randomly (no pattern)</li>
+                </ul>
+                <p style="font-size:0.78rem; color:var(--text-secondary); margin-top:0.75rem;">This balance is called the <strong>Bias-Variance Trade-Off</strong>. The goal is low bias AND low variance.</p>
+            </div>
+            <div style="background:rgba(255,184,108,0.08); border:1px solid rgba(255,184,108,0.3); border-radius:8px; padding:1.25rem;">
+                <h4 style="color:#ffb86c; margin-top:0;">🟡 Underfitting</h4>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">The model is <strong>too simple</strong>. It fails to capture the patterns in the data, performing poorly on both training and test sets.</p>
+                <p style="font-size:0.8rem; margin-top:0.75rem;"><strong>Symptoms:</strong></p>
+                <ul style="font-size:0.78rem; color:var(--text-secondary); padding-left:1rem;">
+                    <li>Train accuracy: 60% | Test accuracy: 58%</li>
+                    <li>Flat or near-random predictions</li>
+                    <li>Model ignores obvious patterns in EDA</li>
+                </ul>
+                <p style="font-size:0.8rem; margin-top:0.75rem;"><strong style="color:#ffb86c;">Fixes:</strong></p>
+                <ul style="font-size:0.78rem; color:var(--text-secondary); padding-left:1rem;">
+                    <li>Use a more complex model</li>
+                    <li>Add more/better features (Feature Engineering!)</li>
+                    <li>Reduce regularisation strength</li>
+                    <li>Train for more epochs (Neural Networks)</li>
+                </ul>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🛡️ Regularisation — The Overfitting Antidote</h4>
+        <p>Regularisation penalises model complexity by adding a penalty term to the loss function, discouraging the model from fitting noise.</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.75rem;">
+            <div style="background:rgba(40,224,255,0.04); border:1px solid rgba(40,224,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan);">L1 Regularisation (Lasso)</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem;">Adds the sum of absolute weights as penalty. Drives some weights to exactly zero — effectively performing <strong>automatic feature selection</strong>.</p>
+                <pre style="background:#000; color:#0f0; padding:0.6rem; border-radius:6px; font-size:0.72rem; margin-top:0.5rem;">from sklearn.linear_model import Lasso
+model = Lasso(alpha=0.1)   # alpha controls strength
+model.fit(X_train, y_train)</pre>
+            </div>
+            <div style="background:rgba(122,75,255,0.04); border:1px solid rgba(122,75,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--purple);">L2 Regularisation (Ridge)</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem;">Adds the sum of squared weights as penalty. Shrinks all weights but never to zero. Better when all features are potentially useful.</p>
+                <pre style="background:#000; color:#0f0; padding:0.6rem; border-radius:6px; font-size:0.72rem; margin-top:0.5rem;">from sklearn.linear_model import Ridge
+model = Ridge(alpha=1.0)
+model.fit(X_train, y_train)</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.6 -->
+    <div class="content-card">
+        <h3>📋 5.6 The Modeling Pipeline — Step by Step</h3>
+        <p>Professional Data Scientists follow a structured, reproducible workflow. Each step exists for a reason — skipping any one of them is a common source of project failure.</p>
+
+        <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1rem;">
+            <div style="background:rgba(40,224,255,0.05); border-left:4px solid var(--cyan); border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:var(--cyan);">Step 1 — Split: Training, Validation & Test Sets</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">Never evaluate your model on data it was trained on — that would be like grading students with the exam questions they already studied. A proper split ensures fair evaluation.</p>
+                <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">from sklearn.model_selection import train_test_split
+
+# Standard 80/20 split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y  # stratify ensures class balance
+)
+print(f"Train: {X_train.shape}, Test: {X_test.shape}")</pre>
+            </div>
+
+            <div style="background:rgba(122,75,255,0.05); border-left:4px solid var(--purple); border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:var(--purple);">Step 2 — Cross-Validation: More Reliable Than a Single Split</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">K-Fold Cross-Validation divides the training data into K folds, trains K times (each time using a different fold as validation), and averages the results. Gives a much more reliable estimate of generalisation performance.</p>
+                <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">from sklearn.model_selection import cross_val_score
+from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
+print(f"CV Scores: {scores}")
+print(f"Mean: {scores.mean():.3f} ± {scores.std():.3f}")</pre>
+            </div>
+
+            <div style="background:rgba(255,184,108,0.05); border-left:4px solid #ffb86c; border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:#ffb86c;">Step 3 — Feature Engineering & Preprocessing (in a Pipeline)</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">All transformations (scaling, encoding, imputation) must be fit ONLY on training data, then applied to test data. Scikit-Learn Pipelines enforce this automatically, preventing data leakage.</p>
+                <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
+from sklearn.ensemble import RandomForestClassifier
+
+pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy='median')),   # Fill missing values
+    ('scaler',  StandardScaler()),                   # Normalise
+    ('model',   RandomForestClassifier(n_estimators=100))
+])
+
+pipeline.fit(X_train, y_train)
+y_pred = pipeline.predict(X_test)   # All steps applied consistently!</pre>
+            </div>
+
+            <div style="background:rgba(91,124,255,0.05); border-left:4px solid var(--blue); border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:var(--blue);">Step 4 — Evaluation: Choosing the Right Metric</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">The metric you optimise must align with the business problem. Accuracy alone is often misleading — especially with imbalanced datasets.</p>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:0.5rem;">
+                    <div>
+                        <p style="font-size:0.82rem; color:var(--cyan); font-weight:600;">Classification Metrics:</p>
+                        <pre style="background:#000; color:#0f0; padding:0.6rem; border-radius:6px; font-size:0.75rem;">from sklearn.metrics import (
+    accuracy_score, precision_score,
+    recall_score, f1_score,
+    roc_auc_score, classification_report
+)
+print(classification_report(y_test, y_pred))
+print(f"AUC-ROC: {roc_auc_score(y_test, y_pred_proba):.3f}")</pre>
+                    </div>
+                    <div>
+                        <p style="font-size:0.82rem; color:#ffb86c; font-weight:600;">Regression Metrics:</p>
+                        <pre style="background:#000; color:#0f0; padding:0.6rem; border-radius:6px; font-size:0.75rem;">from sklearn.metrics import (
+    mean_absolute_error,
+    mean_squared_error,
+    r2_score
+)
+mae  = mean_absolute_error(y_test, y_pred)
+rmse = mean_squared_error(y_test, y_pred, squared=False)
+r2   = r2_score(y_test, y_pred)
+print(f"MAE: {mae:.2f} | RMSE: {rmse:.2f} | R²: {r2:.3f}")</pre>
+                    </div>
+                </div>
+                <div style="background:rgba(91,124,255,0.08); border-radius:6px; padding:0.75rem; margin-top:0.75rem; font-size:0.82rem;">
+                    <strong style="color:var(--cyan);">Metric Guide:</strong>
+                    <span style="color:var(--text-secondary);"> Use <strong>F1-Score</strong> for imbalanced classes. Use <strong>AUC-ROC</strong> for ranking/threshold-independent evaluation. Use <strong>RMSE</strong> for regression when large errors are especially bad. Use <strong>MAE</strong> when all errors should be treated equally.</span>
+                </div>
+            </div>
+
+            <div style="background:rgba(255,107,107,0.05); border-left:4px solid #ff6b6b; border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:#ff6b6b;">Step 5 — Hyperparameter Tuning: Optimising the Model</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem;">Every algorithm has <em>hyperparameters</em> — settings you configure before training (not learned from data). Tuning them systematically can significantly improve performance.</p>
+                <pre style="background:#000; color:#0f0; padding:0.75rem; border-radius:6px; font-size:0.78rem; margin-top:0.5rem;">from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    'n_estimators': [50, 100, 200],
+    'max_depth':    [3, 5, None],
+    'min_samples_split': [2, 5, 10]
+}
+
+grid_search = GridSearchCV(
+    RandomForestClassifier(random_state=42),
+    param_grid,
+    cv=5,
+    scoring='f1',
+    n_jobs=-1,
+    verbose=1
+)
+grid_search.fit(X_train, y_train)
+print(f"Best params: {grid_search.best_params_}")
+print(f"Best F1:     {grid_search.best_score_:.3f}")</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.7 -->
+    <div class="content-card">
+        <h3>📊 5.7 Evaluation Metrics — Deep Understanding</h3>
+        <p>Knowing <em>which</em> metric to use is as important as knowing how to calculate it. Each metric answers a different business question.</p>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">The Confusion Matrix — Foundation of Classification Metrics</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary);">Every classification metric is derived from the confusion matrix — a table comparing predicted vs. actual values.</p>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem; margin-top:0.75rem; overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:center;">
+                <thead>
+                    <tr>
+                        <th style="padding:0.5rem;"></th>
+                        <th style="padding:0.5rem; color:var(--cyan);">Predicted: Positive</th>
+                        <th style="padding:0.5rem; color:var(--cyan);">Predicted: Negative</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding:0.5rem; color:var(--cyan); font-weight:600;">Actual: Positive</td>
+                        <td style="padding:0.5rem; background:rgba(16,185,129,0.15); color:#10b981; border-radius:4px;"><strong>TP</strong> — True Positive<br><small>Correctly predicted Positive</small></td>
+                        <td style="padding:0.5rem; background:rgba(239,68,68,0.1); color:#ef4444; border-radius:4px;"><strong>FN</strong> — False Negative<br><small>Missed a Positive (Type II error)</small></td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.5rem; color:var(--cyan); font-weight:600;">Actual: Negative</td>
+                        <td style="padding:0.5rem; background:rgba(239,68,68,0.1); color:#ef4444; border-radius:4px;"><strong>FP</strong> — False Positive<br><small>Wrong alarm (Type I error)</small></td>
+                        <td style="padding:0.5rem; background:rgba(16,185,129,0.15); color:#10b981; border-radius:4px;"><strong>TN</strong> — True Negative<br><small>Correctly predicted Negative</small></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div style="background:rgba(40,224,255,0.04); border:1px solid rgba(40,224,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan);">Precision</strong> = TP / (TP + FP)
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">Of all the times the model said "Positive", how often was it right? Optimise this when <strong>false alarms are costly</strong> (e.g., sending wrong people to surgery).</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.04); border:1px solid rgba(122,75,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--purple);">Recall (Sensitivity)</strong> = TP / (TP + FN)
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">Of all actual Positives, how many did the model catch? Optimise this when <strong>missing a Positive is costly</strong> (e.g., missing a cancer diagnosis).</p>
+            </div>
+            <div style="background:rgba(255,184,108,0.04); border:1px solid rgba(255,184,108,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:#ffb86c;">F1-Score</strong> = 2 × (Precision × Recall) / (Precision + Recall)
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">The harmonic mean of Precision and Recall. Best used when you need a <strong>balance between both</strong> and classes are imbalanced.</p>
+            </div>
+            <div style="background:rgba(255,107,107,0.04); border:1px solid rgba(255,107,107,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:#ff6b6b;">AUC-ROC</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">Area Under the ROC Curve. Measures the model's ability to discriminate between classes across all classification thresholds. AUC = 0.5 is random; AUC = 1.0 is perfect.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.8 -->
+    <div class="content-card">
+        <h3>🏗️ 5.8 Complete End-to-End Example — Customer Churn Prediction</h3>
+        <p>Let's tie everything together with a realistic, full example. We want to predict which customers are likely to cancel their subscription in the next 30 days.</p>
+
+        <pre style="background:#000; color:#0f0; padding:1.25rem; border-radius:8px; font-size:0.78rem; line-height:1.6; overflow-x:auto;">import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, roc_auc_score
+
+# ── 1. Load & Initial Inspection ─────────────────────────────────
+df = pd.read_csv('customers.csv')
+print(df.info())
+print(df['churned'].value_counts(normalize=True))  # Check class balance
+
+# ── 2. Feature Engineering ────────────────────────────────────────
+df['signup_date'] = pd.to_datetime(df['signup_date'])
+df['last_login']  = pd.to_datetime(df['last_login'])
+
+df['account_age_days']    = (pd.Timestamp.today() - df['signup_date']).dt.days
+df['days_since_login']    = (pd.Timestamp.today() - df['last_login']).dt.days
+df['logins_per_month']    = df['total_logins'] / (df['account_age_days'] / 30)
+df['avg_session_minutes'] = df['total_minutes'] / df['total_logins'].replace(0, 1)
+df['is_low_engagement']   = (df['days_since_login'] > 30).astype(int)
+
+# Encode categorical
+df = pd.get_dummies(df, columns=['plan_type', 'country'], drop_first=True)
+
+# ── 3. Define Features & Target ───────────────────────────────────
+feature_cols = ['account_age_days', 'days_since_login', 'logins_per_month',
+                'avg_session_minutes', 'is_low_engagement', 'monthly_spend',
+                'support_tickets'] + [c for c in df.columns if c.startswith('plan_') or c.startswith('country_')]
+
+X = df[feature_cols]
+y = df['churned']
+
+# ── 4. Train/Test Split ───────────────────────────────────────────
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# ── 5. Build Pipeline ─────────────────────────────────────────────
+pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy='median')),
+    ('scaler',  StandardScaler()),
+    ('model',   RandomForestClassifier(n_estimators=200, max_depth=8, random_state=42, n_jobs=-1))
+])
+
+# ── 6. Cross-Validation ───────────────────────────────────────────
+cv_scores = cross_val_score(pipeline, X_train, y_train, cv=5, scoring='roc_auc')
+print(f"CV AUC-ROC: {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")
+
+# ── 7. Final Training & Evaluation ───────────────────────────────
+pipeline.fit(X_train, y_train)
+y_pred      = pipeline.predict(X_test)
+y_pred_prob = pipeline.predict_proba(X_test)[:, 1]
+
+print("\n── Classification Report ──")
+print(classification_report(y_test, y_pred, target_names=['Stays', 'Churns']))
+print(f"AUC-ROC: {roc_auc_score(y_test, y_pred_prob):.4f}")
+
+# ── 8. Feature Importance ─────────────────────────────────────────
+rf_model     = pipeline.named_steps['model']
+importances  = pd.Series(rf_model.feature_importances_, index=feature_cols)
+top_features = importances.sort_values(ascending=False).head(10)
+print("\n── Top 10 Features ──")
+print(top_features)</pre>
+
+        <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:8px; padding:1rem; margin-top:1rem;">
+            <strong style="color:#10b981;">🎯 What this example demonstrates:</strong>
+            <ul style="color:var(--text-secondary); font-size:0.85rem; margin-top:0.5rem; padding-left:1.25rem; line-height:1.8;">
+                <li>Feature Engineering from raw dates into actionable signals</li>
+                <li>Categorical encoding with get_dummies</li>
+                <li>Pipeline to prevent data leakage</li>
+                <li>Cross-validation for reliable performance estimates</li>
+                <li>Multiple evaluation metrics beyond simple accuracy</li>
+                <li>Feature importance for business storytelling</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 5.9 -->
+    <div class="content-card">
+        <h3>🎯 5.9 Model Interpretability — Explaining Predictions</h3>
+        <p>A model that nobody understands will never be trusted or deployed. In business, you often need to explain <em>why</em> the model made a specific prediction. This is the domain of <strong>Explainable AI (XAI)</strong>.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div style="background:rgba(40,224,255,0.04); border:1px solid rgba(40,224,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan);">Global Interpretability</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">Understand the model's behaviour across the entire dataset. "Which features matter most overall?"</p>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem;">
+                    <li><strong>Feature Importance</strong> — from tree-based models</li>
+                    <li><strong>Permutation Importance</strong> — model-agnostic</li>
+                    <li><strong>Partial Dependence Plots (PDP)</strong> — shows feature effect on output</li>
+                    <li><strong>SHAP Summary Plot</strong> — global feature contributions</li>
+                </ul>
+            </div>
+            <div style="background:rgba(122,75,255,0.04); border:1px solid rgba(122,75,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--purple);">Local Interpretability</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">Explain a <em>specific prediction</em> for a single customer or case. "Why did the model predict THIS customer will churn?"</p>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem;">
+                    <li><strong>SHAP Values</strong> — contribution of each feature to a single prediction</li>
+                    <li><strong>LIME</strong> — Local Interpretable Model-agnostic Explanations</li>
+                    <li><strong>Counterfactuals</strong> — "What would need to change for a different outcome?"</li>
+                </ul>
+            </div>
+        </div>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem; margin-top:1rem;">import shap
+
+explainer   = shap.TreeExplainer(rf_model)
+shap_values = explainer.shap_values(X_test)
+
+# Summary plot — global view of feature importance
+shap.summary_plot(shap_values[1], X_test, feature_names=feature_cols)
+
+# Force plot — explain a single prediction
+shap.force_plot(explainer.expected_value[1], shap_values[1][0], X_test.iloc[0])</pre>
+    </div>
+
+    <!-- 5.10 -->
+    <div class="content-card">
+        <h3>🚀 5.10 From Model to Production — Saving & Deploying</h3>
+        <p>A model that lives only in a Jupyter Notebook delivers zero business value. Deployment means making the model available to generate real-time or batch predictions that drive actual decisions.</p>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">Saving Your Model</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">import joblib
+
+# Save the complete pipeline (preprocessing + model)
+joblib.dump(pipeline, 'churn_model_v1.pkl')
+
+# Load it later
+loaded_pipeline = joblib.load('churn_model_v1.pkl')
+new_predictions = loaded_pipeline.predict(new_data)</pre>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">Serving Predictions via API (Flask)</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">from flask import Flask, request, jsonify
+import joblib, pandas as pd
+
+app      = Flask(__name__)
+pipeline = joblib.load('churn_model_v1.pkl')
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    data       = request.json
+    df_input   = pd.DataFrame([data])
+    prediction = pipeline.predict(df_input)[0]
+    probability= pipeline.predict_proba(df_input)[0][1]
+    return jsonify({
+        'will_churn': bool(prediction),
+        'churn_probability': round(float(probability), 4)
+    })
+
+if __name__ == '__main__':
+    app.run(debug=False, port=5000)</pre>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem; text-align:center;">
+                <div style="font-size:2rem;">🗃️</div>
+                <strong style="color:var(--cyan);">Batch Scoring</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem;">Run predictions on a full dataset periodically (daily/weekly). Common for CRM systems and marketing.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem; text-align:center;">
+                <div style="font-size:2rem;">⚡</div>
+                <strong style="color:var(--purple);">Real-time API</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem;">Serve predictions instantly per request. Needed for apps, websites, and live fraud detection.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem; text-align:center;">
+                <div style="font-size:2rem;">📈</div>
+                <strong style="color:#ffb86c;">Model Monitoring</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.4rem;">Track model performance over time. Detect data drift (when real-world data shifts from training data) and retrain when needed.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.11 -->
+    <div class="content-card">
+        <h3>💼 5.11 Aligning Models with Business Value</h3>
+        <p>Technical excellence alone is insufficient. A 95% accurate model that solves the wrong problem, or whose predictions are ignored by stakeholders, has failed. Data Scientists must constantly connect technical choices to business outcomes.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div>
+                <h4 style="color:var(--cyan); margin-bottom:0.75rem;">❓ Always Ask Before Building</h4>
+                <ul class="styled-list">
+                    <li>What decision will this model support or automate?</li>
+                    <li>What is the cost of a False Positive vs. a False Negative in this context?</li>
+                    <li>Who will consume the predictions — and how?</li>
+                    <li>What accuracy is "good enough" to generate ROI?</li>
+                    <li>How often does the model need to be retrained?</li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color:var(--cyan); margin-bottom:0.75rem;">📐 Translating Metrics to Business Language</h4>
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem; font-size:0.82rem;">
+                    <p style="color:var(--text-secondary);">Instead of saying <em>"our model has 87% AUC-ROC"</em>, say:</p>
+                    <p style="color:var(--cyan); margin-top:0.5rem; font-style:italic;">"Our model correctly identifies 8 out of 10 customers who will churn, allowing the retention team to intervene before cancellation — saving an estimated €45,000/month in lost revenue."</p>
+                    <p style="color:var(--text-secondary); margin-top:0.75rem;">This framing connects model performance directly to business impact — which is what decision-makers care about.</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(91,124,255,0.08); border:1px solid rgba(91,124,255,0.25); border-radius:8px; padding:1.25rem; margin-top:1rem;">
+            <strong style="color:var(--blue);">⭐ The Data Scientist's Creed:</strong>
+            <p style="color:var(--text-secondary); margin-top:0.5rem; font-size:0.9rem; line-height:1.7;">
+                <em>"A simple model that the business understands and trusts will always beat a complex model that nobody can explain. Start simple. Validate with stakeholders. Add complexity only when justified by measurable improvement."</em>
+            </p>
+        </div>
+    </div>
+
+    <!-- Conclusion -->
+    <div class="content-card" style="border-color: var(--cyan);">
+        <h3>✅ Conclusion of Module 5 — You Are Now a Model Builder</h3>
+        <p>You have journeyed from raw data all the way to production-ready predictions. Let's recap the full arc of what you've mastered:</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            <ul class="styled-list">
+                <li>Feature Engineering: creating powerful signals from raw data</li>
+                <li>Numeric & categorical transformations (scaling, encoding)</li>
+                <li>Temporal, derived, and aggregation features</li>
+                <li>Supervised vs. Unsupervised vs. Reinforcement Learning</li>
+                <li>Core algorithms: Linear/Logistic Regression, Decision Trees, Random Forest, K-Means</li>
+                <li>Overfitting, Underfitting, and the Bias-Variance Trade-Off</li>
+            </ul>
+            <ul class="styled-list">
+                <li>Regularisation with L1 (Lasso) and L2 (Ridge)</li>
+                <li>Train/Test split and K-Fold Cross-Validation</li>
+                <li>Scikit-Learn Pipelines for reproducible, leak-free workflows</li>
+                <li>Evaluation metrics aligned to business objectives</li>
+                <li>Hyperparameter tuning with GridSearchCV</li>
+                <li>Model interpretability with SHAP</li>
+                <li>Saving, serving, and monitoring models in production</li>
+            </ul>
+        </div>
+        <div style="background:rgba(40,224,255,0.07); border-radius:8px; padding:1rem; margin-top:1rem; text-align:center;">
+            <p style="font-size:1.05rem; color:var(--cyan); font-weight:600;">Accuracy without business impact is irrelevant.</p>
+            <p style="color:var(--text-secondary); margin-top:0.4rem;">Always focus on the value generated — not just the numbers on a metric dashboard.</p>
+        </div>
+    </div>
+</div>
+            <div id="laboratorio" class="tab-panel">
+                <h3>Consola SQL de Dados</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Pratica a extração de dados. Tenta filtrar clientes com gastos elevados.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">EDITOR SQL</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT cliente_nome, total_gasto 
+FROM vendas 
+WHERE total_gasto > 1500
+ORDER BY total_gasto DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">RESULTADO DA QUERY</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Clique em "Executar" para simular a consulta na base de dados...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Executar Query</button>
+            </div>
+
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>Data Preparation & EDA Quiz</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge of Data Cleaning, Feature Engineering, and Modeling. Answer the 15 questions to receive immediate feedback.</p>
+        
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What defines the process of Feature Engineering in Data Science?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A" data-correct="true"> A) Creating, modifying, or selecting variables to better represent the problem</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Choosing the hardware where the model will be trained</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Cleaning only null values without creating new columns</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) The visual design of charts for the client</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. What is the main advantage of having "good features"?</p>
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Reducing the need to program in Python</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B" data-correct="true"> B) Capturing relevant information and making the model's job easier</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Eliminating the need to validate the model</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Making the dataset as heavy as possible</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. Which technique is used to transform text (e.g., "London", "Paris") into numbers?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) Numerical Normalization</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B" data-correct="true"> B) Categorical Encoding (e.g., One-Hot Encoding)</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Log-transform</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Mean Calculation</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. Extracting the "Day of the Week" from a full date is an example of:</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Underfitting</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Clustering</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C" data-correct="true"> C) Creating derived variables</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Data elimination</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. What guides the Feature Engineering process?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Chance</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B" data-correct="true"> B) Patterns discovered in EDA and business knowledge</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Only the color of the charts</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) The size of the CSV file</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. What is Modeling in Data Science?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A" data-correct="true"> A) Teaching an algorithm to learn patterns to predict results</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) Creating 3D models of data</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C"> C) Designing the company logo</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Installing Python on the computer</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. Which type of Machine Learning uses labeled data (with answers)?</p>
+                
+
+[Image of Supervised vs Unsupervised Learning diagram]
+
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Unsupervised</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B" data-correct="true"> B) Supervised</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Random</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Manual</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. Predicting a house price is a problem of:</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A" data-correct="true"> A) Regression</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B"> B) Classification</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Clustering</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Underfitting</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. Clustering (K-Means) belongs to which type of learning?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Supervised</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B" data-correct="true"> B) Unsupervised</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Reinforcement</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Visual</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. What is the first stage of the modeling pipeline?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A" data-correct="true"> A) Splitting data into training and testing sets</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Publishing the model on the internet</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C"> C) Deleting test data</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Buying new servers</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What happens in Overfitting?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q11" value="A"> A) The model is too simple</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B" data-correct="true"> B) The model memorizes training data but fails on new data</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C"> C) The model learns nothing</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Data is deleted by mistake</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. What is the risk of Underfitting?</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A" data-correct="true"> A) The model being too simple to capture patterns</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) The model being too intelligent</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Spending too much money on electricity</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) The computer crashing</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. Why is validation necessary in a model?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) To make the project longer</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B" data-correct="true"> B) To test performance on unseen data</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C"> C) To ensure Python has no errors</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) To delete useless variables</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. Which of these is a numerical transformation technique?</p>
+                <label class="quiz-option"><input type="radio" name="q14" value="A" data-correct="true"> A) Normalization or Standardization</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Changing the filename</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Creating a PowerPoint</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Deleting columns with numbers</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. What defines a "good model" for a company?</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Being the most complex on the market</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Being written in multiple languages</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"> C) Solving a real problem and generating value</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Not needing data to function</label>
+            </div>
+        </form>
+
+        <div class="quiz-controls" style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button id="submit-quiz" class="btn btn-primary" onclick="processQuiz()">Submit Evaluation</button>
+            <button id="clear-quiz" class="btn btn-back" onclick="resetQuiz()">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback" class="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+        <script>
+    // Quiz functionality
+    class QuizManager {
+        constructor() {
+            this.questionsData = {
+                q1: { correct: 'A', exp: 'Feature Engineering is the process of transforming raw data into variables that improve model learning.' },
+                q2: { correct: 'B', exp: 'Good features simplify the data structure, allowing the model to focus on what is truly important.' },
+                q3: { correct: 'B', exp: 'Algorithms do not read text; One-Hot Encoding creates binary columns (0 and 1) to represent categories.' },
+                q4: { correct: 'C', exp: 'Extracting parts of information (like the day from a date) creates useful new perspectives for the model.' },
+                q5: { correct: 'B', exp: 'Feature engineering is not random; it is based on insights discovered during initial data exploration.' },
+                q6: { correct: 'A', exp: 'Modeling is creating a mathematical representation capable of generalizing historical patterns for the future.' },
+                q7: { correct: 'B', exp: 'Supervised means we have a known "target" for the model to learn and compare against.' },
+                q8: { correct: 'A', exp: 'Whenever the goal is to predict a continuous/numerical value, we use Regression models.' },
+                q9: { correct: 'B', exp: 'Clustering groups data by similarity without being previously told which group they belong to.' },
+                q10: { correct: 'A', exp: 'Splitting data into Training and Testing sets is vital to ensure we evaluate the model fairly.' },
+                q11: { correct: 'B', exp: 'Overfitting is like a student who memorizes the exam but does not know how to apply the subject to new problems.' },
+                q12: { correct: 'A', exp: 'Underfitting occurs when the model is too simple to capture important signals in the data.' },
+                q13: { correct: 'B', exp: 'Validating on "unseen" data (test set) is the only way to know if the model will work in the real world.' },
+                q14: { correct: 'A', exp: 'Normalization puts different scales (e.g., weight and age) into a common range to avoid confusing the algorithm.' },
+                q15: { correct: 'C', exp: 'In a business environment, technical accuracy only matters if it brings a concrete benefit to the organization.' }
+            };
+            this.init();
+        }
+
+        init() {
+            document.getElementById('submit-quiz').addEventListener('click', () => {
+                this.submitQuiz();
+            });
+
+            document.getElementById('clear-quiz').addEventListener('click', () => {
+                this.clearQuiz();
+            });
+        }
+
+        submitQuiz() {
+                    const form = document.getElementById('quiz-form');
+                    const formData = new FormData(form);
+                    let score = 0;
+                    let feedbackHTML = '';
+                    Object.keys(this.questionsData).forEach((key, index) => {
+                        const userAnswer = formData.get(key);
+                        const isCorrect = userAnswer === this.questionsData[key].correct;
+                        if (isCorrect) score++;
+                        feedbackHTML += `
+                            <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                                <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                                <div>
+                                    <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                    ${!isCorrect ? `<br><small class="correct-answer">
+                                            Correct answer: Option ${this.questionsData[key].correct}
+                                        </small>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    this.displayResults(score, feedbackHTML);
+                }
+
+        displayResults(score, feedbackHTML) {
+            const total = Object.keys(this.questionsData).length;
+            const percent = Math.round((score / total) * 100);
+            const resultsDiv = document.getElementById('quiz-results');
+            
+            let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+
+            document.getElementById('quiz-score').innerHTML = `
+                <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                <p style="color: var(--text-secondary)">${percent >= 70 ? 'Amazing! You have mastered the fundamentals.' : 'Keep practicing to improve.'}</p>
+            `;
+
+            document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        clearQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-results').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    // Initialize when document loads
+    document.addEventListener('DOMContentLoaded', () => {
+        new QuizManager();
+    });
+</script>
+
+            <div id="recursos" class="tab-panel">
+                <h3>Materiais de Apoio</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ Guia Definitivo: Python para Análise de Dados</a>
+                    <a href="#" class="resource-link">→ Cheat Sheet: Comandos SQL Essenciais</a>
+                    <a href="#" class="resource-link">→ Documentação Scikit-Learn: Escolhendo o Algoritmo Certo</a>
+                    <a href="#" class="resource-link">→ Workshop: Storytelling com Dados</a>
+                </div>
+            </div>
+
+            <div id="avaliacao" class="tab-panel">
+    <div class="content-card">
+        <h3>🎯 Domain Criteria: Feature Engineering & Modeling</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            To successfully complete this module, you must demonstrate proficiency in the following mastery levels: creating, transforming, and selecting variables, as well as building and training real-world machine learning models.
+        </p>
+        
+        <div class="evaluation-grid">
+            <div class="evaluation-column">
+                <h4 class="evaluation-title essential">
+                    <span>💠</span> Essential
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Understanding the role of Feature Engineering in the Data Science pipeline</li>
+                    <li>Ability to distinguish between features (transformed variables) and raw data</li>
+                    <li>Basic understanding of supervised and unsupervised learning</li>
+                    <li>Introductory knowledge of simple algorithms (Linear Regression, K-Means)</li>
+                    <li>Understanding of the concept of separating training and testing data for models</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title important">
+                    <span>⭐</span> Important
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Creation and transformation of features based on insights from EDA</li>
+                    <li>Application of encoding techniques (One-Hot Encoding) and data normalization</li>
+                    <li>Training of Machine Learning models using libraries such as Scikit-Learn</li>
+                    <li>Ability to identify problems of overfitting and underfitting</li>
+                    <li>Comparison of metrics between models to select the best approach</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title advanced">
+                    <span>🚀</span> Advanced
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Construction of complete pipelines integrating feature engineering and modeling</li>
+                    <li>Performing hyperparameter tuning to optimize model performance</li>
+                    <li>Critical evaluation of each feature's influence on the final model performance</li>
+                    <li>Ability to explain model decisions and predictions in a clear manner</li>
+                    <li>Technical alignment of the model with real business objectives and metrics</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-panel");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            let progressMap = { 'aprender': 25, 'laboratorio': 50, 'quiz': 75, 'recursos': 90, 'avaliacao': 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executada com sucesso.</strong><br><br>Resultados (Top 3):<br>-----------------------<br>1. Carlos Alberto | 4.250,00€<br>2. Beatriz Ramos | 2.100,50€<br>3. Ricardo Jorge | 1.880,00€<br><br><em>Dica: O filtro WHERE funcionou corretamente eliminando registos abaixo de 1500€.</em>";
+        }
+    </script>
+</body>
+</html>

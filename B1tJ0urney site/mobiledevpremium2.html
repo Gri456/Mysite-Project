@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Mobile UI/UX Design</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #d000ff;
+            --purple: #c266ff;
+            --cyan: #a200ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(91, 124, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(207, 75, 255, 0.1) 0%, rgba(217, 91, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem; border-radius: 50px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px;
+            font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+
+        .tab-button {
+            flex: 1; min-width: 120px; padding: 1rem 1.5rem;
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.3s ease; position: relative; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card {
+            background: rgba(255,255,255,0.03); padding: 1.5rem;
+            border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;
+        }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Info box */
+        .info-box {
+            background: rgba(162, 0, 255, 0.08);
+            border: 1px solid rgba(162, 0, 255, 0.25);
+            border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0;
+            font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);
+        }
+        .info-box strong { color: var(--cyan); }
+
+        /* Comparison table */
+        .compare-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.875rem; }
+        .compare-table th { background: rgba(255,255,255,0.07); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid var(--border-color); }
+        .compare-table td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .compare-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+        /* Color swatch grid */
+        .swatch-row { display: flex; gap: 0.5rem; margin: 0.75rem 0; flex-wrap: wrap; }
+        .swatch { border-radius: 6px; padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600; color: #fff; }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 420px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Quiz */
+        .quiz-question { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .quiz-option {
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem;
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;
+            margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05));
+            border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem;
+        }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+
+        .feedback-item {
+            display: flex; align-items: flex-start; gap: 1rem; padding: 1rem;
+            border-radius: 8px; margin-bottom: 1rem; background: rgba(255,255,255,0.03);
+        }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 1rem; font-weight: 600; margin-bottom: 1rem;
+            padding-bottom: 0.75rem; border-bottom: 2px solid;
+        }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .compare-table { font-size: 0.78rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-mobile.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: Mobile UI/UX Design</h1>
+            <p class="course-description">
+                Learn how to design mobile applications that are intuitive, accessible, and visually compelling. Master UX principles, navigation patterns, visual design rules, platform guidelines, and prototyping tools.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• UX Principles • Navigation • Visual Design • iOS &amp; Android • Prototyping</span></div>
+                <div class="meta-item"><span>📌</span><span>Mobile Fundamentals</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- LEARN -->
+            <div id="aprender" class="tab-panel active">
+
+                <div class="content-card">
+                    <h3>Introduction: What Is Mobile UI/UX Design?</h3>
+                    <p>Mobile UI/UX design focuses on creating apps that are easy to use, visually appealing, intuitive, accessible, and optimized for small screens.</p>
+                    <ul class="styled-list" style="margin-top: 1rem;">
+                        <li><span class="highlight">UI (User Interface)</span> → What the app looks like</li>
+                        <li><span class="highlight">UX (User Experience)</span> → How the app feels and behaves</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Mobile design must consider:</p>
+                    <ul class="styled-list">
+                        <li>Touch interactions</li>
+                        <li>Limited screen space</li>
+                        <li>Navigation patterns</li>
+                        <li>Platform conventions (iOS vs Android)</li>
+                        <li>Accessibility</li>
+                        <li>Performance and smoothness</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Great UI/UX increases user satisfaction, engagement, retention, app ratings, and conversion rates.</p>
+
+                    <!-- NEW -->
+                    <div class="info-box" style="margin-top: 1.25rem;">
+                        <strong>💡 UI vs UX — A Practical Example</strong><br>
+                        Imagine a checkout screen in a shopping app. The <strong>UI</strong> covers the button colors, font sizes, card layout, and spacing. The <strong>UX</strong> covers whether users can complete their purchase in 2 taps or 10, whether they feel confident entering payment info, and whether the confirmation is satisfying. Both must work together — beautiful UI with poor UX frustrates users; great UX with ugly UI loses trust.
+                    </div>
+
+                    <p style="margin-top: 1.25rem;"><strong>Why Mobile UX Is Uniquely Challenging:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Context switching</span> — Users open apps on the go, in noisy environments, with partial attention</li>
+                        <li><span class="highlight">One-handed use</span> — Many users operate their phone with a single thumb</li>
+                        <li><span class="highlight">No hover state</span> — Unlike web, there is no "hover" on touchscreens — elements must be obviously tappable</li>
+                        <li><span class="highlight">Interruptions</span> — Calls, notifications, and app switching mean users return mid-task</li>
+                        <li><span class="highlight">Variable screen sizes</span> — From small Android phones to large iPads, layouts must adapt</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Core UX Principles for Mobile Apps</h3>
+                    <div class="code-explanation">
+                        <p><span class="highlight">1. Clarity</span><br>Users must understand instantly where they are, what they can do, and how to move forward.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">2. Simplicity</span><br>Less text, fewer buttons, minimal complexity.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">3. Consistency</span><br>Icons, colors, and layouts should behave predictably.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">4. Feedback</span><br>Animations, vibrations, and transitions confirm actions.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">5. Accessibility</span><br>Design for everyone: readable text, high contrast, voice-over support.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">6. Hierarchy</span><br>Use typography, spacing, and color to show importance.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">7. Efficiency</span><br>Reduce taps required to complete a task.</p>
+                    </div>
+
+                    <!-- NEW -->
+                    <p style="margin-top: 1.25rem;"><strong>Additional UX Laws Worth Knowing:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Fitts's Law</span> — The larger and closer a target, the faster it is to tap. Make important buttons large and reachable.</li>
+                        <li><span class="highlight">Hick's Law</span> — The more choices presented, the longer the decision takes. Limit options per screen.</li>
+                        <li><span class="highlight">Miller's Law</span> — Users can hold approximately 7 (±2) items in working memory. Don't overload menus.</li>
+                        <li><span class="highlight">Jakob's Law</span> — Users spend most of their time in other apps. Follow familiar patterns so your app feels intuitive from day one.</li>
+                        <li><span class="highlight">The Peak-End Rule</span> — Users judge an experience based on its most intense moment and its ending. Make onboarding and success moments memorable.</li>
+                    </ul>
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>🎯 The 3-Tap Rule (and why it's a guideline, not a law):</strong><br>
+                        The old rule says any core feature should be reachable in 3 taps or fewer. While not a hard law, it reflects a real principle: <strong>every extra tap is friction</strong>. Map your most-used flows and count their steps. If a user needs 7 taps to send a message in a messaging app, the UX needs work.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Mobile Navigation Patterns</h3>
+                    <p>Navigation defines how users move through the app.</p>
+                    <div class="code-explanation">
+                        <p><span class="highlight">1. Bottom Navigation Bar</span><br>3–5 main sections. Common in most apps.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">2. Tab Bar (iOS)</span><br>Simple, always visible. Perfect for social apps.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">3. Drawer Menu (Android)</span><br>Slides from the side. Good for apps with many categories.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">4. Stack Navigation</span><br>Used for screens that follow one another (e.g., checkout).</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">5. Gestures</span><br>Swipe → navigation. Pull → refresh. Long press → actions.</p>
+                    </div>
+                    <p style="margin-top: 1rem;">Navigation must always feel natural.</p>
+
+                    <!-- NEW -->
+                    <p style="margin-top: 1.25rem;"><strong>Choosing the Right Navigation Pattern:</strong></p>
+                    <table class="compare-table">
+                        <thead>
+                            <tr><th>Pattern</th><th>Best For</th><th>Avoid When</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong style="color:var(--cyan)">Bottom Tab Bar</strong></td><td>Apps with 3–5 equal-weight sections (Instagram, YouTube)</td><td>More than 5 main sections</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">Drawer Menu</strong></td><td>Apps with many secondary sections (settings, account, help)</td><td>Frequent main-section switching</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">Stack (Push)</strong></td><td>Linear flows: onboarding, checkout, forms</td><td>Top-level navigation between unrelated sections</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">Gesture-based</strong></td><td>Modern iOS apps (swipe back, swipe to dismiss)</td><td>Discoverability-critical apps or first-time users</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">Modal/Sheet</strong></td><td>Quick contextual tasks without leaving the current screen</td><td>Core navigation flows</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>🔑 Thumb Zone — The Reachability Map:</strong><br>
+                        On most smartphones, the bottom third of the screen is the <strong>natural thumb zone</strong> — the easiest area to tap with one hand. Place your most important navigation and actions here. The top of the screen is the hardest to reach and should be reserved for less frequent actions like settings or search. This is why the Bottom Tab Bar is so dominant in mobile design.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Mobile UI Components</h3>
+                    <p>Every mobile app is built from reusable components:</p>
+                    <ul class="styled-list">
+                        <li>Buttons</li>
+                        <li>Cards</li>
+                        <li>Lists</li>
+                        <li>Switches</li>
+                        <li>Forms</li>
+                        <li>Floating Action Buttons</li>
+                        <li>Avatars</li>
+                        <li>Modals</li>
+                        <li>Bottom sheets</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Each must follow spacing, alignment, and accessibility rules.</p>
+
+                    <!-- NEW -->
+                    <p style="margin-top: 1.25rem;"><strong>Component Design Rules:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Buttons</span> — Minimum 44×44pt (iOS) / 48×48dp (Android). Use Primary, Secondary, and Destructive variants. Never use more than one primary button per screen.</li>
+                        <li><span class="highlight">Cards</span> — Group related content. Use consistent padding (16dp), rounded corners, and subtle shadow/elevation to indicate interactivity.</li>
+                        <li><span class="highlight">Input Fields</span> — Always show a label (not just placeholder text, which disappears on focus). Provide clear error states with a message, not just a red border.</li>
+                        <li><span class="highlight">Switches / Toggles</span> — Use for binary settings (on/off). The state must be visually unambiguous at a glance.</li>
+                        <li><span class="highlight">Bottom Sheets</span> — Great for contextual actions. Use half-sheet for simple choices, full-sheet for complex forms.</li>
+                        <li><span class="highlight">Floating Action Button (FAB)</span> — For the single most important action on a screen. Don't use multiple FABs on the same screen.</li>
+                        <li><span class="highlight">Empty States</span> — Every list or content area needs a designed empty state (icon + message + optional CTA) so new users don't see a blank screen.</li>
+                        <li><span class="highlight">Loading States</span> — Use skeleton screens instead of spinners for content loading — they reduce perceived wait time.</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Visual Design Principles</h3>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Color</span><br>Define a primary color. Use accent colors sparingly. Keep strong contrast for accessibility.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Typography</span><br>Use a consistent scale: headings, subheadings, body text, labels.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Spacing</span><br>Consistency is key. Common rule: multiples of 4 or 8 pixels.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Icons</span><br>Simple, recognizable, and consistent across the app.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Shadows &amp; Elevation</span><br>Communicate depth and clickable elements.</p>
+                    </div>
+
+                    <!-- NEW: Color system -->
+                    <p style="margin-top: 1.25rem;"><strong>Building a Mobile Color System:</strong></p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.75rem;">A proper color system has defined roles — not just a palette:</p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Primary</span> — Brand color. Used for main buttons, active states, links. (e.g., #007AFF on iOS)</li>
+                        <li><span class="highlight">Secondary / Accent</span> — Complement the primary. Used sparingly for highlights.</li>
+                        <li><span class="highlight">Surface</span> — Card and component backgrounds (e.g., white, #1C1C1E in dark mode).</li>
+                        <li><span class="highlight">Background</span> — The base screen color (e.g., #F2F2F7 light / #000000 dark).</li>
+                        <li><span class="highlight">Error</span> — Red tones for error states (#FF3B30 iOS / #B00020 Material).</li>
+                        <li><span class="highlight">Success / Warning</span> — Green and yellow for status indicators.</li>
+                        <li><span class="highlight">On-color</span> — Text/icons placed on top of each color role must meet contrast ratios.</li>
+                    </ul>
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>♿ Color Contrast Standards (WCAG):</strong><br>
+                        <strong>AA (minimum):</strong> 4.5:1 for normal text, 3:1 for large text (&gt;18pt or bold &gt;14pt)<br>
+                        <strong>AAA (enhanced):</strong> 7:1 for normal text, 4.5:1 for large text<br>
+                        Never rely on color alone to convey meaning — always combine with icons, patterns, or text labels. About 8% of men have color vision deficiency.
+                    </div>
+
+                    <!-- NEW: Typography system -->
+                    <p style="margin-top: 1.25rem;"><strong>Mobile Typography Scale:</strong></p>
+                    <table class="compare-table">
+                        <thead>
+                            <tr><th>Role</th><th>iOS (pt)</th><th>Android (sp)</th><th>Usage</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Large Title</td><td>34pt Bold</td><td>—</td><td>Navigation bar title (iOS only)</td></tr>
+                            <tr><td>Title 1</td><td>28pt Regular</td><td>24sp Medium</td><td>Screen headings</td></tr>
+                            <tr><td>Title 2</td><td>22pt Regular</td><td>20sp Medium</td><td>Section headings</td></tr>
+                            <tr><td>Headline</td><td>17pt Semibold</td><td>16sp Medium</td><td>Card titles, list headers</td></tr>
+                            <tr><td>Body</td><td>17pt Regular</td><td>16sp Regular</td><td>Main content text</td></tr>
+                            <tr><td>Callout</td><td>16pt Regular</td><td>14sp Regular</td><td>Secondary content</td></tr>
+                            <tr><td>Caption</td><td>12pt Regular</td><td>12sp Regular</td><td>Labels, metadata</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem;">Tip: Always support Dynamic Type (iOS) and scalable sp units (Android) so users with accessibility font size settings are supported.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>Platform Guidelines – iOS vs Android</h3>
+                    <div class="code-explanation">
+                        <p><span class="highlight">iOS – Human Interface Guidelines (HIG)</span></p>
+                        <ul class="styled-list">
+                            <li>Minimalistic design</li>
+                            <li>Rounded elements</li>
+                            <li>Thin icons</li>
+                            <li>Blur effects (translucency)</li>
+                            <li>Bottom navigation focus</li>
+                        </ul>
+                        <p style="margin-top: 0.75rem;"><strong>UI Frameworks:</strong> SwiftUI, UIKit</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Android – Material Design</span></p>
+                        <ul class="styled-list">
+                            <li>Bold colors</li>
+                            <li>Floating action buttons</li>
+                            <li>Elevation-based shadows</li>
+                            <li>Grid-based layouts</li>
+                            <li>Motion guidelines</li>
+                        </ul>
+                        <p style="margin-top: 0.75rem;"><strong>UI Frameworks:</strong> Jetpack Compose, XML layouts</p>
+                    </div>
+
+                    <!-- NEW: Detailed platform comparison -->
+                    <p style="margin-top: 1.25rem;"><strong>iOS vs Android — Side-by-Side Design Decisions:</strong></p>
+                    <table class="compare-table">
+                        <thead>
+                            <tr><th>Design Element</th><th>iOS (HIG)</th><th>Android (Material)</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Navigation Bar</td><td>Large title + back button (top)</td><td>Top App Bar + nav icon</td></tr>
+                            <tr><td>Primary Action Button</td><td>Text button or filled button (top right)</td><td>Floating Action Button (bottom right)</td></tr>
+                            <tr><td>Tab Navigation</td><td>Tab Bar at the bottom</td><td>Navigation Bar at the bottom (Material 3)</td></tr>
+                            <tr><td>Icons</td><td>SF Symbols (thin, stroked)</td><td>Material Icons (filled/outlined)</td></tr>
+                            <tr><td>Corner Radius</td><td>Large (continuous curve)</td><td>Medium (standard rounded)</td></tr>
+                            <tr><td>Contextual Menu</td><td>Context Menu / Action Sheet</td><td>Bottom Sheet / Popup Menu</td></tr>
+                            <tr><td>Pull to Refresh</td><td>Standard across apps</td><td>Standard via SwipeRefreshLayout</td></tr>
+                            <tr><td>Back Navigation</td><td>Swipe right from left edge</td><td>System back gesture (bottom swipe)</td></tr>
+                            <tr><td>Typography</td><td>SF Pro (system font)</td><td>Roboto / Google Sans</td></tr>
+                            <tr><td>Dark Mode</td><td>System-level, automatic</td><td>System-level, automatic</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>🔑 Platform Conventions Matter:</strong><br>
+                        Users have deep expectations based on their platform. An iOS user expects a "Back" label in the top-left. An Android user expects a back gesture from the bottom. Breaking these conventions — even for a beautiful custom design — causes friction and confusion. Always read the platform guidelines for your target OS before designing.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Motion &amp; Microinteractions</h3>
+                    <p>Animations create personality and improve clarity.</p>
+                    <p style="margin-top: 0.75rem;"><strong>Examples:</strong></p>
+                    <ul class="styled-list">
+                        <li>Button ripple effect</li>
+                        <li>Swipe-to-delete animation</li>
+                        <li>Loading indicators</li>
+                        <li>Page transitions</li>
+                        <li>Floating button expansion</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Good motion is subtle, enhances understanding, and never distracts.</p>
+
+                    <!-- NEW -->
+                    <p style="margin-top: 1.25rem;"><strong>The 4 Principles of Good Mobile Animation:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Purposeful</span> — Every animation should communicate something: a state change, a relationship between elements, or confirmation of an action. Never animate just for decoration.</li>
+                        <li><span class="highlight">Fast</span> — Most UI animations should be between 150ms and 350ms. Slower than 500ms feels sluggish; faster than 100ms is imperceptible.</li>
+                        <li><span class="highlight">Natural easing</span> — Use ease-in-out or spring curves, never linear. Linear motion feels mechanical and unnatural to the human eye.</li>
+                        <li><span class="highlight">Respects accessibility</span> — Always honor the "Reduce Motion" setting on iOS and Android. Some users experience nausea or seizures from complex animations.</li>
+                    </ul>
+
+                    <p style="margin-top: 1.25rem;"><strong>Microinteraction Anatomy:</strong></p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Every microinteraction has 4 parts (Dan Saffer's model):</p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Trigger</span> — What starts the interaction (user tap, system event)</li>
+                        <li><span class="highlight">Rules</span> — What happens as a result</li>
+                        <li><span class="highlight">Feedback</span> — What the user sees/feels/hears</li>
+                        <li><span class="highlight">Loops &amp; Modes</span> — How it changes over time or under different conditions</li>
+                    </ul>
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>Example — Like Button Microinteraction:</strong><br>
+                        Trigger: user taps heart icon → Rules: toggle liked state → Feedback: icon fills with red + small bounce animation + haptic pulse → Loop: stays filled until tapped again. This 300ms interaction communicates state change, confirms the action, and feels satisfying — all without a single word of text.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Prototyping Tools</h3>
+                    <p>Designers use tools to create wireframes and mockups:</p>
+                    <ul class="styled-list">
+                        <li>Figma</li>
+                        <li>Sketch</li>
+                        <li>Adobe XD</li>
+                        <li>Protopie</li>
+                        <li>Framer</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Prototypes show the user journey, UI structure, and flow between screens.</p>
+
+                    <!-- NEW -->
+                    <p style="margin-top: 1.25rem;"><strong>Tool Comparison:</strong></p>
+                    <table class="compare-table">
+                        <thead>
+                            <tr><th>Tool</th><th>Best For</th><th>Fidelity</th><th>Platform</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong style="color:var(--cyan)">Figma</strong></td><td>Collaborative design, dev handoff, design systems</td><td>Low → High</td><td>Web (all OS)</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">Sketch</strong></td><td>iOS/Mac design, component libraries</td><td>Medium → High</td><td>macOS only</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">Adobe XD</strong></td><td>Quick prototyping, Adobe ecosystem users</td><td>Low → High</td><td>macOS / Windows</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">ProtoPie</strong></td><td>Complex interactions, sensor-driven prototypes</td><td>High (interactive)</td><td>macOS / Windows</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">Framer</strong></td><td>Code-based advanced prototypes</td><td>High (near-native)</td><td>Web (all OS)</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">Balsamiq</strong></td><td>Fast lo-fi wireframes, early-stage ideation</td><td>Low (lo-fi only)</td><td>Web / Desktop</td></tr>
+                        </tbody>
+                    </table>
+
+                    <p style="margin-top: 1.25rem;"><strong>The Design Process — From Idea to Handoff:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">1. Research</span> — Understand users, competitors, and the problem. User interviews, surveys, analytics.</li>
+                        <li><span class="highlight">2. Information Architecture</span> — Define the structure: what screens exist, how they connect, what content lives where.</li>
+                        <li><span class="highlight">3. Wireframes (Lo-Fi)</span> — Black and white sketches or digital boxes. Focus on layout and flow, not visuals.</li>
+                        <li><span class="highlight">4. Mid-Fi Prototype</span> — Clickable wireframes. Test navigation and user flows before investing in visuals.</li>
+                        <li><span class="highlight">5. Visual Design (Hi-Fi)</span> — Full color, typography, icons, real content. The final look of the app.</li>
+                        <li><span class="highlight">6. Interactive Prototype</span> — Animations, transitions, real interactions simulated in Figma/ProtoPie.</li>
+                        <li><span class="highlight">7. Usability Testing</span> — Observe real users completing tasks. Document failures and friction.</li>
+                        <li><span class="highlight">8. Developer Handoff</span> — Share specs, design tokens, assets, and component docs with engineers.</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Mobile Usability Testing</h3>
+                    <p>Before building the app, test the design with real users.</p>
+                    <p style="margin-top: 0.75rem;"><strong>Evaluate:</strong></p>
+                    <ul class="styled-list">
+                        <li>Navigation clarity</li>
+                        <li>Button placement</li>
+                        <li>Text readability</li>
+                        <li>Flow efficiency</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Testing avoids costly redesigns later.</p>
+
+                    <!-- NEW -->
+                    <p style="margin-top: 1.25rem;"><strong>Types of Usability Testing:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Moderated in-person</span> — A facilitator watches a user complete tasks. Best for detailed qualitative insight. Expensive but rich.</li>
+                        <li><span class="highlight">Unmoderated remote</span> — Users complete tasks on their own using tools like Maze or UserTesting. Scalable and faster.</li>
+                        <li><span class="highlight">A/B Testing</span> — Two design variants shown to different user groups. Measures which performs better (conversion, retention, etc.).</li>
+                        <li><span class="highlight">5-second test</span> — Show a screen for 5 seconds, then ask what users remember. Tests visual hierarchy and clarity.</li>
+                        <li><span class="highlight">Heuristic evaluation</span> — An expert reviews the design against established UX principles (Nielsen's 10 Heuristics) without real users.</li>
+                    </ul>
+
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>📊 Nielsen's Rule — 5 Users Is Enough:</strong><br>
+                        Research by Jakob Nielsen shows that <strong>5 users uncover ~85% of usability problems</strong> in a design. You don't need a large study to get valuable feedback. Run a quick 5-person test, fix the issues found, then test again. This iterative approach is faster and more effective than waiting for a "perfect" design.
+                    </div>
+
+                    <p style="margin-top: 1.25rem;"><strong>Metrics to Track After Launch:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Task completion rate</span> — % of users who successfully finish a key task (e.g., checkout)</li>
+                        <li><span class="highlight">Time on task</span> — How long users take to complete flows</li>
+                        <li><span class="highlight">Error rate</span> — How often users make mistakes (wrong taps, backtracking)</li>
+                        <li><span class="highlight">Drop-off rate</span> — Where users abandon a flow (e.g., form step 3 of 5)</li>
+                        <li><span class="highlight">NPS / CSAT</span> — User satisfaction surveys (Net Promoter Score, Customer Satisfaction)</li>
+                        <li><span class="highlight">Retention rate</span> — % of users who return after Day 1, Day 7, Day 30</li>
+                    </ul>
+                </div>
+
+                <!-- NEW: Accessibility deep dive -->
+                <div class="content-card">
+                    <h3>Accessibility in Depth</h3>
+                    <p>Accessibility (a11y) means designing apps that work for everyone — including users with visual, motor, auditory, or cognitive disabilities. It is also legally required in many jurisdictions.</p>
+
+                    <p style="margin-top: 1.25rem;"><strong>Core Accessibility Features to Implement:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Screen readers</span> — VoiceOver (iOS) and TalkBack (Android) read UI elements aloud. Every interactive element needs a meaningful accessibility label.</li>
+                        <li><span class="highlight">Dynamic type</span> — Support user-defined font sizes. Use relative units (sp/pt), never fixed pixel sizes.</li>
+                        <li><span class="highlight">Color contrast</span> — Minimum 4.5:1 ratio for body text. Use a contrast checker tool during design.</li>
+                        <li><span class="highlight">Focus order</span> — Keyboard and switch-access users navigate via focus. Ensure the focus order is logical (top → bottom, left → right).</li>
+                        <li><span class="highlight">Reduced motion</span> — Respect the OS setting to reduce or disable animations for users with vestibular disorders.</li>
+                        <li><span class="highlight">Touch targets</span> — Minimum 44×44pt (iOS) / 48×48dp (Android) for all interactive elements.</li>
+                        <li><span class="highlight">Error identification</span> — Form errors must be described in text, not just color changes.</li>
+                        <li><span class="highlight">No time limits</span> — Don't auto-dismiss toasts or dialogs before users have time to read them.</li>
+                    </ul>
+
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>📱 Testing Accessibility on Device:</strong><br>
+                        iOS: Settings → Accessibility → VoiceOver → turn on, then navigate your app with eyes closed.<br>
+                        Android: Settings → Accessibility → TalkBack → turn on, then navigate.<br>
+                        If you can't understand the app using only audio and gestures, it needs work. This is the most effective accessibility test you can do — no special tools required.
+                    </div>
+                </div>
+
+                <!-- NEW: Design Systems -->
+                <div class="content-card">
+                    <h3>Design Systems</h3>
+                    <p>A design system is a <strong>single source of truth</strong> for all visual and interaction decisions in a product. It ensures that every screen, component, and interaction is consistent — whether designed by one person or twenty.</p>
+
+                    <p style="margin-top: 1.25rem;"><strong>A Design System Contains:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Design Tokens</span> — Named variables for colors, spacing, typography, radii (e.g., color-primary = #007AFF, spacing-md = 16px)</li>
+                        <li><span class="highlight">Component Library</span> — Buttons, inputs, cards, modals — all with their variants (states, sizes, types)</li>
+                        <li><span class="highlight">Pattern Library</span> — Reusable UI patterns like empty states, error pages, onboarding flows</li>
+                        <li><span class="highlight">Motion Guidelines</span> — Timing, easing curves, and animation principles</li>
+                        <li><span class="highlight">Accessibility Guidelines</span> — Contrast standards, touch targets, screen reader usage</li>
+                        <li><span class="highlight">Content Guidelines</span> — Tone of voice, writing style, naming conventions</li>
+                    </ul>
+
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>🌍 Real-World Design Systems to Study:</strong><br>
+                        <strong>Material Design 3</strong> (Google) — material.io<br>
+                        <strong>Human Interface Guidelines</strong> (Apple) — developer.apple.com/design<br>
+                        <strong>Polaris</strong> (Shopify) — polaris.shopify.com<br>
+                        <strong>Fluent 2</strong> (Microsoft) — fluent2.microsoft.design<br>
+                        These are free, publicly documented, and used by millions of apps. Studying them teaches you how professional teams think about design at scale.
+                    </div>
+                </div>
+
+                <!-- NEW: Dark Mode -->
+                <div class="content-card">
+                    <h3>Dark Mode Design</h3>
+                    <p>Dark mode is now a standard expectation on both iOS and Android. Designing for it requires more than simply inverting colors.</p>
+
+                    <ul class="styled-list" style="margin-top: 1rem;">
+                        <li><span class="highlight">Use semantic color tokens</span> — Define colors by role (surface, background, on-surface), not by value. Then map each role to light and dark values separately.</li>
+                        <li><span class="highlight">Avoid pure black backgrounds</span> — #000000 causes harsh contrast. iOS uses #000000 on OLED, but recommends #1C1C1E for elevated surfaces.</li>
+                        <li><span class="highlight">Reduce elevation, don't just add shadows</span> — Shadows are invisible on dark backgrounds. Material Design 3 uses lighter surface tones (color tinting) to indicate elevation in dark mode.</li>
+                        <li><span class="highlight">Images and illustrations need dark variants</span> — A white logo on a white background becomes invisible in light mode. Plan asset variants early.</li>
+                        <li><span class="highlight">Test text contrast separately</span> — White text on dark grey might not meet 4.5:1 contrast. Check both modes independently.</li>
+                        <li><span class="highlight">Respect the system setting</span> — Apps should automatically switch based on the OS setting, with an optional in-app override.</li>
+                    </ul>
+                </div>
+
+                <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                    <h3>Section Conclusion</h3>
+                    <p>You now understand:</p>
+                    <ul class="styled-list">
+                        <li>UX principles</li>
+                        <li>Visual design rules</li>
+                        <li>Navigation patterns</li>
+                        <li>Platform guidelines</li>
+                        <li>Wireframing and prototyping</li>
+                        <li>Accessibility and usability testing</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">This is the foundational knowledge needed to design professional mobile experiences.</p>
+                </div>
+
+            </div>
+
+            <!-- LAB -->
+            <div id="laboratorio" class="tab-panel">
+                <h3 style="margin-bottom: 1rem;">Design Audit Console</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">Define your app's design properties below and run an audit to get feedback on your UI/UX decisions.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">DESIGN SPEC EDITOR</div>
+                        <textarea class="lab-textarea" id="lab-input">// Define your app's design spec
+
+const appDesign = {
+  platform: "android",      // ios | android | both
+  navigation: "bottom",     // bottom | drawer | tabs | stack | gestures
+  hasAccessibility: false,  // true | false
+  spacingUnit: 6,           // recommended: 4 or 8
+  animationsEnabled: true,  // true | false
+  colorContrast: "low",     // high | medium | low
+  typography: "consistent"  // consistent | inconsistent
+};
+
+// Run audit to evaluate your design choices</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">AUDIT RESULTS</div>
+                        <div class="lab-output" id="lab-output">
+                            Click "Run Audit" to evaluate your design spec and get actionable feedback...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runLab()">▶ Run Audit</button>
+            </div>
+
+            <!-- QUIZ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Quiz: Mobile UI/UX Design</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge on UX principles, navigation patterns, visual design, platform guidelines, and prototyping. Answer all 15 questions.</p>
+
+                    <form id="quiz-form">
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">1. What does UX focus on?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) App color schemes only</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Server performance</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) User experience and overall interaction satisfaction</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Database structure</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">2. What does UI focus on?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Backend logic</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Visual layout and interface design</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Server security</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Data processing</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">3. Name one iOS design characteristic.</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) Hardware-based navigation buttons</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) Minimalist and clean interface design</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Complex layered menus</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) No animations</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">4. Name one Android Material Design characteristic.</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Flat grayscale interface</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Strong use of depth, shadows, and bold colors</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) Text-only navigation</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) No animation</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">5. What is a bottom navigation bar?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) A settings panel</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) A UI element allowing navigation between main sections at the bottom</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) A search tool</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) A background service</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">6. Why is clarity essential in mobile apps?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) It reduces storage</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B"> B) It prevents confusion and improves usability</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) It increases battery usage</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) It replaces documentation</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">7. What does consistency improve?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) App size</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Processing speed</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) User familiarity and ease of use</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Database performance</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">8. What is a wireframe?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) A final UI design</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) A blueprint or layout sketch of an interface</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) A coding framework</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) A testing tool</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">9. What is spacing used for?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Increasing storage</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Organizing content and improving readability</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Improving server speed</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Hiding UI elements</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">10. What is a floating action button?</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) A hidden menu</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) A primary action button that floats above content</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) A navigation drawer</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) A text input field</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">11. What is accessibility in mobile apps?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Limiting user features</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Designing apps usable by people with disabilities</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Increasing app size</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Removing animations</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">12. Why is usability testing important?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) To improve marketing</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) To check server performance</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) To evaluate how easily users can use the app</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) To reduce coding time</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">13. What is elevation in design?</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Font styling</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) A design technique using shadows to show depth</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Animation speed</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Navigation style</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">14. What is the purpose of animations in mobile apps?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Increase file size</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Provide feedback and improve user interaction</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Replace navigation</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Reduce battery usage</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">15. Why is typography important in mobile design?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) It affects readability and visual hierarchy</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) It controls app performance</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C"> C) It stores data</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) It replaces UI elements</label>
+                        </div>
+
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display: none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div id="recursos" class="tab-panel">
+                <h3 style="margin-bottom: 1.5rem;">Support Materials</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ Apple Human Interface Guidelines – Official</a>
+                    <a href="#" class="resource-link">→ Material Design 3 – Google's Design System</a>
+                    <a href="#" class="resource-link">→ Figma – Collaborative Design &amp; Prototyping Tool</a>
+                    <a href="#" class="resource-link">→ Nielsen Norman Group – UX Research &amp; Articles</a>
+                    <a href="#" class="resource-link">→ Laws of UX – Principles with Examples</a>
+                    <a href="#" class="resource-link">→ Mobbin – Mobile UI Pattern Library</a>
+                    <a href="#" class="resource-link">→ Protopie – Advanced Mobile Prototyping</a>
+                    <a href="#" class="resource-link">→ Adobe XD – UI/UX Design Tool</a>
+                    <a href="#" class="resource-link">→ Contrast Checker – WebAIM Accessibility Tool</a>
+                    <a href="#" class="resource-link">→ Google Fonts – Typography for Mobile Apps</a>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: Mobile UI/UX Design</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        To successfully complete this module, you should demonstrate understanding across the following competency levels:
+                    </p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>Difference between UI and UX</li>
+                                <li>The 7 core UX principles (clarity, simplicity, consistency...)</li>
+                                <li>Common mobile navigation patterns</li>
+                                <li>Key mobile UI components (buttons, cards, modals...)</li>
+                                <li>iOS HIG vs Android Material Design differences</li>
+                                <li>What a wireframe is and why it's used</li>
+                                <li>What accessibility means in mobile design</li>
+                                <li>Role of spacing and typography in visual hierarchy</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Creating wireframes for a mobile screen flow</li>
+                                <li>Applying spacing rules (4px/8px grid)</li>
+                                <li>Choosing accessible color contrast ratios</li>
+                                <li>Designing consistent icon systems</li>
+                                <li>Using Figma or equivalent to prototype a user flow</li>
+                                <li>Evaluating navigation patterns for different app types</li>
+                                <li>Designing finger-friendly tap targets (min 44x44pt)</li>
+                                <li>Applying platform-specific guidelines correctly</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Designing and running a usability test</li>
+                                <li>Creating a full design system (tokens, components, patterns)</li>
+                                <li>Advanced motion design and microinteractions</li>
+                                <li>Accessibility audits (VoiceOver, TalkBack compliance)</li>
+                                <li>Designing adaptive layouts for multiple screen sizes</li>
+                                <li>Iterating designs based on real user feedback</li>
+                                <li>Dark mode / theming design</li>
+                                <li>Handoff to developers with design tokens and specs</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+            document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runLab() {
+            const input = document.getElementById('lab-input').value;
+            const output = document.getElementById('lab-output');
+
+            const issues = [];
+            const passes = [];
+
+            if (input.includes('hasAccessibility: false') || input.includes("hasAccessibility:false")) {
+                issues.push('⚠ Accessibility is disabled. Enable voice-over support and high-contrast labels.');
+            } else {
+                passes.push('✓ Accessibility features are enabled.');
+            }
+
+            const spacingMatch = input.match(/spacingUnit:\s*(\d+)/);
+            if (spacingMatch) {
+                const spacing = parseInt(spacingMatch[1]);
+                if (spacing === 4 || spacing === 8) {
+                    passes.push(`✓ Spacing unit (${spacing}px) follows the recommended 4/8px grid.`);
+                } else {
+                    issues.push(`⚠ Spacing unit (${spacing}px) is non-standard. Use 4 or 8 as your base unit.`);
+                }
+            }
+
+            if (input.includes('"low"') && input.includes('colorContrast')) {
+                issues.push('⚠ Low color contrast detected. Minimum ratio should be 4.5:1 (WCAG AA).');
+            } else if (input.includes('"high"') && input.includes('colorContrast')) {
+                passes.push('✓ High color contrast — excellent for accessibility.');
+            } else if (input.includes('"medium"') && input.includes('colorContrast')) {
+                passes.push('✓ Medium contrast — acceptable, but consider increasing for better accessibility.');
+            }
+
+            if (input.includes('"inconsistent"') && input.includes('typography')) {
+                issues.push('⚠ Inconsistent typography detected. Define a clear type scale (heading, body, label).');
+            } else {
+                passes.push('✓ Consistent typography — good visual hierarchy.');
+            }
+
+            if (input.includes('"bottom"') && input.includes('navigation')) {
+                passes.push('✓ Bottom navigation is a proven pattern — works well for 3–5 main sections.');
+            } else if (input.includes('"drawer"') && input.includes('navigation')) {
+                passes.push('✓ Drawer navigation suits complex apps with many categories.');
+            } else if (input.includes('"gestures"') && input.includes('navigation')) {
+                issues.push('⚠ Gesture-only navigation may reduce discoverability — combine with visible elements.');
+            }
+
+            if (input.includes('animationsEnabled: true')) {
+                passes.push('✓ Animations enabled — adds clarity and personality to interactions.');
+            } else {
+                issues.push('⚠ Animations disabled. Subtle motion improves feedback and user experience.');
+            }
+
+            const score = passes.length;
+            const total = passes.length + issues.length;
+            const rating = score === total ? '🟢 Excellent' : score >= total * 0.6 ? '🟡 Good' : '🔴 Needs Work';
+
+            output.innerHTML = `
+                <strong style="color:#28e0ff;">✔ Design Audit Complete</strong><br>
+                <strong style="color:#a8ff78;">Score: ${score}/${total} — ${rating}</strong><br><br>
+                ${passes.map(p => `<span style="color:#10b981;">${p}</span>`).join('<br>')}<br>
+                ${issues.length ? '<br>' + issues.map(i => `<span style="color:#f59e0b;">${i}</span>`).join('<br>') : ''}
+                <br><br><em style="color:#b6c0de;">Tip: Fix the warnings above and re-run the audit to improve your design score.</em>
+            `;
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questionsData = {
+                    q1:  { correct: 'C', exp: 'UX (User Experience) focuses on how the app feels and the overall satisfaction of user interactions.' },
+                    q2:  { correct: 'B', exp: 'UI (User Interface) focuses on visual layout — what the app looks like.' },
+                    q3:  { correct: 'B', exp: 'iOS design is characterised by minimalism, clean interfaces, rounded elements, and blur effects.' },
+                    q4:  { correct: 'B', exp: 'Material Design uses bold colors, elevation-based shadows, and floating action buttons.' },
+                    q5:  { correct: 'B', exp: 'A bottom navigation bar lets users switch between 3–5 main sections from the bottom of the screen.' },
+                    q6:  { correct: 'B', exp: 'Clarity prevents confusion — users instantly know where they are and what they can do.' },
+                    q7:  { correct: 'C', exp: 'Consistency makes icons, colors, and layouts predictable, improving user familiarity and ease of use.' },
+                    q8:  { correct: 'B', exp: 'A wireframe is a low-fidelity blueprint or sketch of an interface showing layout and flow.' },
+                    q9:  { correct: 'B', exp: 'Consistent spacing organizes content and improves readability. Use multiples of 4 or 8 pixels.' },
+                    q10: { correct: 'B', exp: 'A Floating Action Button (FAB) is a prominent circular button that floats above content for the primary action.' },
+                    q11: { correct: 'B', exp: 'Accessibility means designing apps that are usable by people with disabilities, including vision or motor impairments.' },
+                    q12: { correct: 'C', exp: 'Usability testing evaluates how easily real users can navigate and use the app before it\'s built.' },
+                    q13: { correct: 'B', exp: 'Elevation is a visual technique using shadows to convey depth and indicate interactive elements.' },
+                    q14: { correct: 'B', exp: 'Animations provide feedback on actions and make interactions feel natural and satisfying.' },
+                    q15: { correct: 'A', exp: 'Typography affects readability and visual hierarchy — a clear type scale guides users through content.' }
+                };
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0, feedbackHTML = '';
+
+                Object.keys(this.questionsData).forEach((key, index) => {
+                    const userAnswer = formData.get(key);
+                    const isCorrect = userAnswer === this.questionsData[key].correct;
+                    if (isCorrect) score++;
+
+                    feedbackHTML += `
+                        <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                            <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                            <div>
+                                <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                ${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+                            </div>
+                        </div>`;
+                });
+
+                this.displayResults(score, feedbackHTML);
+            }
+
+            displayResults(score, feedbackHTML) {
+                const total = Object.keys(this.questionsData).length;
+                const percent = Math.round((score / total) * 100);
+                const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+
+                document.getElementById('quiz-score').innerHTML = `
+                    <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                    <p style="color:var(--text-secondary)">${percent >= 70 ? 'Excellent! You are ready to design professional mobile experiences.' : 'Review the UX principles, navigation patterns, and platform guidelines and try again.'}</p>`;
+
+                document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                const resultsDiv = document.getElementById('quiz-results');
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            clearQuiz() {
+                document.getElementById('quiz-form').reset();
+                document.getElementById('quiz-results').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+</body>
+</html>
+

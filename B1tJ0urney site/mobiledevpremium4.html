@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Cross-Platform Development</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #d000ff;
+            --purple: #c266ff;
+            --cyan: #a200ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(91, 124, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(207, 75, 255, 0.1) 0%, rgba(217, 91, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255,255,255,0.1); border: 1px solid var(--border-color);
+            color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+
+        .tab-button {
+            flex: 1; min-width: 120px; padding: 1rem 1.5rem;
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.3s ease; position: relative; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card {
+            background: rgba(255,255,255,0.03); padding: 1.5rem;
+            border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;
+        }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); }
+
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 0.75rem 0; }
+        .styled-list li { margin-bottom: 0.6rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        .code-block {
+            background: rgba(0,0,0,0.5); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.82rem; line-height: 1.6; color: var(--text-light); }
+        .code-block .kw { color: #ff79c6; }
+        .code-block .fn { color: #50fa7b; }
+        .code-block .str { color: #f1fa8c; }
+        .code-block .cm { color: #6272a4; font-style: italic; }
+        .code-block .tag { color: #ff6b6b; }
+        .code-block .attr { color: #4ecdc4; }
+
+        .compare-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .compare-table th { background: rgba(91,124,255,0.2); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; }
+        .compare-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+        .compare-table tr:hover td { background: rgba(255,255,255,0.03); }
+        .score-high { color: #10b981; font-weight: 600; }
+        .score-mid { color: #f59e0b; font-weight: 600; }
+        .score-low { color: #ef4444; font-weight: 600; }
+
+        .lab-container { display: flex; gap: 1rem; height: 420px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header-bar { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); border-radius: 8px 8px 0 0; }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; line-height: 1.6; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; font-size: 0.9rem; }
+        .resource-link:hover { text-decoration: underline; }
+
+        .quiz-option {
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem;
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;
+            margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05));
+            border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem;
+        }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+
+        .feedback-item {
+            display: flex; align-items: flex-start; gap: 1rem; padding: 1rem;
+            border-radius: 8px; background: rgba(255,255,255,0.03);
+        }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 1rem; font-weight: 600; margin-bottom: 1rem;
+            padding-bottom: 0.75rem; border-bottom: 2px solid;
+        }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .compare-table { font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-mobile.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: Cross-Platform Development</h1>
+            <p class="course-description">
+                Learn how to build mobile apps that run on both iOS and Android from a single codebase. Compare React Native, Flutter, and Ionic — their strengths, weaknesses, real-world use cases, and when to choose each.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• React Native • Flutter • Ionic • Capacitor • Deployment</span></div>
+                <div class="meta-item"><span>📌</span><span>Prerequisite: Mobile Development Fundamentals</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- LEARN -->
+            <div id="aprender" class="tab-panel active">
+
+                <div class="content-card">
+                    <h3>Why Cross-Platform Development?</h3>
+                    <p>Traditionally, apps had to be developed twice:</p>
+                    <ul class="styled-list">
+                        <li>Once in Swift for iOS</li>
+                        <li>Once in Kotlin/Java for Android</li>
+                    </ul>
+                    <p style="margin-top: 0.75rem;">This doubled development time, maintenance, and cost. Cross-platform frameworks changed everything by allowing developers to:</p>
+                    <ul class="styled-list">
+                        <li>Write one codebase</li>
+                        <li>Run on both iOS and Android</li>
+                        <li>Maintain features in one place</li>
+                        <li>Achieve nearly native performance</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">The three most popular ecosystems: <span class="highlight">React Native</span> (JavaScript), <span class="highlight">Flutter</span> (Dart), and <span class="highlight">Ionic</span> (Web tech). Each offers different strengths depending on the project and team.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>React Native – The JavaScript Mobile Framework</h3>
+                    <p>React Native, created by Facebook, uses JavaScript + React to build mobile apps.</p>
+                    <p style="margin-top: 0.75rem;"><strong>Key features:</strong></p>
+                    <ul class="styled-list">
+                        <li>Reuses up to 90% of code across platforms</li>
+                        <li>Uses "native components" under the hood</li>
+                        <li>Strong community and ecosystem</li>
+                        <li>Supports hot reload</li>
+                        <li>Easy integration with existing native apps</li>
+                    </ul>
+
+                    <div class="code-block" style="margin-top: 1rem;">
+<pre><span class="kw">import</span> { Text, View } <span class="kw">from</span> <span class="str">'react-native'</span>;
+
+<span class="kw">export default function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">View</span>&gt;
+      &lt;<span class="tag">Text</span>&gt;Hello from React Native!&lt;/<span class="tag">Text</span>&gt;
+    &lt;/<span class="tag">View</span>&gt;
+  );
+}</pre>
+                    </div>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Strengths:</span> Familiar for web developers · Large libraries · Hardware access via modules · Fast development cycle</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Weaknesses:</span> JS ↔ native bridge can slow things down · UI performance can vary · Dependent on third-party packages</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Flutter – Google's High-Performance UI Toolkit</h3>
+                    <p>Flutter uses the Dart language and compiles to high-performance native code.</p>
+                    <p style="margin-top: 0.75rem;"><strong>Key features:</strong></p>
+                    <ul class="styled-list">
+                        <li>Beautiful UI components ("widgets")</li>
+                        <li>Fast rendering engine (Skia)</li>
+                        <li>Best performance among cross-platform frameworks</li>
+                        <li>Same UI across Android, iOS, Web, and Desktop</li>
+                        <li>Excellent for animations</li>
+                    </ul>
+
+                    <div class="code-block" style="margin-top: 1rem;">
+<pre><span class="kw">import</span> <span class="str">'package:flutter/material.dart'</span>;
+
+<span class="kw">void</span> <span class="fn">main</span>() => <span class="fn">runApp</span>(<span class="fn">MyApp</span>());
+
+<span class="kw">class</span> MyApp <span class="kw">extends</span> StatelessWidget {
+  @<span class="attr">override</span>
+  Widget <span class="fn">build</span>(BuildContext context) {
+    <span class="kw">return</span> MaterialApp(
+      home: Scaffold(
+        body: Center(child: Text(<span class="str">"Hello from Flutter!"</span>)),
+      ),
+    );
+  }
+}</pre>
+                    </div>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Strengths:</span> Consistent UI · Very fast apps · Easy animations · Best for custom UIs and startups</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Weaknesses:</span> Larger app size · Dart is less known · Requires bridging for many native features</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Ionic – Web Technologies as Mobile Apps</h3>
+                    <p>Ionic allows developers to build mobile apps using HTML, CSS, JavaScript, and WebView technology. Often paired with Angular, React, or Vue.</p>
+
+                    <div class="code-block" style="margin-top: 1rem;">
+<pre>&lt;<span class="tag">ion-header</span>&gt;
+  &lt;<span class="tag">ion-toolbar</span>&gt;
+    &lt;<span class="tag">ion-title</span>&gt;Hello Ionic&lt;/<span class="tag">ion-title</span>&gt;
+  &lt;/<span class="tag">ion-toolbar</span>&gt;
+&lt;/<span class="tag">ion-header</span>&gt;
+
+&lt;<span class="tag">ion-content</span>&gt;
+  &lt;<span class="tag">p</span>&gt;This is an Ionic app!&lt;/<span class="tag">p</span>&gt;
+&lt;/<span class="tag">ion-content</span>&gt;</pre>
+                    </div>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Strengths:</span> Easiest for web developers · Rapid prototyping · Large component library · One codebase for Web + Mobile</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Weaknesses:</span> Lower performance than native · Heavily depends on WebView · Not great for graphics-intense apps</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Performance Comparison</h3>
+                    <table class="compare-table">
+                        <tr>
+                            <th>Criterion</th>
+                            <th>Flutter</th>
+                            <th>React Native</th>
+                            <th>Ionic</th>
+                        </tr>
+                        <tr>
+                            <td>Performance</td>
+                            <td class="score-high">★★★★★</td>
+                            <td class="score-high">★★★★</td>
+                            <td class="score-low">★★★</td>
+                        </tr>
+                        <tr>
+                            <td>Learning Curve</td>
+                            <td class="score-mid">Medium (Dart)</td>
+                            <td class="score-high">Easy (JS)</td>
+                            <td class="score-high">Easiest (Web)</td>
+                        </tr>
+                        <tr>
+                            <td>UI Consistency</td>
+                            <td class="score-high">Excellent</td>
+                            <td class="score-mid">Good</td>
+                            <td class="score-mid">Good</td>
+                        </tr>
+                        <tr>
+                            <td>Animations</td>
+                            <td class="score-high">Excellent</td>
+                            <td class="score-mid">Good</td>
+                            <td class="score-low">Limited</td>
+                        </tr>
+                        <tr>
+                            <td>Ecosystem</td>
+                            <td class="score-high">Growing fast</td>
+                            <td class="score-high">Very large</td>
+                            <td class="score-mid">Solid</td>
+                        </tr>
+                        <tr>
+                            <td>Best For</td>
+                            <td>Custom UIs, MVPs</td>
+                            <td>JS teams, scale</td>
+                            <td>Simple apps, PWAs</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="content-card">
+                    <h3>Accessing Native Features</h3>
+                    <p>Each framework provides APIs for Camera, GPS, Notifications, Accelerometer, Biometrics, and Local storage — but the approach varies:</p>
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Flutter</span> → Uses platform channels to communicate with native code.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">React Native</span> → Uses native modules written in Swift/Kotlin and connected to JS.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Ionic</span> → Uses Capacitor plugins to bridge with device hardware.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Real-World Apps Built With Each Framework</h3>
+                    <div class="code-explanation">
+                        <p><span class="highlight">React Native:</span> Instagram, Facebook, Airbnb (previously), Discord</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Flutter:</span> Google Ads, BMW, Alibaba, Nubank</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Ionic:</span> Admin dashboards, business apps, hybrid PWAs</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>When to Choose Which Framework?</h3>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Choose Flutter if:</span> You want the best UI · Need consistent performance · Building a startup MVP · Want the same code for Web, Desktop, and Mobile</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Choose React Native if:</span> You already know JavaScript · Need to integrate with a backend/web team · Want access to a huge ecosystem</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Choose Ionic if:</span> You want to reuse existing web skills · The app is simple or content-based · You want to ship very quickly</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Deployment Workflow</h3>
+                    <p>All frameworks eventually export native app bundles:</p>
+                    <ul class="styled-list">
+                        <li>Android → .aab file</li>
+                        <li>iOS → IPA via Xcode</li>
+                    </ul>
+                    <p style="margin-top: 0.75rem;"><strong>Publishing steps:</strong></p>
+                    <ul class="styled-list">
+                        <li>App signing</li>
+                        <li>Metadata & screenshots</li>
+                        <li>Privacy policies</li>
+                        <li>Store review processes</li>
+                    </ul>
+                </div>
+
+                <!-- ═══════════════════════════════════════════ -->
+                <!--           NEW CONTENT ADDED BELOW          -->
+                <!-- ═══════════════════════════════════════════ -->
+
+                <div class="content-card">
+                    <h3>State Management in Cross-Platform Apps</h3>
+                    <p>Managing state — data that changes over time — is one of the most important architectural decisions in any mobile app. Each framework has its own ecosystem of solutions:</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Flutter – Popular Solutions:</span></p>
+                    </div>
+                    <ul class="styled-list">
+                        <li><strong>Provider</strong> – Simple, recommended by Google for beginners</li>
+                        <li><strong>Riverpod</strong> – More robust, type-safe evolution of Provider</li>
+                        <li><strong>BLoC (Business Logic Component)</strong> – Separates UI from logic using streams; great for large apps</li>
+                        <li><strong>GetX</strong> – Lightweight and popular for rapid development</li>
+                    </ul>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">React Native – Popular Solutions:</span></p>
+                    </div>
+                    <ul class="styled-list">
+                        <li><strong>Redux</strong> – Predictable state container, widely used in large-scale apps</li>
+                        <li><strong>Zustand</strong> – Minimalist and fast, great for smaller projects</li>
+                        <li><strong>MobX</strong> – Reactive state management with observables</li>
+                        <li><strong>React Query / TanStack Query</strong> – Ideal for server-state and API data caching</li>
+                    </ul>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Ionic:</span> Leverages Angular's built-in services, React hooks, or Vue's Composition API depending on the chosen framework.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Navigation Patterns</h3>
+                    <p>Almost every app needs to navigate between screens. Here's how each framework handles routing and transitions:</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Flutter:</span> Uses a built-in <code style="color:var(--cyan)">Navigator</code> widget. For complex apps, <strong>GoRouter</strong> or <strong>AutoRoute</strong> provide declarative, URL-based routing.</p>
+                    </div>
+
+                    <div class="code-block">
+<pre><span class="cm">// Flutter – Navigate to a new screen</span>
+Navigator.<span class="fn">push</span>(
+  context,
+  MaterialPageRoute(builder: (context) => <span class="fn">DetailScreen</span>()),
+);</pre>
+                    </div>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">React Native:</span> <strong>React Navigation</strong> is the standard library. It supports Stack, Tab, Drawer, and Modal navigators out of the box.</p>
+                    </div>
+
+                    <div class="code-block">
+<pre><span class="cm">// React Native – Stack navigation with React Navigation</span>
+<span class="kw">const</span> Stack = <span class="fn">createNativeStackNavigator</span>();
+
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">NavigationContainer</span>&gt;
+      &lt;<span class="tag">Stack.Navigator</span>&gt;
+        &lt;<span class="tag">Stack.Screen</span> <span class="attr">name</span>=<span class="str">"Home"</span> <span class="attr">component</span>={HomeScreen} /&gt;
+        &lt;<span class="tag">Stack.Screen</span> <span class="attr">name</span>=<span class="str">"Details"</span> <span class="attr">component</span>={DetailScreen} /&gt;
+      &lt;/<span class="tag">Stack.Navigator</span>&gt;
+    &lt;/<span class="tag">NavigationContainer</span>&gt;
+  );
+}</pre>
+                    </div>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Ionic:</span> Uses <strong>Angular Router</strong>, <strong>React Router</strong>, or <strong>Vue Router</strong> depending on the chosen framework. Ionic provides animated page transitions automatically.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Network & API Integration</h3>
+                    <p>Mobile apps almost always need to communicate with a backend. Here's how each framework handles HTTP requests and data fetching:</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Flutter – Using the <code style="color:var(--cyan)">http</code> or <code style="color:var(--cyan)">dio</code> package:</span></p>
+                    </div>
+
+                    <div class="code-block">
+<pre><span class="kw">import</span> <span class="str">'package:http/http.dart'</span> <span class="kw">as</span> http;
+<span class="kw">import</span> <span class="str">'dart:convert'</span>;
+
+<span class="kw">Future</span>&lt;<span class="kw">void</span>&gt; <span class="fn">fetchData</span>() <span class="kw">async</span> {
+  <span class="kw">final</span> response = <span class="kw">await</span> http.<span class="fn">get</span>(Uri.<span class="fn">parse</span>(<span class="str">'https://api.example.com/data'</span>));
+  <span class="kw">if</span> (response.statusCode == 200) {
+    <span class="kw">final</span> data = <span class="fn">jsonDecode</span>(response.body);
+    <span class="fn">print</span>(data);
+  }
+}</pre>
+                    </div>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">React Native – Using the built-in <code style="color:var(--cyan)">fetch</code> API or <code style="color:var(--cyan)">axios</code>:</span></p>
+                    </div>
+
+                    <div class="code-block">
+<pre><span class="cm">// Using built-in fetch API</span>
+<span class="kw">const</span> <span class="fn">fetchData</span> = <span class="kw">async</span> () => {
+  <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://api.example.com/data'</span>);
+  <span class="kw">const</span> json = <span class="kw">await</span> res.<span class="fn">json</span>();
+  <span class="fn">console.log</span>(json);
+};</pre>
+                    </div>
+
+                    <ul class="styled-list" style="margin-top: 0.75rem;">
+                        <li>Both Flutter and React Native support REST and GraphQL APIs</li>
+                        <li>For authentication, JWT tokens or OAuth 2.0 are the most common approaches</li>
+                        <li>Offline support can be added with local databases: <strong>Hive</strong> or <strong>Isar</strong> (Flutter), <strong>AsyncStorage</strong> or <strong>WatermelonDB</strong> (React Native)</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>App Architecture Patterns</h3>
+                    <p>A well-structured app is easier to maintain, test, and scale. These are the most common architectural patterns in cross-platform development:</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">MVC (Model-View-Controller)</span> – Classic pattern. Common in Ionic/Angular apps. Separates data, UI, and logic into three clear layers.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">MVVM (Model-View-ViewModel)</span> – Popular in Flutter and React Native. The ViewModel exposes state and commands to the View, keeping UI code thin and testable.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Clean Architecture</span> – Favored in large Flutter projects. Divides the app into Presentation, Domain, and Data layers with strict dependency rules between them.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Feature-First vs. Layer-First</span> – Two common folder strategies. Feature-first groups by feature (e.g., <code style="color:var(--cyan)">/auth</code>, <code style="color:var(--cyan)">/profile</code>); layer-first groups by role (e.g., <code style="color:var(--cyan)">/models</code>, <code style="color:var(--cyan)">/services</code>, <code style="color:var(--cyan)">/screens</code>).</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Testing in Cross-Platform Development</h3>
+                    <p>Robust apps require testing at multiple levels. Each framework provides dedicated testing tools:</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Flutter Testing Pyramid:</span></p>
+                    </div>
+                    <ul class="styled-list">
+                        <li><strong>Unit tests</strong> – Test individual functions or classes in isolation</li>
+                        <li><strong>Widget tests</strong> – Test individual UI components (unique to Flutter)</li>
+                        <li><strong>Integration tests</strong> – Test complete user flows on a real device or emulator</li>
+                    </ul>
+
+                    <div class="code-block" style="margin-top: 1rem;">
+<pre><span class="cm">// Flutter – Widget test example</span>
+<span class="kw">void</span> <span class="fn">main</span>() {
+  <span class="fn">testWidgets</span>(<span class="str">'Counter increments on tap'</span>, (tester) <span class="kw">async</span> {
+    <span class="kw">await</span> tester.<span class="fn">pumpWidget</span>(<span class="fn">MyApp</span>());
+    <span class="fn">expect</span>(<span class="fn">find.text</span>(<span class="str">'0'</span>), findsOneWidget);
+    <span class="kw">await</span> tester.<span class="fn">tap</span>(<span class="fn">find.byIcon</span>(Icons.add));
+    <span class="kw">await</span> tester.<span class="fn">pump</span>();
+    <span class="fn">expect</span>(<span class="fn">find.text</span>(<span class="str">'1'</span>), findsOneWidget);
+  });
+}</pre>
+                    </div>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">React Native Testing Stack:</span></p>
+                    </div>
+                    <ul class="styled-list">
+                        <li><strong>Jest</strong> – Default test runner for unit and snapshot tests</li>
+                        <li><strong>React Native Testing Library</strong> – Tests components as users interact with them</li>
+                        <li><strong>Detox</strong> – End-to-end testing framework for real device and emulator flows</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Security Considerations in Mobile Apps</h3>
+                    <p>Security is often overlooked in cross-platform development. Here are the most important practices every developer should follow:</p>
+                    <ul class="styled-list">
+                        <li><strong>Never hardcode API keys</strong> – Use environment variables or secure vaults; never commit secrets to version control</li>
+                        <li><strong>Use HTTPS only</strong> – All network traffic must be encrypted; disable cleartext HTTP in app manifests</li>
+                        <li><strong>Secure local storage</strong> – Use <code style="color:var(--cyan)">flutter_secure_storage</code> (Flutter) or <code style="color:var(--cyan)">react-native-keychain</code> (RN) for sensitive data like tokens</li>
+                        <li><strong>Certificate pinning</strong> – Prevent man-in-the-middle attacks by pinning the server's SSL certificate in the app</li>
+                        <li><strong>Obfuscate release builds</strong> – Flutter supports the <code style="color:var(--cyan)">--obfuscate</code> flag; React Native uses Proguard/R8 on Android</li>
+                        <li><strong>Handle permissions responsibly</strong> – Request only the permissions the app actually needs and explain why to the user</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>CI/CD & Automation for Mobile</h3>
+                    <p>Modern mobile teams automate their build, test, and deployment pipelines — this is known as CI/CD (Continuous Integration / Continuous Delivery).</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Popular CI/CD tools for cross-platform apps:</span></p>
+                    </div>
+                    <ul class="styled-list">
+                        <li><strong>Codemagic</strong> – Purpose-built for Flutter apps; simple YAML-based configuration</li>
+                        <li><strong>Bitrise</strong> – Supports both Flutter and React Native; great visual pipeline editor</li>
+                        <li><strong>GitHub Actions</strong> – Free for open-source projects; supports all frameworks via community actions</li>
+                        <li><strong>Fastlane</strong> – Automates screenshots, code signing, and store deployment</li>
+                    </ul>
+
+                    <p style="margin-top: 0.75rem;">A typical CI/CD pipeline for a mobile app includes:</p>
+                    <ul class="styled-list">
+                        <li>Running unit and widget/component tests on every pull request</li>
+                        <li>Building release APK/AAB (Android) and IPA (iOS) automatically</li>
+                        <li>Uploading builds to TestFlight (iOS) or Firebase App Distribution for beta testing</li>
+                        <li>Submitting to the App Store and Google Play via automated scripts on merge to main</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>The Future of Cross-Platform Development</h3>
+                    <p>The cross-platform landscape continues to evolve rapidly. Here are the key trends shaping its future:</p>
+
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><span class="highlight">Flutter's New Rendering Engine (Impeller)</span> – Replaces Skia on iOS and Android for smoother animations, faster startup, and better shader performance. Now the default renderer on iOS.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">React Native's New Architecture</span> – The JSI (JavaScript Interface) replaces the old asynchronous bridge, dramatically reducing latency. The Fabric renderer and TurboModules are central to this system.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Flutter on Web & Desktop</span> – Flutter now runs on Web, Windows, macOS, and Linux from a single codebase — making it a true universal UI toolkit beyond mobile.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">KMM (Kotlin Multiplatform Mobile)</span> – A rising alternative from JetBrains that shares business logic between iOS and Android while keeping native UIs. Growing adoption in enterprise.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">AI-assisted development</span> – Tools like GitHub Copilot are increasingly used to scaffold Flutter widgets and React Native components, reducing boilerplate and speeding up development.</p>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════ -->
+                <!--             END OF NEW CONTENT             -->
+                <!-- ═══════════════════════════════════════════ -->
+
+                <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                    <h3>Section Conclusion</h3>
+                    <p>You now understand:</p>
+                    <ul class="styled-list">
+                        <li>How cross-platform development works</li>
+                        <li>The differences between Flutter, React Native, and Ionic</li>
+                        <li>Their strengths and weaknesses</li>
+                        <li>When to choose each framework</li>
+                        <li>How they integrate with native device features</li>
+                        <li>State management, navigation, and API integration patterns</li>
+                        <li>Architecture, testing, security, and CI/CD best practices</li>
+                        <li>Where the industry is heading with new architectures and tooling</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">This is essential knowledge for mobile engineering at any level.</p>
+                </div>
+
+            </div>
+
+            <!-- LAB -->
+            <div id="laboratorio" class="tab-panel">
+                <h3 style="margin-bottom: 1rem;">Framework Decision Engine</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">Describe your project requirements below and run the engine to get a framework recommendation with code snippet.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header-bar">PROJECT REQUIREMENTS</div>
+                        <textarea class="lab-textarea" id="lab-input">// Describe your project
+
+const project = {
+  teamSkills: "javascript",  // javascript | dart | web | mixed
+  appType: "ecommerce",      // ecommerce | social | dashboard | startup | game
+  performance: "high",       // high | medium | low
+  animations: true,          // true | false
+  webSupport: false,         // true | false
+  timeline: "standard"       // fast | standard
+};
+
+// Click "Run Engine" to get your recommendation</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header-bar">RECOMMENDATION + CODE SNIPPET</div>
+                        <div class="lab-output" id="lab-output">
+                            Click "Run Engine" to see which cross-platform framework best fits your project...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runLab()">▶ Run Engine</button>
+            </div>
+
+            <!-- QUIZ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Quiz: Cross-Platform Development</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge on React Native, Flutter, Ionic, native feature access, performance, and deployment. Answer all 15 questions.</p>
+
+                    <form id="quiz-form">
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">1. What problem do cross-platform frameworks solve?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) They increase hardware requirements</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) They allow apps to be built for multiple platforms using one codebase</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) They remove the need for UI design</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) They replace operating systems</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">2. What language does Flutter use?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Java</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Kotlin</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Dart</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Swift</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">3. What is the main rendering engine of Flutter?</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) WebView</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) Skia</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) OpenGL</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Vulkan</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">4. What is a native module in React Native?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) A JavaScript animation library</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) A bridge allowing access to platform-specific code</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) A UI layout file</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) A database connector</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">5. Why is Ionic considered the easiest to learn?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) It uses low-level machine code</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) It uses web technologies like HTML, CSS, and JavaScript</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) It requires native platform knowledge</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) It removes UI components</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">6. Which cross-platform framework has the best performance?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Ionic</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B"> B) Flutter</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) jQuery Mobile</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Bootstrap</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">7. What is Capacitor used for?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Database management</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Accessing native device features in web-based apps</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) UI animation design</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) App testing automation</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">8. Why might React Native apps lag sometimes?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Poor UI libraries</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) Communication delays between JavaScript and native code</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Lack of styling support</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Absence of networking tools</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">9. What allows Flutter to run on desktops?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Electron</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Flutter's built-in Desktop support</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Xamarin</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Unity</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">10. Name a real app built with Flutter.</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Google Ads</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Instagram</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) Photoshop</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Microsoft Word</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">11. What is hot reload?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Restarting the device</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Instantly updating code changes without restarting the app</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Reinstalling the operating system</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Clearing application data</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">12. Why is WebView a performance limitation?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) It increases performance</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) It may reduce performance compared to fully native apps</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) It improves hardware integration</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) It reduces app size</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">13. What is the output file for Android apps?</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) IPA</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) APK or AAB</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) DMG</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) ZIP</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">14. Which framework works best for heavy animations?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Ionic</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Flutter</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) PhoneGap</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Cordova</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color: var(--cyan); font-weight: 600; margin-bottom: 1rem;">15. In what case is Ionic the best choice?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) High-performance gaming apps</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Simple business or content-driven apps</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Low-level system apps</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Hardware driver development</label>
+                        </div>
+
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display: none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div id="recursos" class="tab-panel">
+                <h3 style="margin-bottom: 1.5rem;">Support Materials</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ Flutter – Official Documentation & Codelabs (Google)</a>
+                    <a href="#" class="resource-link">→ React Native – Official Documentation (Meta)</a>
+                    <a href="#" class="resource-link">→ Ionic Framework – Official Documentation</a>
+                    <a href="#" class="resource-link">→ Capacitor – Native Bridge for Web Apps</a>
+                    <a href="#" class="resource-link">→ Dart Language Tour – dart.dev</a>
+                    <a href="#" class="resource-link">→ React Native vs Flutter – In-Depth Comparison</a>
+                    <a href="#" class="resource-link">→ Flutter Widget Catalog – All UI Components</a>
+                    <a href="#" class="resource-link">→ pub.dev – Flutter Package Repository</a>
+                    <a href="#" class="resource-link">→ npm – React Native Package Registry</a>
+                    <a href="#" class="resource-link">→ Expo – React Native Simplified Development Tool</a>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: Cross-Platform Development</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        To successfully complete this module, demonstrate understanding across the following competency levels:
+                    </p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>Why cross-platform development exists</li>
+                                <li>Flutter uses Dart; React Native uses JavaScript</li>
+                                <li>Ionic uses web technologies (HTML/CSS/JS)</li>
+                                <li>What hot reload is and why it matters</li>
+                                <li>Flutter's rendering engine is Skia</li>
+                                <li>What Capacitor is used for in Ionic</li>
+                                <li>Android publishes .aab; iOS publishes .ipa</li>
+                                <li>Flutter has the best performance among cross-platform frameworks</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Building a basic screen with Flutter widgets</li>
+                                <li>Building a basic screen with React Native components</li>
+                                <li>Understanding how native modules work in React Native</li>
+                                <li>Understanding Flutter platform channels</li>
+                                <li>Choosing the right framework for a given project</li>
+                                <li>Accessing GPS, camera, or notifications in cross-platform apps</li>
+                                <li>Publishing a cross-platform app to a store</li>
+                                <li>Understanding strengths and weaknesses of each framework</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Implementing complex animations in Flutter</li>
+                                <li>Writing custom native modules for React Native</li>
+                                <li>State management (BLoC/Riverpod for Flutter; Redux/Zustand for RN)</li>
+                                <li>CI/CD pipelines for cross-platform apps (Codemagic, Bitrise)</li>
+                                <li>Running Flutter apps on Web and Desktop targets</li>
+                                <li>Performance profiling and optimization in Flutter/RN</li>
+                                <li>Integrating cross-platform apps with REST/GraphQL APIs</li>
+                                <li>Deep linking and push notifications setup</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+            document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runLab() {
+            const input = document.getElementById('lab-input').value.toLowerCase();
+            const output = document.getElementById('lab-output');
+
+            const isJS = input.includes('javascript') || input.includes('"js"');
+            const isDart = input.includes('dart');
+            const isWeb = input.includes('"web"') || input.includes("'web'");
+            const isHighPerf = input.includes('"high"') && input.includes('performance');
+            const isAnimations = input.includes('animations: true');
+            const isWebSupport = input.includes('websupport: true') || input.includes('web_support: true') || input.includes('websupport:true');
+            const isFast = input.includes('"fast"') && input.includes('timeline');
+            const isGame = input.includes('"game"');
+            const isDashboard = input.includes('"dashboard"');
+            const isStartup = input.includes('"startup"');
+
+            let fw, reason, snippet, color;
+
+            if (isGame) {
+                fw = 'Unity or Native';
+                reason = 'Games need maximum GPU access and engine support — neither Flutter nor RN are ideal.';
+                snippet = `// Games → Unity (C#) or Native\n// Flutter is not designed for heavy 3D games\n// Use: Unity, Unreal Engine, or native OpenGL`;
+                color = '#ff6b6b';
+            } else if (isDart || (isHighPerf && isAnimations)) {
+                fw = 'Flutter';
+                reason = 'Flutter excels at performance and animations, using its own Skia rendering engine.';
+                snippet = `import 'package:flutter/material.dart';\n\nvoid main() => runApp(MyApp());\n\nclass MyApp extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    return MaterialApp(\n      home: Scaffold(\n        appBar: AppBar(title: Text('My App')),\n        body: Center(child: Text('Hello Flutter!')),\n      ),\n    );\n  }\n}`;
+                color = '#28e0ff';
+            } else if (isWeb || isDashboard || isFast) {
+                fw = 'Ionic';
+                reason = 'Ionic is ideal for web developers, dashboards, and fast delivery using familiar web tech.';
+                snippet = `<!-- Ionic Page -->\n<ion-header>\n  <ion-toolbar>\n    <ion-title>Dashboard</ion-title>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content class="ion-padding">\n  <ion-card>\n    <ion-card-content>Hello Ionic!</ion-card-content>\n  </ion-card>\n</ion-content>`;
+                color = '#a8ff78';
+            } else {
+                fw = 'React Native';
+                reason = 'React Native is the natural choice for JavaScript developers with a large ecosystem and active community.';
+                snippet = `import React from 'react';\nimport { View, Text, StyleSheet } from 'react-native';\n\nexport default function App() {\n  return (\n    <View style={styles.container}>\n      <Text style={styles.title}>Hello React Native!</Text>\n    </View>\n  );\n}\n\nconst styles = StyleSheet.create({\n  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },\n  title: { fontSize: 24, fontWeight: 'bold' }\n});`;
+                color = '#f59e0b';
+            }
+
+            output.innerHTML = `
+                <span style="color:#28e0ff;font-weight:bold;">✔ Framework Recommendation</span><br><br>
+                <strong style="color:${color};font-size:1.1rem;">→ ${fw}</strong><br><br>
+                <span style="color:#b6c0de;">${reason}</span><br><br>
+                <strong style="color:#50fa7b;">Starter Code Snippet:</strong><br>
+                <pre style="color:#f1fa8c;margin:0.5rem 0;white-space:pre-wrap;">${snippet}</pre>
+                <br><em style="color:#6272a4;">Tip: Adjust teamSkills, appType, or performance in the editor and re-run for a different recommendation.</em>
+            `;
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questionsData = {
+                    q1:  { correct: 'B', exp: 'Cross-platform frameworks allow a single codebase to target multiple platforms, reducing development time and cost.' },
+                    q2:  { correct: 'C', exp: 'Flutter uses Dart — a language created by Google, optimized for UI development.' },
+                    q3:  { correct: 'B', exp: 'Flutter uses the Skia graphics engine to render its own UI, bypassing native components entirely.' },
+                    q4:  { correct: 'B', exp: 'Native modules are bridges in React Native that allow JavaScript to communicate with Swift/Kotlin code.' },
+                    q5:  { correct: 'B', exp: 'Ionic uses standard HTML, CSS, and JavaScript — making it the easiest transition for web developers.' },
+                    q6:  { correct: 'B', exp: 'Flutter has the best performance among cross-platform frameworks due to its Skia rendering engine and Dart compilation.' },
+                    q7:  { correct: 'B', exp: 'Capacitor is Ionic\'s bridge layer that enables web apps to access native device features like GPS and camera.' },
+                    q8:  { correct: 'B', exp: 'React Native uses a bridge between JavaScript and native code, and communication delays across this bridge can cause lag.' },
+                    q9:  { correct: 'B', exp: 'Flutter has built-in desktop support, allowing the same Flutter codebase to run on Windows, macOS, and Linux.' },
+                    q10: { correct: 'A', exp: 'Google Ads is a prominent app built with Flutter. Nubank and BMW also use Flutter for their mobile apps.' },
+                    q11: { correct: 'B', exp: 'Hot reload instantly applies code changes to the running app without a full restart, dramatically speeding up development.' },
+                    q12: { correct: 'B', exp: 'WebView runs a web browser engine inside the app, which is inherently slower than native rendering.' },
+                    q13: { correct: 'B', exp: 'Android apps are distributed as APK (older) or AAB (Android App Bundle — modern and preferred for Play Store).' },
+                    q14: { correct: 'B', exp: 'Flutter\'s Skia rendering engine and widget system make it the best choice for smooth, custom animations.' },
+                    q15: { correct: 'B', exp: 'Ionic is best for simple, content-based, or business apps where web developer skills can be reused directly.' }
+                };
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0, feedbackHTML = '';
+
+                Object.keys(this.questionsData).forEach((key, index) => {
+                    const userAnswer = formData.get(key);
+                    const isCorrect = userAnswer === this.questionsData[key].correct;
+                    if (isCorrect) score++;
+
+                    feedbackHTML += `
+                        <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                            <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                            <div>
+                                <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                ${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+                            </div>
+                        </div>`;
+                });
+
+                this.displayResults(score, feedbackHTML);
+            }
+
+            displayResults(score, feedbackHTML) {
+                const total = Object.keys(this.questionsData).length;
+                const percent = Math.round((score / total) * 100);
+                const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+
+                document.getElementById('quiz-score').innerHTML = `
+                    <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                    <p style="color:var(--text-secondary)">${percent >= 70
+                        ? 'Excellent! You understand cross-platform development well.'
+                        : 'Review the Flutter, React Native, and Ionic sections and try again.'}</p>`;
+
+                document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                const resultsDiv = document.getElementById('quiz-results');
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            clearQuiz() {
+                document.getElementById('quiz-form').reset();
+                document.getElementById('quiz-results').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+</body>
+</html>
+

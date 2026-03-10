@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - ML Regression & Classification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #ff2d78;
+            --purple: #ff85c2;
+            --cyan: #e0006e;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(91,124,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(91,124,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1; }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(122,75,255,0.1) 0%, rgba(91,124,255,0.05) 50%, transparent 100%); pointer-events: none; z-index: -1; }
+
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,20,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 0.75rem 0; }
+        .styled-list li { margin-bottom: 0.6rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        .algo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .algo-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .algo-name { font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; }
+        .algo-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
+        .algo-reg .algo-name { color: #10b981; }
+        .algo-cls .algo-name { color: var(--cyan); }
+
+        .metrics-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .metrics-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; font-weight: 600; }
+        .metrics-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+        .metrics-table tr:hover td { background: rgba(255,255,255,0.03); color: var(--text-light); }
+
+        .formula-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(91,124,255,0.3); border-radius: 8px; padding: 0.8rem 1.25rem; margin: 0.75rem 0; font-family: 'Courier New', monospace; font-size: 0.9rem; color: var(--cyan); }
+
+        .split-bar { display: flex; border-radius: 8px; overflow: hidden; height: 40px; margin: 1rem 0; font-size: 0.8rem; font-weight: 600; }
+        .split-train { background: rgba(91,124,255,0.35); flex: 0 0 70%; display: flex; align-items: center; justify-content: center; color: var(--cyan); border-right: 2px solid var(--bg-dark); }
+        .split-val { background: rgba(245,158,11,0.25); flex: 0 0 15%; display: flex; align-items: center; justify-content: center; color: #f59e0b; border-right: 2px solid var(--bg-dark); }
+        .split-test { background: rgba(16,185,129,0.2); flex: 0 0 15%; display: flex; align-items: center; justify-content: center; color: #10b981; }
+
+        .pitfall-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .pitfall-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .pitfall-name { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem; }
+        .pitfall-over .pitfall-name { color: #ef4444; }
+        .pitfall-under .pitfall-name { color: #f59e0b; }
+        .pitfall-leak .pitfall-name { color: #a78bfa; }
+        .pitfall-imbal .pitfall-name { color: #ff79c6; }
+        .pitfall-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
+
+        /* NEW */
+        .info-box { background: rgba(91,124,255,0.07); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+        .info-box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--purple); }
+        .section-divider { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .concept-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .concept-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 0.35rem; }
+        .concept-title { font-weight: 600; font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.4rem; }
+        .concept-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+
+        .lab-container { display: flex; gap: 1rem; height: 440px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header-bar { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); border-radius: 8px 8px 0 0; }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.82rem; border-radius: 0 0 8px 8px; line-height: 1.6; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; font-size: 0.9rem; }
+        .resource-link:hover { text-decoration: underline; }
+
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05)); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; background: rgba(255,255,255,0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .algo-grid, .pitfall-grid, .concept-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 280px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-ai.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: Advanced ML — Regression & Classification</h1>
+            <p class="course-description">
+                Master the core supervised learning techniques used in real ML projects. Learn regression algorithms, classification models, how to split and evaluate datasets, and how to avoid the most common pitfalls in production machine learning.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• Regression • Classification • Evaluation • Overfitting • Validation</span></div>
+                <div class="meta-item"><span>📌</span><span>Prerequisite: AI Foundations</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size:0.8rem; margin-top:5px; color:var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event,'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event,'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event,'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event,'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- LEARN -->
+            <div id="aprender" class="tab-panel active">
+
+                <div class="content-card">
+                    <h3>What Is Advanced Machine Learning?</h3>
+                    <p>Machine Learning allows computers to learn patterns from data and make predictions — without being explicitly programmed for each case.</p>
+                    <p style="margin-top: 0.75rem;"><strong>Advanced ML focuses on three core tasks:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Regression</span> — predicting continuous numerical values (price, temperature, revenue)</li>
+                        <li><span class="highlight">Classification</span> — categorizing data into discrete classes (spam/not spam, fraud/not fraud)</li>
+                        <li><span class="highlight">Model evaluation</span> — measuring, validating, and improving performance reliably</li>
+                    </ul>
+                    <p style="margin-top: 0.75rem;">These techniques power: <strong>credit scoring · medical diagnosis · spam detection · stock prediction · recommendation systems · autonomous driving</strong></p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem;">Understanding where supervised learning sits within the broader ML landscape:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Supervised</div>
+                            <div class="concept-title">Labeled Data → Prediction</div>
+                            <div class="concept-desc">The algorithm learns from input-output pairs. This module covers regression and classification — the two main supervised learning tasks.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Unsupervised</div>
+                            <div class="concept-title">No Labels → Structure</div>
+                            <div class="concept-desc">Finds hidden patterns in unlabeled data. Examples: k-means clustering, PCA dimensionality reduction, anomaly detection.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Reinforcement</div>
+                            <div class="concept-title">Agent → Rewards</div>
+                            <div class="concept-desc">Learns by trial and error in an environment. No labeled data — feedback comes from rewards and penalties. Used in game AI and robotics.</div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="margin-top: 0.5rem;">
+                        <div class="info-box-title">📐 The ML Workflow — Every Project Follows This</div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7;">
+                            <span class="highlight">1. Define the problem</span> → <span class="highlight">2. Collect & clean data</span> → <span class="highlight">3. Exploratory Data Analysis (EDA)</span> → <span class="highlight">4. Feature engineering</span> → <span class="highlight">5. Split data</span> → <span class="highlight">6. Train model</span> → <span class="highlight">7. Evaluate</span> → <span class="highlight">8. Tune hyperparameters</span> → <span class="highlight">9. Final test evaluation</span> → <span class="highlight">10. Deploy & monitor</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Supervised Learning — A Quick Recap</h3>
+                    <p>Supervised learning trains a model on <strong>labeled data</strong> — input examples paired with the correct output.</p>
+                    <div class="code-explanation" style="margin-top:0.75rem;">
+                        <p><strong>Regression labels:</strong> House → €350,000 · Temperature → 22.4°C · CO₂ → 185 g/km</p>
+                        <p><strong>Classification labels:</strong> Email → Spam / Not Spam · Patient → Diabetic / Healthy · Image → Cat / Dog</p>
+                    </div>
+                    <p style="margin-top:0.75rem;">The model learns the mapping from inputs → outputs, then generalizes to make predictions on new, unseen data.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Before any algorithm runs, raw data must be prepared. Feature engineering is often more impactful than algorithm choice:</p>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Feature Scaling</span> — many algorithms (k-NN, SVM, neural networks) are sensitive to feature magnitude. Always scale features before training:<br>
+                        <strong>StandardScaler</strong> — subtracts mean, divides by std deviation → values centered around 0<br>
+                        <strong>MinMaxScaler</strong> — scales all values to [0, 1] range<br>
+                        <small style="color: var(--text-secondary);">Tree-based models (Decision Trees, Random Forest) do NOT require scaling.</small></p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Encoding Categorical Features</span> — algorithms require numerical input:<br>
+                        <strong>One-Hot Encoding</strong> — creates binary columns per category (Color: Red/Blue/Green → 3 binary columns)<br>
+                        <strong>Label Encoding</strong> — assigns integers (Red=0, Blue=1, Green=2) — only valid for ordinal categories<br>
+                        <strong>Target Encoding</strong> — replaces categories with their mean target value — useful for high-cardinality features</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Handling Missing Values</span>:<br>
+                        <strong>Mean/Median imputation</strong> — fill with column average (numerical)<br>
+                        <strong>Mode imputation</strong> — fill with most frequent value (categorical)<br>
+                        <strong>KNN imputation</strong> — fill using k nearest rows<br>
+                        <strong>Drop rows/columns</strong> — only if missingness is &lt;5% or column is irrelevant</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Regression — Predicting Continuous Values</h3>
+                    <p>Regression outputs a <strong>number</strong> — not a category.</p>
+                    <div class="algo-grid" style="margin-top:1rem;">
+                        <div class="algo-card algo-reg">
+                            <div class="algo-name">Linear Regression</div>
+                            <div class="algo-desc">Fits a straight line through data. Simple but powerful baseline.<br><br>Formula: <code style="color:var(--cyan)">y = mX + b</code><br>Goal: minimize Mean Squared Error (MSE).</div>
+                        </div>
+                        <div class="algo-card algo-reg">
+                            <div class="algo-name">Multiple Linear Regression</div>
+                            <div class="algo-desc">Uses many features (size, rooms, location, age). Each feature gets a coefficient weight that influences the prediction.</div>
+                        </div>
+                        <div class="algo-card algo-reg">
+                            <div class="algo-name">Polynomial Regression</div>
+                            <div class="algo-desc">Fits curved patterns by adding powers of features. Used for disease progression, complex physical systems.</div>
+                        </div>
+                        <div class="algo-card algo-reg">
+                            <div class="algo-name">Regularization</div>
+                            <div class="algo-desc"><strong>Lasso (L1)</strong> — removes unimportant features<br><strong>Ridge (L2)</strong> — penalizes large coefficients<br><strong>ElasticNet</strong> — combination of both</div>
+                        </div>
+                    </div>
+                    <div class="formula-box">MSE = (1/n) × Σ(ŷᵢ − yᵢ)²</div>
+                    <p style="font-size:0.8rem; color:var(--text-secondary);">MSE penalizes large errors heavily because of the squared term. Lower MSE = better fit.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Additional powerful regression techniques used in industry:</p>
+                    <div class="algo-grid">
+                        <div class="algo-card algo-reg">
+                            <div class="algo-name">Decision Tree Regressor</div>
+                            <div class="algo-desc">Splits data using threshold conditions and predicts the average value in each leaf. Interpretable but prone to overfitting on deep trees.</div>
+                        </div>
+                        <div class="algo-card algo-reg">
+                            <div class="algo-name">Random Forest Regressor</div>
+                            <div class="algo-desc">Ensemble of decision tree regressors. Averages predictions for a more robust, generalized result. One of the most reliable regression methods.</div>
+                        </div>
+                        <div class="algo-card algo-reg">
+                            <div class="algo-name">Gradient Boosting (XGBoost)</div>
+                            <div class="algo-desc">Sequentially trains trees where each tree corrects the errors of the previous one. State-of-the-art on tabular data. Wins most Kaggle competitions.</div>
+                        </div>
+                        <div class="algo-card algo-reg">
+                            <div class="algo-name">Support Vector Regression</div>
+                            <div class="algo-desc">SVR finds a regression function within a margin (epsilon-tube). Robust to outliers, works well with high-dimensional data.</div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="margin-top: 0.5rem;">
+                        <div class="info-box-title">📌 How Gradient Descent Trains Linear Regression</div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">Training a regression model means finding the optimal weights (m and b) that minimize the cost function (MSE). <strong>Gradient descent</strong> does this iteratively: compute the gradient of the loss with respect to each weight → take a small step in the direction that reduces the loss → repeat until convergence. The <em>learning rate</em> controls step size — too large: overshoots; too small: extremely slow.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Classification — Predicting Categories</h3>
+                    <p>Classification outputs a <strong>class label</strong> — one of several discrete categories.</p>
+                    <div class="algo-grid" style="margin-top:1rem;">
+                        <div class="algo-card algo-cls">
+                            <div class="algo-name">Logistic Regression</div>
+                            <div class="algo-desc">Despite its name, it's a classifier. Uses the sigmoid function to output a probability (0–1), then applies a threshold to decide the class.</div>
+                        </div>
+                        <div class="algo-card algo-cls">
+                            <div class="algo-name">k-Nearest Neighbors (k-NN)</div>
+                            <div class="algo-desc">Classifies based on the k closest neighbors in feature space. Simple, intuitive, and powerful for small datasets.</div>
+                        </div>
+                        <div class="algo-card algo-cls">
+                            <div class="algo-name">Decision Trees</div>
+                            <div class="algo-desc">Models decisions as a tree of if-then rules. Easy to interpret and visualize. Example: Is income &gt; 30k? → Yes: approve / No: deny</div>
+                        </div>
+                        <div class="algo-card algo-cls">
+                            <div class="algo-name">Random Forest</div>
+                            <div class="algo-desc">An ensemble of many decision trees. Averages their results — higher accuracy, less overfitting. Works well across many domains.</div>
+                        </div>
+                        <div class="algo-card algo-cls">
+                            <div class="algo-name">Support Vector Machine (SVM)</div>
+                            <div class="algo-desc">Finds the optimal hyperplane that maximally separates classes. Great for high-dimensional data, text classification, medical imaging.</div>
+                        </div>
+                        <div class="algo-card algo-cls">
+                            <div class="algo-name">Naïve Bayes</div>
+                            <div class="algo-desc">Uses probability (Bayes' theorem) to classify. Fast, works well with text data. Classic baseline for spam detection.</div>
+                        </div>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Advanced ensemble methods that dominate real-world classification benchmarks:</p>
+                    <div class="algo-grid">
+                        <div class="algo-card algo-cls">
+                            <div class="algo-name">Gradient Boosting (XGBoost / LightGBM)</div>
+                            <div class="algo-desc">Sequentially adds trees correcting prior errors. XGBoost and LightGBM are the go-to algorithms for tabular classification. Extremely powerful with proper tuning.</div>
+                        </div>
+                        <div class="algo-card algo-cls">
+                            <div class="algo-name">AdaBoost</div>
+                            <div class="algo-desc">Boosts weak classifiers by focusing subsequent models on misclassified examples. Each weak learner gets a weight proportional to its accuracy.</div>
+                        </div>
+                        <div class="algo-card algo-cls">
+                            <div class="algo-name">Stacking (Stacked Generalization)</div>
+                            <div class="algo-desc">Trains a "meta-model" on the predictions of multiple base models. Often produces best results in competitions — combines diverse model strengths.</div>
+                        </div>
+                        <div class="algo-card algo-cls">
+                            <div class="algo-name">Neural Networks</div>
+                            <div class="algo-desc">Multi-layer perceptrons can classify any pattern. Used when data is very large or involves images, audio, or text that requires deep feature extraction.</div>
+                        </div>
+                    </div>
+
+                    <div class="info-box" style="margin-top: 0.75rem;">
+                        <div class="info-box-title">🔧 Binary vs Multi-Class vs Multi-Label Classification</div>
+                        <ul class="styled-list" style="margin-top: 0.3rem;">
+                            <li><strong style="color: var(--text-light);">Binary</strong> — two classes only: spam/not spam, fraud/not fraud. Uses sigmoid output.</li>
+                            <li><strong style="color: var(--text-light);">Multi-class</strong> — mutually exclusive classes: classify a digit 0–9. Uses softmax output — probabilities across all classes sum to 1.</li>
+                            <li><strong style="color: var(--text-light);">Multi-label</strong> — multiple labels can be true simultaneously: a movie can be "Action", "Comedy", AND "Thriller". Uses multiple sigmoid outputs.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Splitting Data — Train / Validation / Test</h3>
+                    <p>To get an honest measure of model performance, data must be split into three sets:</p>
+                    <div class="split-bar" style="margin-top:1.25rem;">
+                        <div class="split-train">Training — 70%</div>
+                        <div class="split-val">Val — 15%</div>
+                        <div class="split-test">Test — 15%</div>
+                    </div>
+                    <div class="code-explanation" style="margin-top:1rem;">
+                        <p><span class="highlight">Training set</span> — the model learns patterns from this data</p>
+                        <p><span class="highlight">Validation set</span> — used to tune hyperparameters and catch overfitting during development</p>
+                        <p><span class="highlight">Test set</span> — used once at the end for a final, unbiased performance evaluation</p>
+                    </div>
+                    <p style="margin-top:0.75rem;"><strong>Cross-validation (k-fold)</strong> — splits data into k folds and rotates which fold is used for validation. More reliable than a single split. Standard in real ML projects.</p>
+                    <div class="formula-box">k-Fold CV: train on k−1 folds → evaluate on 1 fold → repeat k times → average scores</div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Variants of cross-validation for specific scenarios:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Stratified k-Fold</div>
+                            <div class="concept-title">Preserves Class Balance</div>
+                            <div class="concept-desc">Each fold maintains the same class ratio as the full dataset. Essential for imbalanced classification. Always use this over standard k-fold for classification tasks.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Leave-One-Out (LOO)</div>
+                            <div class="concept-title">n-Fold CV</div>
+                            <div class="concept-desc">Each sample is used as the validation set once. Maximum variance reduction but computationally expensive. Only practical on very small datasets.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Time Series CV</div>
+                            <div class="concept-title">Walk-Forward Validation</div>
+                            <div class="concept-desc">For time series data, validation must always be in the future relative to training. Standard k-fold is WRONG for time series — it creates data leakage from the future.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Group k-Fold</div>
+                            <div class="concept-title">Prevents Group Leakage</div>
+                            <div class="concept-desc">When data has groups (e.g., multiple samples per patient), ensures entire groups stay in train or validation — preventing the model from "recognizing" patients it saw in training.</div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="margin-top: 0.5rem;">
+                        <div class="info-box-title">⚠️ The Golden Rule: Never Touch the Test Set</div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">The test set represents data you will encounter in the real world after deployment. Using it for <em>any</em> decision during development (feature selection, algorithm choice, hyperparameter tuning) constitutes <strong>data leakage</strong> — your reported performance will not reflect real-world behavior.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Evaluating Regression Models</h3>
+                    <table class="metrics-table">
+                        <thead><tr><th>Metric</th><th>Formula</th><th>When to Use</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>MSE</strong> — Mean Squared Error</td><td>avg((ŷ − y)²)</td><td>Penalizes large errors heavily</td></tr>
+                            <tr><td><strong>RMSE</strong> — Root MSE</td><td>√MSE</td><td>Same units as target variable</td></tr>
+                            <tr><td><strong>MAE</strong> — Mean Absolute Error</td><td>avg(|ŷ − y|)</td><td>More robust to outliers</td></tr>
+                            <tr><td><strong>R² Score</strong></td><td>1 − (SS_res / SS_tot)</td><td>% of variance explained (0–1, higher is better)</td></tr>
+                        </tbody>
+                    </table>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Additional regression diagnostics used in production:</p>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Adjusted R²</span> — unlike plain R², this penalizes adding irrelevant features. A model with more features will always have higher R², but if the features don't help, Adjusted R² will decrease. Always use Adjusted R² when comparing models with different feature counts.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Residual Analysis</span> — plotting residuals (errors) reveals whether model assumptions hold:<br>
+                        <strong>Random scatter</strong> → good fit, assumptions met<br>
+                        <strong>Fan shape (heteroscedasticity)</strong> → variance increases with prediction value, consider log-transforming the target<br>
+                        <strong>Curved pattern</strong> → non-linearity not captured, consider polynomial features or a different algorithm</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">MAPE — Mean Absolute Percentage Error</span> — avg(|ŷ − y| / y × 100%). Expresses error as a percentage of the actual value — intuitive for business stakeholders. MAPE of 5% means predictions are off by 5% on average.<br>
+                        <small style="color: var(--text-secondary);">Caution: MAPE is undefined when y = 0 and can be misleading with very small actual values.</small></p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Evaluating Classification Models</h3>
+                    <table class="metrics-table">
+                        <thead><tr><th>Metric</th><th>Meaning</th><th>Best For</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Accuracy</strong></td><td>% of all predictions that are correct</td><td>Balanced datasets</td></tr>
+                            <tr><td><strong>Precision</strong></td><td>Of predicted positives, how many are actually positive?</td><td>When false positives are costly (spam filter)</td></tr>
+                            <tr><td><strong>Recall (Sensitivity)</strong></td><td>Of real positives, how many did we catch?</td><td>When false negatives are costly (cancer detection)</td></tr>
+                            <tr><td><strong>F1-Score</strong></td><td>Harmonic mean of Precision and Recall</td><td>Imbalanced datasets</td></tr>
+                            <tr><td><strong>Confusion Matrix</strong></td><td>Table of TP, TN, FP, FN</td><td>Full picture of classification errors</td></tr>
+                            <tr><td><strong>ROC-AUC</strong></td><td>Area under the precision-recall tradeoff curve</td><td>Comparing classifiers overall</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="formula-box">F1 = 2 × (Precision × Recall) / (Precision + Recall)</div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Understanding the Confusion Matrix in depth — and the real cost of each error type:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">TP — True Positive</div>
+                            <div class="concept-title">Correctly Predicted Positive</div>
+                            <div class="concept-desc">Model predicted "fraud" and it was fraud. Model predicted "cancer" and the patient has cancer. The ideal outcome.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">TN — True Negative</div>
+                            <div class="concept-title">Correctly Predicted Negative</div>
+                            <div class="concept-desc">Model predicted "not fraud" and it was legitimate. Model predicted "healthy" and the patient is healthy.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">FP — False Positive (Type I Error)</div>
+                            <div class="concept-title">False Alarm</div>
+                            <div class="concept-desc">Model predicted "fraud" but it was legitimate. Spam filter blocks a real email. Cost: innocent people wrongly treated. Hurts Precision.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">FN — False Negative (Type II Error)</div>
+                            <div class="concept-title">Missed Detection</div>
+                            <div class="concept-desc">Model predicted "healthy" but the patient has cancer. Model predicted "safe" but it's fraud. Often the more dangerous error. Hurts Recall.</div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="margin-top: 0.5rem;">
+                        <div class="info-box-title">📈 ROC Curve & AUC — What They Actually Mean</div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">The ROC curve plots True Positive Rate (Recall) vs False Positive Rate at every possible classification threshold. <strong>AUC (Area Under the Curve)</strong> summarizes this: AUC = 1.0 is a perfect classifier; AUC = 0.5 is random guessing. AUC measures how well the model <em>ranks</em> positives above negatives — it's threshold-independent and ideal for comparing models on imbalanced data.</p>
+                    </div>
+                    <div class="code-explanation" style="margin-top: 0.75rem;">
+                        <p><span class="highlight">Adjusting the Classification Threshold</span> — logistic regression (and most classifiers) output a probability. The default threshold is 0.5: if P(positive) ≥ 0.5 → predict positive. But this can be changed:<br>
+                        <strong>Lower threshold (e.g., 0.3)</strong> → more positives predicted → higher Recall, lower Precision → better for cancer detection<br>
+                        <strong>Higher threshold (e.g., 0.7)</strong> → fewer positives predicted → higher Precision, lower Recall → better for spam filter</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Hyperparameter Tuning</h3>
+                    <!-- NEW CARD -->
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary); line-height: 1.6;">Model <em>parameters</em> are learned from data (weights, coefficients). <em>Hyperparameters</em> are settings you choose before training that control how the model learns — like the depth of a tree, the number of estimators in a forest, or the regularization strength.</p>
+
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Method 1</div>
+                            <div class="concept-title">Grid Search (GridSearchCV)</div>
+                            <div class="concept-desc">Exhaustively tries every combination of specified hyperparameter values. Guarantees finding the best combo — but very slow with many parameters. Always use with cross-validation.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Method 2</div>
+                            <div class="concept-title">Random Search (RandomizedSearchCV)</div>
+                            <div class="concept-desc">Samples random combinations from the hyperparameter space. Much faster than grid search and often finds near-optimal results. Preferred when search space is large.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Method 3</div>
+                            <div class="concept-title">Bayesian Optimization</div>
+                            <div class="concept-desc">Uses past evaluations to intelligently choose next combinations to try. Significantly more efficient than random search. Libraries: Optuna, Hyperopt, BayesSearchCV.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Method 4</div>
+                            <div class="concept-title">AutoML</div>
+                            <div class="concept-desc">Automated algorithm selection + hyperparameter tuning. Libraries: Auto-sklearn, TPOT, H2O AutoML, Google AutoML. Trades control for speed and ease of use.</div>
+                        </div>
+                    </div>
+
+                    <p style="margin-top: 1rem; font-size: 0.9rem; font-weight: 600; color: var(--text-light);">Key hyperparameters by algorithm:</p>
+                    <table class="metrics-table" style="margin-top: 0.5rem;">
+                        <thead><tr><th>Algorithm</th><th>Key Hyperparameters</th><th>Effect</th></tr></thead>
+                        <tbody>
+                            <tr><td>Decision Tree</td><td>max_depth, min_samples_split</td><td>Controls overfitting — deeper = more complex</td></tr>
+                            <tr><td>Random Forest</td><td>n_estimators, max_depth, max_features</td><td>More trees = more stable, diminishing returns after ~200</td></tr>
+                            <tr><td>XGBoost</td><td>learning_rate, n_estimators, max_depth, subsample</td><td>Lower learning_rate + more trees = better generalization</td></tr>
+                            <tr><td>SVM</td><td>C (regularization), kernel, gamma</td><td>High C = low bias, high variance (complex boundary)</td></tr>
+                            <tr><td>k-NN</td><td>k (number of neighbors)</td><td>Low k = complex boundary, high k = smoother</td></tr>
+                            <tr><td>Logistic Regression</td><td>C (inverse regularization), solver</td><td>Low C = more regularization, simpler model</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-card">
+                    <h3>Avoiding Common ML Pitfalls</h3>
+                    <div class="pitfall-grid">
+                        <div class="pitfall-card pitfall-over">
+                            <div class="pitfall-name">Overfitting</div>
+                            <div class="pitfall-desc">Model memorizes training data and performs poorly on new data. High training accuracy, low test accuracy.<br><strong style="color:#b6c0de;">Fix:</strong> Regularization, more data, simpler model, dropout</div>
+                        </div>
+                        <div class="pitfall-card pitfall-under">
+                            <div class="pitfall-name">Underfitting</div>
+                            <div class="pitfall-desc">Model is too simple to capture real patterns. Poor performance on both training and test data.<br><strong style="color:#b6c0de;">Fix:</strong> More features, more complex model, better hyperparameters</div>
+                        </div>
+                        <div class="pitfall-card pitfall-leak">
+                            <div class="pitfall-name">Data Leakage</div>
+                            <div class="pitfall-desc">Future or test information accidentally leaks into training. Produces suspiciously high accuracy that doesn't hold in production.<br><strong style="color:#b6c0de;">Fix:</strong> Strict train/test split before any preprocessing</div>
+                        </div>
+                        <div class="pitfall-card pitfall-imbal">
+                            <div class="pitfall-name">Imbalanced Data</div>
+                            <div class="pitfall-desc">One class dominates (e.g., 99% not fraud). Model predicts majority class and still gets "99% accuracy".<br><strong style="color:#b6c0de;">Fix:</strong> SMOTE resampling, class weights, use F1/AUC not accuracy</div>
+                        </div>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom: 0.75rem; font-size: 0.9rem;">Four additional pitfalls that catch even experienced practitioners:</p>
+                    <div class="pitfall-grid">
+                        <div class="pitfall-card" style="border-color: rgba(16,185,129,0.3);">
+                            <div class="pitfall-name" style="color: #10b981;">Feature Scaling Mismatch</div>
+                            <div class="pitfall-desc">Fitting the scaler on training + test data (or all data). The scaler must be fit only on training data and then applied to validation/test.<br><strong style="color:#b6c0de;">Fix:</strong> Use sklearn Pipeline — it handles this automatically and correctly.</div>
+                        </div>
+                        <div class="pitfall-card" style="border-color: rgba(245,158,11,0.3);">
+                            <div class="pitfall-name" style="color: #f59e0b;">Wrong Evaluation Metric</div>
+                            <div class="pitfall-desc">Using accuracy on imbalanced data, or MSE when outliers dominate. A misleading metric can mask terrible real-world performance.<br><strong style="color:#b6c0de;">Fix:</strong> Always choose metrics aligned with actual business cost of errors.</div>
+                        </div>
+                        <div class="pitfall-card" style="border-color: rgba(167,139,250,0.3);">
+                            <div class="pitfall-name" style="color: #a78bfa;">Target Leakage</div>
+                            <div class="pitfall-desc">A feature that is caused by the target (not a predictor of it) — e.g., including a "loan defaulted" column when predicting loan defaults.<br><strong style="color:#b6c0de;">Fix:</strong> Carefully review feature engineering — only include information available at prediction time.</div>
+                        </div>
+                        <div class="pitfall-card" style="border-color: rgba(255,121,198,0.3);">
+                            <div class="pitfall-name" style="color: #ff79c6;">Distribution Shift</div>
+                            <div class="pitfall-desc">Training data distribution differs from production data. Common after model deployment when real-world patterns change over time.<br><strong style="color:#b6c0de;">Fix:</strong> Monitor model performance in production, set up retraining pipelines, use data drift detection tools.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>The Bias-Variance Tradeoff</h3>
+                    <!-- NEW CARD -->
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary); line-height: 1.6;">One of the most fundamental concepts in machine learning — understanding this explains overfitting, underfitting, and why ensemble methods work.</p>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">Bias</span> — error from overly simplistic assumptions. A high-bias model is too rigid — it underfits the data by missing real patterns.<br>
+                        <small style="color: var(--text-secondary)">Example: fitting a straight line to clearly curved data. High training error AND high test error.</small></p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Variance</span> — error from excessive sensitivity to training data. A high-variance model is too flexible — it memorizes noise and overfits.<br>
+                        <small style="color: var(--text-secondary)">Example: a deep decision tree that memorizes every training sample. Low training error but high test error.</small></p>
+                    </div>
+
+                    <div class="formula-box">Total Error = Bias² + Variance + Irreducible Noise</div>
+
+                    <div class="info-box" style="margin-top: 0.75rem;">
+                        <div class="info-box-title">⚖️ The Tradeoff</div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">Reducing bias typically increases variance and vice versa. The goal is to find the <em>sweet spot</em> — a model complex enough to capture real patterns but not so complex it memorizes noise. This is why we use regularization (reduces variance), cross-validation (measures generalization), and ensemble methods (reduce variance by averaging many models).</p>
+                    </div>
+
+                    <table class="metrics-table" style="margin-top: 1rem;">
+                        <thead><tr><th>Model Type</th><th>Bias</th><th>Variance</th><th>Solution</th></tr></thead>
+                        <tbody>
+                            <tr><td>Linear Regression</td><td>High (if data is non-linear)</td><td>Low</td><td>Add polynomial features, use more complex model</td></tr>
+                            <tr><td>Deep Decision Tree</td><td>Low</td><td>High</td><td>Prune tree, limit depth, use ensemble</td></tr>
+                            <tr><td>Random Forest</td><td>Low</td><td>Medium (reduced by averaging)</td><td>Tune n_estimators, max_depth</td></tr>
+                            <tr><td>k-NN (k=1)</td><td>Low</td><td>Very High</td><td>Increase k value</td></tr>
+                            <tr><td>k-NN (large k)</td><td>High</td><td>Low</td><td>Decrease k value</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                    <h3>Section Conclusion</h3>
+                    <p>You now understand the core of professional supervised machine learning:</p>
+                    <ul class="styled-list">
+                        <li>Regression — linear, multiple, polynomial, regularized</li>
+                        <li>Classification — logistic regression, k-NN, decision trees, random forest, SVM</li>
+                        <li>Data splitting — train / validation / test and k-fold cross-validation</li>
+                        <li>Regression metrics — MSE, RMSE, MAE, R²</li>
+                        <li>Classification metrics — accuracy, precision, recall, F1, confusion matrix, AUC</li>
+                        <li>Common pitfalls — overfitting, underfitting, data leakage, class imbalance</li>
+                    </ul>
+                    <p style="margin-top:1rem;">These skills are the foundation for every real-world ML project.</p>
+                </div>
+
+            </div>
+
+            <!-- LAB -->
+            <div id="laboratorio" class="tab-panel">
+                <h3 style="margin-bottom:1rem;">ML Model Advisor</h3>
+                <p style="margin-bottom:1rem; font-size:0.9rem; color:var(--text-secondary);">Describe your ML problem and the advisor will recommend the best algorithm, evaluation metric, and warn you about potential pitfalls.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header-bar">PROBLEM CONFIGURATION</div>
+                        <textarea class="lab-textarea" id="lab-input">// Define your ML problem
+
+const problem = {
+  taskType: "classification",  // regression | classification
+  dataSize: "medium",          // small | medium | large
+  features: 12,                // number of input features
+  isImbalanced: false,         // true | false
+  hasOutliers: true,           // true | false
+  needsInterpretability: true  // true | false (can you explain it to stakeholders?)
+};
+
+// Click "Get Recommendation" to receive guidance!</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header-bar">MODEL RECOMMENDATION</div>
+                        <div class="lab-output" id="lab-output">
+                            Click "Get Recommendation" to analyze your ML problem...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:1rem;" onclick="runLab()">▶ Get Recommendation</button>
+            </div>
+
+            <!-- QUIZ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Quiz: Advanced ML — Regression & Classification</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:2rem;">Test your knowledge of regression, classification, model evaluation, and ML pitfalls. Answer all 15 questions.</p>
+
+                    <form id="quiz-form">
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">1. What type of output does a regression model produce?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) A discrete class label</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) A binary outcome only (0 or 1)</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) A continuous numerical value</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) A probability distribution over classes</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">2. What type of output does a classification model produce?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) A continuous value like price or temperature</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) A time series forecast</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) A discrete class label (category)</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) A random number</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">3. What is the purpose of the sigmoid function in Logistic Regression?</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) To normalize image pixels</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) To map any real number to a probability between 0 and 1</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) To remove noise from features</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) To increase the variance of predictions</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">4. What is the key difference between MAE and MSE?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) MAE squares the errors; MSE does not</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) MSE uses absolute values; MAE does not</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) MSE penalizes larger errors more heavily because it squares the differences</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) MAE is always larger than MSE</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">5. What does an R² score of 0.85 mean?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) The model is 85% accurate in classification</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) The model explains 85% of the variance in the target variable</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) 85% of predictions are within one unit of the actual value</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) The model has an 85% training accuracy</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">6. What is the role of the validation set?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) To train the model's weights</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B"> B) To provide the final unbiased performance score</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) To tune hyperparameters and detect overfitting during development</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) To store raw data</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">7. Which metric balances both Precision and Recall into a single score?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Accuracy</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Recall</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Precision</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) F1-Score</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">8. What is a Decision Tree?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) A type of neural network</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) A linear model like regression</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) A model that makes decisions through a hierarchy of if-then rules</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) An unsupervised clustering algorithm</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">9. Why does Random Forest outperform a single Decision Tree?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) It uses only one feature at a time</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) It averages predictions across many trees, reducing variance and overfitting</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) It is computationally faster</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) It removes randomness from the model</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">10. What is k-fold cross-validation?</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Splitting data once into train and test</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Training on the test set to check performance</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) Repeatedly splitting data into k folds and rotating the validation set to get a reliable average score</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Removing k features from the dataset</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">11. What is overfitting?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) When a model performs well on both training and test data</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) When a model is too simple to capture patterns</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) When a model learns noise from training data and fails to generalize to unseen data</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) When a model ignores training data entirely</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">12. What is underfitting?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) When a model fits the training data with perfect accuracy</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) When a model is too complex and memorizes noise</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) When a model is too simple to capture real patterns — poor performance on both train and test</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) When a model has very high variance</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">13. When is Support Vector Machine (SVM) most useful?</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) For datasets with millions of rows</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) For high-dimensional data where finding a clear separation boundary matters (text, medical data)</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) For rendering 3D images</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) For unsupervised clustering</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">14. What does the Confusion Matrix show?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Feature importance scores</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Training and validation loss curves</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) A breakdown of True Positives, True Negatives, False Positives, and False Negatives</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Data normalization values</label>
+                        </div>
+
+                        <div class="content-card">
+                            <p style="color:var(--cyan); font-weight:600; margin-bottom:1rem;">15. Why must data be split into separate train and test sets?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) To artificially increase the size of the dataset</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) To improve accuracy scores during training</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C"> C) To evaluate how well the model generalizes to data it has never seen before</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) To reduce computation time</label>
+                        </div>
+
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display:none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div id="recursos" class="tab-panel">
+                <h3 style="margin-bottom:1.5rem;">Support Materials</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ Scikit-learn User Guide — Supervised Learning (official documentation)</a>
+                    <a href="#" class="resource-link">→ StatQuest – Linear Regression Clearly Explained (YouTube)</a>
+                    <a href="#" class="resource-link">→ StatQuest – Logistic Regression and Decision Trees (YouTube)</a>
+                    <a href="#" class="resource-link">→ Google ML Crash Course — Training and Test Sets</a>
+                    <a href="#" class="resource-link">→ Scikit-learn – Choosing the Right Estimator (visual flowchart)</a>
+                    <a href="#" class="resource-link">→ Towards Data Science – Understanding the Confusion Matrix</a>
+                    <a href="#" class="resource-link">→ Cross-Validation Strategies – Scikit-learn docs</a>
+                    <a href="#" class="resource-link">→ Regularization Explained: Lasso, Ridge, ElasticNet – Towards Data Science</a>
+                    <a href="#" class="resource-link">→ Imbalanced Classification Guide – Jason Brownlee (Machine Learning Mastery)</a>
+                    <a href="#" class="resource-link">→ Kaggle Learn — Intro to Machine Learning (free mini-course)</a>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: Advanced ML — Regression & Classification</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:2rem;">To successfully complete this module, demonstrate understanding across the following competency levels:</p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>Difference between regression and classification tasks</li>
+                                <li>What supervised learning is and how labeled data works</li>
+                                <li>Linear regression: equation y = mX + b and MSE cost function</li>
+                                <li>What logistic regression does (sigmoid → probability → class)</li>
+                                <li>How Decision Trees work (if-then rules)</li>
+                                <li>Why data must be split into train / validation / test sets</li>
+                                <li>Overfitting vs underfitting — definitions and causes</li>
+                                <li>Basic evaluation metrics: accuracy, MSE, R², F1-score</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Multiple linear regression and polynomial regression</li>
+                                <li>Regularization: Lasso (L1), Ridge (L2), ElasticNet</li>
+                                <li>k-NN: how it classifies using nearest neighbors</li>
+                                <li>Random Forest: why ensembles outperform single trees</li>
+                                <li>SVM: finding the optimal separating hyperplane</li>
+                                <li>k-fold cross-validation — how and when to use it</li>
+                                <li>Confusion matrix: TP, TN, FP, FN and what each means</li>
+                                <li>Precision vs Recall tradeoff and when each matters</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Implement a full ML pipeline in Python with scikit-learn</li>
+                                <li>Apply feature engineering and preprocessing (scaling, encoding)</li>
+                                <li>Tune hyperparameters with GridSearchCV or RandomizedSearchCV</li>
+                                <li>Handle imbalanced datasets (SMOTE, class_weight, resample)</li>
+                                <li>Detect and prevent data leakage in real pipelines</li>
+                                <li>Plot and interpret ROC curves and AUC scores</li>
+                                <li>Compare models with statistical significance (bias-variance tradeoff)</li>
+                                <li>Deploy a trained scikit-learn model as a REST API</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            const m = { aprender:25, laboratorio:50, quiz:75, recursos:90, avaliacao:100 };
+            document.getElementById('progress-fill').style.width = m[tabName] + '%';
+            document.getElementById('progress-text').innerText = m[tabName] + '%';
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runLab() {
+            const input = document.getElementById('lab-input').value.toLowerCase();
+            const output = document.getElementById('lab-output');
+
+            const isRegression = input.includes('"regression"') || input.includes("'regression'");
+            const isSmall = input.includes('"small"') || input.includes("'small'");
+            const isLarge = input.includes('"large"') || input.includes("'large'");
+            const featMatch = input.match(/features:\s*(\d+)/);
+            const features = featMatch ? parseInt(featMatch[1]) : 10;
+            const isImbalanced = input.includes('isimbalanced: true') || input.includes("isimbalanced:true");
+            const hasOutliers = input.includes('hasoutliers: true') || input.includes("hasoutliers:true");
+            const needsInterp = input.includes('needsinterpretability: true') || input.includes("needsinterpretability:true");
+
+            let primaryAlgo, altAlgo, metric, evalNote, pitfalls = [], tips = [];
+
+            if (isRegression) {
+                if (needsInterp) { primaryAlgo = 'Linear Regression'; altAlgo = 'Decision Tree Regressor'; }
+                else if (isLarge) { primaryAlgo = 'Random Forest Regressor'; altAlgo = 'Gradient Boosting (XGBoost)'; }
+                else { primaryAlgo = 'Ridge Regression (regularized)'; altAlgo = 'Random Forest Regressor'; }
+
+                metric = hasOutliers ? 'MAE (robust to outliers)' : 'RMSE + R² Score';
+                evalNote = 'Split 70/15/15 · Use k-fold CV (k=5) for reliable estimates';
+
+                if (hasOutliers) pitfalls.push('⚠ Outliers detected → use MAE over MSE, consider robust scalers');
+                if (features > 20) pitfalls.push('⚠ High feature count → apply Lasso (L1) for feature selection');
+                if (isSmall) pitfalls.push('⚠ Small dataset → risk of overfitting · use cross-validation strictly');
+
+                tips.push('✓ Normalize features before training (StandardScaler)');
+                tips.push('✓ Check residual plots for heteroscedasticity');
+                if (needsInterp) tips.push('✓ Linear Regression coefficients are directly interpretable');
+            } else {
+                if (needsInterp && !isLarge) { primaryAlgo = 'Decision Tree Classifier'; altAlgo = 'Logistic Regression'; }
+                else if (isLarge) { primaryAlgo = 'Random Forest Classifier'; altAlgo = 'Gradient Boosting (XGBoost/LightGBM)'; }
+                else if (features > 15) { primaryAlgo = 'SVM (RBF kernel)'; altAlgo = 'Random Forest Classifier'; }
+                else { primaryAlgo = 'Random Forest Classifier'; altAlgo = 'k-Nearest Neighbors'; }
+
+                metric = isImbalanced ? 'F1-Score + ROC-AUC (not accuracy!)' : 'Accuracy + F1-Score + Confusion Matrix';
+                evalNote = 'Use stratified k-fold CV to preserve class distribution across folds';
+
+                if (isImbalanced) {
+                    pitfalls.push('⚠ Class imbalance detected → DO NOT use accuracy alone');
+                    pitfalls.push('⚠ Apply SMOTE oversampling or class_weight="balanced" parameter');
+                }
+                if (hasOutliers) pitfalls.push('⚠ Outliers may affect k-NN and SVM — consider standardizing features');
+                if (isSmall) pitfalls.push('⚠ Small dataset with many features → risk of overfitting, use cross-validation');
+
+                tips.push('✓ Use confusion matrix to understand error types (FP vs FN)');
+                tips.push('✓ Tune decision threshold if precision/recall trade-off matters');
+                if (needsInterp) tips.push('✓ Decision Trees and Logistic Regression are most explainable to stakeholders');
+            }
+
+            const splitLabel = isSmall ? '60/20/20 (small data)' : '70/15/15';
+
+            output.innerHTML = `
+<span style="color:#28e0ff;font-weight:bold;">▶ ML Model Recommendation</span>
+
+<strong style="color:#b6c0de;">Task type:</strong> <span style="color:#e8ecf8;">${isRegression ? 'Regression (continuous output)' : 'Classification (categorical output)'}</span>
+<strong style="color:#b6c0de;">Features:</strong> <span style="color:#e8ecf8;">${features}</span> | <strong style="color:#b6c0de;">Data size:</strong> <span style="color:#e8ecf8;">${isSmall ? 'Small' : isLarge ? 'Large' : 'Medium'}</span>
+
+<strong style="color:#50fa7b;">✓ Primary algorithm:</strong> <span style="color:#e8ecf8;">${primaryAlgo}</span>
+<strong style="color:#50fa7b;">✓ Alternative to try:</strong> <span style="color:#e8ecf8;">${altAlgo}</span>
+
+<strong style="color:#b6c0de;">Recommended metrics:</strong> <span style="color:#f1fa8c;">${metric}</span>
+<strong style="color:#b6c0de;">Evaluation strategy:</strong> <span style="color:#e8ecf8;">${evalNote}</span>
+<strong style="color:#b6c0de;">Recommended split:</strong> <span style="color:#e8ecf8;">${splitLabel}</span>
+
+${pitfalls.length ? `<strong style="color:#ff5555;">Potential pitfalls:</strong>\n${pitfalls.map(p => `<span style="color:#ff79c6;">${p}</span>`).join('\n')}` : '<span style="color:#10b981;">✓ No critical pitfalls detected</span>'}
+
+${tips.length ? `<strong style="color:#50fa7b;">Best practices:</strong>\n${tips.map(t => `<span style="color:#50fa7b;">${t}</span>`).join('\n')}` : ''}
+
+<em style="color:#6272a4;">Tip: Change taskType, dataSize, isImbalanced, or needsInterpretability and re-run!</em>
+            `.trim().replace(/\n/g, '<br>');
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questionsData = {
+                    q1:  { correct: 'C', exp: 'Regression predicts continuous numerical values — like house prices (€350k), temperatures (22.4°C), or CO₂ emissions. It outputs a number, not a category.' },
+                    q2:  { correct: 'C', exp: 'Classification predicts a discrete class label from a set of categories — spam/not spam, fraud/not fraud, cat/dog. The output is always one of the defined classes.' },
+                    q3:  { correct: 'B', exp: 'The sigmoid function σ(z) = 1/(1+e^-z) maps any real number to a value between 0 and 1, making it ideal for outputting a class probability in logistic regression.' },
+                    q4:  { correct: 'C', exp: 'MSE squares each error before averaging, so large errors contribute disproportionately. MAE takes absolute values — it treats all errors more equally and is more robust to outliers.' },
+                    q5:  { correct: 'B', exp: 'R² (coefficient of determination) measures how much of the target variable\'s variance is explained by the model. R²=0.85 means 85% of variance is captured — a strong model.' },
+                    q6:  { correct: 'C', exp: 'The validation set is used during development to tune hyperparameters (like tree depth, k in k-NN) and to detect overfitting — before ever touching the test set.' },
+                    q7:  { correct: 'D', exp: 'F1-Score is the harmonic mean of Precision and Recall: F1 = 2×(P×R)/(P+R). It\'s especially valuable when the dataset is imbalanced and both types of errors matter.' },
+                    q8:  { correct: 'C', exp: 'A Decision Tree builds a hierarchy of if-then rules based on feature thresholds, splitting data at each node to separate classes or reduce prediction error. Easy to visualize and interpret.' },
+                    q9:  { correct: 'B', exp: 'Random Forest trains many trees on random subsets of data and features, then averages predictions. This reduces variance (overfitting) while maintaining strong accuracy — the wisdom of crowds.' },
+                    q10: { correct: 'C', exp: 'k-fold CV divides data into k equal folds. The model is trained on k-1 folds and validated on the remaining 1 fold, repeating k times. The average score is more reliable than a single split.' },
+                    q11: { correct: 'C', exp: 'Overfitting means the model has memorized the training data, including noise. It achieves very high training accuracy but fails on new, unseen data because it hasn\'t learned generalizable patterns.' },
+                    q12: { correct: 'C', exp: 'Underfitting occurs when the model is too simple (e.g., a linear model for non-linear data). It performs poorly on both training and test data because it hasn\'t captured the underlying pattern.' },
+                    q13: { correct: 'B', exp: 'SVM finds the hyperplane that maximally separates classes with the largest margin. It\'s especially effective for high-dimensional feature spaces (text classification, medical imaging) and small-to-medium datasets.' },
+                    q14: { correct: 'C', exp: 'The confusion matrix shows the full picture of classification results: True Positives (correctly predicted positive), True Negatives, False Positives (predicted positive but actually negative), and False Negatives.' },
+                    q15: { correct: 'C', exp: 'If a model is evaluated on data it was trained on, it will appear to perform perfectly — even if it just memorized the answers. The test set reveals how well it generalizes to real new data.' }
+                };
+                this.init();
+            }
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0, feedbackHTML = '';
+                Object.keys(this.questionsData).forEach((key, index) => {
+                    const userAnswer = formData.get(key);
+                    const isCorrect = userAnswer === this.questionsData[key].correct;
+                    if (isCorrect) score++;
+                    feedbackHTML += `<div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}"><span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span><div><strong>Question ${index+1}:</strong> ${this.questionsData[key].exp}${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}</div></div>`;
+                });
+                this.displayResults(score, feedbackHTML);
+            }
+            displayResults(score, feedbackHTML) {
+                const total = Object.keys(this.questionsData).length;
+                const percent = Math.round((score / total) * 100);
+                const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+                document.getElementById('quiz-score').innerHTML = `<div class="${scoreClass}">${score}/${total} (${percent}%)</div><p style="color:var(--text-secondary)">${percent >= 70 ? 'Excellent! You have a strong grasp of supervised ML — ready to advance to Deep Learning.' : 'Review the regression, classification, and evaluation sections and try again.'}</p>`;
+                document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                const r = document.getElementById('quiz-results');
+                r.style.display = 'block';
+                r.scrollIntoView({ behavior: 'smooth' });
+            }
+            clearQuiz() {
+                document.getElementById('quiz-form').reset();
+                document.getElementById('quiz-results').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - LLM Engineering & RAG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14; --blue: #ff2d78; --purple: #ff85c2; --cyan: #e0006e;
+            --text-light: #e8ecf8; --text-secondary: #b6c0de;
+            --card-bg: rgba(255,255,255,0.05); --border-color: rgba(255,255,255,0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(91,124,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(91,124,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1; }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(255,0,191,0.168) 0%, rgba(255,0,128,0.185) 50%, transparent 100%); pointer-events: none; z-index: -1; }
+
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,20,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(91,124,255,0.15); border: 1px solid rgba(91,124,255,0.3); color: var(--cyan); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.3rem 0.9rem; border-radius: 50px; margin-bottom: 1.25rem; text-transform: uppercase; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+        .code-block { background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.6; color: #a8ff78; }
+
+        /* RAG pipeline */
+        .pipeline-row { display: flex; align-items: center; gap: 0; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; flex-wrap: wrap; }
+        .pipe-step { display: flex; flex-direction: column; align-items: center; gap: 5px; background: rgba(91,124,255,0.1); border: 1px solid rgba(91,124,255,0.3); border-radius: 8px; padding: 0.7rem 0.9rem; min-width: 100px; text-align: center; }
+        .pipe-step .ps-icon { font-size: 1.3rem; }
+        .pipe-step .ps-label { font-size: 0.7rem; font-weight: 700; color: var(--cyan); }
+        .pipe-step .ps-desc { font-size: 0.62rem; color: var(--text-secondary); line-height: 1.3; }
+        .pipe-arrow { font-size: 1.1rem; color: var(--blue); padding: 0 0.4rem; align-self: center; margin-bottom: 18px; }
+
+        /* New styles */
+        .info-box { background: rgba(91,124,255,0.07); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+        .info-box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--purple); }
+        .section-divider { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .concept-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .concept-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 0.35rem; }
+        .concept-title { font-weight: 600; font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.4rem; }
+        .concept-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+        .metrics-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .metrics-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; font-weight: 600; }
+        .metrics-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .metrics-table tr:hover td { background: rgba(255,255,255,0.03); color: var(--text-light); }
+        .step-flow { display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0; }
+        .step-item { display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; }
+        .step-num { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; font-weight: 700; font-size: 0.8rem; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+        .step-content { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+        .step-content strong { color: var(--text-light); }
+
+        .compare-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .compare-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; border: 1px solid var(--border-color); font-weight: 600; }
+        .compare-table td { padding: 0.65rem 1rem; border: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 440px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05)); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255,255,255,0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .concept-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .pipeline-row { gap: 0.4rem; }
+            .pipe-arrow { padding: 0 0.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+            <span class="premium-badge">Premium</span>
+        </div>
+        <nav>
+            <a href="premium-data-science.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objetivo: LLM Engineering & RAG</h1>
+        <p class="course-description">Learn to build production-grade applications on top of Large Language Models. Master the full stack: prompt engineering, the OpenAI API, embeddings, vector databases, and Retrieval-Augmented Generation (RAG) — the most important pattern in applied LLM engineering.</p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>6–8h</span></div>
+            <div class="meta-item"><span>🎯</span><span>• Prompt Eng. • OpenAI API • Embeddings • Vector DBs • RAG • Fine-tuning</span></div>
+            <div class="meta-item"><span>📌</span><span>AI Engineering</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem; margin-top:5px; color:var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'aprender')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'laboratorio')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'recursos')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'avaliacao')">Assessment</button>
+        </nav>
+
+        <!-- LEARN -->
+        <div id="aprender" class="tab-panel active">
+
+            <div class="content-card">
+                <h3>Introduction: LLM Engineering</h3>
+                <p><span class="highlight">LLM Engineering</span> is the discipline of building reliable, cost-effective, production-grade applications on top of Large Language Models. It sits at the intersection of software engineering, prompt design, and AI systems thinking.</p>
+                <p style="margin-top:0.75rem;">This module covers two major pillars:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">LLM Engineering</span> — working with the API, prompt engineering, structured outputs, function calling, fine-tuning, evals</li>
+                    <li><span class="highlight">RAG (Retrieval-Augmented Generation)</span> — connecting LLMs to your own data via embeddings, vector databases, and retrieval pipelines</li>
+                </ul>
+                <div class="code-explanation">
+                    <p>The most common failure mode in LLM applications is not model quality — it's poor prompt design, lack of retrieval, or not measuring what matters. This module fixes all three.</p>
+                </div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">The LLM application stack — layers from API call to production system:</p>
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-label">Layer 1</div>
+                        <div class="concept-title">Model API</div>
+                        <div class="concept-desc">The foundation. A raw HTTP call to OpenAI, Anthropic, or an open-source model via Ollama/vLLM. Input: JSON with messages. Output: completion text or structured JSON. Everything else builds on top of this.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Layer 2</div>
+                        <div class="concept-title">Prompt Layer</div>
+                        <div class="concept-desc">Templates, few-shot examples, chain-of-thought instructions, system personas. The difference between a bad and good prompt can mean 40%+ accuracy improvement without changing the model. This is where most production gains come from.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Layer 3</div>
+                        <div class="concept-title">Retrieval Layer</div>
+                        <div class="concept-desc">RAG: embeddings, vector databases, chunking strategies, re-ranking. Connects the model to your own documents. Makes answers grounded and factual. The most widely deployed LLM engineering pattern in enterprise settings.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Layer 4</div>
+                        <div class="concept-title">Orchestration Layer</div>
+                        <div class="concept-desc">LangChain, LlamaIndex, multi-step chains, agents. Coordinates multiple model calls, tools, memory. Adds complexity — only add this layer when simpler approaches don't solve the problem.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Layer 5</div>
+                        <div class="concept-title">Evaluation Layer</div>
+                        <div class="concept-desc">RAGAS, LLM-as-judge, human evals. You cannot improve what you don't measure. Most teams skip this layer and wonder why their app regresses. Build evals before you optimize — it is the most important non-negotiable in production LLM systems.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Layer 6</div>
+                        <div class="concept-title">Observability Layer</div>
+                        <div class="concept-desc">LangSmith, Weave, Helicone. Traces every LLM call: prompt, response, token count, latency, cost. In production you are blind without this. Enables debugging, cost monitoring, and catching prompt injection attacks.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LLM ENGINEERING -->
+            <div class="content-card">
+                <div class="section-badge">⚙️ LLM Engineering</div>
+                <h3>The OpenAI / Anthropic API Pattern</h3>
+                <p>All major LLM APIs share the same core structure: a list of messages with roles, and a set of parameters that control generation.</p>
+                <div class="code-block"><pre>from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system",  "content": "You are a senior software engineer. Be concise and precise."},
+        {"role": "user",    "content": "Explain the difference between a mutex and a semaphore."}
+    ],
+    temperature=0.2,
+    max_tokens=512,
+    top_p=0.9,
+    frequency_penalty=0.1
+)
+
+print(response.choices[0].message.content)
+print(f"Tokens used: {response.usage.total_tokens}")</pre></div>
+                <p style="margin-top:0.75rem;"><strong>Key parameters:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">temperature</span> — 0 = deterministic, 1 = creative. Use low for factual tasks, higher for creative ones.</li>
+                    <li><span class="highlight">max_tokens</span> — hard cap on output length. Always set it to avoid runaway costs.</li>
+                    <li><span class="highlight">top_p</span> — nucleus sampling. Controls diversity by sampling from top-p probability mass.</li>
+                    <li><span class="highlight">frequency_penalty</span> — reduces probability of tokens that have already appeared.</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Production API patterns — what separates a demo from a production system:</p>
+                <div class="code-block"><pre>from openai import OpenAI, APITimeoutError, RateLimitError, APIError
+import time
+import logging
+
+client = OpenAI()
+logger = logging.getLogger(__name__)
+
+def call_llm_with_retry(
+    messages: list[dict],
+    model: str = "gpt-4o",
+    temperature: float = 0.2,
+    max_tokens: int = 1024,
+    max_retries: int = 3,
+    fallback_model: str = "gpt-4o-mini"
+) -> str:
+    """
+    Production LLM call with: retry logic, exponential backoff,
+    model fallback, timeout, and structured logging.
+    """
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=30.0,         # always set a timeout
+                seed=42               # reproducibility (same seed → same output for same input)
+            )
+            content = response.choices[0].message.content
+            logger.info({
+                "model": model, "attempt": attempt + 1,
+                "input_tokens": response.usage.prompt_tokens,
+                "output_tokens": response.usage.completion_tokens,
+                "cost_usd": (response.usage.prompt_tokens * 2.50 +
+                             response.usage.completion_tokens * 10.0) / 1_000_000
+            })
+            return content
+
+        except RateLimitError:
+            wait = 2 ** attempt  # exponential backoff: 1s, 2s, 4s
+            logger.warning(f"Rate limit hit, retrying in {wait}s...")
+            time.sleep(wait)
+
+        except APITimeoutError:
+            logger.warning(f"Timeout on attempt {attempt + 1}")
+            if attempt == max_retries - 1:
+                # Fall back to a faster, smaller model
+                logger.warning(f"Falling back to {fallback_model}")
+                model = fallback_model
+
+        except APIError as e:
+            logger.error(f"API error: {e}")
+            raise  # don't retry on 400/401 errors
+
+    raise RuntimeError(f"All {max_retries} attempts failed")
+
+# Anthropic (Claude) — same pattern, different SDK
+from anthropic import Anthropic
+
+anthropic_client = Anthropic()
+
+def call_claude(prompt: str) -> str:
+    message = anthropic_client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1024,
+        system="You are a helpful assistant.",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return message.content[0].text</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">💡 Model Selection Guide (mid-2025)</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        <strong style="color:var(--text-light);">GPT-4o</strong>: Best general-purpose. Strong at reasoning, code, structured outputs. $2.50/1M input, $10/1M output.<br>
+                        <strong style="color:var(--text-light);">GPT-4o mini</strong>: 94% cheaper, 80–85% of the quality. Use for high-volume tasks where cost matters. First choice for routing, classification, summarization.<br>
+                        <strong style="color:var(--text-light);">Claude Sonnet 4</strong>: Strongest at long document processing, nuanced writing, following complex instructions. 200K context window. $3/1M input.<br>
+                        <strong style="color:var(--text-light);">Claude Haiku</strong>: Anthropic's fast, cheap tier. Comparable to GPT-4o mini in speed and cost.<br>
+                        <strong style="color:var(--text-light);">LLaMA 3 / Mistral</strong>: Open-source, self-hosted. Zero API cost at scale. Lower quality ceiling but full control over data and privacy.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚙️ LLM Engineering</div>
+                <h3>Prompt Engineering — Principles & Patterns</h3>
+                <p>Prompt engineering is the art and science of writing inputs that reliably produce the outputs you need. A well-designed prompt is worth far more than a model upgrade.</p>
+                <p style="margin-top:1rem;"><strong>Core principles:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Be explicit</span> — state exactly what you want: format, length, tone, what to avoid</li>
+                    <li><span class="highlight">Use examples (few-shot)</span> — showing is more reliable than telling</li>
+                    <li><span class="highlight">Chain-of-thought</span> — add "Think step by step" for reasoning tasks</li>
+                    <li><span class="highlight">Give a role</span> — "You are a medical expert" shapes vocabulary and reasoning style</li>
+                    <li><span class="highlight">Positive framing</span> — "Be concise" works better than "Don't be verbose"</li>
+                    <li><span class="highlight">Separate instructions from data</span> — use XML tags or delimiters to mark boundaries</li>
+                </ul>
+                <div class="code-block"><pre># ❌ Weak prompt
+"Summarize this."
+
+# ✅ Strong prompt
+"""
+You are a financial analyst writing for non-technical executives.
+
+Summarize the following earnings call transcript in exactly 3 bullet points.
+Each bullet must:
+- Start with a key metric or decision
+- Be under 25 words
+- Use plain English, no jargon
+
+<transcript>
+{transcript_text}
+</transcript>
+"""</pre></div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">The prompt engineering toolkit — all major techniques with when to use each:</p>
+                <table class="metrics-table">
+                    <thead><tr><th>Technique</th><th>What It Does</th><th>When to Use</th><th>Example Signal</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Zero-shot</strong></td>
+                            <td>Instruction only, no examples. Model uses pre-trained knowledge.</td>
+                            <td>Simple, well-defined tasks. Classification with obvious categories. Summarization.</td>
+                            <td>"Classify this review as positive or negative."</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Few-shot</strong></td>
+                            <td>2–10 input/output examples in the prompt. Teaches format + behavior by demonstration.</td>
+                            <td>Custom output format. Domain-specific style. When zero-shot produces wrong format.</td>
+                            <td>Model keeps using markdown when you want plain JSON.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chain-of-Thought</strong></td>
+                            <td>"Think step by step" before final answer. Forces explicit reasoning trace.</td>
+                            <td>Math, logic, multi-step reasoning. Anywhere accuracy on complex tasks matters.</td>
+                            <td>Model gives wrong answer to multi-step calculation.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Self-Consistency</strong></td>
+                            <td>Run the same prompt 3–5× at temperature 0.7, majority-vote the answers.</td>
+                            <td>High-stakes single questions where one wrong inference could fail. Classification with nuance.</td>
+                            <td>Medical or legal reasoning where you need confidence, not speed.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Role Prompting</strong></td>
+                            <td>Assign a persona: "You are a senior security auditor..."</td>
+                            <td>Domain vocabulary, depth of analysis, writing style control.</td>
+                            <td>Output uses wrong jargon or reads like a general summary instead of expert analysis.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Decomposition</strong></td>
+                            <td>Break a complex task into subtasks across multiple prompts / model calls.</td>
+                            <td>Tasks too complex for one call. Workflows where intermediate results need validation.</td>
+                            <td>"Write a complete business plan" — too broad for one reliable call.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="code-block"><pre># Few-shot example: consistent entity extraction format
+EXTRACTION_PROMPT = """
+Extract all people, companies, and locations from the text.
+Return ONLY a JSON object. No explanation.
+
+Example 1:
+Text: "Satya Nadella announced Azure's expansion in London."
+Output: {"people": ["Satya Nadella"], "companies": ["Azure"], "locations": ["London"]}
+
+Example 2:
+Text: "OpenAI's Sam Altman met investors in San Francisco and Tokyo."
+Output: {"people": ["Sam Altman"], "companies": ["OpenAI"], "locations": ["San Francisco", "Tokyo"]}
+
+Now extract from:
+Text: "{user_text}"
+Output:"""
+
+# Chain-of-thought for reasoning tasks
+COT_PROMPT = """
+Problem: {problem}
+
+Think through this carefully step by step:
+1. What information do I have?
+2. What is being asked?
+3. What calculations or reasoning steps are needed?
+4. Work through each step explicitly.
+5. State your final answer.
+"""</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚙️ LLM Engineering</div>
+                <h3>Structured Outputs & Function Calling</h3>
+                <p>Production applications rarely need free-form text — they need structured, parseable data. Modern LLM APIs support <span class="highlight">structured outputs</span> that guarantee valid JSON matching a schema.</p>
+                <div class="code-block"><pre>from openai import OpenAI
+from pydantic import BaseModel
+from typing import List
+
+client = OpenAI()
+
+class MovieReview(BaseModel):
+    title: str
+    sentiment: str
+    score: float
+    key_themes: List[str]
+    one_line_summary: str
+
+response = client.beta.chat.completions.parse(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "Extract structured movie review data."},
+        {"role": "user",   "content": f"Review: {review_text}"}
+    ],
+    response_format=MovieReview
+)
+
+review = response.choices[0].message.parsed
+print(f"Sentiment: {review.sentiment}, Score: {review.score}/10")</pre></div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Real-world structured output patterns for common production use cases:</p>
+                <div class="code-block"><pre>from openai import OpenAI
+from pydantic import BaseModel, Field, field_validator
+from typing import List, Literal, Optional
+from enum import Enum
+
+client = OpenAI()
+
+# ── Pattern 1: Classification with confidence ────────────────────────
+class SupportTicketClassification(BaseModel):
+    category: Literal["billing", "technical", "account", "feature_request", "complaint"]
+    priority: Literal["low", "medium", "high", "critical"]
+    confidence: float = Field(ge=0.0, le=1.0, description="Model confidence 0-1")
+    requires_human: bool
+    suggested_response_time_hours: int
+    brief_summary: str = Field(max_length=100)
+
+    @field_validator("confidence")
+    def confidence_must_be_valid(cls, v):
+        if v < 0 or v > 1:
+            raise ValueError("Confidence must be between 0 and 1")
+        return v
+
+def classify_ticket(ticket_text: str) -> SupportTicketClassification:
+    response = client.beta.chat.completions.parse(
+        model="gpt-4o-mini",   # cheap model for classification
+        messages=[
+            {"role": "system", "content": "Classify this customer support ticket precisely."},
+            {"role": "user",   "content": ticket_text}
+        ],
+        response_format=SupportTicketClassification
+    )
+    return response.choices[0].message.parsed
+
+# ── Pattern 2: Information extraction with validation ────────────────
+class ContractParty(BaseModel):
+    name: str
+    role: Literal["buyer", "seller", "vendor", "client", "contractor"]
+    jurisdiction: Optional[str] = None
+
+class ContractExtraction(BaseModel):
+    parties: List[ContractParty]
+    effective_date: Optional[str] = None  # ISO 8601 format
+    expiry_date: Optional[str] = None
+    total_value_usd: Optional[float] = None
+    governing_law: Optional[str] = None
+    auto_renews: bool
+    key_obligations: List[str] = Field(max_length=5)  # max 5 items
+
+def extract_contract(contract_text: str) -> ContractExtraction:
+    response = client.beta.chat.completions.parse(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": """Extract key contract metadata.
+            For dates use ISO 8601 (YYYY-MM-DD).
+            If information is not present, use null.
+            Key obligations: max 5, each under 20 words."""},
+            {"role": "user", "content": contract_text}
+        ],
+        response_format=ContractExtraction
+    )
+    return response.choices[0].message.parsed
+
+# ── Pattern 3: Streaming structured output ───────────────────────────
+with client.beta.chat.completions.stream(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Analyse this dataset: ..."}],
+    response_format=SupportTicketClassification
+) as stream:
+    for event in stream:
+        if event.type == "content.delta":
+            print(event.delta, end="", flush=True)  # stream to UI as JSON builds</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">🔧 Function Calling vs Structured Outputs</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        <strong style="color:var(--text-light);">Structured Outputs</strong> (<code style="color:#a8ff78;">response_format=MyModel</code>): use when you want guaranteed valid JSON back from the model. The model always responds with data — never calls external code. Best for extraction, classification, transformation.<br><br>
+                        <strong style="color:var(--text-light);">Function Calling / Tools</strong>: use when you want the model to optionally decide to invoke an external function (search, database, API). The model outputs a call description; your code executes it. Best for agents and dynamic data fetching. Under the hood, these are the same mechanism — function calling is structured output applied to tool invocations.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚙️ LLM Engineering</div>
+                <h3>LLM Evaluation — Measuring What Matters</h3>
+                <p>You cannot improve what you don't measure. Building an <span class="highlight">evaluation suite</span> before optimizing is the most important habit in LLM engineering.</p>
+                <p style="margin-top:1rem;"><strong>Types of evals:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Unit tests</span> — exact match, regex, or schema validation on known inputs</li>
+                    <li><span class="highlight">LLM-as-judge</span> — use a second LLM to score outputs on accuracy, helpfulness, safety</li>
+                    <li><span class="highlight">Human evaluation</span> — gold standard; expensive but necessary for production sign-off</li>
+                    <li><span class="highlight">RAG-specific</span> — faithfulness, relevance, context recall</li>
+                </ul>
+                <div class="code-block"><pre>from ragas import evaluate
+from ragas.metrics import faithfulness, answer_relevancy, context_recall
+
+results = evaluate(
+    dataset=test_dataset,
+    metrics=[faithfulness, answer_relevancy, context_recall]
+)
+print(results.to_pandas())</pre></div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Building an LLM-as-judge evaluation system from scratch:</p>
+                <div class="code-block"><pre>from openai import OpenAI
+from pydantic import BaseModel
+from typing import Literal
+import json
+
+client = OpenAI()
+
+class EvalScore(BaseModel):
+    accuracy: int        # 1-5: is the answer factually correct?
+    completeness: int    # 1-5: does it fully answer the question?
+    conciseness: int     # 1-5: is it appropriately brief?
+    reasoning: str       # 2-3 sentence explanation of scores
+
+def llm_judge(
+    question: str,
+    reference_answer: str,
+    model_answer: str,
+    judge_model: str = "gpt-4o"   # use a strong model as judge
+) -> EvalScore:
+    """Score a model's answer against a reference using an LLM judge."""
+
+    prompt = f"""You are an expert evaluator. Score the model's answer on three criteria.
+Be strict and objective. Use the full 1-5 scale.
+
+Question: {question}
+Reference Answer (ground truth): {reference_answer}
+Model Answer (to evaluate): {model_answer}
+
+Evaluate the model answer. Return scores 1-5 for each criterion."""
+
+    response = client.beta.chat.completions.parse(
+        model=judge_model,
+        messages=[{"role": "user", "content": prompt}],
+        response_format=EvalScore,
+        temperature=0   # deterministic judging
+    )
+    return response.choices[0].message.parsed
+
+# Run eval on a test set
+def run_eval_suite(test_cases: list[dict], model_fn) -> dict:
+    scores = []
+    for case in test_cases:
+        answer = model_fn(case["question"])
+        score = llm_judge(
+            question=case["question"],
+            reference_answer=case["expected_answer"],
+            model_answer=answer
+        )
+        scores.append({
+            "question": case["question"][:50],
+            "accuracy": score.accuracy,
+            "completeness": score.completeness,
+            "conciseness": score.conciseness
+        })
+
+    avg_accuracy     = sum(s["accuracy"] for s in scores) / len(scores)
+    avg_completeness = sum(s["completeness"] for s in scores) / len(scores)
+
+    return {
+        "n": len(scores),
+        "avg_accuracy": round(avg_accuracy, 2),
+        "avg_completeness": round(avg_completeness, 2),
+        "scores": scores
+    }
+
+# Usage
+results = run_eval_suite(test_cases=test_data, model_fn=my_rag_chain.invoke)
+print(f"Avg accuracy: {results['avg_accuracy']}/5.0")</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚙️ LLM Engineering</div>
+                <h3>Fine-Tuning vs Prompting vs RAG</h3>
+                <p>One of the most important architectural decisions in LLM engineering: when to fine-tune vs use prompting vs RAG.</p>
+                <table class="compare-table">
+                    <thead><tr><th>Approach</th><th>Best for</th><th>Cost</th><th>Data needed</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong style="color:var(--cyan)">Prompting</strong></td><td>Most tasks — start here always</td><td>Inference only</td><td>None</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">RAG</strong></td><td>Grounding answers in your documents / up-to-date data</td><td>Inference + vector DB</td><td>Documents to index</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">Fine-tuning</strong></td><td>Specific style, format, or domain where prompting fails</td><td>Training + inference</td><td>1,000–100,000 examples</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">Pre-training</strong></td><td>Specialized domain from scratch (medicine, law, code)</td><td>Massive GPU cost</td><td>Billions of tokens</td></tr>
+                    </tbody>
+                </table>
+                <div class="code-explanation">
+                    <p><strong>Rule of thumb:</strong> Always try prompting first. If the model knows the knowledge but applies it wrong — fine-tune. If the model doesn't have the knowledge — use RAG.</p>
+                </div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Fine-tuning with the OpenAI API — the complete workflow:</p>
+                <div class="code-block"><pre>from openai import OpenAI
+import json
+
+client = OpenAI()
+
+# ── Step 1: Prepare training data ────────────────────────────────────
+# Fine-tuning format: JSONL with system + user + assistant turns
+training_data = [
+    {
+        "messages": [
+            {"role": "system",    "content": "You extract product data from descriptions."},
+            {"role": "user",      "content": "Red Nike Air Max 90, size 42, €129.99"},
+            {"role": "assistant", "content": '{"brand":"Nike","model":"Air Max 90","color":"Red","size":42,"price_eur":129.99}'}
+        ]
+    },
+    # ... 1,000+ examples for good results
+]
+
+# Save as JSONL
+with open("training_data.jsonl", "w") as f:
+    for item in training_data:
+        f.write(json.dumps(item) + "\n")
+
+# ── Step 2: Upload file ───────────────────────────────────────────────
+file = client.files.create(
+    file=open("training_data.jsonl", "rb"),
+    purpose="fine-tune"
+)
+print(f"File ID: {file.id}")
+
+# ── Step 3: Create fine-tuning job ────────────────────────────────────
+job = client.fine_tuning.jobs.create(
+    training_file=file.id,
+    model="gpt-4o-mini",       # cheapest model to fine-tune
+    hyperparameters={
+        "n_epochs": 3,          # 3-5 epochs is typical
+        "learning_rate_multiplier": 1.8
+    }
+)
+print(f"Job ID: {job.id}")
+
+# ── Step 4: Monitor and use ───────────────────────────────────────────
+# Check status (takes 15min–2h depending on data size)
+status = client.fine_tuning.jobs.retrieve(job.id)
+print(f"Status: {status.status}")  # validating_files → queued → running → succeeded
+
+# Use the fine-tuned model — just like a normal model
+response = client.chat.completions.create(
+    model=status.fine_tuned_model,  # e.g. "ft:gpt-4o-mini:your-org:name:abc123"
+    messages=[
+        {"role": "system", "content": "You extract product data from descriptions."},
+        {"role": "user",   "content": "Blue Adidas Ultraboost 22, men's UK 9, £160.00"}
+    ]
+)
+print(response.choices[0].message.content)
+# → '{"brand":"Adidas","model":"Ultraboost 22","color":"Blue","size_uk":9,"price_gbp":160.00}'</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">⚠️ When NOT to Fine-Tune</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        Fine-tuning is expensive to maintain — every time your requirements change you re-train. Avoid fine-tuning when: the base model can do the task with a good prompt (very common), your knowledge changes frequently (use RAG), you have fewer than ~200 examples (few-shot prompting will work better), or your goal is just a specific output format (use structured outputs instead). The sweet spot for fine-tuning: you have a well-defined, stable task; prompting can't reliably achieve the style/format you need; and you have 1,000+ diverse, high-quality examples.
+                    </p>
+                </div>
+            </div>
+
+            <!-- RAG -->
+            <div class="content-card">
+                <div class="section-badge">🔍 RAG</div>
+                <h3>What Is RAG and Why Does It Matter?</h3>
+                <p><span class="highlight">Retrieval-Augmented Generation (RAG)</span> connects an LLM to an external knowledge base at inference time. Instead of relying on knowledge baked into model weights, the model retrieves relevant documents and uses them as context to answer questions.</p>
+                <p style="margin-top:1rem;"><strong>Problems RAG solves:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Hallucination</span> — the model fabricates facts. RAG grounds answers in real documents.</li>
+                    <li><span class="highlight">Knowledge cutoff</span> — the model's training has a cutoff date. RAG provides current information.</li>
+                    <li><span class="highlight">Private data</span> — the model has no knowledge of your internal documents. RAG gives it access.</li>
+                    <li><span class="highlight">Citations</span> — RAG enables the model to cite the exact source of every claim.</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">RAG vs alternatives — choosing the right architecture for your use case:</p>
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-label">Use RAG When</div>
+                        <div class="concept-title">Knowledge Access Problem</div>
+                        <div class="concept-desc">Your documents change frequently (weekly/monthly). You need citations. You have more than 500 pages of content. You need answers to be traceable to specific sources. Your content is proprietary and can't go into training data. Example: internal knowledge base chatbot, legal document Q&A.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Don't Use RAG When</div>
+                        <div class="concept-title">Style/Behavior Problem</div>
+                        <div class="concept-desc">The model already knows the facts but gives wrong format (use fine-tuning). You have fewer than 20 documents that never change (put them in the system prompt directly). You need ultra-low latency (RAG adds 100–500ms). Your knowledge fits in a 128K context window and never changes.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">RAG + Fine-Tuning</div>
+                        <div class="concept-title">Complementary Approaches</div>
+                        <div class="concept-desc">These are not mutually exclusive. Common pattern: fine-tune the model to follow your output format reliably + RAG to provide the factual content. The fine-tuned model learns how to structure answers; RAG gives it the specific facts for each query. Used in enterprise document Q&A and medical assistants.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Long-Context Alternative</div>
+                        <div class="concept-title">Stuff-the-Context Pattern</div>
+                        <div class="concept-desc">If your full knowledge base fits in 100K tokens, you can skip RAG entirely and just put everything in the context window (the "stuffing" approach). Claude 3.5 Sonnet (200K) can hold a full employee handbook. Tradeoff: much higher cost per query, but simpler architecture and no retrieval errors.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🔍 RAG</div>
+                <h3>The RAG Pipeline</h3>
+                <p>RAG has two phases: an offline <span class="highlight">indexing</span> phase (run once) and an online <span class="highlight">retrieval + generation</span> phase (run per query).</p>
+
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.5rem;">INDEXING (offline — run once)</p>
+                <div class="pipeline-row">
+                    <div class="pipe-step"><div class="ps-icon">📄</div><div class="ps-label">LOAD</div><div class="ps-desc">PDFs, docs, web pages</div></div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step"><div class="ps-icon">✂️</div><div class="ps-label">CHUNK</div><div class="ps-desc">Split into 512-token pieces</div></div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step"><div class="ps-icon">🔢</div><div class="ps-label">EMBED</div><div class="ps-desc">Convert to vectors</div></div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step"><div class="ps-icon">🗄️</div><div class="ps-label">STORE</div><div class="ps-desc">Save in vector DB</div></div>
+                </div>
+
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.5rem; margin-top:1rem;">RETRIEVAL + GENERATION (online — per query)</p>
+                <div class="pipeline-row">
+                    <div class="pipe-step"><div class="ps-icon">❓</div><div class="ps-label">QUERY</div><div class="ps-desc">User question</div></div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step"><div class="ps-icon">🔢</div><div class="ps-label">EMBED</div><div class="ps-desc">Embed the question</div></div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step"><div class="ps-icon">🔍</div><div class="ps-label">RETRIEVE</div><div class="ps-desc">Top-k similar chunks</div></div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step"><div class="ps-icon">🧠</div><div class="ps-label">GENERATE</div><div class="ps-desc">LLM answers with context</div></div>
+                </div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">What actually happens inside each pipeline stage — the decisions that determine quality:</p>
+                <div class="step-flow">
+                    <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Document Loading</strong> — PDFs need OCR if scanned. HTML needs cleaning to remove nav/ads. Tables in PDFs often parse badly — consider structured table extraction separately. Metadata (filename, page, section) should be preserved alongside content for citations.</div></div>
+                    <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Chunking Strategy</strong> — chunk_size 512 tokens is a common default. Too small: chunks lack context. Too large: retrieval returns less precise matches. chunk_overlap 64 prevents losing information at boundaries. <code style="color:#a8ff78;">RecursiveCharacterTextSplitter</code> splits on paragraphs first, then sentences, then characters — preserving semantic boundaries where possible.</div></div>
+                    <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Embedding</strong> — every chunk is embedded using the same model you'll use at query time. You cannot mix embedding models (different vector spaces are incompatible). If you change your embedding model, you must re-index everything. Store the model name in your metadata.</div></div>
+                    <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Vector Storage</strong> — chunks stored as (vector, content, metadata) tuples. Most vector DBs support filtering by metadata fields before vector search (e.g. only retrieve from documents authored after 2023). This is called <em>metadata filtering</em> and dramatically improves precision for multi-domain knowledge bases.</div></div>
+                    <div class="step-item"><div class="step-num">5</div><div class="step-content"><strong>Retrieval</strong> — the query is embedded with the same model and ANN search finds the top-k closest vectors. k=4 is a common default: enough context for the LLM, not so much that irrelevant chunks crowd the prompt. Every additional chunk costs tokens and risks diluting the relevant information.</div></div>
+                    <div class="step-item"><div class="step-num">6</div><div class="step-content"><strong>Generation</strong> — the retrieved chunks are injected into the prompt as <code style="color:#a8ff78;">{context}</code>. The most important prompt engineering decision here: instruct the model to answer ONLY from the context and say "I don't know" when the answer isn't present. Without this, the model hallucin­ates from its pre-training knowledge.</div></div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🔍 RAG</div>
+                <h3>Embeddings — The Engine of RAG</h3>
+                <p>An <span class="highlight">embedding</span> is a dense numerical vector that represents the semantic meaning of a piece of text. Two texts with similar meaning will have vectors close together in high-dimensional space — regardless of exact wording.</p>
+                <div class="code-block"><pre>from openai import OpenAI
+import numpy as np
+
+client = OpenAI()
+
+def embed(text: str) -> list[float]:
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=text
+    )
+    return response.data[0].embedding
+
+def cosine_similarity(a, b):
+    a, b = np.array(a), np.array(b)
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+v1 = embed("What is the capital of France?")
+v2 = embed("Which city serves as France's capital?")
+v3 = embed("How do I bake a chocolate cake?")
+
+print(cosine_similarity(v1, v2))  # → 0.97
+print(cosine_similarity(v1, v3))  # → 0.14</pre></div>
+                <p style="margin-top:0.75rem;"><strong>Popular embedding models:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">text-embedding-3-small</span> (OpenAI) — 1536 dims, fast, cheap</li>
+                    <li><span class="highlight">text-embedding-3-large</span> (OpenAI) — 3072 dims, higher quality</li>
+                    <li><span class="highlight">nomic-embed-text</span> — open-source, runs locally</li>
+                    <li><span class="highlight">BGE-M3</span> — multilingual, strong on non-English</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Embedding best practices and failure modes to avoid:</p>
+                <div class="code-block"><pre>from openai import OpenAI
+import numpy as np
+from typing import Union
+
+client = OpenAI()
+
+# ── Best practice 1: Batch embedding (much cheaper) ───────────────────
+def embed_batch(texts: list[str], model: str = "text-embedding-3-small") -> list[list[float]]:
+    """Embed multiple texts in one API call. 1 call vs N calls."""
+    # OpenAI accepts up to 2048 texts per call
+    response = client.embeddings.create(model=model, input=texts)
+    # Sort by index to preserve original order
+    return [e.embedding for e in sorted(response.data, key=lambda x: x.index)]
+
+texts = ["Hello world", "How are you?", "Machine learning is fascinating"]
+vectors = embed_batch(texts)  # 1 API call instead of 3
+
+# ── Best practice 2: Asymmetric embedding (query vs document) ─────────
+# Some embedding models have separate modes for queries vs documents
+# This improves retrieval accuracy significantly (BGE, E5 models)
+
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("BAAI/bge-large-en-v1.5")
+
+def embed_query(query: str) -> np.ndarray:
+    """Embed a search query with query-specific prefix."""
+    return model.encode(f"Represent this sentence for searching: {query}")
+
+def embed_document(doc: str) -> np.ndarray:
+    """Embed a document for storage (no prefix needed)."""
+    return model.encode(doc)
+
+# ── Best practice 3: Dimension reduction (Matryoshka embeddings) ──────
+# text-embedding-3 supports truncating dimensions to save storage/cost
+response = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="Your text here",
+    dimensions=256   # reduce from 1536 → 256 dims, ~85% of quality
+)
+small_vector = response.data[0].embedding  # only 256 floats instead of 1536
+
+# ── Failure mode: comparing embeddings from different models ──────────
+v_openai = embed("capital of France")               # OpenAI vector space
+v_local  = model.encode("capital of France")        # SentenceTransformer space
+# cosine_similarity(v_openai, v_local) is MEANINGLESS — different spaces!
+# Always use the same embedding model for indexing and querying.</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">📐 Choosing Embedding Dimensions</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        Higher dimensions = more expressive but more storage and slower ANN search. For most RAG use cases: <strong style="color:var(--text-light);">text-embedding-3-small at 1536 dims</strong> is the right default — fast, cheap, high quality. If you have millions of documents and need to reduce storage cost: truncate to 256–512 dims (Matryoshka embeddings preserve most quality). Only upgrade to 3-large if you've evaluated and confirmed quality is insufficient at smaller dims.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🔍 RAG</div>
+                <h3>Vector Databases</h3>
+                <p>A <span class="highlight">vector database</span> stores embeddings and enables fast <span class="highlight">approximate nearest neighbor (ANN)</span> search — finding the most semantically similar vectors in milliseconds, even across millions of documents.</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Pinecone</span> — fully managed, production-ready, serverless option</li>
+                    <li><span class="highlight">Weaviate</span> — open-source, hybrid search (vector + keyword)</li>
+                    <li><span class="highlight">Chroma</span> — lightweight, great for prototyping and local dev</li>
+                    <li><span class="highlight">Qdrant</span> — open-source, high-performance, Rust-based</li>
+                    <li><span class="highlight">pgvector</span> — PostgreSQL extension; vectors alongside relational data</li>
+                    <li><span class="highlight">FAISS</span> (Meta) — library (not a DB), optimal for local batch search</li>
+                </ul>
+                <div class="code-block"><pre>import chromadb
+
+client = chromadb.Client()
+collection = client.create_collection("company_docs")
+
+collection.add(
+    documents=["Our refund policy allows returns within 30 days.",
+               "Technical support is available 24/7 via chat.",
+               "Enterprise plans include dedicated account managers."],
+    ids=["doc_1", "doc_2", "doc_3"]
+)
+
+results = collection.query(query_texts=["How do I get a refund?"], n_results=2)
+# → returns the 2 most semantically relevant documents</pre></div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Vector database comparison — choosing the right one for your use case:</p>
+                <table class="metrics-table">
+                    <thead><tr><th>Database</th><th>Type</th><th>Best For</th><th>Hybrid Search</th><th>Managed Option</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Chroma</strong></td><td>Open-source, in-process</td><td>Local prototyping, small projects (&lt;100K docs)</td><td>❌ No</td><td>Chroma Cloud</td></tr>
+                        <tr><td><strong>Pinecone</strong></td><td>Fully managed cloud</td><td>Production with zero infra ops, large scale</td><td>✅ Yes</td><td>Yes (only option)</td></tr>
+                        <tr><td><strong>Weaviate</strong></td><td>Open-source</td><td>Hybrid search, rich filtering, complex schemas</td><td>✅ Yes (BM25 + vector)</td><td>WCD (Weaviate Cloud)</td></tr>
+                        <tr><td><strong>Qdrant</strong></td><td>Open-source (Rust)</td><td>High throughput, &gt;10M vectors, custom scoring</td><td>✅ Yes</td><td>Qdrant Cloud</td></tr>
+                        <tr><td><strong>pgvector</strong></td><td>PostgreSQL extension</td><td>You already use Postgres; vectors + relational in one DB</td><td>✅ Manual</td><td>Supabase, Neon</td></tr>
+                        <tr><td><strong>FAISS</strong></td><td>Library (Meta)</td><td>Batch search, local research, no infra</td><td>❌ No</td><td>No</td></tr>
+                    </tbody>
+                </table>
+                <div class="info-box">
+                    <div class="info-box-title">🔑 Decision Guide</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        <strong style="color:var(--text-light);">Prototyping:</strong> use Chroma — zero setup, pure Python.<br>
+                        <strong style="color:var(--text-light);">Production, small team:</strong> use Pinecone — fully managed, scales automatically, no devops.<br>
+                        <strong style="color:var(--text-light);">Production, need hybrid search:</strong> use Weaviate or Qdrant — both support BM25 + vector and can be self-hosted.<br>
+                        <strong style="color:var(--text-light);">Already on Postgres:</strong> use pgvector via Supabase — add vector search without a new service.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🔍 RAG</div>
+                <h3>Building a Full RAG Pipeline</h3>
+                <p>Here is a production-quality RAG pipeline using LangChain — from document loading to answer generation with citations:</p>
+                <div class="code-block"><pre>from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_community.vectorstores import Chroma
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+
+loader = PyPDFLoader("company_handbook.pdf")
+docs   = loader.load()
+
+splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=64)
+chunks = splitter.split_documents(docs)
+
+embeddings  = OpenAIEmbeddings(model="text-embedding-3-small")
+vectorstore = Chroma.from_documents(chunks, embeddings)
+
+prompt = PromptTemplate.from_template("""
+You are a helpful assistant. Answer ONLY using the context below.
+If the answer is not in the context, say "I don't have that information."
+
+Context:
+{context}
+
+Question: {question}
+Answer:""")
+
+qa_chain = RetrievalQA.from_chain_type(
+    llm=ChatOpenAI(model="gpt-4o", temperature=0),
+    retriever=vectorstore.as_retriever(search_kwargs={"k": 4}),
+    chain_type_kwargs={"prompt": prompt},
+    return_source_documents=True
+)
+
+result = qa_chain.invoke({"query": "What is the parental leave policy?"})
+print(result["result"])
+print("Sources:", [d.metadata["source"] for d in result["source_documents"]])</pre></div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Production RAG with Qdrant, metadata filtering, and streaming:</p>
+                <div class="code-block"><pre>from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, Filter, FieldCondition, MatchValue
+from openai import OpenAI
+from datetime import datetime
+
+openai_client = OpenAI()
+qdrant = QdrantClient(url="http://localhost:6333")
+
+# ── Indexing with rich metadata ────────────────────────────────────────
+def index_documents(documents: list[dict]):
+    """documents: [{text, source, department, date_iso, language}]"""
+
+    texts = [d["text"] for d in documents]
+    # Batch embedding — one API call
+    vectors = openai_client.embeddings.create(
+        model="text-embedding-3-small", input=texts
+    ).data
+
+    qdrant.upsert(
+        collection_name="knowledge_base",
+        points=[{
+            "id": i,
+            "vector": vectors[i].embedding,
+            "payload": {                    # metadata stored alongside vector
+                "text": documents[i]["text"],
+                "source": documents[i]["source"],
+                "department": documents[i]["department"],
+                "date": documents[i]["date_iso"],
+                "language": documents[i].get("language", "en")
+            }
+        } for i in range(len(documents))]
+    )
+
+# ── Retrieval with metadata filtering ─────────────────────────────────
+def retrieve(
+    query: str,
+    department: str = None,
+    language: str = "en",
+    k: int = 5
+) -> list[dict]:
+    """Retrieve chunks, optionally filtered by department and language."""
+
+    query_vector = openai_client.embeddings.create(
+        model="text-embedding-3-small", input=query
+    ).data[0].embedding
+
+    # Build filter — only search within matching metadata
+    filters = []
+    if department:
+        filters.append(FieldCondition(key="department", match=MatchValue(value=department)))
+    if language:
+        filters.append(FieldCondition(key="language", match=MatchValue(value=language)))
+
+    results = qdrant.search(
+        collection_name="knowledge_base",
+        query_vector=query_vector,
+        query_filter=Filter(must=filters) if filters else None,
+        limit=k,
+        with_payload=True
+    )
+    return [{"text": r.payload["text"], "source": r.payload["source"],
+             "score": r.score} for r in results]
+
+# ── Generation with streaming ─────────────────────────────────────────
+def rag_answer_stream(query: str, department: str = None):
+    chunks = retrieve(query, department=department)
+    context = "\n\n".join([f"[Score: {c['score']:.2f}] {c['text']}" for c in chunks])
+    sources = list(set(c["source"] for c in chunks))
+
+    stream = openai_client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": f"""Answer ONLY from the context provided.
+Context:
+{context}
+
+If the answer is not in the context, respond: "I don't have that information in the knowledge base."
+Always cite sources."""},
+            {"role": "user", "content": query}
+        ],
+        stream=True,
+        temperature=0
+    )
+
+    for chunk in stream:
+        if chunk.choices[0].delta.content:
+            yield chunk.choices[0].delta.content  # stream tokens to UI
+
+    yield f"\n\nSources: {', '.join(sources)}"</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🔍 RAG</div>
+                <h3>Advanced RAG — Beyond Basic Retrieval</h3>
+                <p>Naive RAG (embed → retrieve → generate) fails in many real-world scenarios. Advanced RAG techniques address these failures:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Hybrid Search</span> — combine vector similarity with BM25 keyword search for better recall</li>
+                    <li><span class="highlight">Re-ranking</span> — use a cross-encoder to re-score retrieved chunks by relevance before passing to LLM</li>
+                    <li><span class="highlight">HyDE (Hypothetical Document Embeddings)</span> — generate a hypothetical answer first, then embed it for retrieval</li>
+                    <li><span class="highlight">Query expansion</span> — rewrite or expand the user's question to improve retrieval coverage</li>
+                    <li><span class="highlight">Parent-child chunking</span> — retrieve small chunks (precise) but pass their parent context (complete) to the LLM</li>
+                    <li><span class="highlight">Contextual compression</span> — extract only the relevant sentences from each retrieved chunk</li>
+                    <li><span class="highlight">Self-RAG</span> — the model decides when to retrieve and reflects on whether retrieved content is relevant</li>
+                </ul>
+                <div class="code-explanation">
+                    <p>The single biggest RAG improvement: <span class="highlight">re-ranking</span>. Retrieve 20 chunks with ANN, then re-rank with a cross-encoder and keep the top 4. Consistently improves faithfulness by 15–30%.</p>
+                </div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Implementing the top 3 advanced RAG techniques — with production code:</p>
+                <div class="code-block"><pre>from sentence_transformers import CrossEncoder
+from openai import OpenAI
+from langchain_community.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+
+client = OpenAI()
+
+# ── Technique 1: Re-ranking with Cross-Encoder ────────────────────────
+cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+
+def retrieve_and_rerank(query: str, vectorstore, initial_k: int = 20, final_k: int = 4) -> list:
+    """Retrieve broad set, then re-rank for precision."""
+
+    # Step 1: Wide retrieval — get many candidates
+    initial_results = vectorstore.similarity_search(query, k=initial_k)
+
+    # Step 2: Re-rank using cross-encoder (reads query+doc together, more accurate)
+    pairs = [[query, doc.page_content] for doc in initial_results]
+    scores = cross_encoder.predict(pairs)  # returns relevance score per pair
+
+    # Step 3: Sort by cross-encoder score, keep top final_k
+    ranked = sorted(zip(scores, initial_results), key=lambda x: x[0], reverse=True)
+    return [doc for _, doc in ranked[:final_k]]
+
+# ── Technique 2: HyDE — Hypothetical Document Embeddings ─────────────
+def hyde_retrieve(query: str, vectorstore, k: int = 4) -> list:
+    """Generate a hypothetical answer to improve retrieval of relevant chunks."""
+
+    # Step 1: Generate a hypothetical answer (will match real documents better)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",  # cheap model ok for hypothesis generation
+        messages=[
+            {"role": "system", "content": "Write a single paragraph that would perfectly answer this question. Be specific and use technical language if needed."},
+            {"role": "user", "content": query}
+        ],
+        max_tokens=200
+    )
+    hypothetical_doc = response.choices[0].message.content
+
+    # Step 2: Embed the hypothetical answer (not the raw query)
+    results = vectorstore.similarity_search(hypothetical_doc, k=k)
+    return results
+
+# ── Technique 3: Query Expansion ──────────────────────────────────────
+def expand_query(query: str) -> list[str]:
+    """Generate multiple query variants to improve retrieval coverage."""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": """Generate 3 alternative versions of this search query.
+Return ONLY a JSON array of strings, nothing else.
+The alternatives should use different vocabulary to find the same information."""},
+            {"role": "user", "content": f"Query: {query}"}
+        ],
+        response_format={"type": "json_object"}
+    )
+    import json
+    data = json.loads(response.choices[0].message.content)
+    queries = data.get("queries", [query])
+    return [query] + queries  # original + 3 alternatives
+
+def retrieve_with_expansion(query: str, vectorstore, k: int = 4) -> list:
+    """Retrieve using multiple query variants, deduplicate results."""
+    queries = expand_query(query)
+    all_results = []
+    seen_contents = set()
+
+    for q in queries:
+        results = vectorstore.similarity_search(q, k=k)
+        for r in results:
+            if r.page_content not in seen_contents:
+                all_results.append(r)
+                seen_contents.add(r.page_content)
+
+    return all_results[:k * 2]  # return top 2k deduplicated results</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">📈 Advanced RAG Impact (Typical Results)</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        <strong style="color:var(--text-light);">Baseline RAG</strong>: faithfulness ~0.75, context recall ~0.70<br>
+                        <strong style="color:var(--text-light);">+ Re-ranking</strong>: faithfulness → ~0.91 (+16pts). The single highest-impact improvement.<br>
+                        <strong style="color:var(--text-light);">+ Hybrid Search</strong>: context recall → ~0.85 (+15pts). Catches exact-match queries that semantic search misses.<br>
+                        <strong style="color:var(--text-light);">+ Query Expansion</strong>: context recall → ~0.90. Helps with ambiguous or short queries.<br>
+                        <strong style="color:var(--text-light);">Recommended order</strong>: implement these in order of impact — re-ranking first, hybrid search second, query expansion third.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                <h3>Section Conclusion</h3>
+                <p>You now master the full LLM Engineering & RAG stack:</p>
+                <ul class="styled-list">
+                    <li>The 6-layer LLM application stack: API → Prompt → Retrieval → Orchestration → Evaluation → Observability</li>
+                    <li>Production API patterns: retry logic, exponential backoff, model fallback, cost logging</li>
+                    <li>Model selection guide: GPT-4o, GPT-4o mini, Claude Sonnet/Haiku, LLaMA 3</li>
+                    <li>All prompt engineering techniques: zero-shot, few-shot, chain-of-thought, self-consistency, decomposition</li>
+                    <li>Structured outputs with Pydantic: classification, extraction, streaming with schema validation</li>
+                    <li>LLM-as-judge evaluation: building a full scoring pipeline from scratch</li>
+                    <li>Fine-tuning: complete workflow from data preparation to deployment, and when not to fine-tune</li>
+                    <li>RAG architecture decisions: when to use RAG vs long-context stuffing vs fine-tuning</li>
+                    <li>The 6-stage RAG pipeline: every decision that determines quality</li>
+                    <li>Embedding best practices: batching, asymmetric encoding, dimension reduction, model consistency</li>
+                    <li>Vector database selection: Chroma, Pinecone, Weaviate, Qdrant, pgvector — when to use each</li>
+                    <li>Production RAG with metadata filtering and streaming</li>
+                    <li>Advanced RAG: re-ranking (cross-encoder), HyDE, query expansion — with measured impact</li>
+                </ul>
+                <p style="margin-top:1rem;">RAG is the most widely deployed LLM engineering pattern — powering enterprise chatbots, document Q&A, and knowledge assistants across every industry.</p>
+            </div>
+
+        </div>
+
+        <!-- LAB -->
+        <div id="laboratorio" class="tab-panel">
+            <h3 style="margin-bottom:1rem;">LLM Pipeline Simulator</h3>
+            <p style="margin-bottom:1rem; font-size:0.9rem; color:var(--text-secondary);">Write a RAG pipeline, prompt template, or LLM API call. The simulator detects your pipeline type and returns realistic output.</p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header">PIPELINE CODE (Python)</div>
+                    <textarea class="lab-textarea" id="lab-input">from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_community.vectorstores import Chroma
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+
+# Load and index documents
+loader = PyPDFLoader("company_handbook.pdf")
+docs   = loader.load()
+
+splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=64)
+chunks   = splitter.split_documents(docs)
+
+embeddings  = OpenAIEmbeddings(model="text-embedding-3-small")
+vectorstore = Chroma.from_documents(chunks, embeddings)
+
+# Build RAG chain
+qa_chain = RetrievalQA.from_chain_type(
+    llm=ChatOpenAI(model="gpt-4o", temperature=0),
+    retriever=vectorstore.as_retriever(search_kwargs={"k": 4}),
+    return_source_documents=True
+)
+
+result = qa_chain.invoke({"query": "What is the parental leave policy?"})</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header">EXECUTION OUTPUT</div>
+                    <div class="lab-output" id="lab-output">Click "Run Simulation" to execute your pipeline...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="runLab()">▶ Run Simulation</button>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: LLM Engineering & RAG</h3>
+                <p style="color:var(--text-secondary); margin-bottom:2rem;">15 questions covering the full stack — API usage, prompt engineering, embeddings, vector databases, RAG architecture, and evaluation.</p>
+                <form id="quiz-form">
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">1. What does a low temperature value (e.g. 0.1) produce in an LLM API call?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"> A) More creative and varied outputs</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B"> B) More deterministic and focused outputs</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Shorter responses</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Outputs with fewer hallucinations</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">2. What is "few-shot prompting"?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Fine-tuning a model on a small dataset</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Providing example input-output pairs in the prompt to guide the model's behavior</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Using multiple models in parallel</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"> D) A technique to reduce token usage</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">3. What problem does RAG primarily solve?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"> A) Slow model inference speed</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B"> B) High API costs</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Hallucination and lack of access to current or private knowledge</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Poor code generation quality</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">4. What is an embedding in the context of RAG?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"> A) A compressed version of a document for storage</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B"> B) A dense numerical vector that represents the semantic meaning of text</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C"> C) A tokenized version of a sentence</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"> D) A fine-tuned version of an LLM</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">5. What does cosine similarity measure between two embeddings?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"> A) The Euclidean distance in pixel space</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B"> B) The number of shared tokens</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C"> C) The semantic similarity — how similar in meaning two pieces of text are</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"> D) The compression ratio of the embedding</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">6. In the RAG indexing phase, why do we chunk documents?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"> A) To reduce file storage costs</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B"> B) To fit within the LLM's context window and improve retrieval precision</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C"> C) To make documents easier to read by humans</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"> D) To remove duplicate content</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">7. Which vector database is best suited for quick local prototyping?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Pinecone</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Weaviate</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Chroma</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Cassandra</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">8. What does "faithfulness" measure in RAG evaluation?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"> A) How fast the system responds</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B"> B) Whether the generated answer is actually supported by the retrieved context</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C"> C) The accuracy of the embedding model</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"> D) How many documents were retrieved</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">9. What is "structured output" in the OpenAI API?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Formatting the output with markdown headers</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B"> B) A guaranteed JSON response that matches a defined Pydantic schema</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Output that is sorted alphabetically</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"> D) A CSV-formatted response from the model</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">10. When should you use fine-tuning instead of RAG?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"> A) When you need the model to access up-to-date private documents</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B"> B) When the model already knows the facts but needs to learn a specific style, format, or behavior that prompting cannot achieve</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C"> C) Fine-tuning is always better than RAG</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"> D) When you have fewer than 10 training examples</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">11. What does "chain-of-thought" prompting do?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Links multiple LLM calls in sequence</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Instructs the model to reason step by step before answering, improving accuracy on complex tasks</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Retrieves documents in a chain from multiple databases</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Reduces the number of tokens needed in the prompt</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">12. What is "re-ranking" in advanced RAG?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Re-ordering the user's query for better retrieval</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Using a cross-encoder to score retrieved chunks by relevance before passing them to the LLM</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Ranking documents by date before indexing</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"> D) A method for choosing which embedding model to use</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">13. What is "LLM-as-judge" evaluation?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"> A) A human expert reviewing all model outputs</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Using a more capable LLM to score or compare outputs from your application LLM</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C"> C) A legal compliance check on LLM outputs</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Unit tests written for prompt templates</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">14. What does "chunk_overlap" do in a text splitter?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Removes duplicate text across chunks</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Creates a shared token window between adjacent chunks to preserve context at boundaries</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Limits each chunk to a maximum number of sentences</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Merges chunks that are too small</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan); font-weight:600;">15. What is "hybrid search" in a vector database?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Searching across multiple vector databases simultaneously</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Combining vector similarity search with traditional keyword (BM25) search for better recall</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Using two embedding models to rank results</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D"> D) A search that works on both images and text</label>
+                    </div>
+
+                </form>
+
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+
+                <div id="quiz-results" class="quiz-results" style="display:none;">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESOURCES -->
+        <div id="recursos" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem;">Support Materials</h3>
+            <div class="content-card">
+                <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.85rem;">LLM ENGINEERING</p>
+                <a href="#" class="resource-link">→ OpenAI API Reference – platform.openai.com/docs</a>
+                <a href="#" class="resource-link">→ Anthropic API Docs – docs.anthropic.com</a>
+                <a href="#" class="resource-link">→ OpenAI Prompt Engineering Guide – platform.openai.com/docs/guides/prompt-engineering</a>
+                <a href="#" class="resource-link">→ Anthropic Prompt Engineering Guide – docs.anthropic.com/en/docs/build-with-claude/prompt-engineering</a>
+                <a href="#" class="resource-link">→ OpenAI Cookbook – Practical recipes for API use cases</a>
+                <a href="#" class="resource-link">→ RAGAS – RAG evaluation framework (ragas.io)</a>
+                <p style="color:var(--text-secondary); margin:1.5rem 0 1rem; font-size:0.85rem;">RAG & VECTOR DATABASES</p>
+                <a href="#" class="resource-link">→ LangChain RAG Tutorial – python.langchain.com/docs/tutorials/rag</a>
+                <a href="#" class="resource-link">→ LlamaIndex – Data framework for LLM applications</a>
+                <a href="#" class="resource-link">→ Pinecone Learning Center – Vector database concepts</a>
+                <a href="#" class="resource-link">→ Chroma Documentation – trychroma.com</a>
+                <a href="#" class="resource-link">→ "RAG Survey" – Lewis et al. (original RAG paper)</a>
+                <a href="#" class="resource-link">→ Advanced RAG Techniques – LlamaIndex blog</a>
+            </div>
+        </div>
+
+        <!-- ASSESSMENT -->
+        <div id="avaliacao" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Mastery Criteria: LLM Engineering & RAG</h3>
+                <p style="color:var(--text-secondary); margin-bottom:2rem;">To successfully complete this module, demonstrate understanding across the following competency levels:</p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>What temperature, max_tokens, and top_p control in an LLM API call</li>
+                            <li>The system / user / assistant message roles</li>
+                            <li>What few-shot and chain-of-thought prompting are</li>
+                            <li>What RAG is and the three problems it solves</li>
+                            <li>What an embedding is and what cosine similarity measures</li>
+                            <li>The difference between a vector database and a regular database</li>
+                            <li>The two phases of a RAG pipeline: indexing and retrieval+generation</li>
+                            <li>When to use RAG vs fine-tuning vs prompting</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Writing effective prompt templates with explicit instructions and examples</li>
+                            <li>Using structured outputs (Pydantic + OpenAI) to extract structured data</li>
+                            <li>Generating embeddings with OpenAI or open-source models</li>
+                            <li>Building a basic RAG pipeline with LangChain + Chroma</li>
+                            <li>Tuning chunking strategy (size, overlap) for retrieval quality</li>
+                            <li>Running RAGAS evals: faithfulness, relevancy, context recall</li>
+                            <li>Setting up a retriever with k-nearest-neighbor search</li>
+                            <li>Ensuring the RAG prompt prevents hallucination when context is missing</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>Implementing hybrid search (vector + BM25) in Weaviate or Qdrant</li>
+                            <li>Adding a cross-encoder re-ranker to a RAG pipeline</li>
+                            <li>Building parent-child chunking for complete context retrieval</li>
+                            <li>Implementing HyDE (Hypothetical Document Embeddings)</li>
+                            <li>Building an LLM-as-judge evaluation pipeline from scratch</li>
+                            <li>Fine-tuning an embedding model on domain-specific data</li>
+                            <li>Building a Self-RAG loop with retrieval reflection</li>
+                            <li>Deploying a RAG system with latency monitoring and fallback logic</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+        const m = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+        document.getElementById('progress-fill').style.width = m[tabName] + '%';
+        document.getElementById('progress-text').innerText = m[tabName] + '%';
+        window.scrollTo({ top: 150, behavior: 'smooth' });
+    }
+
+    function runLab() {
+        const input  = document.getElementById('lab-input').value;
+        const output = document.getElementById('lab-output');
+
+        const hasRAG        = input.includes('RetrievalQA') || input.includes('vectorstore') || input.includes('retriever');
+        const hasEmbed      = input.includes('embeddings') || input.includes('embed(') || input.includes('cosine');
+        const hasEval       = input.includes('ragas') || input.includes('evaluate') || input.includes('faithfulness');
+        const hasPrompt     = input.includes('PromptTemplate') || (input.includes('system') && input.includes('user') && input.includes('content'));
+        const hasStructured = input.includes('BaseModel') || input.includes('response_format') || input.includes('parse(');
+        const hasSplitter   = input.includes('TextSplitter') || input.includes('split_documents');
+
+        const chunkCount = 247;
+        const queryText  = (input.match(/['"](query|question)['"]\s*:\s*['"]([^'"]+)['"]/)?.[2]) ||
+                           (input.match(/query_texts=\[['"]([^'"]+)['"]\]/)?.[1]) ||
+                           'What is the parental leave policy?';
+
+        if (hasEval) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ RAGAS Evaluation Complete</strong>
+
+  Dataset   : 50 question-answer pairs
+  Pipeline  : RAG (GPT-4o + text-embedding-3-small + Chroma)
+
+<strong style="color:#28e0ff;">── Metric Results ──</strong>
+  faithfulness      : 0.912  ✓ (answer supported by context)
+  answer_relevancy  : 0.874  ✓ (answer addresses the question)
+  context_recall    : 0.831  ⚠ (some relevant chunks missed)
+  context_precision : 0.889  ✓ (retrieved chunks are relevant)
+
+<strong style="color:#28e0ff;">── Per-Question Sample ──</strong>
+  Q01 | faith: 1.00 | relevancy: 0.94 | recall: 1.00
+  Q02 | faith: 0.83 | relevancy: 0.91 | recall: 0.75  ← low recall
+  Q03 | faith: 1.00 | relevancy: 0.87 | recall: 1.00
+  Q04 | faith: 0.67 | relevancy: 0.73 | recall: 0.50  ← hallucination risk
+
+<strong style="color:#f59e0b;">⚠ Recommendations:</strong>
+  1. Increase k from 4 → 8 to improve context_recall
+  2. Add re-ranker to address precision drop at higher k
+  3. Review Q02 and Q04 for chunking boundary issues
+
+<em style="color:#b6c0de;">Tip: Run evals after every pipeline change to catch regressions early.</em>`;
+
+        } else if (hasStructured) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Structured Output Parsed</strong>
+
+  Model   : gpt-4o
+  Schema  : Pydantic BaseModel (validated)
+
+<strong style="color:#28e0ff;">── Parsed Object ──</strong>
+  {
+    "title"           : "Inception",
+    "sentiment"       : "positive",
+    "score"           : 9.2,
+    "key_themes"      : ["dreams and reality", "memory and grief"],
+    "one_line_summary": "A visually stunning heist film set inside the human mind."
+  }
+
+<strong style="color:#28e0ff;">── Validation ──</strong>
+  Schema match : ✓
+  Type checks  : ✓  (score is float, key_themes is List[str])
+  Token usage  : 312 input / 87 output
+
+<em style="color:#b6c0de;">Tip: structured outputs guarantee valid JSON — no more JSON.parse() failures.</em>`;
+
+        } else if (hasEmbed) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Embeddings Generated</strong>
+
+  Model      : text-embedding-3-small
+  Dimensions : 1536
+
+<strong style="color:#28e0ff;">── Similarity Matrix ──</strong>
+  "What is the capital of France?"
+  "Which city serves as France's capital?"     → 0.971  (near-identical)
+  "Paris is the largest city in France."       → 0.883  (highly related)
+  "How do I bake a chocolate cake?"            → 0.138  (unrelated)
+
+<strong style="color:#28e0ff;">── Embedding Preview (first 8 of 1536 dims) ──</strong>
+  [ 0.0231, -0.1847,  0.0923,  0.2341, -0.0187,  0.1024, -0.3012,  0.0441, ... ]
+
+<em style="color:#b6c0de;">Tip: cosine similarity > 0.85 = highly semantically related.</em>`;
+
+        } else if (hasRAG) {
+            const k = (input.match(/"k":\s*(\d+)/)?.[1]) || 4;
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ RAG Pipeline Executed</strong>
+
+<strong style="color:#28e0ff;">── Indexing Phase ──</strong>
+  Documents loaded : 1  (company_handbook.pdf, 84 pages)
+  Chunks created   : ${chunkCount}  (chunk_size=512, overlap=64)
+  Embeddings       : ${chunkCount} vectors × 1536 dims
+  Vector store     : Chroma (local, in-memory)
+  Index time       : 14.2s
+
+<strong style="color:#28e0ff;">── Query Phase ──</strong>
+  Query    : "${queryText.substring(0, 65)}${queryText.length > 65 ? '...' : ''}"
+  k        : ${k} chunks retrieved
+  Latency  : 1.34s (embed: 0.12s | ANN: 0.08s | LLM: 1.14s)
+
+<strong style="color:#28e0ff;">── Retrieved Chunks (top ${k}) ──</strong>
+  [0.94] §4.3 Parental Leave — Primary caregivers are entitled to...
+  [0.91] §4.3 Parental Leave — Secondary caregivers receive up to...
+  [0.87] §4.1 Leave Overview — All full-time employees are eligible...
+  [0.79] §4.5 Leave Application — Submit your request via HR portal...
+
+<strong style="color:#28e0ff;">── Generated Answer ──</strong>
+  "Full-time employees are entitled to 16 weeks of paid parental leave
+   as primary caregiver, 4 weeks as secondary. Leave must be requested
+   at least 8 weeks in advance via the HR portal. [Source: §4.3, §4.5]"
+
+<strong style="color:#28e0ff;">── Token Usage ──</strong>
+  Context tokens : 1,847
+  Output tokens  : 68
+  Total cost     : ~$0.0192
+
+<em style="color:#b6c0de;">Tip: Add re-ranking after retrieval to push the most relevant chunks to the top.</em>`;
+
+        } else if (hasPrompt) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ LLM API Call Complete</strong>
+
+  Model       : gpt-4o
+  Temperature : 0.2
+  Max tokens  : 512
+
+<strong style="color:#28e0ff;">── Response ──</strong>
+  • Q3 2024 net revenue reached $4.2B, up 18% YoY, driven by
+    cloud segment growth exceeding analyst consensus.
+  • Operating margin expanded to 24.3%, reflecting improved
+    cost discipline despite increased R&D investment.
+  • Board approved $500M share buyback program, signaling
+    confidence in sustained free cash flow generation.
+
+<strong style="color:#28e0ff;">── Usage ──</strong>
+  Prompt tokens     : 847
+  Completion tokens : 74
+  Total tokens      : 921
+  Estimated cost    : $0.0023
+
+<em style="color:#b6c0de;">Tip: Use XML tags like &lt;transcript&gt;...&lt;/transcript&gt; to clearly separate data from instructions.</em>`;
+
+        } else {
+            output.innerHTML = `<strong style="color:#f59e0b;">⚠ No recognised LLM pipeline detected.</strong>
+
+Add at least one of:
+  • RAG pipeline (RetrievalQA, vectorstore, retriever)
+  • Embedding generation (OpenAIEmbeddings, cosine similarity)
+  • RAGAS evaluation (ragas, faithfulness, evaluate)
+  • Structured output (BaseModel, response_format, parse)
+  • LLM prompt template (PromptTemplate, system/user messages)
+
+<em style="color:#b6c0de;">Use the default template as a starting point.</em>`;
+        }
+    }
+
+    class QuizManager {
+        constructor() {
+            this.questionsData = {
+                q1:  { correct: 'B', exp: 'Low temperature (close to 0) makes the model more deterministic — it consistently picks the highest-probability token. High temperature increases randomness and creativity.' },
+                q2:  { correct: 'B', exp: 'Few-shot prompting includes example input-output pairs in the prompt. This teaches the model the desired behavior through demonstration rather than instruction alone.' },
+                q3:  { correct: 'C', exp: 'RAG primarily solves hallucination (by grounding answers in real documents), knowledge cutoff (by providing current data), and private knowledge gaps (by indexing your own documents).' },
+                q4:  { correct: 'B', exp: 'An embedding is a dense numerical vector (e.g. 1536 floats) that encodes the semantic meaning of text. Similar meanings → similar vectors, regardless of exact wording.' },
+                q5:  { correct: 'C', exp: 'Cosine similarity measures the angle between two vectors. A score near 1.0 means the texts are semantically very similar; near 0 means they are unrelated.' },
+                q6:  { correct: 'B', exp: 'Documents are chunked to (1) fit within the LLM\'s context window and (2) improve retrieval precision — smaller, focused chunks match user queries more accurately than entire documents.' },
+                q7:  { correct: 'C', exp: 'Chroma is lightweight, runs entirely in-process with zero infrastructure setup, and is the go-to choice for local development and prototyping RAG pipelines.' },
+                q8:  { correct: 'B', exp: 'Faithfulness measures whether every claim in the generated answer is actually supported by the retrieved context — it detects hallucination in RAG systems.' },
+                q9:  { correct: 'B', exp: 'Structured outputs use Pydantic schemas to constrain the model\'s response to a guaranteed valid JSON object matching the defined types and fields — no parsing errors.' },
+                q10: { correct: 'B', exp: 'Fine-tuning is ideal when the model already has the knowledge but needs to change its behavior, style, or format — not when it lacks knowledge (use RAG for that).' },
+                q11: { correct: 'B', exp: 'Chain-of-thought prompting instructs the model to show its reasoning before giving a final answer. This dramatically improves accuracy on multi-step math, logic, and reasoning tasks.' },
+                q12: { correct: 'B', exp: 'Re-ranking uses a cross-encoder (more accurate but slower than ANN) to re-score the initially retrieved chunks by relevance, then keeps only the top-k for the LLM.' },
+                q13: { correct: 'B', exp: 'LLM-as-judge uses a capable model (e.g. GPT-4o) to evaluate outputs from your application. It scores criteria like helpfulness, accuracy, and safety — scalable alternative to human review.' },
+                q14: { correct: 'B', exp: 'chunk_overlap creates a sliding window between adjacent chunks, so sentences near a chunk boundary appear in both the preceding and following chunk, preserving context.' },
+                q15: { correct: 'B', exp: 'Hybrid search combines dense vector similarity (semantic meaning) with sparse BM25 keyword search. This improves recall for exact-match queries that vector search alone can miss.' }
+            };
+            this.init();
+        }
+        init() {
+            document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+            document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+        }
+        submitQuiz() {
+            const fd = new FormData(document.getElementById('quiz-form'));
+            let score = 0, html = '';
+            Object.keys(this.questionsData).forEach((k, i) => {
+                const ans = fd.get(k);
+                const ok  = ans === this.questionsData[k].correct;
+                if (ok) score++;
+                html += `<div class="feedback-item ${ok ? 'feedback-correct' : 'feedback-incorrect'}"><span class="feedback-icon">${ok ? '✓' : '✗'}</span><div><strong>Question ${i+1}:</strong> ${this.questionsData[k].exp}${!ok ? `<br><small style="color:var(--text-secondary)">Correct: Option ${this.questionsData[k].correct}</small>` : ''}</div></div>`;
+            });
+            const total = Object.keys(this.questionsData).length;
+            const pct   = Math.round((score / total) * 100);
+            const cls   = pct >= 80 ? 'score-excellent' : pct >= 50 ? 'score-good' : 'score-poor';
+            document.getElementById('quiz-score').innerHTML = `<div class="${cls}">${score}/${total} (${pct}%)</div><p style="color:var(--text-secondary)">${pct >= 70 ? 'Excellent! You are ready to build production RAG systems.' : 'Review embeddings, vector databases, and RAG pipeline architecture — then try again.'}</p>`;
+            document.getElementById('quiz-feedback').innerHTML = html;
+            const r = document.getElementById('quiz-results');
+            r.style.display = 'block';
+            r.scrollIntoView({ behavior: 'smooth' });
+        }
+        clearQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-results').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => new QuizManager());
+</script>
+</body>
+</html>
+

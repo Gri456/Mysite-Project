@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Science — BitJourney</title>
+    <meta name="description" content="O papel do Cientista de Dados, competências essenciais, processo, responsabilidade, saídas profissionais, recursos e tendências do futuro. Página dinâmica e acessível com design premium para BitJourney." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui']
+                    },
+                    colors: {
+                        brand: {
+                            50:'#ecfeff',100:'#cffafe',200:'#a5f3fc',300:'#67e8f9',400:'#22d3ee',
+                            500:'#06b6d4',600:'#0891b2',700:'#0e7490',800:'#155e75',900:'#164e63'
+                        }
+                    },
+                    boxShadow: {
+                        glow: '0 0 0 6px rgb(34 211 238 / 0.08), 0 10px 40px -10px rgb(59 130 246 / 0.45)'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%,100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' }
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '100%': { backgroundPosition: '200% 50%' }
+                        },
+                    },
+                    animation: {
+                        float: 'float 6s ease-in-out infinite',
+                        shimmer: 'shimmer 3s linear infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Decorative gradient orbs */
+        .orb {
+            filter: blur(64px);
+            opacity:.4;
+            pointer-events:none
+        }
+        .scroll-reveal {
+            opacity:0;
+            transform: translateY(12px);
+            transition: all .6s ease;
+        }
+        .scroll-reveal.revealed {
+            opacity:1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-lime-950 via-green-950 to-emerald-950 text-white selection:bg-cyan-300 selection:text-slate-900">
+    <!-- Background Orbs -->
+    <div aria-hidden="true" class="fixed inset-0 overflow-hidden -z-10">
+        <div class="orb absolute -top-20 -left-10 w-96 h-96 rounded-full bg-lime-500/50"></div>
+        <div class="orb absolute top-40 -right-20 w-[30rem] h-[30rem] rounded-full bg-green-500/40"></div>
+        <div class="orb absolute bottom-[-6rem] left-1/3 w-[28rem] h-[28rem] rounded-full bg-lime-400/40"></div>
+    </div>
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-slate-950/60 border-b border-white/10">
+        <nav class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between gap-4">
+                <a href="index.html" class="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>
+                    </svg>
+                    <span class="text-xl font-extrabold tracking-tight">BitJourney</span>
+                </a>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="browse.html" class="text-slate-300 hover:text-white">Explorar</a>
+                    <a href="contacts.html" class="text-slate-300 hover:text-white">Contactos</a>
+                    <a href="quiz.html" class="inline-flex items-center gap-2 text-slate-900 bg-cyan-300 hover:bg-cyan-200 font-semibold px-3 py-1.5 rounded-xl transition-shadow shadow-glow">
+                        <span>Quiz</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </a>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="login.html" class="text-slate-300 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10">Entrar</a>
+                    <a href="criar-conta.html" class="bg-white/10 hover:bg-white/20 border border-white/10 px-3 py-1.5 rounded-lg">Criar Conta</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="container mx-auto px-4 pt-12 pb-10 md:pt-16 md:pb-16">
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+            <div class="scroll-reveal">
+                <p class="inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-lime-300/90 bg-lime-300/10 ring-1 ring-lime-300/30 px-2 py-1 rounded-full">
+                    <span class="h-2 w-2 bg-lime-300 rounded-full animate-pulse"></span>
+                    Área Temática
+                </p>
+                <h1 class="mt-4 text-4xl md:text-5xl font-extrabold leading-tight">
+                    Data Science: <span class="bg-gradient-to-r from-lime-500 via-green-400 to-lime-400 bg-clip-text text-transparent">O Alquimista do Digital</span>
+                </h1>
+                <p class="mt-4 text-slate-300 max-w-prose">Um Cientista de Dados é muito mais do que um analista. É um investigador estratégico que transforma dados brutos em insights valiosos, impulsionando a tomada de decisão e a inovação.</p>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <a href="#competencias" class="px-4 py-2 rounded-xl bg-lime-400 text-slate-900 font-semibold hover:bg-green-200 focus:outline-none focus:ring-4 focus:ring-cyan-400/40">Ver Competências</a>
+                    <a href="#saidas" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10">Saídas Profissionais</a>
+                </div>
+                <div class="mt-6 flex items-center gap-6 text-sm text-slate-400">
+                    <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-emerald-400"></span>Alta Procura</div>
+                    <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-green-400"></span>Carreira Dinâmica</div>
+                    <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-lime-300"></span>Aprendizagem Contínua</div>
+                </div>
+            </div>
+            <div class="relative scroll-reveal md:justify-self-end">
+                <div class="absolute -inset-4 bg-gradient-to-r from-lime-500/20 via-lime-500/10 to-lime-500/20 rounded-2xl blur-2xl"></div>
+                <div class="relative bg-slate-900/60 border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2 bg-gradient-to-r from-emerald-300 via-green-500 to-lime-700 bg-[length:200%_100%] animate-shimmer text-slate-900 rounded-xl p-4">
+                            <p class="text-sm font-semibold">Impacto Real</p>
+                            <p class="text-2xl font-extrabold">E-commerce • Saúde • Finanças • Logística</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">Programação</p>
+                            <p class="mt-1 text-lg font-bold">Python • R • SQL</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">ML/DL</p>
+                            <p class="mt-1 text-lg font-bold">Scikit-learn • TensorFlow</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">Visualização</p>
+                            <p class="mt-1 text-lg font-bold">Tableau • Power BI</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <p class="text-xs uppercase tracking-wide text-slate-400">Big Data</p>
+                            <p class="mt-1 text-lg font-bold">Spark • Hadoop</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impacto Invisível -->
+    <section class="container mx-auto px-4 py-12" id="impacto">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">🌍 O Impacto Invisível no Nosso Dia a Dia</h2>
+            <p class="mt-2 text-slate-300 max-w-3xl">O trabalho de um Cientista de Dados tem um impacto profundo e direto na nossa vida quotidiana, mesmo que nem sempre nos apercebamos disso:</p>
+            <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Comércio Eletrónico</h3>
+                    <p class="mt-1 text-sm text-slate-300">Sistemas de recomendação que sugerem produtos ou filmes com base no seu comportamento.</p>
+                </article>
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Saúde</h3>
+                    <p class="mt-1 text-sm text-slate-300">Modelos preveem surtos de doenças, analisam imagens médicas e personalizam tratamentos.</p>
+                </article>
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Serviços Financeiros</h3>
+                    <p class="mt-1 text-sm text-slate-300">Sistemas de deteção de fraude em tempo real e algoritmos de crédito mais precisos.</p>
+                </article>
+                <article class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:-translate-y-1 hover:shadow-glow transition">
+                    <h3 class="font-bold text-white">Logística e Transportes</h3>
+                    <p class="mt-1 text-sm text-slate-300">Previsão de tráfego e otimização de rotas em aplicações de navegação.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Competências -->
+    <section class="container mx-auto px-4 py-12" id="competencias">
+        <div class="scroll-reveal">
+            <div class="flex items-end justify-between gap-4 flex-wrap">
+                <h2 class="text-3xl font-extrabold">🛠 Competências Essenciais para o Sucesso</h2>
+                <div class="flex items-center gap-2 text-xs text-slate-300">
+                    <span class="inline-block px-2 py-1 rounded bg-white/10">Hard Skills</span>
+                    <span class="inline-block px-2 py-1 rounded bg-white/10">Soft Skills</span>
+                </div>
+            </div>
+            <div class="mt-6 grid lg:grid-cols-2 gap-6">
+                <!-- Hard Skills -->
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                    <h3 class="font-bold text-xl">Competências Técnicas (Hard Skills)</h3>
+                    <ul class="mt-4 space-y-3 text-slate-300">
+                        <li><span class="font-semibold text-white">Programação:</span> Domínio de Python (Pandas, NumPy, Scikit-learn) ou R.</li>
+                        <li><span class="font-semibold text-white">Estatística e Matemática:</span> Base sólida em estatística, probabilidade e álgebra linear.</li>
+                        <li><span class="font-semibold text-white">Manipulação de Dados:</span> Capacidade de trabalhar com grandes volumes de dados usando SQL e Spark.</li>
+                        <li><span class="font-semibold text-white">Machine Learning:</span> Conhecimento de algoritmos de aprendizagem supervisionada e não supervisionada.</li>
+                        <li><span class="font-semibold text-white">Visualização de Dados:</span> Uso de Tableau, Power BI ou bibliotecas como Matplotlib e Seaborn.</li>
+                    </ul>
+                </div>
+                <!-- Soft Skills -->
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                    <h3 class="font-bold text-xl">Competências Pessoais (Soft Skills)</h3>
+                    <ul class="mt-4 space-y-3 text-slate-300">
+                        <li><span class="font-semibold text-white">Pensamento Crítico e Curiosidade:</span> Capacidade de questionar os dados e formular hipóteses.</li>
+                        <li><span class="font-semibold text-white">Resolução de Problemas:</span> Usar dados para resolver problemas de negócio complexos.</li>
+                        <li><span class="font-semibold text-white">Comunicação:</span> Explicar resultados técnicos complexos a stakeholders não técnicos.</li>
+                        <li><span class="font-semibold text-white">Conhecimento de Negócio:</span> Compreender objetivos e métricas do negócio para impacto real.</li>
+                        <li><span class="font-semibold text-white">Ética de Dados:</span> Compreender implicações do uso de dados, incluindo privacidade e enviesamentos.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Processo (Timeline) -->
+    <section class="container mx-auto px-4 py-12" id="processo">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">🧩 O Processo de Ciência de Dados: Do Dado ao Insight</h2>
+            <ol class="relative mt-8 border-l border-white/10 ml-2">
+                <!-- Step -->
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-lime-300 text-slate-900 font-bold">1</span>
+                    <h3 class="font-bold">Compreensão do Negócio</h3>
+                    <p class="text-slate-300">Definir o problema de negócio, objetivos e critérios de sucesso.</p>
+                </li>
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-lime-300 text-slate-900 font-bold">2</span>
+                    <h3 class="font-bold">Aquisição e Compreensão dos Dados</h3>
+                    <p class="text-slate-300">Recolher dados de diversas fontes e explorar a sua qualidade e relações.</p>
+                </li>
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-lime-300 text-slate-900 font-bold">3</span>
+                    <h3 class="font-bold">Preparação e Limpeza de Dados</h3>
+                    <p class="text-slate-300">Limpar dados em falta, corrigir inconsistências e preparar o dataset para modelação.</p>
+                </li>
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-lime-300 text-slate-900 font-bold">4</span>
+                    <h3 class="font-bold">Modelação</h3>
+                    <p class="text-slate-300">Selecionar e aplicar algoritmos de machine learning, treinar e ajustar modelos.</p>
+                </li>
+                <li class="mb-10 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-lime-300 text-slate-900 font-bold">5</span>
+                    <h3 class="font-bold">Avaliação</h3>
+                    <p class="text-slate-300">Avaliar o modelo final contra métricas de negócio e técnicas.</p>
+                </li>
+                <li class="mb-2 ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-lime-300 text-slate-900 font-bold">6</span>
+                    <h3 class="font-bold">Implementação e Monitorização</h3>
+                    <p class="text-slate-300">Colocar o modelo em produção e monitorizar o seu desempenho.</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- Responsabilidade -->
+    <section class="container mx-auto px-4 py-12" id="responsabilidade">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">⚡ A Responsabilidade do Cientista de Dados</h2>
+            <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Privacidade e Ética</h3>
+                    <p class="text-slate-300 text-sm">Garantir a anonimização dos dados e cumprir regulamentos como o RGPD.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Combate ao Enviesamento Algorítmico</h3>
+                    <p class="text-slate-300 text-sm">Identificar e mitigar enviesamentos que podem perpetuar discriminações.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Transparência e Explicabilidade</h3>
+                    <p class="text-slate-300 text-sm">Desenvolver formas de explicar as previsões de modelos complexos.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                    <h3 class="font-bold">Impacto nos Negócios e Sociedade</h3>
+                    <p class="text-slate-300 text-sm">Garantir a robustez e precisão dos modelos para evitar impactos negativos.</p>
+                </div>
+            </div>
+            <p class="mt-4 text-slate-300">O Cientista de Dados deve explorar novas técnicas de forma a criar soluções inovadoras que sejam éticas e benéficas para a sociedade.</p>
+        </div>
+    </section>
+
+    <!-- Saídas Profissionais (Tabs) -->
+    <section class="container mx-auto px-4 py-12" id="saidas">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">💼 Saídas Profissionais em Data Science</h2>
+            <div class="mt-6 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                <!-- Tab list -->
+                <div role="tablist" aria-label="Perfis" class="flex flex-wrap">
+                    <button data-tab="analyst" role="tab" aria-selected="true" class="tab-btn flex-1 px-4 py-3 text-left font-semibold bg-white/10 hover:bg-white/20 focus:outline-none">1) Data Analyst</button>
+                    <button data-tab="scientist" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">2) Data Scientist</button>
+                    <button data-tab="mlengineer" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">3) ML Engineer</button>
+                    <button data-tab="dataengineer" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">4) Data Engineer</button>
+                    <button data-tab="bideveloper" role="tab" class="tab-btn flex-1 px-4 py-3 text-left font-semibold hover:bg-white/10 focus:outline-none">5) BI Developer</button>
+                </div>
+                <!-- Panels -->
+                <div class="p-6 space-y-10">
+                    <!-- Data Analyst -->
+                    <section data-panel="analyst">
+                        <h3 class="text-2xl font-bold">Data Analyst (Analista de Dados)</h3>
+                        <p class="text-slate-300">Foca-se em analisar dados históricos para identificar tendências, criar dashboards e responder a perguntas de negócio específicas.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Extrair dados de bases de dados usando SQL</li>
+                                    <li>Limpar e organizar conjuntos de dados para análise</li>
+                                    <li>Criar visualizações e dashboards para monitorizar KPIs</li>
+                                    <li>Realizar análises ad-hoc para responder a perguntas de negócio</li>
+                                    <li>Escrever relatórios e apresentar conclusões</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">SQL, Tableau, Power BI, Looker, Excel (avançado), Python (Pandas, Jupyter Notebooks) ou R.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="25000" data-max="35000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€25,000 – €35,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="35000" data-max="50000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€35,000 – €50,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="50000" data-max="65000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€50,000 – €65,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Data Scientist -->
+                    <section data-panel="scientist" hidden>
+                        <h3 class="text-2xl font-bold">Data Scientist (Cientista de Dados)</h3>
+                        <p class="text-slate-300">Vai além da análise, focando-se na construção de modelos preditivos e prescritivos usando técnicas estatísticas e de machine learning.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Realizar análise exploratória de dados (EDA) profunda</li>
+                                    <li>Desenvolver, treinar e avaliar modelos de machine learning</li>
+                                    <li>Implementar modelos em ambientes de produção</li>
+                                    <li>Comunicar resultados técnicos a audiências não técnicas</li>
+                                    <li>Colaborar com equipas de engenharia e produto</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">Python (Pandas, Scikit-learn, TensorFlow, PyTorch), R, Spark, Hadoop, Jupyter Notebooks, Git.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="30000" data-max="40000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€30,000 – €40,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="40000" data-max="55000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€40,000 – €55,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="55000" data-max="75000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€55,000 – €75,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Machine Learning Engineer -->
+                    <section data-panel="mlengineer" hidden>
+                        <h3 class="text-2xl font-bold">Machine Learning Engineer</h3>
+                        <p class="text-slate-300">Especialista em colocar modelos de machine learning em produção e mantê-los a funcionar à escala.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Construir pipelines de dados para treino de modelos</li>
+                                    <li>Implementar e versionar modelos em ambientes de cloud</li>
+                                    <li>Desenvolver APIs para servir previsões de modelos</li>
+                                    <li>Automatizar processos de ML (MLOps) com ferramentas de CI/CD</li>
+                                    <li>Otimizar modelos para desempenho e escalabilidade</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">AWS SageMaker, GCP Vertex AI, Azure ML Studio, Docker, Kubernetes, MLflow, Kubeflow, Python, Java, Scala.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="35000" data-max="45000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€35,000 – €45,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="45000" data-max="60000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€45,000 – €60,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="60000" data-max="85000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€60,000 – €85,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Data Engineer -->
+                    <section data-panel="dataengineer" hidden>
+                        <h3 class="text-2xl font-bold">Data Engineer (Engenheiro de Dados)</h3>
+                        <p class="text-slate-300">Constrói e mantém a "canalização" de dados, responsável pela arquitetura, construção e manutenção dos sistemas de dados.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Projectar e construir sistemas de processamento de dados escaláveis</li>
+                                    <li>Gerir infraestruturas de dados em cloud (data warehouses, data lakes)</li>
+                                    <li>Implementar soluções ETL/ELT (Extract, Transform, Load)</li>
+                                    <li>Garantir a qualidade, eficiência e fiabilidade dos dados</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">Apache Spark, Hadoop, Kafka, AWS Redshift, Google BigQuery, Snowflake, Azure Data Lake, Apache Airflow, SQL, Python, Java, Scala.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="32000" data-max="42000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€32,000 – €42,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="42000" data-max="58000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€42,000 – €58,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="58000" data-max="80000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€58,000 – €80,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- BI Developer -->
+                    <section data-panel="bideveloper" hidden>
+                        <h3 class="text-2xl font-bold">Business Intelligence (BI) Developer</h3>
+                        <p class="text-slate-300">Especializa-se em transformar dados em insights acionáveis através da criação de dashboards, relatórios e ferramentas de visualização.</p>
+                        <div class="mt-4 grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Tarefas do Dia a Dia</h4>
+                                <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+                                    <li>Desenhar e desenvolver dashboards interativos</li>
+                                    <li>Otimizar consultas SQL para alimentar visualizações</li>
+                                    <li>Colaborar com utilizadores de negócio para entender necessidades</li>
+                                    <li>Garantir uma única fonte de verdade para as métricas da empresa</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-semibold">Stack & Ferramentas</h4>
+                                <p class="text-slate-300">Tableau, Power BI, Looker, Qlik, SQL, Snowflake, Redshift, BigQuery.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid md:grid-cols-3 gap-4">
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="24000" data-max="32000">
+                                <p class="text-sm text-slate-400">Júnior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€24,000 – €32,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="32000" data-max="45000">
+                                <p class="text-sm text-slate-400">Mid‑Level</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€32,000 – €45,000</span>/ano</p>
+                            </div>
+                            <div class="salary-card bg-white/5 border border-white/10 rounded-2xl p-4" data-min="45000" data-max="58000">
+                                <p class="text-sm text-slate-400">Sénior</p>
+                                <p class="text-xl font-extrabold"><span class="salary-value">€45,000 – €58,000+</span>/ano</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <!-- Currency Toggle -->
+                <div class="flex items-center justify-between gap-4 px-6 pb-6">
+                    <p class="text-xs text-slate-400">Estimativas médias para o mercado português. Variam por região, empresa e experiência.</p>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-slate-300">Moeda:</span>
+                        <button id="currencyEUR" class="px-2 py-1 rounded-lg bg-white/10 border border-white/10 font-semibold">EUR</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Importância -->
+    <section class="container mx-auto px-4 py-12" id="importancia">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">📊 A Importância Crucial da Ciência de Dados</h2>
+            <p class="mt-2 text-slate-300 max-w-3xl">A ciência de dados é o motor da transformação digital. Num mundo inundado de informação, a capacidade de extrair significado dos dados é o que separa as empresas que lideram daquelas que ficam para trás.</p>
+            <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Vantagem Competitiva</h3><p class="text-slate-300 text-sm">Permite entender clientes, optimizar operações e antecipar tendências.</p></div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Inovação em Produto</h3><p class="text-slate-300 text-sm">Alimenta features inovadoras como assistentes virtuais e sistemas de recomendação.</p></div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Eficiência Operacional</h3><p class="text-slate-300 text-sm">Modelos preveem falhas em equipamentos e optimizam cadeias de abastecimento.</p></div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5"><h3 class="font-semibold">Investigação Científica</h3><p class="text-slate-300 text-sm">Acelera descobertas em genómica, astronomia e ciências climáticas.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tendências -->
+    <section class="container mx-auto px-4 py-12" id="futuro">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">🎯 O Futuro da Ciência de Dados: Tendências e Evolução</h2>
+            <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">IA Generativa e LLMs</h3>
+                    <p class="text-slate-300 text-sm">Modelos como GPT-4 para sumarizar texto, escrever código e gerar conteúdo.</p>
+                </div>
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">MLOps e AutoML</h3>
+                    <p class="text-slate-300 text-sm">Automação do ciclo de vida dos modelos e do design de modelos.</p>
+                </div>
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">Ética e Explicabilidade</h3>
+                    <p class="text-slate-300 text-sm">Pressão para desenvolver modelos justos, transparentes e explicáveis.</p>
+                </div>
+                <div class="group bg-white/5 border border-white/10 rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-glow">
+                    <h3 class="font-semibold">Dados em Tempo Real</h3>
+                    <p class="text-slate-300 text-sm">Capacidade de processar e agir sobre dados no momento em que são gerados.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recursos -->
+    <section class="container mx-auto px-4 py-12" id="recursos">
+        <div class="scroll-reveal">
+            <h2 class="text-3xl font-extrabold">📚 Como Iniciar uma Carreira em Data Science</h2>
+            <ul class="mt-4 space-y-3">
+                <li><span class="font-semibold text-white">Fundamentos:</span> Aprender Python ou R, estatística e matemática.</li>
+                <li><span class="font-semibold text-white">Manipulação de Dados:</span> Dominar SQL e bibliotecas como Pandas.</li>
+                <li><span class="font-semibold text-white">Machine Learning:</span> Estudar algoritmos e frameworks como Scikit-learn.</li>
+                <li><span class="font-semibold text-white">Visualização:</span> Aprender Tableau, Power BI ou bibliotecas de visualização.</li>
+                <li><span class="font-semibold text-white">Projetos Práticos:</span> Construir portfolio com projetos reais.</li>
+                <li><span class="font-semibold text-white">Comunicação:</span> Desenvolver habilidades para explicar insights de dados.</li>
+                <li><span class="font-semibold text-white">Aprendizagem Contínua:</span> Manter-se atualizado com novas técnicas e tendências.</li>
+            </ul>
+            <div class="mt-6 text-sm text-slate-400">Quer aprender mais? Explora os nossos conteúdos gratuitos e prepara‑te para a área premium.</div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="container mx-auto px-4 pb-10 pt-6 text-sm text-slate-400">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+            <p>© <span id="year"></span> BitJourney • <a class="text-cyan-300 hover:underline" href="index.html">Home</a></p>
+            <a href="browse.html" class="inline-flex items-center gap-2 text-purple-300 hover:underline">⬅ Voltar à Exploração</a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries)=>{
+            entries.forEach(e=>{
+                if(e.isIntersecting){
+                    e.target.classList.add('revealed');
+                    observer.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.12 });
+        document.querySelectorAll('.scroll-reveal').forEach(el=>observer.observe(el));
+
+        // Tabs
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const panels = document.querySelectorAll('[data-panel]');
+        tabButtons.forEach(btn => btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-tab');
+            tabButtons.forEach(b=>{
+                b.setAttribute('aria-selected', b===btn);
+                b.classList.toggle('bg-white/10', b===btn);
+            });
+            panels.forEach(p=>{
+                p.hidden = p.getAttribute('data-panel')!==id;
+            });
+        }));
+    </script>
+</body>
+</html>

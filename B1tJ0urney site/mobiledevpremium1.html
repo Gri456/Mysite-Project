@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Mobile Development</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #d000ff;
+            --purple: #c266ff;
+            --cyan: #a200ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(91, 124, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(207, 75, 255, 0.1) 0%, rgba(217, 91, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem; border-radius: 50px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px;
+            font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+
+        .tab-button {
+            flex: 1; min-width: 120px; padding: 1rem 1.5rem;
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.3s ease; position: relative; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card {
+            background: rgba(255,255,255,0.03); padding: 1.5rem;
+            border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;
+        }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Comparison table */
+        .compare-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.875rem; }
+        .compare-table th { background: rgba(255,255,255,0.07); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid var(--border-color); }
+        .compare-table td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .compare-table tr:hover td { background: rgba(255,255,255,0.03); }
+        .tag-yes { color: #10b981; font-weight: 600; }
+        .tag-no  { color: #ef4444; font-weight: 600; }
+        .tag-mid { color: #f59e0b; font-weight: 600; }
+
+        /* Info box */
+        .info-box {
+            background: rgba(162, 0, 255, 0.08);
+            border: 1px solid rgba(162, 0, 255, 0.25);
+            border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0;
+            font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);
+        }
+        .info-box strong { color: var(--cyan); }
+
+        /* Code block */
+        .code-block {
+            background: #000; border-radius: 6px; padding: 1rem;
+            font-family: 'Courier New', monospace; font-size: 0.82rem;
+            color: #a8ff78; overflow-x: auto; margin: 0.75rem 0;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 420px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Quiz */
+        .quiz-question { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .quiz-option {
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem;
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;
+            margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05));
+            border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem;
+        }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+
+        .feedback-item {
+            display: flex; align-items: flex-start; gap: 1rem; padding: 1rem;
+            border-radius: 8px; margin-bottom: 1rem; background: rgba(255,255,255,0.03);
+        }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 1rem; font-weight: 600; margin-bottom: 1rem;
+            padding-bottom: 0.75rem; border-bottom: 2px solid;
+        }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .compare-table { font-size: 0.78rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-mobile.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: Mobile Development</h1>
+            <p class="course-description">
+                Learn the foundations of mobile app development. Understand native and hybrid ecosystems, Android and iOS technology stacks, cross-platform frameworks, and key principles for building professional mobile applications.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• Android • iOS • Flutter • React Native • UI/UX</span></div>
+                <div class="meta-item"><span>📌</span><span>Mobile Fundamentals</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- LEARN -->
+            <div id="aprender" class="tab-panel active">
+
+                <div class="content-card">
+                    <h3>Introduction: What Is Mobile Development?</h3>
+                    <p>Mobile development is the creation of applications for smartphones and tablets. It combines:</p>
+                    <ul class="styled-list">
+                        <li>Software engineering</li>
+                        <li>User interface design</li>
+                        <li>Performance optimization</li>
+                        <li>Hardware integration (GPS, camera, sensors)</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Mobile apps power:</p>
+                    <ul class="styled-list">
+                        <li>Social media</li>
+                        <li>E-commerce</li>
+                        <li>Banking</li>
+                        <li>Games</li>
+                        <li>Health &amp; fitness</li>
+                        <li>Education</li>
+                        <li>Productivity</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">The field is divided into:</p>
+                    <ul class="styled-list">
+                        <li>Native development (iOS / Android)</li>
+                        <li>Hybrid / Cross-platform development (Flutter, React Native, etc.)</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Understanding these ecosystems is the foundation for any future mobile specialization.</p>
+                    <div class="info-box" style="margin-top: 1.25rem;">
+                        <strong>📊 Market Context</strong><br>
+                        As of 2024, there are over <strong>6.8 billion</strong> smartphone users worldwide. The Google Play Store hosts over 3 million apps and the Apple App Store over 1.8 million. Mobile apps generate more than <strong>$935 billion</strong> in revenue annually through purchases, subscriptions, and advertising — making mobile one of the most in-demand developer skills globally.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Native Mobile Development Overview</h3>
+                    <p>Native apps are built specifically for each platform:</p>
+                    <ul class="styled-list">
+                        <li>Android → Kotlin / Java</li>
+                        <li>iOS → Swift / Objective-C</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Native apps provide:</p>
+                    <ul class="styled-list">
+                        <li>Maximum performance</li>
+                        <li>Full hardware access</li>
+                        <li>Best UI responsiveness</li>
+                        <li>Best long-term ecosystem support</li>
+                    </ul>
+                    <div class="info-box" style="margin-top: 1.25rem;">
+                        <strong>💡 When should you choose native?</strong><br>
+                        Native development is the right choice when your app demands <strong>maximum performance</strong> (e.g., games, AR), requires <strong>deep hardware integration</strong> (Bluetooth, NFC, biometrics), or must comply with strict <strong>platform-specific security</strong> requirements (banking, healthcare). Companies like Spotify, Instagram, and Uber maintain native codebases for their core apps precisely because of these reasons.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Android Development Fundamentals</h3>
+                    <p>Android is the world's most widely used mobile OS.</p>
+                    <p style="margin-top: 0.75rem;"><strong>Core Technologies:</strong></p>
+                    <ul class="styled-list">
+                        <li>Kotlin → Google's preferred language</li>
+                        <li>Java → older apps still use it</li>
+                        <li>Android Studio → official IDE</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>Android App Structure:</strong></p>
+                    <ul class="styled-list">
+                        <li>Activities: screens the user interacts with</li>
+                        <li>Fragments: modular UI components</li>
+                        <li>XML layouts: UI structure</li>
+                        <li>Intents: communication between screens</li>
+                        <li>Manifest file: app configuration</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>Android Strengths:</strong></p>
+                    <ul class="styled-list">
+                        <li>Open ecosystem</li>
+                        <li>Customization</li>
+                        <li>Runs on many device types</li>
+                        <li>Flexible hardware integration</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>Use Cases:</strong></p>
+                    <ul class="styled-list">
+                        <li>Social apps</li>
+                        <li>Maps &amp; GPS apps</li>
+                        <li>Banking apps</li>
+                        <li>Games</li>
+                        <li>IoT dashboards</li>
+                    </ul>
+                    <p style="margin-top: 1.25rem;"><strong>Basic Kotlin Activity Example:</strong></p>
+                    <div class="code-block">class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Find a button and set a click listener
+        val myButton = findViewById&lt;Button&gt;(R.id.myButton)
+        myButton.setOnClickListener {
+            Toast.makeText(this, "Hello, Android!", Toast.LENGTH_SHORT).show()
+        }
+    }
+}</div>
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>🔑 Key Concept — Android Lifecycle:</strong><br>
+                        Every Activity goes through a lifecycle: <strong>onCreate → onStart → onResume → onPause → onStop → onDestroy</strong>. Understanding this is critical — it controls when your app saves data, releases resources, and reacts to interruptions (e.g., a phone call). Ignoring the lifecycle is the #1 cause of Android bugs for beginners.
+                    </div>
+                    <p style="margin-top: 1.25rem;"><strong>Android Jetpack — Modern Development Libraries:</strong></p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Google provides Jetpack, a suite of libraries that simplify common development tasks:</p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Room</span> — Local SQLite database abstraction</li>
+                        <li><span class="highlight">ViewModel</span> — Survives screen rotations; holds UI state</li>
+                        <li><span class="highlight">LiveData / StateFlow</span> — Reactive data streams for UI updates</li>
+                        <li><span class="highlight">Navigation</span> — Manages screen transitions and back stack</li>
+                        <li><span class="highlight">WorkManager</span> — Schedules background tasks reliably</li>
+                        <li><span class="highlight">Hilt</span> — Dependency injection framework</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>iOS Development Fundamentals</h3>
+                    <p>iOS is known for:</p>
+                    <ul class="styled-list">
+                        <li>Premium user experience</li>
+                        <li>Strict security</li>
+                        <li>Stable ecosystem</li>
+                        <li>High-paying app markets</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>Core Technologies:</strong></p>
+                    <ul class="styled-list">
+                        <li>Swift → modern, safe, fast</li>
+                        <li>Xcode → official IDE</li>
+                        <li>SwiftUI → declarative UI framework</li>
+                        <li>UIKit → traditional UI framework</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>iOS App Architecture:</strong></p>
+                    <ul class="styled-list">
+                        <li>View → UI</li>
+                        <li>ViewModel → logic for UI</li>
+                        <li>Model → data &amp; rules</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Apple encourages patterns like MVVM, MVC, and Clean Architecture.</p>
+                    <p style="margin-top: 1rem;"><strong>iOS Strengths:</strong></p>
+                    <ul class="styled-list">
+                        <li>Highly optimized performance</li>
+                        <li>Strong security</li>
+                        <li>Best consistency in screen sizes</li>
+                        <li>Tight integration with Apple hardware</li>
+                    </ul>
+                    <p style="margin-top: 1.25rem;"><strong>Basic SwiftUI View Example:</strong></p>
+                    <div class="code-block">import SwiftUI
+
+struct ContentView: View {
+    // @State makes this variable reactive — UI updates when it changes
+    @State private var count = 0
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("You tapped \(count) times")
+                .font(.title)
+            Button("Tap me") {
+                count += 1
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+    }
+}</div>
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>🔑 SwiftUI vs UIKit — Which to learn?</strong><br>
+                        <strong>SwiftUI</strong> is Apple's modern declarative framework, ideal for new projects — less code, live previews in Xcode, and works across iPhone, iPad, macOS, watchOS. <strong>UIKit</strong> is the older imperative framework, still widely used in legacy codebases and when fine-grained UI control is needed. Most professional iOS developers know both.
+                    </div>
+                    <p style="margin-top: 1.25rem;"><strong>The Apple Ecosystem Advantage:</strong></p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">iOS apps can be extended across the full Apple ecosystem with minimal extra code:</p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">iPad</span> — Larger canvas with Split View multitasking</li>
+                        <li><span class="highlight">Apple Watch</span> — WatchKit / SwiftUI for wrist apps</li>
+                        <li><span class="highlight">macOS</span> — Catalyst / SwiftUI to run iOS apps on Mac</li>
+                        <li><span class="highlight">tvOS</span> — Apple TV apps</li>
+                        <li><span class="highlight">App Clips</span> — Lightweight instant-launch mini-apps</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Hybrid &amp; Cross-Platform Development</h3>
+                    <p>Hybrid frameworks allow building one app that runs on both Android and iOS.</p>
+                    <p style="margin-top: 0.75rem;"><strong>Most Popular Technologies:</strong></p>
+                    <ul class="styled-list">
+                        <li>Flutter (Dart) → best performance among hybrids</li>
+                        <li>React Native (JavaScript) → huge ecosystem</li>
+                        <li>Ionic (Web-based)</li>
+                        <li>Xamarin / .NET MAUI (C#)</li>
+                    </ul>
+
+                    <div class="code-explanation" style="margin-top: 1.5rem;">
+                        <p><span class="highlight">Flutter – Google's Modern Cross-Platform Framework</span></p>
+                        <p style="margin-top: 0.5rem;"><strong>Features:</strong></p>
+                        <ul class="styled-list">
+                            <li>Fast performance (near native)</li>
+                            <li>Hot reload</li>
+                            <li>Beautiful UI widgets</li>
+                            <li>Same code for Android, iOS, Web, and Desktop</li>
+                        </ul>
+                        <p style="margin-top: 0.75rem;"><strong>Use cases:</strong> Apps with custom UIs, MVPs and startups, scalable apps.</p>
+                        <p style="margin-top: 1rem;"><strong>Flutter Widget Example (Dart):</strong></p>
+                        <div class="code-block">import 'package:flutter/material.dart';
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+  @override
+  State&lt;MyHomePage&gt; createState() =&gt; _MyHomePageState();
+}
+
+class _MyHomePageState extends State&lt;MyHomePage&gt; {
+  int _counter = 0;
+  void _increment() =&gt; setState(() =&gt; _counter++);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Flutter Counter')),
+      body: Center(child: Text('$_counter', style: Theme.of(context).textTheme.headlineMedium)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _increment,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}</div>
+                    </div>
+
+                    <div class="code-explanation">
+                        <p><span class="highlight">React Native – JavaScript for Mobile Apps</span></p>
+                        <p style="margin-top: 0.5rem;"><strong>Features:</strong></p>
+                        <ul class="styled-list">
+                            <li>Based on React</li>
+                            <li>Strong community</li>
+                            <li>Easy to integrate with web backends</li>
+                            <li>Allows mixing native &amp; JS components</li>
+                        </ul>
+                        <p style="margin-top: 0.75rem;"><strong>Use cases:</strong> E-commerce, social apps, content-driven apps.</p>
+                        <p style="margin-top: 1rem;"><strong>React Native Component Example:</strong></p>
+                        <div class="code-block">import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;View style={styles.container}&gt;
+      &lt;Text style={styles.text}&gt;Count: {count}&lt;/Text&gt;
+      &lt;TouchableOpacity onPress={() =&gt; setCount(count + 1)}&gt;
+        &lt;Text style={styles.btn}&gt;Tap me&lt;/Text&gt;
+      &lt;/TouchableOpacity&gt;
+    &lt;/View&gt;
+  );
+}</div>
+                    </div>
+
+                    <p style="margin-top: 1.5rem;"><strong>Framework Comparison Overview:</strong></p>
+                    <table class="compare-table">
+                        <thead>
+                            <tr>
+                                <th>Framework</th><th>Language</th><th>Performance</th><th>Platforms</th><th>Learning Curve</th><th>Best For</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong style="color:var(--cyan)">Flutter</strong></td><td>Dart</td><td><span class="tag-yes">High</span></td><td>Android, iOS, Web, Desktop</td><td><span class="tag-mid">Medium</span></td><td>Custom UI, MVPs</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">React Native</strong></td><td>JavaScript</td><td><span class="tag-mid">Medium-High</span></td><td>Android, iOS</td><td><span class="tag-yes">Low (if know React)</span></td><td>JS devs, content apps</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">Ionic</strong></td><td>HTML/CSS/JS</td><td><span class="tag-no">Lower</span></td><td>Android, iOS, Web</td><td><span class="tag-yes">Very Low</span></td><td>Simple web-based apps</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">.NET MAUI</strong></td><td>C#</td><td><span class="tag-mid">Medium-High</span></td><td>Android, iOS, Windows, Mac</td><td><span class="tag-mid">Medium</span></td><td>Enterprise / .NET teams</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">Native Android</strong></td><td>Kotlin / Java</td><td><span class="tag-yes">Maximum</span></td><td>Android only</td><td><span class="tag-no">High</span></td><td>Games, banking, deep HW</td></tr>
+                            <tr><td><strong style="color:var(--cyan)">Native iOS</strong></td><td>Swift</td><td><span class="tag-yes">Maximum</span></td><td>iOS / Apple only</td><td><span class="tag-no">High</span></td><td>Premium UX, Apple HW</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-card">
+                    <h3>Mobile Ecosystem Components</h3>
+                    <p>Mobile applications interact with:</p>
+                    <ul class="styled-list">
+                        <li>APIs</li>
+                        <li>Databases</li>
+                        <li>Cloud services</li>
+                        <li>Push notifications</li>
+                        <li>Operating system permissions</li>
+                        <li>Hardware features</li>
+                    </ul>
+                    <div class="code-explanation" style="margin-top: 1rem;">
+                        <p><strong>Typical mobile stack:</strong><br>UI → Business Logic → API Layer → Database</p>
+                    </div>
+                    <p style="margin-top: 1.25rem;"><strong>Key Backend &amp; Cloud Services for Mobile:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Firebase (Google)</span> — Authentication, Firestore DB, push notifications, analytics, crash reporting. Most popular BaaS for mobile.</li>
+                        <li><span class="highlight">AWS Amplify</span> — Amazon's mobile backend with auth, storage, and GraphQL APIs.</li>
+                        <li><span class="highlight">Supabase</span> — Open-source Firebase alternative with PostgreSQL backend.</li>
+                        <li><span class="highlight">REST APIs</span> — Standard HTTP-based communication with your own backend server.</li>
+                        <li><span class="highlight">GraphQL</span> — Query language for APIs; lets the app request exactly the data it needs.</li>
+                    </ul>
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>🔑 App Permissions — A Critical Concept:</strong><br>
+                        Modern mobile OSes enforce a <strong>permission model</strong>. Apps must explicitly request access to sensitive features: camera, microphone, location, contacts, notifications. Users can grant or deny each permission at runtime. Handling permission responses correctly (especially denial and "don't ask again") is a key skill for every mobile developer.
+                    </div>
+                    <p style="margin-top: 1.25rem;"><strong>Common Hardware APIs Mobile Developers Use:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Camera API</span> — Photo/video capture, QR code scanning</li>
+                        <li><span class="highlight">GPS / Location</span> — Foreground and background location tracking</li>
+                        <li><span class="highlight">Accelerometer / Gyroscope</span> — Motion detection, screen orientation</li>
+                        <li><span class="highlight">Bluetooth &amp; NFC</span> — Device communication, contactless payments</li>
+                        <li><span class="highlight">Biometrics</span> — Face ID, Touch ID / fingerprint authentication</li>
+                        <li><span class="highlight">Push Notifications</span> — FCM (Android) and APNs (iOS)</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Performance Considerations</h3>
+                    <p>Key performance topics:</p>
+                    <ul class="styled-list">
+                        <li>Battery usage</li>
+                        <li>Memory optimization</li>
+                        <li>Smooth animations</li>
+                        <li>Fast load times</li>
+                        <li>Efficient network requests</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Native apps often win here, but hybrid has improved drastically.</p>
+                    <p style="margin-top: 1.25rem;"><strong>The 60 FPS Target:</strong></p>
+                    <div class="info-box">
+                        Mobile apps should render at <strong>60 frames per second</strong> (or 120fps on modern devices), meaning each frame must complete in under <strong>16ms</strong>. Heavy work on the main/UI thread — like large network calls, complex calculations, or blocking I/O — causes frames to be dropped, which users perceive as "jank" (stuttering). The solution is to move work to <strong>background threads</strong> (Kotlin Coroutines, Swift async/await, Dart isolates).
+                    </div>
+                    <p style="margin-top: 1.25rem;"><strong>Key Performance Techniques:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Lazy loading</span> — Load content only when the user scrolls to it (RecyclerView, LazyColumn, FlatList)</li>
+                        <li><span class="highlight">Image caching</span> — Use Glide/Coil (Android), SDWebImage (iOS), or CachedNetworkImage (Flutter) to avoid re-downloading images</li>
+                        <li><span class="highlight">Async networking</span> — Never make HTTP requests on the main thread</li>
+                        <li><span class="highlight">Build variants</span> — Use release builds (not debug) for performance testing</li>
+                        <li><span class="highlight">Profiling tools</span> — Android Profiler, Xcode Instruments, Flutter DevTools</li>
+                        <li><span class="highlight">Reduce app size</span> — Remove unused assets, use ProGuard / R8 (Android), App Thinning (iOS)</li>
+                    </ul>
+                </div>
+
+                <div class="content-card">
+                    <h3>Mobile UI/UX Fundamentals</h3>
+                    <p>Good mobile design must be:</p>
+                    <ul class="styled-list">
+                        <li>Responsive</li>
+                        <li>Finger-friendly</li>
+                        <li>Accessible</li>
+                        <li>Minimalistic</li>
+                        <li>Consistent across screens</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>Common components:</strong></p>
+                    <ul class="styled-list">
+                        <li>Navigation bars</li>
+                        <li>Buttons</li>
+                        <li>Cards</li>
+                        <li>Lists</li>
+                        <li>Forms</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Every mobile platform has its own design guidelines:</p>
+                    <ul class="styled-list">
+                        <li>Material Design (Android)</li>
+                        <li>Human Interface Guidelines (iOS)</li>
+                    </ul>
+                    <p style="margin-top: 1.25rem;"><strong>Touch Target Guidelines:</strong></p>
+                    <div class="info-box">
+                        The minimum recommended touch target size is <strong>48×48dp</strong> (Android / Material Design) or <strong>44×44pt</strong> (iOS / HIG). Targets smaller than this are difficult to tap accurately and lead to user frustration. This applies to buttons, icons, list items, and any interactive element. Always add sufficient padding around small visual elements.
+                    </div>
+                    <p style="margin-top: 1.25rem;"><strong>Common Navigation Patterns:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Bottom Tab Bar</span> — Most common; gives quick access to 3–5 top-level sections (Instagram, YouTube)</li>
+                        <li><span class="highlight">Drawer / Hamburger Menu</span> — Slides in from the side; good for many sections (Gmail)</li>
+                        <li><span class="highlight">Stack Navigation</span> — Push/pop screens like a stack; used for detail flows (product → detail → checkout)</li>
+                        <li><span class="highlight">Tab + Stack Hybrid</span> — Bottom tabs each containing their own navigation stack</li>
+                        <li><span class="highlight">Modal Sheets</span> — Slide-up overlays for quick actions without leaving the current context</li>
+                    </ul>
+                    <p style="margin-top: 1.25rem;"><strong>Accessibility in Mobile Apps:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Screen readers</span> — TalkBack (Android) and VoiceOver (iOS) read UI elements aloud for visually impaired users</li>
+                        <li><span class="highlight">Content descriptions</span> — Every image/icon needs a text label for accessibility</li>
+                        <li><span class="highlight">Dynamic text</span> — Respect the user's font size preferences; avoid hard-coded font sizes</li>
+                        <li><span class="highlight">Color contrast</span> — Minimum 4.5:1 contrast ratio for text (WCAG AA standard)</li>
+                        <li><span class="highlight">Focus order</span> — Logical keyboard/focus traversal for users who can't use touch</li>
+                    </ul>
+                </div>
+
+                <!-- NEW: State Management -->
+                <div class="content-card">
+                    <h3>State Management</h3>
+                    <p>State management is one of the most important concepts in mobile development. It defines <strong>how your app stores, updates, and shares data</strong> between different parts of the UI.</p>
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>What is "state"?</strong><br>
+                        Any data that can change and affects what the UI shows is "state". Examples: whether a loading spinner is visible, the list of items in a cart, whether a user is logged in, or the text in a search field.
+                    </div>
+                    <p style="margin-top: 1.25rem;"><strong>State Management Options by Platform:</strong></p>
+                    <table class="compare-table">
+                        <thead>
+                            <tr><th>Platform</th><th>Solution</th><th>Level</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Android</td><td>ViewModel + StateFlow</td><td><span class="tag-yes">Recommended</span></td><td>Survives rotation; reactive streams</td></tr>
+                            <tr><td>Android</td><td>LiveData</td><td><span class="tag-mid">Common</span></td><td>Older lifecycle-aware observable</td></tr>
+                            <tr><td>iOS</td><td>@State / @ObservableObject</td><td><span class="tag-yes">Recommended</span></td><td>SwiftUI's built-in reactive state</td></tr>
+                            <tr><td>iOS</td><td>Combine</td><td><span class="tag-mid">Advanced</span></td><td>Apple's reactive programming framework</td></tr>
+                            <tr><td>Flutter</td><td>setState()</td><td><span class="tag-yes">Beginner</span></td><td>Simple local state, rebuilds widget</td></tr>
+                            <tr><td>Flutter</td><td>Provider</td><td><span class="tag-mid">Intermediate</span></td><td>Most common shared state solution</td></tr>
+                            <tr><td>Flutter</td><td>Riverpod / BLoC</td><td><span class="tag-no">Advanced</span></td><td>Scalable, testable state architecture</td></tr>
+                            <tr><td>React Native</td><td>useState / useContext</td><td><span class="tag-yes">Built-in</span></td><td>React hooks for local/shared state</td></tr>
+                            <tr><td>React Native</td><td>Redux / Zustand</td><td><span class="tag-mid">Advanced</span></td><td>Global state for large apps</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- NEW: Testing -->
+                <div class="content-card">
+                    <h3>Testing in Mobile Development</h3>
+                    <p>Testing ensures your app works correctly and avoids regressions when you add new features. Mobile testing is organized in a <strong>testing pyramid</strong>:</p>
+                    <ul class="styled-list" style="margin-top: 1rem;">
+                        <li><span class="highlight">Unit Tests</span> — Test individual functions or classes in isolation. Fast, no device needed. (JUnit / XCTest)</li>
+                        <li><span class="highlight">Integration Tests</span> — Test how multiple components work together (e.g., ViewModel + Repository).</li>
+                        <li><span class="highlight">UI / End-to-End Tests</span> — Simulate real user interactions on a device or emulator. Slower but high confidence. (Espresso for Android, XCUITest for iOS, Flutter Integration Tests)</li>
+                    </ul>
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>📐 The Testing Pyramid:</strong><br>
+                        Write <strong>many unit tests</strong> (fast, cheap), <strong>some integration tests</strong>, and <strong>few UI tests</strong> (slow, expensive). A common ratio is 70% unit / 20% integration / 10% UI. This gives the best coverage with the fastest feedback loop.
+                    </div>
+                    <p style="margin-top: 1.25rem;"><strong>Popular Testing Tools by Platform:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Android</span> — JUnit 4/5, Mockito, Espresso, Robolectric, Turbine (flows)</li>
+                        <li><span class="highlight">iOS</span> — XCTest, Quick/Nimble, XCUITest</li>
+                        <li><span class="highlight">Flutter</span> — flutter_test, Mockito, integration_test</li>
+                        <li><span class="highlight">React Native</span> — Jest, React Native Testing Library, Detox</li>
+                    </ul>
+                </div>
+
+                <!-- NEW: Security -->
+                <div class="content-card">
+                    <h3>Mobile Security Essentials</h3>
+                    <p>Security is a first-class concern in mobile development. Apps handle sensitive user data and must defend against a variety of threats.</p>
+                    <ul class="styled-list" style="margin-top: 1rem;">
+                        <li><span class="highlight">Secure Storage</span> — Never store passwords or tokens in plain text. Use Android Keystore / iOS Keychain.</li>
+                        <li><span class="highlight">HTTPS / TLS</span> — Always use encrypted connections. Avoid HTTP for any sensitive data.</li>
+                        <li><span class="highlight">Certificate Pinning</span> — Prevents man-in-the-middle attacks by validating the server's certificate against a known copy.</li>
+                        <li><span class="highlight">Obfuscation</span> — Use ProGuard/R8 (Android) or bitcode stripping (iOS) to make reverse engineering harder.</li>
+                        <li><span class="highlight">Input Validation</span> — Sanitize all user input to prevent injection attacks, especially in local databases.</li>
+                        <li><span class="highlight">OAuth 2.0 / PKCE</span> — Industry-standard flow for user authentication in mobile apps without handling passwords directly.</li>
+                        <li><span class="highlight">Biometric Auth</span> — Enhance login security with fingerprint or face recognition using platform-native APIs.</li>
+                    </ul>
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>⚠️ Never hardcode secrets in your app code!</strong><br>
+                        API keys, tokens, and passwords embedded in your source code or binary can be extracted by attackers. Use environment variables during builds, backend proxies for sensitive API calls, or services like <strong>Google Secret Manager</strong> or <strong>AWS Secrets Manager</strong>.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Publishing Apps</h3>
+                    <p>Apps can be distributed through:</p>
+                    <ul class="styled-list">
+                        <li>App Store (iOS)</li>
+                        <li>Google Play Store (Android)</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Each store requires:</p>
+                    <ul class="styled-list">
+                        <li>Developer accounts</li>
+                        <li>App metadata</li>
+                        <li>Icons and screenshots</li>
+                        <li>Compliance with guidelines</li>
+                        <li>Privacy policies</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">Publishing is a core skill for mobile developers.</p>
+                    <p style="margin-top: 1.25rem;"><strong>The Publishing Process — Step by Step:</strong></p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">1. Developer Account</span> — Google Play: one-time $25 fee. Apple App Store: $99/year.</li>
+                        <li><span class="highlight">2. Signing &amp; Certificates</span> — Android apps must be signed with a keystore; iOS requires provisioning profiles and certificates via Xcode.</li>
+                        <li><span class="highlight">3. App Metadata</span> — Title, description, keywords, category, content rating. This affects ASO (App Store Optimization).</li>
+                        <li><span class="highlight">4. Screenshots &amp; Preview Videos</span> — Required for all screen sizes. High quality screenshots significantly impact conversion rates.</li>
+                        <li><span class="highlight">5. Privacy Policy</span> — Mandatory for both stores, especially if your app collects any user data.</li>
+                        <li><span class="highlight">6. Review Process</span> — Google Play: automated, often under 24 hours. Apple App Store: manual review, typically 1–3 days.</li>
+                        <li><span class="highlight">7. Release Management</span> — Use staged rollouts (e.g., release to 10% of users first) to catch issues before full deployment.</li>
+                    </ul>
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>🚀 CI/CD for Mobile:</strong><br>
+                        Professional teams automate the build and publish process using tools like <strong>Fastlane</strong> (open-source), <strong>Bitrise</strong>, <strong>Codemagic</strong>, or <strong>GitHub Actions</strong>. This enables automated testing, signing, and uploading to the store on every code merge — saving hours of manual work per release.
+                    </div>
+                </div>
+
+                <!-- NEW: Career Paths -->
+                <div class="content-card">
+                    <h3>Career Paths in Mobile Development</h3>
+                    <p>Mobile development offers diverse and well-compensated career paths. Here are the main directions:</p>
+                    <ul class="styled-list" style="margin-top: 1rem;">
+                        <li><span class="highlight">Android Developer</span> — Specializes in Kotlin/Java and the Android ecosystem. High demand globally.</li>
+                        <li><span class="highlight">iOS Developer</span> — Specializes in Swift and Apple platforms. Premium pay, especially in US/EU markets.</li>
+                        <li><span class="highlight">Flutter Developer</span> — Cross-platform specialist. Growing demand as companies look to ship faster with one codebase.</li>
+                        <li><span class="highlight">React Native Developer</span> — Often comes from web/React background. Can work on both web and mobile products.</li>
+                        <li><span class="highlight">Mobile Tech Lead</span> — Leads architecture decisions, mentors developers, owns the mobile strategy for a product.</li>
+                        <li><span class="highlight">Indie Developer</span> — Builds and publishes their own apps on the App Store / Play Store. Revenue through sales, subscriptions, or ads.</li>
+                    </ul>
+                    <div class="info-box" style="margin-top: 1rem;">
+                        <strong>💼 What companies look for in mobile developers:</strong><br>
+                        Beyond platform knowledge, companies value developers who understand <strong>app architecture</strong> (MVVM, Clean Architecture), write <strong>testable code</strong>, care about <strong>user experience</strong>, understand <strong>performance profiling</strong>, and can collaborate effectively on cross-functional teams with designers and backend engineers.
+                    </div>
+                </div>
+
+                <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                    <h3>Section Conclusion</h3>
+                    <p>You now understand the foundations of mobile development:</p>
+                    <ul class="styled-list">
+                        <li>Native vs hybrid platforms</li>
+                        <li>Android and iOS technology stacks</li>
+                        <li>Cross-platform frameworks</li>
+                        <li>UI/UX mobile principles</li>
+                        <li>App architecture basics</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">These concepts form the basis of all advanced mobile topics.</p>
+                </div>
+
+            </div>
+
+            <!-- LAB -->
+            <div id="laboratorio" class="tab-panel">
+                <h3 style="margin-bottom: 1rem;">Platform Comparison Console</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">Explore a side-by-side comparison of platform choices. Edit the scenario below and run the analysis to get a framework recommendation.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">SCENARIO EDITOR</div>
+                        <textarea class="lab-textarea" id="lab-input">// Define your app scenario
+
+const project = {
+  name: "My App",
+  type: "social",         // social | ecommerce | game | productivity | banking
+  platforms: "both",      // ios | android | both
+  team: "small",          // small | large
+  timeline: "fast",       // fast | standard
+  budget: "limited"       // limited | flexible
+};
+
+// Run analysis to get framework recommendation</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">RECOMMENDATION</div>
+                        <div class="lab-output" id="lab-output">
+                            Click "Run Analysis" to get a framework recommendation based on your project scenario...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runLab()">▶ Run Analysis</button>
+            </div>
+
+            <!-- QUIZ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Quiz: Mobile Development</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge on native development, cross-platform frameworks, mobile architecture, and UI/UX principles. Answer all 15 questions.</p>
+
+                    <form id="quiz-form">
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">1. What is native mobile development?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Building apps using web browsers only</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Building apps specifically for one platform using its native tools</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Building desktop applications</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Creating games only</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">2. What languages are used in iOS development?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Java and Kotlin</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Swift and Objective-C</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Python and C++</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) PHP and JavaScript</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">3. Name one hybrid mobile framework.</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) Laravel</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) Angular</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Ionic</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Django</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">4. What does React Native use as its programming language?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Java</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Dart</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) JavaScript</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Swift</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">5. What is the primary IDE for Android?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Visual Studio Code</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Android Studio</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Eclipse</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Xcode</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">6. What is SwiftUI used for?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Database management</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B"> B) UI development for Apple platforms</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) Server deployment</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Game engines</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">7. What advantage does Flutter offer?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Requires native code only</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Cross-platform development from a single codebase</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Works only on Android</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Removes UI design</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">8. What is Material Design?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) A programming language</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) A Google design system for UI/UX</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) A database structure</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) A testing framework</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">9. What is MVVM?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) A database model</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) A design pattern separating UI, logic, and data</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) A testing tool</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) A mobile operating system</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">10. What is an Activity in Android?</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) A background service</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) A UI screen in an Android app</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) A database</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) A layout file</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">11. What is a Fragment?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) A full application</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) A reusable part of an Android UI</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) A database record</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) A background task</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">12. What is "hot reload"?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Restarting a device</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Rebuilding the entire app</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Instantly applying code changes without restarting the app</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Clearing cache</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">13. What is the App Store used for?</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Writing code</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Hosting databases</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Distributing and downloading iOS apps</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Testing UI</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">14. What is cross-platform development?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Building apps for one platform only</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Writing separate code for each platform</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Creating apps that run on multiple platforms using shared code</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Designing desktop software</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color: var(--cyan); font-weight: 600;">15. Why is UI/UX crucial in mobile apps?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) It reduces app size</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) It ensures better user satisfaction and usability</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C"> C) It replaces backend logic</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) It increases battery usage</label>
+                        </div>
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display: none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div id="recursos" class="tab-panel">
+                <h3 style="margin-bottom: 1.5rem;">Support Materials</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ Android Developer Documentation – Official Guide</a>
+                    <a href="#" class="resource-link">→ Apple Developer Documentation – iOS &amp; Swift</a>
+                    <a href="#" class="resource-link">→ Flutter – Official Documentation &amp; Codelabs</a>
+                    <a href="#" class="resource-link">→ React Native – Official Documentation</a>
+                    <a href="#" class="resource-link">→ Material Design Guidelines – Google</a>
+                    <a href="#" class="resource-link">→ Human Interface Guidelines – Apple</a>
+                    <a href="#" class="resource-link">→ Kotlin Language Reference – JetBrains</a>
+                    <a href="#" class="resource-link">→ Swift Language Guide – Apple</a>
+                    <a href="#" class="resource-link">→ Google Play – App Publishing Guide</a>
+                    <a href="#" class="resource-link">→ App Store Review Guidelines – Apple</a>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: Mobile Development</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        To successfully complete this module, you should demonstrate understanding across the following competency levels:
+                    </p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>Difference between native and hybrid development</li>
+                                <li>Android languages: Kotlin and Java</li>
+                                <li>iOS languages: Swift and Objective-C</li>
+                                <li>What Android Studio and Xcode are</li>
+                                <li>What Activities and Fragments are in Android</li>
+                                <li>What SwiftUI and UIKit are</li>
+                                <li>What cross-platform means</li>
+                                <li>What Material Design and HIG are</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Building a basic screen in Flutter or React Native</li>
+                                <li>Understanding the MVVM architecture pattern</li>
+                                <li>Navigating between screens in a mobile app</li>
+                                <li>Consuming a REST API from a mobile app</li>
+                                <li>Using state management (setState, Provider, etc.)</li>
+                                <li>Understanding hot reload and its benefits</li>
+                                <li>Mobile performance considerations (battery, memory)</li>
+                                <li>Designing finger-friendly, accessible interfaces</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Publishing an app to Google Play or App Store</li>
+                                <li>Implementing push notifications</li>
+                                <li>Integrating hardware features (camera, GPS, sensors)</li>
+                                <li>Advanced state management (Riverpod, Redux, BLoC)</li>
+                                <li>Writing unit and integration tests for mobile</li>
+                                <li>CI/CD pipelines for mobile apps (Fastlane, Bitrise)</li>
+                                <li>Deep linking and universal links</li>
+                                <li>Offline-first architecture and local storage strategies</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+            document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runLab() {
+            const input = document.getElementById('lab-input').value;
+            const output = document.getElementById('lab-output');
+
+            const isBoth = input.includes('"both"') || input.includes("'both'");
+            const isIOS = input.includes('"ios"') || input.includes("'ios'");
+            const isFast = input.includes('"fast"') || input.includes("'fast'");
+            const isLimited = input.includes('"limited"') || input.includes("'limited'");
+            const isGame = input.includes('"game"') || input.includes("'game'");
+            const isBanking = input.includes('"banking"') || input.includes("'banking'");
+
+            let recommendation, reason, pros, cons;
+
+            if (isGame) {
+                recommendation = 'Unity / Native';
+                reason = 'Games require maximum performance and hardware access.';
+                pros = ['Full GPU access', 'Best frame rates', 'Rich game engine support'];
+                cons = ['Higher development cost', 'Longer time to market'];
+            } else if (isBanking) {
+                recommendation = 'Native (Swift + Kotlin)';
+                reason = 'Banking apps demand maximum security, biometrics, and hardware trust features.';
+                pros = ['Best security APIs', 'Full biometric access', 'Trusted by app stores'];
+                cons = ['Two separate codebases', 'Higher team cost'];
+            } else if (isBoth && (isFast || isLimited)) {
+                recommendation = 'Flutter';
+                reason = 'Flutter is ideal for fast cross-platform delivery on a limited budget.';
+                pros = ['Single codebase', 'Near-native performance', 'Fast hot reload', 'Beautiful UI widgets'];
+                cons = ['Dart language learning curve', 'Larger app size'];
+            } else if (isIOS) {
+                recommendation = 'Swift + SwiftUI';
+                reason = 'For iOS-only apps, native Swift gives the best performance and user experience.';
+                pros = ['Best iOS performance', 'Full Apple API access', 'App Store preferred'];
+                cons = ['iOS only', 'Requires Xcode + Mac'];
+            } else if (isBoth) {
+                recommendation = 'React Native';
+                reason = 'React Native works well for cross-platform apps with web developer teams.';
+                pros = ['JavaScript ecosystem', 'Strong community', 'Easy web integration'];
+                cons = ['Bridge performance overhead', 'Some native modules needed'];
+            } else {
+                recommendation = 'Flutter';
+                reason = 'Flutter is a safe default for most new cross-platform mobile projects.';
+                pros = ['Single codebase', 'Fast iteration', 'Good community'];
+                cons = ['Dart is niche', 'Larger binaries'];
+            }
+
+            output.innerHTML = `
+                <strong style="color:#28e0ff;">✔ Framework Recommendation</strong><br><br>
+                <strong style="color:#a8ff78;">→ ${recommendation}</strong><br><br>
+                <span style="color:#f59e0b;">Reason:</span> ${reason}<br><br>
+                <strong style="color:#10b981;">Pros:</strong><br>
+                ${pros.map(p => `&nbsp;&nbsp;✓ ${p}`).join('<br>')}<br><br>
+                <strong style="color:#ef4444;">Cons:</strong><br>
+                ${cons.map(c => `&nbsp;&nbsp;✗ ${c}`).join('<br>')}<br><br>
+                <em style="color:#b6c0de;">Tip: Change the project type or platform in the editor to explore other recommendations.</em>
+            `;
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questionsData = {
+                    q1:  { correct: 'B', exp: 'Native development means building apps specifically for one platform using its native tools and languages.' },
+                    q2:  { correct: 'B', exp: 'iOS development uses Swift (modern) and Objective-C (legacy).' },
+                    q3:  { correct: 'C', exp: 'Ionic is a popular hybrid/web-based mobile framework alongside Flutter and React Native.' },
+                    q4:  { correct: 'C', exp: 'React Native uses JavaScript as its primary programming language, based on the React framework.' },
+                    q5:  { correct: 'B', exp: 'Android Studio is the official IDE for Android development, made by Google.' },
+                    q6:  { correct: 'B', exp: 'SwiftUI is Apple\'s declarative UI framework for building interfaces across all Apple platforms.' },
+                    q7:  { correct: 'B', exp: 'Flutter\'s main advantage is cross-platform development from a single Dart codebase for Android, iOS, Web, and Desktop.' },
+                    q8:  { correct: 'B', exp: 'Material Design is Google\'s design system that provides guidelines and components for Android UI/UX.' },
+                    q9:  { correct: 'B', exp: 'MVVM (Model-View-ViewModel) is an architecture pattern that separates UI, business logic, and data.' },
+                    q10: { correct: 'B', exp: 'An Activity represents a single screen that the user can interact with in an Android app.' },
+                    q11: { correct: 'B', exp: 'A Fragment is a reusable, modular portion of an Android user interface within an Activity.' },
+                    q12: { correct: 'C', exp: 'Hot reload instantly applies code changes to a running app without a full restart, used in Flutter and React Native.' },
+                    q13: { correct: 'C', exp: 'The App Store is Apple\'s official platform for distributing and downloading iOS applications.' },
+                    q14: { correct: 'C', exp: 'Cross-platform development creates apps that run on multiple platforms (iOS, Android) from a shared codebase.' },
+                    q15: { correct: 'B', exp: 'Good UI/UX ensures users can navigate the app intuitively, increasing satisfaction and retention.' }
+                };
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0, feedbackHTML = '';
+
+                Object.keys(this.questionsData).forEach((key, index) => {
+                    const userAnswer = formData.get(key);
+                    const isCorrect = userAnswer === this.questionsData[key].correct;
+                    if (isCorrect) score++;
+
+                    feedbackHTML += `
+                        <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                            <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                            <div>
+                                <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                ${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+                            </div>
+                        </div>`;
+                });
+
+                this.displayResults(score, feedbackHTML);
+            }
+
+            displayResults(score, feedbackHTML) {
+                const total = Object.keys(this.questionsData).length;
+                const percent = Math.round((score / total) * 100);
+                const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+
+                document.getElementById('quiz-score').innerHTML = `
+                    <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                    <p style="color:var(--text-secondary)">${percent >= 70 ? 'Excellent! You are ready to start building mobile apps.' : 'Review the concepts on native vs hybrid, Android/iOS stacks, and frameworks and try again.'}</p>`;
+
+                document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                const resultsDiv = document.getElementById('quiz-results');
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            clearQuiz() {
+                document.getElementById('quiz-form').reset();
+                document.getElementById('quiz-results').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+</body>
+</html>
+

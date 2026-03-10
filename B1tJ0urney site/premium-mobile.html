@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BitJourney — Mobile Development</title>
+  <link rel="icon" href="favicon.ico">
+
+  <style>
+    :root{
+      --bg:#11041d; --panel:#1a0730; --panel-2:#0f0525;
+      --text:#e6f0ff; --muted:#b89fd8;
+      --p1:#d000ff; --p2:#c266ff; --p3:#a200ff;
+      --ok:#22c55e; --ring:#db60fa;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background:radial-gradient(1000px 700px at 100% -10%,rgba(187,0,255,.31) 0%,transparent 60%),var(--bg);
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial
+    }
+    a{color:inherit;text-decoration:none}
+
+    /* Header */
+    header{
+      position:sticky;top:0;z-index:50;
+      background:linear-gradient(180deg,rgba(17,4,29,.9),rgba(17,4,29,.45));
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(208,0,255,.15)
+    }
+    .container{max-width:1100px;margin:0 auto;padding:0 1.25rem}
+    .row{display:flex;align-items:center;justify-content:space-between;padding:1rem 0}
+    .brand{display:flex;align-items:center;gap:.6rem}
+    .brand-logo{
+      width:36px;height:36px;border-radius:10px;
+      background:linear-gradient(135deg,var(--p1),var(--p2) 60%,var(--p3));
+      display:grid;place-items:center;color:#fff;font-weight:800;
+      box-shadow:0 8px 24px rgba(208,0,255,.35)
+    }
+    .chip{font-size:.8rem;padding:.25rem .6rem;border:1px solid rgba(255,255,255,.15);border-radius:999px;color:var(--muted)}
+    .btn{
+      display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.1rem;
+      border-radius:.75rem;border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;font-weight:600;
+      box-shadow:0 10px 30px rgba(208,0,255,.25);
+      transition:transform .15s ease, box-shadow .2s ease;cursor:pointer
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 16px 36px rgba(208,0,255,.4)}
+    .btn-ghost{background:transparent;border-color:rgba(255,255,255,.15);color:var(--text)}
+    .btn-ghost:hover{background:rgba(255,255,255,.05)}
+
+    /* Hero */
+    .hero{padding:3rem 0 1rem;text-align:center}
+    .title{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800}
+    .subtitle{color:var(--muted);max-width:760px;margin:.75rem auto 0;font-size:1.05rem}
+
+    /* Stage Panel */
+    .panel{
+      position:relative;
+      background:linear-gradient(180deg,rgba(26,7,48,.8),rgba(15,5,37,.8));
+      border:1px solid rgba(208,0,255,.15);border-radius:18px;padding:1rem;
+      box-shadow:inset 0 0 0 1px rgba(208,0,255,.05),0 10px 40px rgba(5,2,15,.6)
+    }
+
+    /* Vertical Road — altura fixa, SVG cobre tudo */
+    .road-wrap{position:relative;padding:0;height:2200px}
+    .road{position:absolute;top:0;left:0;width:100%;height:100%}
+
+    /* Milestones (cards) — sem translateY para controlo preciso */
+    .milestone{
+      position:absolute;
+      width:44%;max-width:420px;
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:16px;padding:1rem;backdrop-filter:blur(6px);
+      box-shadow:0 10px 28px rgba(5,2,15,.55)
+    }
+    .milestone h4{margin:0 0 .3rem;font-size:1rem}
+    .milestone p{margin:.2rem 0;color:var(--muted);font-size:.92rem;line-height:1.3}
+    .tags{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem}
+    .tag{font-size:.72rem;padding:.18rem .5rem;border-radius:999px;border:1px solid rgba(255,255,255,.18);color:#e8d6ff}
+    .actions{display:flex;gap:.5rem;margin-top:.7rem;flex-wrap:wrap}
+    .mini{padding:.45rem .65rem;border-radius:.6rem;font-size:.82rem}
+    .done{outline:2px solid rgba(34,197,94,.6);box-shadow:0 0 0 3px rgba(34,197,94,.15)}
+    .locked{opacity:.78;filter:grayscale(.25)}
+
+    .left {left:2%}
+    .right{right:2%}
+
+    /* 10 posições — espaçamento de ~200px, começa em 20px, acaba em ~1980px */
+    .mv1 {top:  20px} .mv2 {top: 230px} .mv3 {top: 440px} .mv4 {top: 650px}
+    .mv5 {top: 860px} .mv6 {top:1070px} .mv7 {top:1280px} .mv8 {top:1490px}
+    .mv9 {top:1700px} .mv10{top:1910px}
+
+    /* Troféu */
+    .trophy{
+      position:absolute;top:12px;right:12px;
+      display:flex;gap:.6rem;align-items:center;
+      background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.05));
+      border:1px solid rgba(255,255,255,.18);
+      padding:.5rem .7rem;border-radius:.7rem;z-index:10
+    }
+    .trophy .icon{
+      width:22px;height:22px;border-radius:50%;
+      background:radial-gradient(circle at 30% 30%,#ffe08a,#f59e0b);
+      box-shadow:0 0 0 2px rgba(255,255,255,.15),0 6px 16px rgba(245,158,11,.3)
+    }
+    .trophy small{color:var(--muted)}
+    .trophy.unlocked .icon{background:radial-gradient(circle at 30% 30%,#a7f3d0,#22c55e)}
+    .trophy.unlocked small{color:#a7f3d0}
+
+    .progressbar{display:flex;align-items:center;gap:.6rem;margin-top:.7rem}
+    .progress{
+      flex:1;height:10px;border-radius:999px;overflow:hidden;
+      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)
+    }
+    .progress>span{
+      display:block;height:100%;width:0%;
+      background:linear-gradient(90deg,var(--p1),var(--p2));
+      transition:width .35s ease
+    }
+
+    .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,2,15,.6);backdrop-filter:blur(6px);z-index:80}
+    .modal.active{display:grid}
+    .card{
+      background:linear-gradient(180deg,rgba(26,7,48,.95),rgba(15,5,37,.95));
+      border:1px solid rgba(208,0,255,.18);border-radius:16px;
+      padding:1.2rem 1.2rem 1rem;max-width:560px
+    }
+
+    .trophy-big{
+      width:120px;height:120px;margin:0 auto .4rem;border-radius:50%;
+      background:radial-gradient(circle at 35% 30%,#fff3b0,#f59e0b 60%,#b45309 100%);
+      box-shadow:0 10px 30px rgba(245,158,11,.35), inset 0 0 30px rgba(255,255,255,.35)
+    }
+    .confetti{position:absolute;inset:0;pointer-events:none;opacity:.8}
+
+    .cta{margin:1.25rem 0 3rem;display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+
+    #resetProgressBtn{
+      position:fixed;bottom:20px;left:20px;z-index:9999;
+      padding:.55rem .8rem;font-size:.9rem;border:none;border-radius:.65rem;
+      background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;
+      box-shadow:0 8px 22px rgba(208,0,255,.35);cursor:pointer;opacity:.9
+    }
+    #resetProgressBtn:hover{opacity:1}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container row">
+    <div class="brand">
+      <div class="brand-logo">BJ</div>
+      <div>
+        <div style="font-weight:800;letter-spacing:.3px">BitJourney</div>
+        <div class="chip">Premium • Mobile Development</div>
+      </div>
+    </div>
+    <nav style="display:flex;gap:.6rem">
+      <a class="btn-ghost btn" href="index.html">Início</a>
+      <a class="btn-ghost btn" href="browse.html">Explorar</a>
+      <a class="btn" href="area-privada.html">Área Privada</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <h1 class="title">A tua Jornada Premium — <span style="background:linear-gradient(90deg,var(--p1),var(--p2));-webkit-background-clip:text;background-clip:text;color:transparent">Mobile Development</span></h1>
+    <p class="subtitle">
+      Uma estrada <strong>vertical</strong> feita de <strong>bits (0 e 1)</strong> guia-te por vários temas — completa cada marco e ganha o troféu no final.
+    </p>
+  </section>
+
+  <section class="panel road-wrap">
+
+    <div id="trophy" class="trophy">
+      <div class="icon"></div>
+      <div>
+        <div style="font-weight:700;font-size:.92rem">Troféu da Jornada</div>
+        <small id="trophyStatus">Completa todos os objetivos</small>
+      </div>
+    </div>
+
+    <svg class="road" viewBox="0 0 1100 2200" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="gv" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#d000ff"/>
+          <stop offset="60%" stop-color="#a200ff"/>
+          <stop offset="100%" stop-color="#5c0090"/>
+        </linearGradient>
+        <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="6" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <path id="vpath" d="
+          M 550 0
+          C 720 220, 720 440, 550 660
+          S 380 1100, 550 1320
+          S 720 1760, 550 1980
+          S 380 2100, 550 2200" />
+      </defs>
+      <path d="M 525 0
+               C 695 220, 695 440, 525 660
+               S 405 1100, 525 1320
+               S 695 1760, 525 1980
+               S 405 2100, 525 2200
+               L 575 2200
+               C 745 2100, 745 1980, 575 1760
+               S 455 1320, 575 1100
+               S 745 660, 575 440
+               S 745 220, 575 0 Z"
+            fill="url(#gv)" opacity=".12" filter="url(#glow)"/>
+      <use href="#vpath" fill="none" stroke="url(#gv)" stroke-width="6" opacity=".55"/>
+      <text font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas" font-size="22" fill="#c266ff" opacity=".45">
+        <textPath href="#vpath" startOffset="0%">
+          010101001101001110100101001011100101001000101101001011001010100110010101001101001010010101001101001001110001010100101101001011001010010010101001101001110100101001011100101001000101101001011001010100110010101001101001010010101001101001001110001010100101101001011001010010
+        </textPath>
+      </text>
+    </svg>
+
+    <!-- MILESTONES -->
+
+    <div class="milestone mv1 left" data-key="mob-intro">
+      <h4>1) Mobile Development</h4>
+      <p>Ecossistema mobile (iOS vs Android), tipos de apps (nativas, híbridas, PWA), lojas de apps e oportunidades de carreira.</p>
+      <div class="tags"><span class="tag">iOS</span><span class="tag">Android</span><span class="tag">PWA</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="mobiledevpremium1.html">Ver conteúdos</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv2 right locked" data-key="mob-uiux">
+      <h4>2) Mobile UI/UX Design</h4>
+      <p>Princípios de design mobile, guidelines (Material Design, HIG), prototipagem com Figma e acessibilidade em apps.</p>
+      <div class="tags"><span class="tag">UI/UX</span><span class="tag">Figma</span><span class="tag">Material</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="mobiledevpremium2.html">Guia</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv3 left locked" data-key="mob-native">
+      <h4>3) Native Mobile Programming</h4>
+      <p>Swift/SwiftUI para iOS, Kotlin/Jetpack Compose para Android, ciclo de vida, permissões e sensores do dispositivo.</p>
+      <div class="tags"><span class="tag">Swift</span><span class="tag">Kotlin</span><span class="tag">nativo</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="mobiledevpremium3.html">Aprofundar</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv4 right locked" data-key="mob-cross">
+      <h4>4) Cross-Platform Development</h4>
+      <p>React Native, Flutter e Expo — comparação, quando usar cada um, hot reload e partilha de código entre plataformas.</p>
+      <div class="tags"><span class="tag">Flutter</span><span class="tag">React Native</span><span class="tag">Expo</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="mobiledevpremium4.html">Referências</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv5 left locked" data-key="mob-api">
+      <h4>5) API & Database Integration</h4>
+      <p>REST APIs, GraphQL, armazenamento local (SQLite, AsyncStorage), Firebase, sincronização offline e autenticação.</p>
+      <div class="tags"><span class="tag">REST</span><span class="tag">Firebase</span><span class="tag">offline</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="mobiledevpremium5.html">Comparar</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv6 right locked" data-key="mob-testing">
+      <h4>6) Testing, QA & Publishing</h4>
+      <p>Testes unitários e de integração, TestFlight, Google Play Console, assinatura de apps e processo de publicação nas lojas.</p>
+      <div class="tags"><span class="tag">testes</span><span class="tag">App Store</span><span class="tag">Play Store</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="mobiledevpremium6.html">Guia</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv7 left locked" data-key="mob-perf">
+      <h4>7) App Sustainability & Growth</h4>
+      <p>Otimização de performance, gestão de memória, análise de crashes, monitorização com ferramentas como Sentry e Firebase Crashlytics.</p>
+      <div class="tags"><span class="tag">performance</span><span class="tag">Sentry</span><span class="tag">crashes</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="mobiledevpremium7.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv8 right locked" data-key="mob-advanced">
+      <h4>8) Architecture & State Management</h4>
+      <p>Push notifications, câmara, geolocalização, Bluetooth, pagamentos in-app, ARKit/ARCore e integrações nativas avançadas.</p>
+      <div class="tags"><span class="tag">push</span><span class="tag">câmara</span><span class="tag">AR</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="mobiledevpremium8.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv9 left locked" data-key="mob-devops">
+      <h4>9) Mobile DevOps & CI/CD</h4>
+      <p>Fastlane, GitHub Actions, Bitrise, distribuição automática, versionamento e pipelines de entrega contínua para mobile.</p>
+      <div class="tags"><span class="tag">CI/CD</span><span class="tag">Fastlane</span><span class="tag">automação</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="mobiledevpremium9.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+    <div class="milestone mv10 right locked" data-key="mob-career">
+      <h4>10) On-Device AI & Local Performance</h4>
+      <p>Portfolio de apps, certificações (Google Associate Android Developer), freelancing, monetização e como entrar na indústria.</p>
+      <div class="tags"><span class="tag">carreira</span><span class="tag">portfolio</span><span class="tag">monetização</span></div>
+      <div class="actions">
+        <button class="btn mini" data-complete>Concluir</button>
+        <a class="btn-ghost btn mini" href="mobiledevpremium10.html">Checklist</a>
+      </div>
+      <div class="progressbar"><div class="progress"><span></span></div></div>
+    </div>
+
+  </section>
+
+  <section class="cta">
+    <button id="btnStart" class="btn">Começar Jornada</button>
+    <a class="btn-ghost btn" href="browse.html">Voltar a explorar</a>
+  </section>
+</main>
+
+<!-- Modal: precisa de login -->
+<div id="loginModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="mlabel">
+  <div class="card">
+    <h3 id="mlabel" style="margin:0 0 .25rem;font-size:1.25rem">Acesso Premium</h3>
+    <p style="color:var(--muted);margin:.25rem 0 .9rem">
+      Precisas de iniciar sessão com o teu código para veres e gravares o teu progresso.
+    </p>
+    <div style="display:flex;gap:.6rem;justify-content:flex-end">
+      <button id="closeModal" class="btn-ghost btn">Agora não</button>
+      <a class="btn" href="login.html">Fazer Login</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Parabéns -->
+<div id="congratsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="glabel">
+  <div class="card" style="text-align:center;position:relative;overflow:hidden">
+    <div class="confetti" id="confetti"></div>
+    <div class="trophy-big"></div>
+    <h3 id="glabel" style="margin:.25rem 0 .25rem;font-size:1.35rem">Parabéns! Jornada concluída 🏆</h3>
+    <p style="color:var(--muted);margin:0 0 1rem">Completaste todos os objetivos da rota Mobile Development.</p>
+    <div style="display:flex;gap:.6rem;justify-content:center">
+      <a class="btn" href="area-privada.html">Ver certificados</a>
+      <button id="closeCongrats" class="btn-ghost btn">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<button id="resetProgressBtn" title="Apagar só o progresso desta jornada">🗑 Reset progresso</button>
+
+<script>
+  const isLogged = !!localStorage.getItem('userCode');
+  const loginModal = document.getElementById('loginModal');
+  const closeLogin = document.getElementById('closeModal');
+  if (!isLogged) setTimeout(()=> loginModal.classList.add('active'), 450);
+  closeLogin?.addEventListener('click', ()=> loginModal.classList.remove('active'));
+
+  const MILESTONES = [
+    'mob-intro','mob-uiux','mob-native','mob-cross','mob-api',
+    'mob-testing','mob-perf','mob-advanced','mob-devops','mob-career'
+  ];
+  const KEY = 'bj_mobile_progress_vertical';
+  const CONGRATS_FLAG = 'bj_mobile_congrats_shown';
+
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ return {}; } };
+  const save = (state) => localStorage.setItem(KEY, JSON.stringify(state));
+  const state = load();
+
+  function updateGlobal(){
+    const completed = MILESTONES.filter(k => state[k]?.done).length;
+    const percent = Math.round(completed / MILESTONES.length * 100);
+    document.querySelectorAll('.progress > span').forEach((bar, i) => {
+      const k = MILESTONES[i];
+      bar.style.width = (state[k]?.done ? '100%' : (state[k]?.percent || 0)+'%');
+    });
+    const trophy = document.getElementById('trophy');
+    const status = document.getElementById('trophyStatus');
+    if (completed === MILESTONES.length){
+      trophy.classList.add('unlocked');
+      status.textContent = 'Jornada concluída — Parabéns! 🏆';
+      showCongratsOnce();
+    } else {
+      trophy.classList.remove('unlocked');
+      status.textContent = `Progresso: ${percent}%`;
+    }
+  }
+
+  function refreshLocks(){
+    const firstUndone = MILESTONES.findIndex(k => !state[k]?.done);
+    document.querySelectorAll('.milestone').forEach(ms=>{
+      const k = ms.dataset.key;
+      const idx = MILESTONES.indexOf(k);
+      ms.classList.toggle('locked', idx > firstUndone && firstUndone !== -1);
+      ms.classList.toggle('done', !!state[k]?.done);
+    });
+  }
+
+  document.querySelectorAll('[data-complete]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const ms = e.target.closest('.milestone');
+      const key = ms.dataset.key;
+      state[key] = {done: !(state[key]?.done), percent: state[key]?.done ? 100 : 0};
+      save(state);
+      refreshLocks();
+      updateGlobal();
+    });
+  });
+
+  document.getElementById('btnStart').addEventListener('click', ()=>{
+    if (!isLogged){ loginModal.classList.add('active'); return; }
+    const k = MILESTONES[0];
+    state[k] = state[k] || {done:false, percent:0};
+    let p = state[k].percent || 0;
+    const id = setInterval(()=>{
+      p += 8; state[k].percent = Math.min(p, 92); save(state); updateGlobal();
+      if (p>=92) clearInterval(id);
+    }, 80);
+    refreshLocks();
+  });
+
+  const congratsModal = document.getElementById('congratsModal');
+  const closeCongrats = document.getElementById('closeCongrats');
+  closeCongrats?.addEventListener('click', ()=> congratsModal.classList.remove('active'));
+
+  function showCongratsOnce(){
+    if (localStorage.getItem(CONGRATS_FLAG) === '1') return;
+    spawnConfetti();
+    congratsModal.classList.add('active');
+    localStorage.setItem(CONGRATS_FLAG, '1');
+  }
+
+  function spawnConfetti(){
+    const confetti = document.getElementById('confetti');
+    const frags = [];
+    for (let i=0;i<80;i++){
+      const d = document.createElement('div');
+      const size = 6 + Math.random()*6;
+      d.style.cssText = `position:absolute;left:${Math.random()*100}%;top:${-10+Math.random()*10}%;width:${size}px;height:${size}px;border-radius:2px;background:${['#d000ff','#c266ff','#7c3aed','#06b6d4','#f59e0b'][Math.floor(Math.random()*5)]};opacity:.9;transform:translateY(0) rotate(${Math.random()*180}deg);transition:transform ${2+Math.random()*1.5}s cubic-bezier(.2,.8,.2,1), opacity 2.5s`;
+      frags.push(d);
+      confetti.appendChild(d);
+      requestAnimationFrame(()=>{
+        d.style.transform = `translateY(${180+Math.random()*220}px) rotate(${360+Math.random()*360}deg)`;
+        d.style.opacity = '0';
+      });
+    }
+    setTimeout(()=> frags.forEach(f=>f.remove()), 3000);
+  }
+
+  const resetBtn = document.getElementById('resetProgressBtn');
+  resetBtn.addEventListener('click', ()=>{
+    if (!confirm('Apagar o progresso desta jornada?')) return;
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(CONGRATS_FLAG);
+    for (const k of MILESTONES){ delete state[k]; }
+    document.querySelectorAll('.progress > span').forEach(b=> b.style.width='0%');
+    document.querySelectorAll('.milestone').forEach(ms=>{ ms.classList.remove('done','locked'); });
+    refreshLocks();
+    document.getElementById('trophy').classList.remove('unlocked');
+    document.getElementById('trophyStatus').textContent = 'Completa todos os objetivos';
+    alert('Progresso apagado!');
+  });
+
+  refreshLocks();
+  updateGlobal();
+</script>
+
+</body>
+</html>

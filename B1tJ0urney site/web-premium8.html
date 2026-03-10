@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Strict Typing & TypeScript Scalability</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #5b7cff;
+            --purple: #7a4bff;
+            --cyan: #28e0ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 125, 230, 0.1) 1px, transparent 1px); background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1; }
+        @keyframes gridMove { 0% { transform: translate(0, 0); } 100% { transform: translate(50px, 50px); } }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%); pointer-events: none; z-index: -1; }
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11, 13, 20, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .nav-buttons { display: flex; gap: 1rem; align-items: center; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91, 124, 255, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91, 124, 255, 0.4); }
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(to right, #1d4ed8, #06b6d4, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-section { margin-bottom: 2rem; }
+        .progress-label { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91, 124, 255, 0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-content { padding: 2rem; min-height: 400px; }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #fff; color: #333; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-icon { font-size: 1.1rem; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+        .question-title { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; font-family: 'Courier New', monospace; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91, 124, 255, 0.1), rgba(40, 224, 255, 0.05)); border: 1px solid rgba(91, 124, 255, 0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer { color: #ef4444; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium.html" class="btn btn-back">← Back</a>
+                <a href="browse.html" class="btn btn-primary">Browse</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Strict Typing & TypeScript Scalability</h1>
+            <p class="course-description">
+                In this module you will deepen your understanding of TypeScript's core concepts, focusing on strict typing, advanced types, and best practices for building scalable, reliable applications.<br>
+                The goal is to master TypeScript's type system to write more dependable code, with fewer bugs and easier maintenance in large teams.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>8–10h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• Advanced Types • Generics • Decorators • Utility Types • Module Patterns</span></div>
+                <div class="meta-item"><span>📌</span><span>Basic knowledge of JavaScript and TypeScript required</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'learn')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'lab')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'resources')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'evaluation')">Evaluation</button>
+            </nav>
+
+            <div id="learn" class="tab-panel active">
+
+    <!-- 1.1 What is TypeScript? -->
+    <div class="content-card">
+        <h2 style="color: var(--cyan); margin-bottom: 1rem;">🟦 1.1 What is TypeScript and why use it?</h2>
+        <p style="line-height: 1.7;">JavaScript is dynamic and flexible — but that flexibility has a cost: bugs that only surface at runtime, code that's hard to refactor, and chaotic collaboration in large teams. <strong>TypeScript</strong> solves this by adding a static type system on top of JavaScript.</p>
+        <br>
+        <p style="line-height: 1.7;">TypeScript compiles to JavaScript and runs in any environment where JavaScript runs. The <code>tsc</code> compiler validates your code <strong>before it executes</strong>, catching errors that would otherwise only appear in production.</p>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:1rem; margin-top:1.5rem;">
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🐛</div>
+                <strong style="color:var(--cyan);">Fewer Bugs</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">The compiler catches type errors before runtime</p>
+            </div>
+            <div style="background:rgba(91,124,255,0.07);border:1px solid rgba(91,124,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">📚</div>
+                <strong style="color:var(--blue);">Auto-complete</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">IDEs like VS Code offer intelligent suggestions based on types</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.07);border:1px solid rgba(122,75,255,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🔄</div>
+                <strong style="color:var(--purple);">Safe Refactoring</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Renaming a property automatically updates all usages</p>
+            </div>
+            <div style="background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.2);padding:1rem;border-radius:8px;text-align:center;">
+                <div style="font-size:1.8rem;">🤝</div>
+                <strong style="color:#ffa500;">Living Documentation</strong>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.4rem;">Types are documentation that the compiler verifies</p>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.5rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">INITIAL SETUP</p>
+            <pre style="font-size:0.8rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code># Install TypeScript globally
+npm install -g typescript
+
+# Check version
+tsc --version
+
+# Initialise a TypeScript project
+tsc --init         # Creates tsconfig.json
+
+# Compile a file
+tsc app.ts
+
+# Watch mode (recompiles on save)
+tsc --watch
+
+# In modern Node.js projects
+npm install -D typescript ts-node @types/node</code></pre>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border-left:4px solid var(--cyan);padding:1rem;border-radius:0 8px 8px 0;margin-top:1.5rem;">
+            <strong>⚙️ tsconfig.json — Recommended Configuration for Serious Projects:</strong>
+            <div style="background:#000;padding:1rem;border-radius:8px;margin-top:0.8rem;">
+                <pre style="font-size:0.8rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,            // Enables ALL strict checks
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,       // Generates .d.ts files
+    "sourceMap": true
+  }
+}</code></pre>
+            </div>
+            <p style="font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;"><strong>Golden rule:</strong> always enable <code>"strict": true</code>. It may feel painful at first, but it saves days of debugging later.</p>
+        </div>
+    </div>
+
+    <!-- 1.2 Basic Types -->
+    <div class="content-card">
+        <h3>🔤 1.2 Basic Types and Type Annotations</h3>
+        <p>TypeScript adds type annotations to JavaScript. Most of the time the compiler infers types automatically — you don't need to annotate everything. But knowing the base types is essential.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">PRIMITIVES AND BASIC TYPES</p>
+            <pre style="font-size:0.8rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code>// Primitives
+let name: string = "Alice";
+let age: number = 30;
+let active: boolean = true;
+let nothing: null = null;
+let undef: undefined = undefined;
+let bigInt: bigint = 100n;
+let sym: symbol = Symbol("id");
+
+// Arrays
+let scores: number[] = [1, 2, 3];
+let tags: Array&lt;string&gt; = ["ts", "js"];
+
+// Tuples — fixed-size arrays with fixed types
+let point: [number, number] = [10, 20];
+let entry: [string, number] = ["age", 25];
+
+// Object types
+let user: { name: string; age: number } = { name: "Bob", age: 25 };
+
+// Automatic inference — TypeScript already knows the type!
+let count = 42;           // TypeScript infers: number
+let greeting = "Hello";  // TypeScript infers: string
+count = "oops";           // ERROR: Type 'string' is not assignable to type 'number'</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">✅ any vs unknown</strong>
+                <div style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// any — disables checks (avoid!)
+let dangerous: any = "hello";
+dangerous.toFixed(); // No error, but crashes
+
+// unknown — type-safe "any"
+let safe: unknown = getData();
+// Must check before using:
+if (typeof safe === "string") {
+  console.log(safe.toUpperCase()); // OK
+}
+
+// never — value that never exists
+function crash(): never {
+  throw new Error("Fatal!");
+}</code></pre>
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">🔀 Union and Intersection Types</strong>
+                <div style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Union — can be A OR B
+type StringOrNumber = string | number;
+let id: StringOrNumber = "abc-123";
+id = 42; // also valid
+
+// Intersection — has properties of A AND B
+type Admin = User &amp; { adminLevel: number };
+
+// Literal types — exact values
+type Direction = "north" | "south" | "east" | "west";
+type DiceRoll = 1 | 2 | 3 | 4 | 5 | 6;
+
+let dir: Direction = "north"; // OK
+dir = "up"; // ERROR!</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.3 Interfaces and Type Aliases -->
+    <div class="content-card">
+        <h3>📐 1.3 Interfaces and Type Aliases — Structuring your Data</h3>
+        <p>To describe the shape of complex objects, use <strong>interface</strong> or <strong>type</strong>. Both work very similarly, but have important differences.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">INTERFACES — PREFERRED FOR OBJECTS AND CLASSES</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>interface User {
+  id: number;
+  name: string;
+  email: string;
+  age?: number;          // Optional property
+  readonly createdAt: Date; // Read-only — can't change after creation
+}
+
+// Interface extension — inheritance
+interface AdminUser extends User {
+  permissions: string[];
+  adminLevel: 1 | 2 | 3;
+}
+
+// Implementation in classes
+class UserService implements User {
+  id: number;
+  name: string;
+  email: string;
+  readonly createdAt: Date;
+  
+  constructor(data: Omit&lt;User, 'createdAt'&gt;) {
+    this.id = data.id;
+    this.name = data.name;
+    this.email = data.email;
+    this.createdAt = new Date();
+  }
+}
+
+// Declaration merging — you can extend existing interfaces
+interface Window {
+  myCustomProperty: string; // Add to the global Window type
+}</code></pre>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">TYPE ALIASES — PREFERRED FOR UNIONS, INTERSECTIONS AND COMPLEX TYPES</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Type alias for objects
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  category: "electronics" | "clothing" | "food";
+};
+
+// Types for functions
+type Transformer&lt;T, R&gt; = (input: T) =&gt; R;
+type EventHandler = (event: Event) =&gt; void;
+
+// Conditional types — types that depend on other types
+type IsString&lt;T&gt; = T extends string ? "yes" : "no";
+type Result1 = IsString&lt;string&gt;; // "yes"
+type Result2 = IsString&lt;number&gt;; // "no"
+
+// Template literal types
+type EventName = "click" | "focus" | "blur";
+type Handler = `on${Capitalize&lt;EventName&gt;}`;
+// Handler = "onClick" | "onFocus" | "onBlur"</code></pre>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>⚖️ Interface vs Type — When to use each?</strong>
+            <table style="width:100%;border-collapse:collapse;margin-top:0.8rem;font-size:0.83rem;">
+                <thead><tr style="border-bottom:1px solid var(--border-color);">
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Situation</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Use</th>
+                    <th style="text-align:left;padding:0.5rem;color:var(--cyan);">Why</th>
+                </tr></thead>
+                <tbody style="color:var(--text-secondary);">
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;">Describing objects / classes</td>
+                        <td style="padding:0.5rem;color:var(--cyan);">interface</td>
+                        <td style="padding:0.5rem;">Supports declaration merging and extends</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:0.5rem;">Unions, intersections, tuples</td>
+                        <td style="padding:0.5rem;color:var(--cyan);">type</td>
+                        <td style="padding:0.5rem;">Interfaces can't express unions</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.5rem;">Public APIs / libraries</td>
+                        <td style="padding:0.5rem;color:var(--cyan);">interface</td>
+                        <td style="padding:0.5rem;">Users can extend interfaces</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 1.4 Generics -->
+    <div class="content-card">
+        <h3>🧬 1.4 Generics — Reusable and Type-Safe Code</h3>
+        <p>Generics are one of TypeScript's most powerful features. They allow you to write code that works with <strong>any type</strong>, while maintaining full type safety — without using <code>any</code>.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ff6b6b;">😩 Without Generics</strong>
+                <div style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Must duplicate code for each type
+function getFirstString(arr: string[]): string {
+  return arr[0];
+}
+function getFirstNumber(arr: number[]): number {
+  return arr[0];
+}
+// Or lose safety with any:
+function getFirst(arr: any[]): any {
+  return arr[0]; // Type lost!
+}</code></pre>
+                </div>
+            </div>
+            <div style="background:rgba(40,224,255,0.07);border:1px solid rgba(40,224,255,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">😊 With Generics</strong>
+                <div style="background:#000;padding:0.8rem;border-radius:6px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// One function that works with any type!
+function getFirst&lt;T&gt;(arr: T[]): T {
+  return arr[0];
+}
+
+const s = getFirst(["a", "b"]); // string
+const n = getFirst([1, 2, 3]);   // number
+const u = getFirst([{ id: 1 }]); // { id: number }
+// TypeScript infers T automatically!</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">ADVANCED GENERICS — CONSTRAINTS AND MULTIPLE PARAMETERS</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Constraint — T must have an 'id' property
+function findById&lt;T extends { id: number }&gt;(items: T[], id: number): T | undefined {
+  return items.find(item =&gt; item.id === id);
+}
+
+// Multiple type parameters
+function merge&lt;T extends object, U extends object&gt;(obj1: T, obj2: U): T &amp; U {
+  return { ...obj1, ...obj2 };
+}
+
+const result = merge({ name: "Alice" }, { age: 30 });
+// result: { name: string } &amp; { age: number }
+
+// Generics in interfaces
+interface Repository&lt;T&gt; {
+  findAll(): Promise&lt;T[]&gt;;
+  findById(id: number): Promise&lt;T | null&gt;;
+  create(data: Omit&lt;T, 'id'&gt;): Promise&lt;T&gt;;
+  update(id: number, data: Partial&lt;T&gt;): Promise&lt;T&gt;;
+  delete(id: number): Promise&lt;void&gt;;
+}
+
+// Strongly typed implementation
+class UserRepository implements Repository&lt;User&gt; {
+  async findAll(): Promise&lt;User[]&gt; { return []; }
+  async findById(id: number): Promise&lt;User | null&gt; { return null; }
+  async create(data: Omit&lt;User, 'id'&gt;): Promise&lt;User&gt; { return {} as User; }
+  async update(id: number, data: Partial&lt;User&gt;): Promise&lt;User&gt; { return {} as User; }
+  async delete(id: number): Promise&lt;void&gt; { }
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- 1.5 Utility Types -->
+    <div class="content-card">
+        <h3>🛠️ 1.5 Utility Types — Transforming Existing Types</h3>
+        <p>TypeScript includes a set of built-in <strong>Utility Types</strong> that transform existing types. They are invaluable day-to-day and avoid code duplication.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">THE MOST COMMONLY USED UTILITY TYPES</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.9;"><code>interface User {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+}
+
+// Partial&lt;T&gt; — all properties become optional
+type UpdateUserDTO = Partial&lt;User&gt;;
+// { id?: number; name?: string; email?: string; ... }
+
+// Required&lt;T&gt; — all properties become required
+type FullUser = Required&lt;User&gt;;
+
+// Pick&lt;T, K&gt; — select only some properties
+type PublicUser = Pick&lt;User, 'id' | 'name' | 'email'&gt;;
+// Never exposes the password!
+
+// Omit&lt;T, K&gt; — exclude specific properties
+type CreateUserDTO = Omit&lt;User, 'id' | 'createdAt'&gt;;
+// User doesn't have an id or creation date yet
+
+// Readonly&lt;T&gt; — all properties are read-only
+type ImmutableUser = Readonly&lt;User&gt;;
+
+// Record&lt;K, V&gt; — create an object with keys K and values V
+type UsersByRole = Record&lt;'admin' | 'user' | 'guest', User[]&gt;;
+
+// NonNullable&lt;T&gt; — removes null and undefined
+type SafeString = NonNullable&lt;string | null | undefined&gt;; // string
+
+// ReturnType&lt;T&gt; — extracts the return type of a function
+type FetchResult = ReturnType&lt;typeof fetch&gt;; // Promise&lt;Response&gt;
+
+// Parameters&lt;T&gt; — extracts function parameters as a tuple
+type SetTimeoutParams = Parameters&lt;typeof setTimeout&gt;;</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.8rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;text-align:center;">
+                <strong style="color:var(--cyan);">Partial&lt;T&gt;</strong>
+                <p style="color:var(--text-secondary);font-size:0.78rem;margin-top:0.3rem;">All optional — for partial updates</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;text-align:center;">
+                <strong style="color:var(--cyan);">Omit&lt;T,K&gt;</strong>
+                <p style="color:var(--text-secondary);font-size:0.78rem;margin-top:0.3rem;">Remove properties — for DTOs</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;text-align:center;">
+                <strong style="color:var(--cyan);">Pick&lt;T,K&gt;</strong>
+                <p style="color:var(--text-secondary);font-size:0.78rem;margin-top:0.3rem;">Select properties — for projections</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;font-size:0.83rem;text-align:center;">
+                <strong style="color:var(--cyan);">Record&lt;K,V&gt;</strong>
+                <p style="color:var(--text-secondary);font-size:0.78rem;margin-top:0.3rem;">Typed dictionaries</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.6 Type Narrowing -->
+    <div class="content-card">
+        <h3>🎯 1.6 Type Narrowing and Type Guards</h3>
+        <p>When working with union types, TypeScript needs to know which "branch" of the type you're working with. The process of refining types within a block of code is called <strong>narrowing</strong>.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">NARROWING TECHNIQUES</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// typeof narrowing
+function formatValue(value: string | number): string {
+  if (typeof value === "string") {
+    return value.toUpperCase(); // TypeScript knows it's a string here
+  }
+  return value.toFixed(2); // TypeScript knows it's a number here
+}
+
+// instanceof narrowing
+function processShape(shape: Circle | Rectangle) {
+  if (shape instanceof Circle) {
+    return Math.PI * shape.radius ** 2;
+  }
+  return shape.width * shape.height;
+}
+
+// Discriminated Unions — recommended pattern
+type Shape =
+  | { kind: "circle"; radius: number }
+  | { kind: "rectangle"; width: number; height: number }
+  | { kind: "triangle"; base: number; height: number };
+
+function getArea(shape: Shape): number {
+  switch (shape.kind) {
+    case "circle":
+      return Math.PI * shape.radius ** 2;
+    case "rectangle":
+      return shape.width * shape.height;
+    case "triangle":
+      return (shape.base * shape.height) / 2;
+    // TypeScript ensures you've covered all cases!
+  }
+}
+
+// Custom Type Guard — type predicate
+function isUser(value: unknown): value is User {
+  return (
+    typeof value === "object" &amp;&amp;
+    value !== null &amp;&amp;
+    "id" in value &amp;&amp;
+    "name" in value
+  );
+}
+
+const data: unknown = fetchFromAPI();
+if (isUser(data)) {
+  console.log(data.name); // TypeScript knows it's a User!
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- 1.7 Advanced Functions -->
+    <div class="content-card">
+        <h3>⚡ 1.7 Advanced Functions — Overloads, this and Parameters</h3>
+        <p>TypeScript adds powerful expressiveness to functions — you can define multiple signatures, explicitly type <code>this</code>, and use advanced parameter modifiers.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">FUNCTION OVERLOADS AND ADVANCED TYPING</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Function overloads — multiple signatures
+function createElement(tag: "div"): HTMLDivElement;
+function createElement(tag: "span"): HTMLSpanElement;
+function createElement(tag: "input"): HTMLInputElement;
+function createElement(tag: string): HTMLElement {
+  return document.createElement(tag);
+}
+
+const div = createElement("div");   // HTMLDivElement
+const span = createElement("span"); // HTMLSpanElement
+
+// Strongly typed rest parameters
+function buildUrl(base: string, ...segments: string[]): string {
+  return [base, ...segments].join("/");
+}
+
+// Functions as types
+type Predicate&lt;T&gt; = (item: T) =&gt; boolean;
+type Mapper&lt;T, R&gt; = (item: T, index: number) =&gt; R;
+type Reducer&lt;T, R&gt; = (acc: R, item: T) =&gt; R;
+
+// Type-safe higher-order functions
+function pipe&lt;T&gt;(...fns: Array&lt;(x: T) =&gt; T&gt;): (x: T) =&gt; T {
+  return (x) =&gt; fns.reduce((v, f) =&gt; f(v), x);
+}
+
+const process = pipe(
+  (s: string) =&gt; s.trim(),
+  (s) =&gt; s.toLowerCase(),
+  (s) =&gt; s.replace(/\s+/g, "-")
+);
+
+console.log(process("  Hello World  ")); // "hello-world"</code></pre>
+        </div>
+    </div>
+
+    <!-- 1.8 Classes and OOP -->
+    <div class="content-card">
+        <h3>🏛️ 1.8 Classes and Object-Oriented Programming</h3>
+        <p>TypeScript transforms JavaScript classes with <strong>access modifiers</strong>, <strong>readonly properties</strong>, <strong>abstract classes</strong>, and full integration with the type system.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">ADVANCED CLASSES IN TYPESCRIPT</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>abstract class BaseEntity {
+  readonly id: string;
+  readonly createdAt: Date;
+
+  constructor() {
+    this.id = crypto.randomUUID();
+    this.createdAt = new Date();
+  }
+
+  // Abstract method — subclasses must implement
+  abstract validate(): boolean;
+
+  toJSON(): Record&lt;string, unknown&gt; {
+    return { id: this.id, createdAt: this.createdAt };
+  }
+}
+
+class User extends BaseEntity {
+  #password: string; // Native private field (not accessible externally)
+
+  constructor(
+    public name: string,            // public — creates and exposes property
+    public email: string,
+    private role: "admin" | "user", // private — only within the class
+    password: string
+  ) {
+    super();
+    this.#password = this.hashPassword(password);
+  }
+
+  validate(): boolean {
+    return this.email.includes("@") &amp;&amp; this.name.length &gt; 0;
+  }
+
+  private hashPassword(raw: string): string {
+    return `hashed_${raw}`; // Simplified
+  }
+
+  // Getter — accessed like a property
+  get displayName(): string {
+    return `${this.name} (${this.role})`;
+  }
+
+  // Static factory method
+  static create(name: string, email: string, password: string): User {
+    return new User(name, email, "user", password);
+  }
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- 1.9 Modules -->
+    <div class="content-card">
+        <h3>📦 1.9 Modules, Namespaces and Code Organisation</h3>
+        <p>In scalable TypeScript projects, code organisation is critical. TypeScript supports native ES Modules, module declarations for third-party libraries, and export patterns that maximise tree-shaking.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">RECOMMENDED MODULE PATTERNS</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// types/index.ts — centralise all types
+export interface User { id: number; name: string; email: string; }
+export type UserId = User['id']; // Extract type from property
+export type UserRole = 'admin' | 'user' | 'guest';
+
+// utils/validators.ts
+export const isValidEmail = (email: string): boolean =&gt;
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+// services/UserService.ts
+import type { User, UserId } from '../types';
+// 'import type' — only imports types, zero bundle impact!
+
+export class UserService {
+  private users: Map&lt;UserId, User&gt; = new Map();
+
+  getUser(id: UserId): User | undefined {
+    return this.users.get(id);
+  }
+}
+
+// Module declaration for libraries without types
+declare module 'some-untyped-lib' {
+  export function doSomething(x: string): number;
+  export const VERSION: string;
+}</code></pre>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1.2rem;border-radius:8px;">
+                <strong style="color:var(--cyan);">📁 Recommended Project Structure</strong>
+                <pre style="background:#000;padding:0.6rem;border-radius:4px;font-size:0.75rem;color:#0f0;margin-top:0.5rem;overflow-x:auto;line-height:1.8;"><code>src/
+├── types/          # Types and interfaces
+│   └── index.ts
+├── models/         # Domain classes
+├── services/       # Business logic
+├── repositories/   # Data access
+├── controllers/    # HTTP handlers
+├── utils/          # Utility functions
+├── config/         # Configuration
+└── index.ts        # Entry point</code></pre>
+            </div>
+            <div style="background:rgba(255,100,100,0.07);border:1px solid rgba(255,100,100,0.2);padding:1.2rem;border-radius:8px;">
+                <strong style="color:#ff6b6b;">❌ Anti-patterns to Avoid</strong>
+                <ul style="list-style:none;font-size:0.82rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>→ Using <code>any</code> as an escape (use <code>unknown</code>)</li>
+                    <li>→ Unnecessary type assertions (<code>as X</code>)</li>
+                    <li>→ Suppressing errors with <code>// @ts-ignore</code></li>
+                    <li>→ Giant, undecomposed interfaces</li>
+                    <li>→ Mixing <code>null</code> and <code>undefined</code> without criteria</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.10 Decorators -->
+    <div class="content-card">
+        <h3>🎨 1.10 Decorators — Metaprogramming</h3>
+        <p>Decorators are an experimental feature (but widely used in frameworks like Angular, NestJS, and TypeORM) that allows adding behaviour to classes, methods, and properties in a declarative way.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">PRACTICAL DECORATORS</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Enable in tsconfig: "experimentalDecorators": true
+
+// Class decorator — adds metadata
+function Controller(path: string) {
+  return function (target: Function) {
+    Reflect.defineMetadata('path', path, target);
+  };
+}
+
+// Method decorator — automatic logging
+function Log(target: any, key: string, descriptor: PropertyDescriptor) {
+  const original = descriptor.value;
+  descriptor.value = function (...args: any[]) {
+    console.log(`[LOG] ${key} called with:`, args);
+    const result = original.apply(this, args);
+    console.log(`[LOG] ${key} returned:`, result);
+    return result;
+  };
+  return descriptor;
+}
+
+// Property decorator — validation
+function MinLength(min: number) {
+  return function (target: any, propertyKey: string) {
+    let value: string;
+    Object.defineProperty(target, propertyKey, {
+      get: () =&gt; value,
+      set: (newValue: string) =&gt; {
+        if (newValue.length &lt; min)
+          throw new Error(`${propertyKey} must have at least ${min} characters`);
+        value = newValue;
+      }
+    });
+  };
+}
+
+// Combined usage — as in NestJS
+@Controller('/users')
+class UserController {
+  @MinLength(3)
+  name: string = '';
+
+  @Log
+  getUsers(): string[] {
+    return ['Alice', 'Bob'];
+  }
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- 1.11 Mapped Types -->
+    <div class="content-card">
+        <h3>🗺️ 1.11 Mapped Types and Advanced Conditional Types</h3>
+        <p><strong>Mapped Types</strong> allow you to create new types by programmatically transforming existing ones — they are the foundation of how TypeScript's Utility Types are implemented internally.</p>
+
+        <div style="background:#000;padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <p style="color:var(--cyan);font-size:0.75rem;margin-bottom:0.5rem;">MAPPED TYPES AND ADVANCED INFERENCE</p>
+            <pre style="font-size:0.78rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// Mapped type — transform all properties
+type Nullable&lt;T&gt; = {
+  [K in keyof T]: T[K] | null;
+};
+
+type Getters&lt;T&gt; = {
+  [K in keyof T as `get${Capitalize&lt;string &amp; K&gt;}`]: () =&gt; T[K];
+};
+
+type UserGetters = Getters&lt;User&gt;;
+// { getId: () =&gt; number; getName: () =&gt; string; ... }
+
+// Advanced conditional types
+type DeepReadonly&lt;T&gt; = {
+  readonly [K in keyof T]: T[K] extends object ? DeepReadonly&lt;T[K]&gt; : T[K];
+};
+
+// infer — extract types within conditional types
+type UnpackPromise&lt;T&gt; = T extends Promise&lt;infer U&gt; ? U : T;
+
+type ApiResult = UnpackPromise&lt;Promise&lt;User[]&gt;&gt;; // User[]
+type SyncResult = UnpackPromise&lt;string&gt;;           // string
+
+// Extract all methods from a class
+type MethodsOf&lt;T&gt; = {
+  [K in keyof T as T[K] extends Function ? K : never]: T[K];
+};
+
+// Satisfies operator (TS 4.9+) — validates without widening
+const config = {
+  port: 3000,
+  host: "localhost",
+  db: { url: "postgres://..." }
+} satisfies AppConfig; // Validates against AppConfig but keeps precise type</code></pre>
+        </div>
+    </div>
+
+    <!-- 1.12 Performance and Best Practices -->
+    <div class="content-card">
+        <h3>🚀 1.12 Compilation Performance and Best Practices at Scale</h3>
+        <p>In large projects, TypeScript compiler performance can become a bottleneck. There are specific strategies to maintain fast feedback even in monorepos with millions of lines of code.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">⚡ Compilation Optimisations:</strong>
+                <div style="background:#000;padding:1rem;border-radius:8px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// tsconfig.json — large projects
+{
+  "compilerOptions": {
+    "incremental": true,       // Incremental cache
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "skipLibCheck": true,      // Skip node_modules types
+    "isolatedModules": true    // Compatible with esbuild/swc
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}</code></pre>
+                </div>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">🏗️ Project References (Monorepos):</strong>
+                <div style="background:#000;padding:1rem;border-radius:8px;margin-top:0.6rem;">
+                    <pre style="font-size:0.75rem;color:#0f0;overflow-x:auto;line-height:1.8;"><code>// tsconfig.json at the monorepo root
+{
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/api" },
+    { "path": "./packages/web" }
+  ]
+}
+// Only compiles what changed!
+// tsc --build --watch</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);padding:1rem;border-radius:8px;margin-top:1.2rem;">
+            <strong>✅ TypeScript Best Practices Checklist:</strong>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:0.8rem;font-size:0.83rem;">
+                <div style="background:rgba(40,224,255,0.06);padding:0.8rem;border-radius:6px;">✔ <code>strict: true</code> always enabled</div>
+                <div style="background:rgba(40,224,255,0.06);padding:0.8rem;border-radius:6px;">✔ Prefer <code>unknown</code> over <code>any</code></div>
+                <div style="background:rgba(40,224,255,0.06);padding:0.8rem;border-radius:6px;">✔ Use <code>import type</code> for type imports</div>
+                <div style="background:rgba(40,224,255,0.06);padding:0.8rem;border-radius:6px;">✔ Discriminated unions to model states</div>
+                <div style="background:rgba(40,224,255,0.06);padding:0.8rem;border-radius:6px;">✔ Utility Types instead of duplicated interfaces</div>
+                <div style="background:rgba(40,224,255,0.06);padding:0.8rem;border-radius:6px;">✔ Readonly for immutable data</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1.13 Conclusion -->
+    <div class="content-card" style="background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.08)); border-color: rgba(40,224,255,0.3);">
+        <h3>🎓 1.13 Module Conclusion and Next Steps</h3>
+        <p>Mastering TypeScript isn't just about learning syntax — it's about adopting a <strong>type-driven design mindset</strong> that transforms the quality of your code and your team's velocity.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+            <div>
+                <strong style="color:var(--cyan);">✅ What you've learned:</strong>
+                <ul style="list-style:none;font-size:0.83rem;color:var(--text-secondary);margin-top:0.6rem;line-height:2;">
+                    <li>✔ TypeScript setup and configuration</li>
+                    <li>✔ Basic types, unions and intersections</li>
+                    <li>✔ Interfaces and type aliases</li>
+                    <li>✔ Generics and constraints</li>
+                    <li>✔ Built-in Utility Types</li>
+                    <li>✔ Type narrowing and type guards</li>
+                    <li>✔ Advanced functions and overloads</li>
+                    <li>✔ Classes and OOP with TypeScript</li>
+                    <li>✔ Modules and code organisation</li>
+                    <li>✔ Decorators and metaprogramming</li>
+                    <li>✔ Mapped types and conditional types</li>
+                    <li>✔ Performance and best practices at scale</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color:var(--cyan);">🗺️ Your next steps:</strong>
+                <div style="margin-top:0.6rem;font-size:0.83rem;">
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">1️⃣ Migrate an existing JS project</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Add TypeScript incrementally with <code>"allowJs": true</code></p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">2️⃣ Explore the TypeScript Playground</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Test complex types at typescriptlang.org/play</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;margin-bottom:0.6rem;">
+                        <strong style="color:var(--blue);">3️⃣ Learn Zod or Valibot</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Runtime validation that complements static types</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);padding:0.8rem;border-radius:6px;">
+                        <strong style="color:var(--blue);">4️⃣ Contribute to DefinitelyTyped</strong>
+                        <p style="color:var(--text-secondary);margin-top:0.2rem;">Write types for JavaScript libraries without types</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:1.2rem;margin-top:1.2rem;">
+            <strong>🏆 Final Challenge:</strong>
+            <p style="font-size:0.9rem;color:var(--text-secondary);margin-top:0.5rem;">Build a REST API in Node.js + TypeScript with strict end-to-end typing: types for input DTOs, types for responses, generics for the repository, utility types for partial updates, and type guards to validate external data. Enable <code>"strict": true</code> and don't use <code>any</code> even once. This is the production-ready code standard.</p>
+        </div>
+    </div>
+
+</div>
+
+            <div id="lab" class="tab-panel">
+                <h3>TypeScript Type Explorer</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Experiment with TypeScript types. Test utility types, generics and type guards.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">TYPESCRIPT PLAYGROUND</div>
+                        <textarea class="lab-textarea" id="ts-input">// Exercise: Create a type-safe API for users
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: 'admin' | 'user';
+}
+
+// Create a type for creating users (without id)
+type CreateUserDTO = Omit&lt;User, 'id'&gt;;
+
+// Create a type for updating users (everything optional)
+type UpdateUserDTO = Partial&lt;Omit&lt;User, 'id'&gt;&gt;;
+
+// Create a public type (without role)
+type PublicUser = Pick&lt;User, 'id' | 'name' | 'email'&gt;;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">TYPE ANALYSIS</div>
+                        <div class="lab-iframe" id="ts-output">
+                            Click "Analyse" to see the type analysis...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runTs()">Analyse Types</button>
+            </div>
+
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>📊 Quiz: Strict Typing & TypeScript Scalability</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your command of types, generics, utility types and TypeScript best practices.</p>
+
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What is TypeScript?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) A JavaScript framework</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B"> B) A superset of JavaScript with static typing</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C"> C) A completely different language from JavaScript</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) A module bundler</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. What is the difference between <code>interface</code> and <code>type</code> in TypeScript?</p>
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) They are exactly the same and can be used interchangeably</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B"> B) <code>interface</code> supports declaration merging and <code>type</code> supports unions</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C"> C) <code>type</code> is faster at compilation</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) <code>interface</code> can only be used in classes</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. What does the Utility Type <code>Partial&lt;T&gt;</code> do?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) Removes all properties from type T</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B"> B) Makes all properties of T required</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Makes all properties of T optional</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Creates a deep copy of type T</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. What are Generics in TypeScript?</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Types that only work with strings</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Types that allow writing reusable, type-safe code for any type</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C"> C) A way to disable type checking</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Types exclusive to classes</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. What is the difference between <code>any</code> and <code>unknown</code>?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) They are the same — both disable type checks</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B"> B) <code>unknown</code> is faster than <code>any</code></label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C"> C) <code>unknown</code> requires checking the type before use, <code>any</code> does not</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) <code>any</code> can only be used in variables, not functions</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. What is Type Narrowing?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Reducing the number of properties in a type</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) The process of refining types within conditional code blocks</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C"> C) Converting types from string to number</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Removing nullable types from unions</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. What does <code>Omit&lt;User, 'id' | 'createdAt'&gt;</code> do?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Creates a type with ONLY the 'id' and 'createdAt' properties</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Creates a User type WITHOUT the 'id' and 'createdAt' properties</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Makes 'id' and 'createdAt' optional</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Makes 'id' and 'createdAt' readonly</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. What is the advantage of Discriminated Unions?</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) They are faster than interfaces</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B"> B) They allow TypeScript to verify all cases were handled in a switch</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C"> C) They reduce bundle size</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) They are compatible with plain JavaScript</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. What does <code>"strict": true</code> do in tsconfig.json?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Disables all type checks</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Enables a set of rigorous checks like noImplicitAny, strictNullChecks, etc.</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Enforces the use of semicolons</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Requires using interfaces instead of types</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. What is a Type Guard?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) A security middleware for APIs</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B"> B) A function that checks and proves to TypeScript that a value is of a specific type</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C"> C) A decorator that protects class properties</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) A special type only for arrays</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What is the correct syntax for a Generic with a constraint?</p>
+                <label class="quiz-option"><input type="radio" name="q11" value="A"> A) <code>function f&lt;T is object&gt;(x: T)</code></label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B"> B) <code>function f&lt;T: object&gt;(x: T)</code></label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C"> C) <code>function f&lt;T extends object&gt;(x: T)</code></label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) <code>function f&lt;T implements object&gt;(x: T)</code></label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. What is <code>import type</code> in TypeScript?</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) A syntax error — it doesn't exist</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Imports only types, with no impact on the production bundle</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Imports types from JavaScript files</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Imports types asynchronously</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. What are Mapped Types?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Types for working with Map and Set</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Types that create new types by iterating over the properties of an existing type</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Types for geographical maps</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Types that only work with arrays</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. What does the <code>readonly</code> modifier do on a property?</p>
+                <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Makes the property visible only within the class</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Prevents the property from being changed after initialisation</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Makes the property optional</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Automatically serialises the property to JSON</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. Which tsconfig option improves compilation performance in large projects?</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) <code>"fast": true</code></label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B"> B) <code>"noCheck": true</code></label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C"> C) <code>"incremental": true</code></label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) <code>"cache": true</code></label>
+            </div>
+        </form>
+
+        <div class="quiz-controls" style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback" class="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+class QuizManager {
+    constructor() {
+        this.questionsData = {
+            q1:  { correct: 'B', exp: 'TypeScript is a superset of JavaScript that adds static typing and compiles to JavaScript.' },
+            q2:  { correct: 'B', exp: 'interface supports declaration merging (can be extended by third parties) and type supports unions and intersections directly.' },
+            q3:  { correct: 'C', exp: 'Partial&lt;T&gt; makes all properties optional — ideal for update DTOs where only some fields change.' },
+            q4:  { correct: 'B', exp: 'Generics allow writing reusable functions, classes and types that work with any type, maintaining type safety.' },
+            q5:  { correct: 'C', exp: 'unknown is the "safe any" — it forces you to check the type before using the value, whereas any disables all checks.' },
+            q6:  { correct: 'B', exp: 'Narrowing is when TypeScript refines the type of a variable inside a conditional block (typeof, instanceof, etc.).' },
+            q7:  { correct: 'B', exp: 'Omit&lt;T, K&gt; creates a new type with ALL properties of T EXCEPT those listed in K.' },
+            q8:  { correct: 'B', exp: 'Discriminated Unions with a "kind" field allow TypeScript to check (exhaustive checking) that all cases are covered.' },
+            q9:  { correct: 'B', exp: '"strict: true" enables noImplicitAny, strictNullChecks, strictFunctionTypes, and other essential checks for production-grade code.' },
+            q10: { correct: 'B', exp: 'A Type Guard is a function with return type "value is Type" that proves to the compiler that a value is of a specific type.' },
+            q11: { correct: 'C', exp: 'The correct syntax is "extends" for constraints: function f&lt;T extends object&gt;(x: T) — ensures T has the properties of object.' },
+            q12: { correct: 'B', exp: '"import type" is a type-only import — it is completely removed during compilation, not affecting the production bundle.' },
+            q13: { correct: 'B', exp: 'Mapped Types iterate over the keys of an existing type with [K in keyof T] to create new transformed types.' },
+            q14: { correct: 'B', exp: 'readonly prevents reassigning the property after initialisation — TypeScript will error if you try to change the value.' },
+            q15: { correct: 'C', exp: '"incremental: true" saves the previous compilation state in .tsbuildinfo, only compiling what changed.' }
+        };
+        this.init();
+    }
+
+    init() {
+        document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+        document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+    }
+
+    submitQuiz() {
+        const form = document.getElementById('quiz-form');
+        const formData = new FormData(form);
+        let score = 0;
+        let feedbackHTML = '';
+
+        Object.keys(this.questionsData).forEach((key, index) => {
+            const userAnswer = formData.get(key);
+            const isCorrect = userAnswer === this.questionsData[key].correct;
+            if (isCorrect) score++;
+            feedbackHTML += `
+    <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+        <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+        <div>
+            <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+            ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+        </div>
+    </div>`;
+        });
+
+        this.displayResults(score, feedbackHTML);
+    }
+
+    displayResults(score, feedbackHTML) {
+        const total = Object.keys(this.questionsData).length;
+        const percent = Math.round((score / total) * 100);
+        const resultsDiv = document.getElementById('quiz-results');
+        let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+        document.getElementById('quiz-score').innerHTML = `
+            <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+            <p style="color: var(--text-secondary)">${percent >= 70 ? 'Excellent! You have mastered the TypeScript concepts.' : 'Review the typing concepts and try again.'}</p>`;
+        document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clearQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-results').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => { new QuizManager(); });
+</script>
+
+            <div id="resources" class="tab-panel">
+                <div class="content-card">
+                    <h3 class="content-title">Recommended Documentation</h3>
+                    <p class="content-text">Curated list of essential resources to deepen your TypeScript knowledge.</p>
+                    <div class="resources-list">
+                        <div class="resource-category">
+                            <h4 class="category-title">Official Documentation</h4>
+                            <ul class="resource-links">
+                                <li><a href="#" class="resource-link">TypeScript Official Handbook</a></li>
+                                <li><a href="#" class="resource-link">TypeScript Deep Dive (Basarat)</a></li>
+                                <li><a href="#" class="resource-link">TypeScript Release Notes</a></li>
+                                <li><a href="#" class="resource-link">DefinitelyTyped Repository</a></li>
+                            </ul>
+                        </div>
+                        <div class="resource-category">
+                            <h4 class="category-title">Guides and Tutorials</h4>
+                            <ul class="resource-links">
+                                <li><a href="#" class="resource-link">TypeScript for JavaScript Programmers</a></li>
+                                <li><a href="#" class="resource-link">Advanced TypeScript Patterns</a></li>
+                                <li><a href="#" class="resource-link">Type Challenges Repository</a></li>
+                                <li><a href="#" class="resource-link">Total TypeScript (Matt Pocock)</a></li>
+                            </ul>
+                        </div>
+                        <div class="resource-category">
+                            <h4 class="category-title">Tools</h4>
+                            <ul class="resource-links">
+                                <li><a href="#" class="resource-link">TypeScript Playground</a></li>
+                                <li><a href="#" class="resource-link">ts-reset — Improve native types</a></li>
+                                <li><a href="#" class="resource-link">Zod — Validation with type inference</a></li>
+                                <li><a href="#" class="resource-link">tRPC — Type-safe end-to-end APIs</a></li>
+                            </ul>
+                        </div>
+                        <div class="resource-category">
+                            <h4 class="category-title">Quick References</h4>
+                            <ul class="resource-links">
+                                <li><a href="#" class="resource-link">TypeScript Cheat Sheet</a></li>
+                                <li><a href="#" class="resource-link">Utility Types Reference</a></li>
+                                <li><a href="#" class="resource-link">tsconfig Reference</a></li>
+                                <li><a href="#" class="resource-link">TypeScript Error Codes Explained</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="resources-note">
+                        <p>💡 <strong>Note:</strong> The TypeScript Playground is the best way to experiment with complex types without any local setup.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="evaluation" class="tab-panel">
+    <div class="content-card">
+        <h3>🎯 Mastery Criteria: Strict Typing & TypeScript Scalability</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            Criteria organised by importance levels to assess your TypeScript mastery.
+        </p>
+
+        <div class="evaluation-grid">
+            <div class="evaluation-column">
+                <h4 class="evaluation-title essential">
+                    <span>💠</span> Essential
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>Basic Types:</strong> Correctly annotate variables, functions and parameters.</li>
+                    <li><strong>Interfaces:</strong> Define and use interfaces to describe objects.</li>
+                    <li><strong>Strict Mode:</strong> Work with <code>"strict": true</code> without disabling checks.</li>
+                    <li><strong>Union Types:</strong> Use union types and type narrowing with <code>typeof</code>.</li>
+                    <li><strong>Utility Types:</strong> Apply <code>Partial</code>, <code>Omit</code>, <code>Pick</code>, <code>Readonly</code>.</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title important">
+                    <span>⭐</span> Important
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>Generics:</strong> Create generic functions and classes with constraints.</li>
+                    <li><strong>Type Guards:</strong> Implement custom type guards with type predicates.</li>
+                    <li><strong>Discriminated Unions:</strong> Model states with exhaustive checking.</li>
+                    <li><strong>OOP Classes:</strong> Use access modifiers, abstract classes and generics.</li>
+                    <li><strong>Modules:</strong> Organise code with <code>import type</code> and path aliases.</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title advanced">
+                    <span>🚀</span> Advanced
+                </h4>
+                <ul class="evaluation-list">
+                    <li><strong>Mapped Types:</strong> Create type transformations with <code>[K in keyof T]</code>.</li>
+                    <li><strong>Conditional Types:</strong> Use <code>infer</code> and complex conditional types.</li>
+                    <li><strong>Decorators:</strong> Implement and use decorators for metaprogramming.</li>
+                    <li><strong>Performance:</strong> Configure incremental compilation and project references.</li>
+                    <li><strong>Type-safe APIs:</strong> tRPC or end-to-end inference with Zod.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-panel");
+            for (i = 0; i < tabcontent.length; i++) { tabcontent[i].classList.remove("active"); }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            let progressMap = { 'learn': 25, 'lab': 50, 'quiz': 75, 'resources': 90, 'evaluation': 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runTs() {
+            const input = document.getElementById('ts-input').value;
+            const output = document.getElementById('ts-output');
+            output.style.color = '#333';
+
+            let analysis = '<strong>✅ TypeScript Type Analysis</strong><br><br>';
+
+            if (input.includes('Omit<') || input.includes('Omit&lt;')) analysis += '→ <strong>Omit&lt;T,K&gt;</strong>: Removes listed properties from type T. Useful for create DTOs.<br><br>';
+            if (input.includes('Partial<') || input.includes('Partial&lt;')) analysis += '→ <strong>Partial&lt;T&gt;</strong>: Makes all properties optional. Perfect for partial updates.<br><br>';
+            if (input.includes('Pick<') || input.includes('Pick&lt;')) analysis += '→ <strong>Pick&lt;T,K&gt;</strong>: Selects only listed properties. Useful for public projections.<br><br>';
+            if (input.includes('interface')) analysis += '→ <strong>interface</strong>: Object shape definition. Supports declaration merging.<br><br>';
+            if (input.includes('type ')) analysis += '→ <strong>type alias</strong>: Can express unions, intersections and complex types.<br><br>';
+            if (input.includes('<T>') || input.includes('<T,')) analysis += '→ <strong>Generic&lt;T&gt;</strong>: Reusable, type-safe code for any type.<br><br>';
+
+            if (analysis === '<strong>✅ TypeScript Type Analysis</strong><br><br>') {
+                analysis += 'Add TypeScript types in the editor to see the analysis.<br><br><em>Suggestion: Try using Partial&lt;&gt;, Omit&lt;&gt;, or create an interface.</em>';
+            }
+
+            analysis += '<br><em style="color:#888;">💡 Use the TypeScript Playground at typescriptlang.org/play for real compilation!</em>';
+            output.innerHTML = analysis;
+        }
+    </script>
+</body>
+</html>
+

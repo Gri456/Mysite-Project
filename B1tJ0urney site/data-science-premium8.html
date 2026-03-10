@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Storytelling & Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --green-primary: #22c55e;
+            --green-secondary: #4ade80;
+            --green-accent: #16a34a;
+            --green-cyan: #2dd4bf;
+            --cyan: #38bdf8;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(34, 197, 94, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 197, 94, 0.07) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(34, 197, 94, 0.08) 0%, rgba(45, 212, 191, 0.04) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        /* ── Header ── */
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: var(--green-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px; font-size: 0.75rem; font-weight: 600;
+        }
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--green-primary), var(--green-cyan));
+            color: #0b0d14; font-weight: 700;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.35);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45); }
+
+        /* ── Main ── */
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;
+            background: linear-gradient(to right, #84cc16, #4ade80, #a3e635);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; color: transparent;
+        }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--green-primary), var(--green-cyan)); width: 0%; transition: width 0.3s ease; }
+
+        /* ── Tabs ── */
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { background: rgba(15, 155, 67, 0.3); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--green-primary), var(--green-cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Content Cards ── */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--green-primary); display: flex; align-items: center; gap: 10px; }
+        .content-card h4 { margin: 1.2rem 0 0.6rem; color: var(--green-cyan); font-size: 1rem; }
+        .content-card p { color: var(--text-secondary); line-height: 1.7; margin-bottom: 0.6rem; font-size: 0.95rem; }
+        .code-explanation { border-left: 3px solid var(--green-primary); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--green-cyan); font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); font-size: 0.93rem; line-height: 1.5; }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--green-primary); }
+
+        /* code block */
+        pre { background: #0a0c12; border: 1px solid rgba(34, 197, 94,0.2); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 1rem 0; overflow-x: auto; font-family: 'Courier New', Consolas, monospace; font-size: 0.82rem; line-height: 1.7; color: #c9d1d9; }
+
+        /* tip / warning boxes */
+        .tip-box { background: rgba(34, 197, 94,0.08); border-left: 4px solid var(--green-primary); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .tip-box strong { color: var(--green-primary); }
+        .warning-box { background: rgba(255,165,0,0.07); border-left: 4px solid #ffa500; border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .warning-box strong { color: #ffa500; }
+        .info-box { background: rgba(56,189,248,0.07); border-left: 4px solid var(--cyan); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .info-box strong { color: var(--cyan); }
+
+        /* two-col */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+        .mini-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mini-card h5 { color: var(--green-cyan); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .mini-card p, .mini-card li { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.55; }
+        .mini-card ul { padding-left: 1rem; margin-top: 0.4rem; }
+
+        /* three-col */
+        .three-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1rem; margin: 1rem 0; }
+
+        /* arch-flow */
+        .arch-flow { background: rgba(34, 197, 94,0.05); border: 1px solid rgba(34, 197, 94,0.2); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; font-size: 0.82rem; text-align: center; color: var(--text-secondary); }
+        .arrow { color: var(--green-primary); margin: 0 0.4rem; }
+
+        /* data table */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-secondary); font-size: 0.88rem; }
+        .data-table thead tr { border-bottom: 2px solid var(--border-color); text-align: left; }
+        .data-table th { padding: 10px; font-weight: 600; color: var(--text-light); }
+        .data-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .data-table td { padding: 10px; }
+
+        /* formula */
+        .formula { font-family: monospace; background: rgba(34, 197, 94,0.1); padding: 2px 8px; border-radius: 4px; color: var(--green-cyan); font-size: 0.9rem; }
+
+        /* ── Lab ── */
+        .lab-container { display: flex; gap: 1rem; height: 420px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .lab-header { background: rgba(34, 197, 94,0.1); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--green-secondary); font-weight: 600; }
+        .lab-textarea { flex: 1; background: #000; color: #4ade80; font-family: monospace; font-size: 0.8rem; padding: 1rem; border: none; resize: none; outline: none; line-height: 1.6; }
+        .lab-output { flex: 1; background: #0c0800; color: #2dd4bf; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.8rem; line-height: 1.7; white-space: pre-wrap; }
+        .run-btn { padding: 0.55rem 1.25rem; background: linear-gradient(135deg, var(--green-primary), var(--green-cyan)); color: #0b0d14; border: none; cursor: pointer; font-family: inherit; font-size: 0.82rem; font-weight: 700; transition: opacity 0.2s; width: 100%; }
+        .run-btn:hover { opacity: 0.85; }
+
+        /* ── Resources ── */
+        .resource-link { color: var(--green-secondary); text-decoration: none; display: block; margin: 0.6rem 0; font-size: 0.92rem; transition: color 0.2s; }
+        .resource-link:hover { color: var(--green-cyan); text-decoration: underline; }
+
+        /* ── Quiz ── */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); font-size: 0.95rem; }
+        .quiz-option { display: flex; align-items: flex-start; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover { background: rgba(34, 197, 94,0.1); border-color: rgba(34, 197, 94,0.4); color: var(--text-light); }
+        .quiz-option input[type="radio"] { width: 17px; height: 17px; accent-color: var(--green-primary); flex-shrink: 0; margin-top: 2px; }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(34, 197, 94,0.08), rgba(45, 212, 191,0.05)); border: 1px solid rgba(34, 197, 94,0.15); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--green-cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; background: rgba(255,255,255,0.03); font-size: 0.875rem; }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.1rem; flex-shrink: 0; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer { color: #ef4444; font-weight: 600; }
+
+        /* ── Evaluation ── */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+
+        /* chart preview bars */
+        .bar-demo { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin: 1rem 0; }
+        .bar-demo .bar { flex: 1; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, var(--green-primary), var(--green-accent)); opacity: 0.85; transition: opacity 0.2s; }
+        .bar-demo .bar:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav style="display:flex;gap:0.6rem">
+                <a href="premium-data-science.html" class="btn btn-back">← Back</a>
+                <a href="browse.html" class="btn btn-primary">Explore</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Storytelling & Visualization</h1>
+            <p class="course-description">
+                Transform raw data into compelling visual narratives. Master the principles of effective chart design, colour theory, and dashboard architecture — then communicate insights that actually change decisions.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–5h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• Chart Design • Matplotlib • Plotly • Dashboard • Narrative</span></div>
+                <div class="meta-item"><span>📌</span><span>Communicating data insights to technical and non-technical audiences</span></div>
+            </div>
+            <div class="progress-section">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event,'aprender')">📖 Learn</button>
+                <button class="tab-button" onclick="openTab(event,'laboratorio')">⚗️ Lab</button>
+                <button class="tab-button" onclick="openTab(event,'quiz')">🎯 Quiz</button>
+                <button class="tab-button" onclick="openTab(event,'recursos')">📚 Resources</button>
+                <button class="tab-button" onclick="openTab(event,'avaliacao')">✅ Evaluation</button>
+            </nav>
+
+            <!-- ═══════════════════════════════ LEARN TAB ═══════════════════════════════ -->
+            <div id="aprender" class="tab-panel active">
+
+                <!-- 1 -->
+                <div class="content-card">
+                    <h3>📊 1 — Why Storytelling with Data Matters</h3>
+                    <p>Data alone does not persuade anyone. A table of numbers, however accurate, is invisible to most audiences. <span class="highlight">Data storytelling</span> is the discipline of combining data, visuals, and narrative to communicate a clear message — turning analysis into action.</p>
+                    <p>Research from MIT confirms that the human brain processes visual information <strong>60,000× faster</strong> than text. A well-designed chart is not decoration; it is a cognitive shortcut that makes complex patterns immediately graspable.</p>
+
+                    <h4>The Three Pillars of Data Storytelling</h4>
+                    <div class="three-col">
+                        <div class="mini-card">
+                            <h5>📈 Data</h5>
+                            <p>The foundation. Your analysis must be accurate, relevant, and sufficiently clean. A beautiful chart built on dirty data misleads at scale.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>🎨 Visuals</h5>
+                            <p>The medium. Charts, colours, and layout determine whether your audience understands in 5 seconds or gives up and moves on.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>📝 Narrative</h5>
+                            <p>The glue. Context, causality, and the "so what?" that turns a chart into a recommendation. Without narrative, data is just noise.</p>
+                        </div>
+                    </div>
+
+                    <h4>The Data-Ink Ratio (Edward Tufte)</h4>
+                    <p>Edward Tufte's foundational principle: <span class="highlight">maximise the data-ink ratio</span> — every drop of ink (or pixel) should represent data, not decoration. Remove chart junk: unnecessary gridlines, 3D effects, excessive tick marks, and decorative borders.</p>
+
+                    <div class="arch-flow">
+                        <span style="color:var(--text-secondary)">Raw Data</span>
+                        <span class="arrow">→ Choose Chart →</span>
+                        <span style="color:var(--text-light)">Design & Encode</span>
+                        <span class="arrow">→ Remove Clutter →</span>
+                        <span style="color:var(--text-light)">Add Context</span>
+                        <span class="arrow">→ Tell the Story →</span>
+                        <span style="color:var(--green-cyan)">Decision / Action</span>
+                    </div>
+
+                    <div class="tip-box">
+                        <strong>💡 The One-Sentence Test:</strong> Before designing any chart, write down in one sentence what you want the audience to conclude. If you can't do it, your analysis isn't ready. The title of your chart should be that sentence — not a label like "Monthly Revenue" but "Revenue grew 34% YoY, driven by the Enterprise segment."
+                    </div>
+                </div>
+
+                <!-- 2 -->
+                <div class="content-card">
+                    <h3>🗂️ 2 — Choosing the Right Chart for the Job</h3>
+                    <p>The most common data visualisation mistake is choosing a chart type before understanding the relationship you want to show. Always start with the question: <em>what is the nature of the comparison?</em></p>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Relationship</th>
+                                <th>Best Chart Types</th>
+                                <th>Avoid</th>
+                                <th>Example Use Case</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong style="color:var(--green-primary)">Comparison</strong></td><td>Bar chart, Grouped bar</td><td>Pie chart (>5 slices)</td><td>Sales by region this quarter</td></tr>
+                            <tr><td><strong style="color:var(--green-primary)">Trend over time</strong></td><td>Line chart, Area chart</td><td>Bar chart (many dates)</td><td>Monthly active users over 2 years</td></tr>
+                            <tr><td><strong style="color:var(--green-primary)">Part-to-whole</strong></td><td>Stacked bar, Treemap, Waffle</td><td>3D pie chart</td><td>Revenue breakdown by product</td></tr>
+                            <tr><td><strong style="color:var(--green-primary)">Correlation</strong></td><td>Scatter plot, Bubble chart</td><td>Line chart</td><td>Price vs. demand elasticity</td></tr>
+                            <tr><td><strong style="color:var(--green-primary)">Distribution</strong></td><td>Histogram, Box plot, Violin</td><td>Bar chart</td><td>Delivery time distribution</td></tr>
+                            <tr><td><strong style="color:var(--green-primary)">Geospatial</strong></td><td>Choropleth, Dot map</td><td>Bar chart</td><td>Customer density by city</td></tr>
+                            <tr><td><strong style="color:var(--green-primary)">Flow / Process</strong></td><td>Sankey, Funnel chart</td><td>Scatter plot</td><td>Conversion funnel, user journey</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h4>The Pie Chart Problem</h4>
+                    <p>Pie charts are widely used and almost universally misused. The human eye is excellent at comparing lengths (bars) but poor at comparing areas and angles (slices). Use a pie chart <em>only</em> when you have 2–4 categories and the part-to-whole relationship is the sole message. In all other cases, use a bar chart.</p>
+
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>❌ Pie Chart Pitfalls</h5>
+                            <ul>
+                                <li>Hard to rank slices accurately</li>
+                                <li>Impossible to compare across two pie charts</li>
+                                <li>Exploded/3D versions distort proportions</li>
+                                <li>Tiny slices become invisible</li>
+                            </ul>
+                        </div>
+                        <div class="mini-card">
+                            <h5>✅ When Bars Win</h5>
+                            <ul>
+                                <li>Rank is immediately visible</li>
+                                <li>Easy side-by-side comparison</li>
+                                <li>Works for any number of categories</li>
+                                <li>Labels fit naturally on the axis</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <strong>⚠️ Dual-Axis Charts:</strong> Charts with two Y-axes (left and right) can visually imply correlations that don't exist by manipulating scale. Use them sparingly, always label both axes clearly, and consider small multiples as a safer alternative.
+                    </div>
+                </div>
+
+                <!-- 3 -->
+                <div class="content-card">
+                    <h3>🐍 3 — Matplotlib: Programmatic Charting Foundations</h3>
+                    <p>Matplotlib is Python's foundational plotting library. Every major visualisation library (Seaborn, Pandas plotting, even parts of Plotly) builds on it. Understanding the <span class="highlight">Figure / Axes architecture</span> is essential before moving to higher-level tools.</p>
+
+                    <h4>The Figure / Axes Mental Model</h4>
+                    <pre>import matplotlib.pyplot as plt
+import numpy as np
+
+# A Figure is the whole canvas.
+# An Axes is one individual chart on that canvas.
+# You can have multiple Axes (subplots) on one Figure.
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))  # 1 row, 2 columns
+
+# ── Left chart: Clean bar chart ──
+months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+revenue = [42, 58, 71, 65, 89, 103]
+
+bars = axes[0].bar(months, revenue, color='#22c55e', edgecolor='none', width=0.6)
+axes[0].set_title('Monthly Revenue — Revenue surged 145% in 6 months',
+                   fontsize=11, fontweight='bold', pad=12)
+axes[0].set_ylabel('Revenue (€k)', color='#b6c0de')
+axes[0].tick_params(colors='#b6c0de')
+axes[0].spines[['top', 'right']].set_visible(False)  # Remove chart junk
+axes[0].set_facecolor('#0b0d14')
+
+# Add value labels on bars
+for bar, val in zip(bars, revenue):
+    axes[0].text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
+                 f'€{val}k', ha='center', va='bottom', fontsize=9, color='#2dd4bf')
+
+# ── Right chart: Line chart with annotation ──
+days = np.arange(1, 31)
+dau = 1200 + np.cumsum(np.random.normal(80, 40, 30))
+
+axes[1].plot(days, dau, color='#22c55e', linewidth=2.5)
+axes[1].fill_between(days, dau, alpha=0.15, color='#22c55e')
+
+# Highlight a key event
+axes[1].axvline(x=15, color='#2dd4bf', linestyle='--', linewidth=1.5)
+axes[1].annotate('Product launch', xy=(15, dau[14]),
+                 xytext=(18, dau[14] - 200),
+                 arrowprops=dict(arrowstyle='->', color='#2dd4bf'),
+                 color='#2dd4bf', fontsize=9)
+
+axes[1].set_title('Daily Active Users — Launch drove +40% growth',
+                  fontsize=11, fontweight='bold', pad=12)
+axes[1].spines[['top', 'right']].set_visible(False)
+axes[1].set_facecolor('#0b0d14')
+
+fig.patch.set_facecolor('#0b0d14')
+plt.tight_layout(pad=2)
+plt.savefig('charts.png', dpi=150, bbox_inches='tight', facecolor='#0b0d14')
+plt.show()</pre>
+
+                    <h4>Publication-Quality Styling with rcParams</h4>
+                    <pre>import matplotlib.pyplot as plt
+
+# Apply a consistent dark theme to ALL charts in the session
+plt.rcParams.update({
+    'figure.facecolor':  '#0b0d14',
+    'axes.facecolor':    '#0b0d14',
+    'axes.edgecolor':    '#2a2d3a',
+    'axes.labelcolor':   '#b6c0de',
+    'text.color':        '#e8ecf8',
+    'xtick.color':       '#b6c0de',
+    'ytick.color':       '#b6c0de',
+    'grid.color':        '#1e2130',
+    'grid.linestyle':    '--',
+    'grid.linewidth':    0.6,
+    'font.family':       'Inter, DejaVu Sans',
+    'axes.spines.top':   False,
+    'axes.spines.right': False,
+    'figure.dpi':        120,
+})
+
+# Now every chart inherits this theme automatically
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.plot([1, 2, 3, 4], [10, 25, 18, 40], color='#22c55e', linewidth=2.5)
+ax.set_title('Styled Consistently', fontweight='bold')
+plt.show()</pre>
+
+                    <div class="tip-box">
+                        <strong>💡 Pre-attentive Attributes:</strong> Colour, size, position, and shape are processed before conscious thought. Use <strong>one</strong> pre-attentive attribute to highlight your key insight — make the most important bar a different colour, or make the key data point larger. Using multiple attributes simultaneously creates noise, not signal.
+                    </div>
+                </div>
+
+                <!-- 4 -->
+                <div class="content-card">
+                    <h3>🌊 4 — Seaborn: Statistical Visualisation Made Easy</h3>
+                    <p>Seaborn is built on Matplotlib and specialises in <span class="highlight">statistical charts</span>: distributions, relationships, and categorical summaries. It integrates natively with Pandas DataFrames, making EDA (Exploratory Data Analysis) significantly faster.</p>
+
+                    <h4>The Essential Seaborn Chart Arsenal</h4>
+                    <pre>import seaborn as sns
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load a sample dataset
+df = sns.load_dataset('tips')  # restaurant tips data
+
+# ── 1. Distribution: how is a variable spread? ──
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+sns.histplot(df['total_bill'], bins=25, kde=True,
+             color='#22c55e', ax=axes[0])
+axes[0].set_title('Bill Distribution (Histogram + KDE)')
+
+# ── 2. Box plot: compare distributions across groups ──
+sns.boxplot(data=df, x='day', y='total_bill', palette='Oranges', ax=axes[1])
+axes[1].set_title('Bill by Day — Saturday peaks highest')
+
+# ── 3. Correlation heatmap: find relationships in one view ──
+corr = df[['total_bill', 'tip', 'size']].corr()
+sns.heatmap(corr, annot=True, fmt='.2f', cmap='YlOrRd',
+            linewidths=0.5, ax=axes[2])
+axes[2].set_title('Correlation Matrix')
+
+plt.tight_layout()
+plt.show()
+
+# ── 4. Pair plot: all pairwise relationships at once ──
+# Essential for EDA — find which variables correlate before modelling
+sns.pairplot(df[['total_bill', 'tip', 'size', 'sex']], hue='sex',
+             palette={'Male': '#22c55e', 'Female': '#38bdf8'},
+             plot_kws={'alpha': 0.6}, diag_kind='kde')
+plt.suptitle('Pairwise Relationships — Tip correlates strongly with Bill', y=1.02)
+plt.show()</pre>
+
+                    <h4>The FacetGrid: Small Multiples</h4>
+                    <pre># Small multiples: show the same chart for each subgroup
+# Far more honest than a cluttered single chart with many series
+
+g = sns.FacetGrid(df, col='day', row='time',
+                  height=3.5, aspect=1.2,
+                  sharey=True)
+
+g.map_dataframe(sns.scatterplot, x='total_bill', y='tip',
+                alpha=0.7, color='#22c55e')
+
+g.set_axis_labels('Total Bill (€)', 'Tip (€)')
+g.set_titles(col_template='{col_name}', row_template='{row_name}')
+g.figure.suptitle('Bill vs Tip — Split by Day and Meal Time', y=1.02)
+plt.show()</pre>
+
+                    <div class="info-box">
+                        <strong>ℹ️ When to Use Seaborn vs Matplotlib:</strong> Use Seaborn for statistical charts (distributions, correlations, categorical comparisons) during EDA. Switch to Matplotlib for final publication charts where you need fine-grained control over every element. Use both together — Seaborn creates the chart, Matplotlib customises it.
+                    </div>
+                </div>
+
+                <!-- 5 -->
+                <div class="content-card">
+                    <h3>⚡ 5 — Plotly: Interactive & Production Visualisations</h3>
+                    <p>Plotly produces <span class="highlight">interactive charts</span> — hover tooltips, zoom, pan, and dynamic filtering — that are essential for dashboards and web applications. Plotly Express provides a one-liner API for 95% of use cases; Plotly Graph Objects gives full control when needed.</p>
+
+                    <h4>Plotly Express — Fast, Elegant, Interactive</h4>
+                    <pre>import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+
+# ── 1. Animated chart: see trends evolve over time ──
+df = px.data.gapminder()  # world development data
+
+fig = px.scatter(
+    df, x='gdpPercap', y='lifeExp',
+    size='pop', color='continent',
+    hover_name='country',
+    animation_frame='year',
+    animation_group='country',
+    log_x=True,
+    size_max=55,
+    range_x=[200, 120000], range_y=[25, 90],
+    title='Life Expectancy vs GDP — The World Gets Richer & Healthier',
+    color_discrete_sequence=px.colors.qualitative.Bold
+)
+
+fig.update_layout(
+    plot_bgcolor='#0b0d14',
+    paper_bgcolor='#0b0d14',
+    font_color='#e8ecf8',
+    title_font_size=14
+)
+fig.show()  # Opens in browser, fully interactive
+
+# ── 2. Funnel chart: conversion rates ──
+funnel_data = {
+    'Stage':    ['Website Visits', 'Sign-ups', 'Free Trial', 'Paid Conversion', 'Renewal'],
+    'Users':    [52000, 8400, 3100, 980, 740],
+}
+df_funnel = pd.DataFrame(funnel_data)
+
+fig2 = px.funnel(df_funnel, x='Users', y='Stage',
+                 title='Sales Funnel — 1.9% overall conversion rate',
+                 color_discrete_sequence=['#22c55e'])
+fig2.show()
+
+# ── 3. Treemap: hierarchical part-to-whole ──
+df_tree = px.data.gapminder().query("year == 2007")
+
+fig3 = px.treemap(df_tree, path=[px.Constant('World'), 'continent', 'country'],
+                  values='pop', color='lifeExp',
+                  color_continuous_scale='RdYlGn',
+                  title='World Population & Life Expectancy by Country (2007)')
+fig3.show()</pre>
+
+                    <h4>Graph Objects: Full Control for Complex Charts</h4>
+                    <pre>import plotly.graph_objects as go
+
+# Waterfall chart — ideal for showing incremental changes (e.g. P&L)
+fig = go.Figure(go.Waterfall(
+    name='P&L Breakdown',
+    orientation='v',
+    measure=['relative','relative','relative','total','relative','relative','total'],
+    x=['Revenue', 'COGS', 'Gross Profit', '', 'OpEx', 'Taxes', 'Net Profit'],
+    y=[500, -180, 0, 320, -95, -48, 0],
+    connector={'line': {'color': 'rgba(34, 197, 94,0.3)'}},
+    increasing={'marker': {'color': '#22c55e'}},
+    decreasing={'marker': {'color': '#ef4444'}},
+    totals={'marker': {'color': '#22c55e'}},
+    text=['€500k', '-€180k', '', '€320k', '-€95k', '-€48k', '€177k'],
+    textposition='outside'
+))
+
+fig.update_layout(
+    title='P&L Waterfall — Net Profit of €177k on €500k Revenue',
+    plot_bgcolor='#0b0d14', paper_bgcolor='#0b0d14',
+    font_color='#e8ecf8', showlegend=False,
+    yaxis_title='€ (thousands)'
+)
+fig.show()</pre>
+                </div>
+
+                <!-- 6 -->
+                <div class="content-card">
+                    <h3>🎨 6 — Colour Theory for Data Visualisation</h3>
+                    <p>Colour is the most powerful — and most misused — tool in data visualisation. Used well, it directs attention and encodes information. Used poorly, it creates confusion, excludes colour-blind viewers, and conveys false meaning.</p>
+
+                    <h4>The Four Types of Colour Palettes</h4>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin:1rem 0;">
+                        <div class="mini-card">
+                            <h5>🔵 Sequential</h5>
+                            <p>One hue from light to dark. Use for <strong>quantitative data with a natural order</strong> (e.g., revenue intensity, population density). Lower = lighter, higher = darker.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>🔴🔵 Diverging</h5>
+                            <p>Two hues from a neutral midpoint. Use when data <strong>has a meaningful zero or midpoint</strong> (e.g., profit/loss, temperature vs average, survey scores).</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>🟠🟢🟣 Qualitative</h5>
+                            <p>Distinct hues with no implied order. Use for <strong>categorical data</strong> (regions, product lines, user segments). Maximum 7–8 colours before it becomes unreadable.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>⚫ Highlight</h5>
+                            <p>One accent colour on a grey baseline. Use to <strong>direct attention</strong> to the single most important element. Everything else is muted; the message is unmissable.</p>
+                        </div>
+                    </div>
+
+                    <h4>Colour Accessibility — Never Exclude Your Audience</h4>
+                    <p>Approximately 8% of men and 0.5% of women have some form of colour-vision deficiency. Red-green is the most common. Using red/green to mean "bad/good" silently excludes millions of people.</p>
+
+                    <pre>import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+
+# ── Accessible colour palettes ──
+
+# Option 1: Okabe-Ito (designed for colour-blind viewers — always safe)
+okabe_ito = ['#E69F00', '#56B4E9', '#009E73', '#F0E442',
+             '#0072B2', '#D55E00', '#CC79A7', '#000000']
+
+# Option 2: Use hatching as a secondary encoding (no colour needed)
+fig, ax = plt.subplots(figsize=(8, 4))
+categories = ['A', 'B', 'C', 'D']
+values = [45, 78, 32, 91]
+hatches = ['/', 'x', '\\', '.']  # Different patterns encode groups
+
+for i, (cat, val, hatch) in enumerate(zip(categories, values, hatches)):
+    ax.bar(cat, val, color='#22c55e', hatch=hatch, alpha=0.85, edgecolor='white')
+
+ax.set_title('Using Hatching — Accessible without Colour Vision')
+ax.spines[['top', 'right']].set_visible(False)
+plt.show()
+
+# Option 3: Test your palette with simulated colour-blindness
+# pip install matplotlib-colorblind  OR use https://www.color-blindness.com/coblis/</pre>
+
+                    <div class="warning-box">
+                        <strong>⚠️ Colour Don'ts:</strong> Never use more than 5–6 colours in a single chart. Never use rainbow (jet) colormaps — they create false visual gradients. Never use colour as the <em>only</em> encoding — always add labels, patterns, or shapes as a secondary channel.
+                    </div>
+                </div>
+
+                <!-- 7 -->
+                <div class="content-card">
+                    <h3>📐 7 — Dashboard Design Principles</h3>
+                    <p>A dashboard is not a collection of charts — it is a <span class="highlight">decision-support tool</span>. Every element on the screen should answer a specific question that the audience asks regularly. If a chart doesn't drive a decision, remove it.</p>
+
+                    <h4>The F-Pattern & Visual Hierarchy</h4>
+                    <p>Eye-tracking research shows that users scan dashboards in an F-pattern: top-left first, then horizontally across the top, then vertically down the left side. Place your most critical KPIs top-left, secondary metrics along the top row, and supporting detail charts below.</p>
+
+                    <div class="arch-flow">
+                        <span style="color:var(--text-secondary)">Top-Left (KPI)</span>
+                        <span class="arrow">→ Most important metric — seen first</span>
+                        <span style="color:var(--green-cyan)">⭐ Primary KPI</span>
+                        <br><br>
+                        <span style="color:var(--text-secondary)">Top Row</span>
+                        <span class="arrow">→ Secondary KPIs and trend indicators</span>
+                        <br><br>
+                        <span style="color:var(--text-secondary)">Centre/Bottom</span>
+                        <span class="arrow">→ Supporting charts and drill-down detail</span>
+                    </div>
+
+                    <h4>Building a KPI Dashboard with Plotly Dash</h4>
+                    <pre>import dash
+from dash import dcc, html
+import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+
+app = dash.Dash(__name__)
+
+# Sample data
+df = pd.DataFrame({
+    'Month': ['Jan','Feb','Mar','Apr','May','Jun'],
+    'Revenue': [42, 58, 71, 65, 89, 103],
+    'Churn':   [4.2, 3.8, 3.5, 4.1, 2.9, 2.4],
+    'NPS':     [32, 35, 38, 36, 42, 48]
+})
+
+# Revenue trend chart
+fig_rev = px.line(df, x='Month', y='Revenue',
+                  title='Revenue (€k) — Up 145% YTD',
+                  markers=True, color_discrete_sequence=['#22c55e'])
+fig_rev.update_layout(plot_bgcolor='#0b0d14', paper_bgcolor='#0b0d14',
+                      font_color='#e8ecf8')
+
+# Churn chart
+fig_churn = px.bar(df, x='Month', y='Churn',
+                   title='Churn Rate (%) — Down 43% YTD',
+                   color_discrete_sequence=['#ef4444'])
+fig_churn.update_layout(plot_bgcolor='#0b0d14', paper_bgcolor='#0b0d14',
+                        font_color='#e8ecf8')
+
+# ── Dashboard Layout ──
+app.layout = html.Div(style={'background': '#0b0d14', 'padding': '1.5rem'}, children=[
+
+    # Header
+    html.H1('Business Performance Dashboard — Q2 2025',
+            style={'color': '#22c55e', 'margin-bottom': '1.5rem'}),
+
+    # KPI Cards Row
+    html.Div(style={'display': 'grid', 'grid-template-columns': 'repeat(3,1fr)', 'gap': '1rem', 'margin-bottom': '1.5rem'}, children=[
+        html.Div(style={'background': '#121933', 'padding': '1.5rem', 'border-radius': '8px', 'border': '1px solid rgba(34, 197, 94,0.3)'}, children=[
+            html.P('Total Revenue', style={'color': '#b6c0de', 'font-size': '0.85rem'}),
+            html.H2('€428k', style={'color': '#22c55e', 'font-size': '2rem', 'margin': '0.3rem 0'}),
+            html.P('↑ 145% vs same period last year', style={'color': '#22c55e', 'font-size': '0.8rem'}),
+        ]),
+        html.Div(style={'background': '#121933', 'padding': '1.5rem', 'border-radius': '8px', 'border': '1px solid rgba(34, 197, 94,0.3)'}, children=[
+            html.P('Avg Churn Rate', style={'color': '#b6c0de', 'font-size': '0.85rem'}),
+            html.H2('2.4%', style={'color': '#22c55e', 'font-size': '2rem', 'margin': '0.3rem 0'}),
+            html.P('↓ 43% — at historic low', style={'color': '#22c55e', 'font-size': '0.8rem'}),
+        ]),
+        html.Div(style={'background': '#121933', 'padding': '1.5rem', 'border-radius': '8px', 'border': '1px solid rgba(34, 197, 94,0.3)'}, children=[
+            html.P('Net Promoter Score', style={'color': '#b6c0de', 'font-size': '0.85rem'}),
+            html.H2('48', style={'color': '#2dd4bf', 'font-size': '2rem', 'margin': '0.3rem 0'}),
+            html.P('↑ +16 points vs Q1', style={'color': '#22c55e', 'font-size': '0.8rem'}),
+        ]),
+    ]),
+
+    # Charts Row
+    html.Div(style={'display': 'grid', 'grid-template-columns': '1fr 1fr', 'gap': '1rem'}, children=[
+        dcc.Graph(figure=fig_rev),
+        dcc.Graph(figure=fig_churn),
+    ]),
+])
+
+if __name__ == '__main__':
+    app.run(debug=True)  # Visit http://127.0.0.1:8050</pre>
+
+                    <div class="tip-box">
+                        <strong>💡 The 5-Second Rule:</strong> Show your dashboard to a colleague who hasn't seen it before. Ask them: "In 5 seconds, what is the most important message here?" If they can't answer immediately, your visual hierarchy needs work — either the key metric isn't prominent enough, or there's too much competing information.
+                    </div>
+                </div>
+
+                <!-- 8 -->
+                <div class="content-card">
+                    <h3>📖 8 — Narrative Structure: The SCR Framework</h3>
+                    <p>The best data scientists rarely "win" by having the best model — they win by <span class="highlight">telling the most compelling story</span> with their findings. The <strong>Situation → Complication → Resolution (SCR)</strong> framework, adapted from McKinsey's Pyramid Principle, is the gold standard for presenting data insights to business audiences.</p>
+
+                    <h4>SCR in Practice</h4>
+                    <div class="three-col">
+                        <div class="mini-card">
+                            <h5>📍 Situation</h5>
+                            <p>Establish shared context. What does the audience already know? Set the scene without new information. <em>"We launched our mobile app 6 months ago targeting 25–34 year olds."</em></p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>⚡ Complication</h5>
+                            <p>Introduce the tension. What changed, went wrong, or needs a decision? This is the hook. <em>"Despite strong download numbers, 68% of users churn within the first week — 3× our target."</em></p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>✅ Resolution</h5>
+                            <p>Deliver the answer and recommendation backed by data. <em>"Our analysis shows onboarding drop-off at step 3 accounts for 74% of churn. Simplifying step 3 could recover €280k ARR."</em></p>
+                        </div>
+                    </div>
+
+                    <h4>Annotation: The Bridge Between Chart and Story</h4>
+                    <p>Raw charts don't tell stories — annotations do. Every significant data point, trend change, or outlier should be labelled with its <em>business meaning</em>, not just its value.</p>
+
+                    <pre>import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(11, 5))
+
+weeks = np.arange(1, 25)
+dau = [980, 1020, 1150, 1380, 2100, 2450, 2300, 2150,
+       2050, 1980, 2200, 2380, 2600, 2750, 2900, 2800,
+       2720, 2650, 3100, 3400, 3550, 3480, 3700, 3950]
+
+ax.plot(weeks, dau, color='#22c55e', linewidth=2.5, zorder=3)
+ax.fill_between(weeks, dau, alpha=0.12, color='#22c55e')
+
+# ── Annotation 1: Key event ──
+ax.axvline(x=5, color='#2dd4bf', linestyle='--', linewidth=1.2, alpha=0.7)
+ax.annotate('Viral TikTok\n+215% spike',
+            xy=(5, 2100), xytext=(7, 1600),
+            arrowprops=dict(arrowstyle='->', color='#2dd4bf', lw=1.5),
+            color='#2dd4bf', fontsize=9, fontweight='bold')
+
+# ── Annotation 2: Product decision ──
+ax.axvline(x=18, color='#38bdf8', linestyle='--', linewidth=1.2, alpha=0.7)
+ax.annotate('Push notifications\nenabled → retention +18%',
+            xy=(18, 2650), xytext=(15, 3300),
+            arrowprops=dict(arrowstyle='->', color='#38bdf8', lw=1.5),
+            color='#38bdf8', fontsize=9, fontweight='bold')
+
+# ── End annotation: headline number ──
+ax.annotate(f'W24: {dau[-1]:,} DAU\n+303% vs W1',
+            xy=(24, dau[-1]), xytext=(21.5, 3700),
+            arrowprops=dict(arrowstyle='->', color='#e8ecf8', lw=1.5),
+            color='#e8ecf8', fontsize=9, fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='#22c55e', alpha=0.85))
+
+ax.set_title('Daily Active Users grew 303% in 24 weeks — driven by viral moment + retention fix',
+             fontsize=11, fontweight='bold', pad=14, color='#e8ecf8')
+ax.set_xlabel('Week', color='#b6c0de')
+ax.set_ylabel('Daily Active Users', color='#b6c0de')
+ax.spines[['top', 'right']].set_visible(False)
+ax.set_facecolor('#0b0d14')
+fig.patch.set_facecolor('#0b0d14')
+ax.tick_params(colors='#b6c0de')
+plt.tight_layout()
+plt.show()</pre>
+
+                    <div class="info-box">
+                        <strong>ℹ️ Audience Adaptation:</strong> Your storytelling must change based on who is in the room. For <strong>executives</strong>: lead with the business impact and recommendation — they don't need methodology. For <strong>technical peers</strong>: share methodology, uncertainty, and caveats. For <strong>operational teams</strong>: focus on what to do differently starting tomorrow.
+                    </div>
+                </div>
+
+            </div><!-- end aprender tab -->
+
+            <!-- ═══════════════════════════════ LAB TAB ═══════════════════════════════ -->
+            <div id="laboratorio" class="tab-panel">
+
+                <div class="content-card">
+                    <h3>⚗️ Chart Builder Simulator</h3>
+                    <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:1rem;">Edit the Python code below and run the simulation to see how chart design choices affect the output quality score and visual clarity assessment.</p>
+                    <div class="lab-container">
+                        <div class="lab-editor">
+                            <div class="lab-header">✎ CHART CODE — Python / Matplotlib</div>
+                            <textarea class="lab-textarea" id="lab-code">import matplotlib.pyplot as plt
+
+# Monthly sales data
+months = ['Jan','Feb','Mar','Apr','May','Jun']
+sales  = [42, 58, 71, 65, 89, 103]
+target = [50, 60, 70, 80, 85, 95]
+
+fig, ax = plt.subplots(figsize=(9, 5))
+
+# Bars: actual sales
+ax.bar(months, sales, color='#22c55e',
+       width=0.5, label='Actual Sales')
+
+# Line: target
+ax.plot(months, target, color='#2dd4bf',
+        linewidth=2, marker='o',
+        linestyle='--', label='Target')
+
+# Remove chart junk
+ax.spines[['top','right']].set_visible(False)
+
+# Meaningful title
+ax.set_title('Sales exceeded target in 4 of 6 months',
+             fontweight='bold')
+ax.legend()
+plt.tight_layout()
+plt.show()</textarea>
+                            <button class="run-btn" onclick="runLab()">▶ ANALYSE CHART</button>
+                        </div>
+                        <div class="lab-preview">
+                            <div class="lab-header">⚡ CHART QUALITY ASSESSMENT</div>
+                            <div class="lab-output" id="lab-output"><span style="color:rgba(34, 197, 94,0.4)">// Press ANALYSE CHART to evaluate...</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🎨 Colour Palette Evaluator</h3>
+                    <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:1rem;">Test a colour palette against accessibility standards and get recommendations for improvement.</p>
+                    <div class="lab-container">
+                        <div class="lab-editor">
+                            <div class="lab-header">✎ PALETTE DEFINITION</div>
+                            <textarea class="lab-textarea" id="palette-code">from matplotlib.colors import to_rgb
+import numpy as np
+
+# Define your palette
+palette = {
+    'Revenue':  '#22c55e',   # green
+    'Costs':    '#ef4444',   # red
+    'Profit':   '#22c55e',   # green
+    'Forecast': '#38bdf8',   # blue
+}
+
+# Check contrast ratios for accessibility
+def relative_luminance(hex_color):
+    r, g, b = to_rgb(hex_color)
+    rgb = [(c/12.92 if c <= 0.04045
+            else ((c+0.055)/1.055)**2.4)
+           for c in [r, g, b]]
+    return 0.2126*rgb[0] + 0.7152*rgb[1] + 0.0722*rgb[2]
+
+for name, color in palette.items():
+    L = relative_luminance(color)
+    contrast_on_dark = (L + 0.05) / (0.0 + 0.05)
+    print(f"{name}: {color} | Luminance: {L:.3f} | Contrast on dark bg: {contrast_on_dark:.1f}:1")</textarea>
+                            <button class="run-btn" onclick="runPalette()">▶ EVALUATE PALETTE</button>
+                        </div>
+                        <div class="lab-preview">
+                            <div class="lab-header">⚡ ACCESSIBILITY REPORT</div>
+                            <div class="lab-output" id="palette-output"><span style="color:rgba(34, 197, 94,0.4)">// Press EVALUATE PALETTE to check accessibility...</span></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- end lab tab -->
+
+            <!-- ═══════════════════════════════ QUIZ TAB ═══════════════════════════════ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Module Quiz — Storytelling & Visualization</h3>
+                    <p style="color:var(--text-secondary);margin-bottom:2rem;">15 questions covering chart selection, design principles, Python libraries, and data storytelling. Minimum 70% to pass.</p>
+
+                    <form id="quiz-form">
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q1. According to Edward Tufte, what should you maximise in a well-designed chart?</div>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) The number of colours used to differentiate data series.</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) The size of the chart title so the audience reads it first.</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C" data-correct="true"> C) The data-ink ratio — every pixel should represent data, not decoration.</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) The number of data points shown simultaneously.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q2. You need to show how revenue is split across 7 product lines. Which chart type is most appropriate?</div>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Pie chart — perfect for part-to-whole comparisons.</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B" data-correct="true"> B) Horizontal bar chart — allows easy ranking and label readability.</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Scatter plot — shows the relationship between the product lines.</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Line chart — shows how revenue evolves across the 7 lines.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q3. In Matplotlib, what is the relationship between a Figure and an Axes?</div>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) A Figure is a single chart; an Axes is a collection of charts.</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) They are interchangeable terms for the same object.</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C" data-correct="true"> C) A Figure is the whole canvas; an Axes is one individual chart within it.</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) An Axes is the entire canvas; a Figure is one plot region.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q4. What is the SCR framework used for in data storytelling?</div>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Selecting the right chart: Scale, Colour, and Resolution.</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) A statistical test: Significance, Confidence, and Robustness.</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C" data-correct="true"> C) A narrative structure: Situation → Complication → Resolution, to present insights persuasively.</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) A dashboard layout standard: Summary, Chart, and Report.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q5. Which colour palette type is most appropriate for showing profit vs. loss (data with a meaningful zero midpoint)?</div>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Sequential — one hue from light to dark.</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Qualitative — distinct hues for categories.</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C" data-correct="true"> C) Diverging — two hues from a neutral midpoint.</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Highlight — one accent on a grey baseline.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q6. What is the main advantage of Plotly over Matplotlib?</div>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Plotly renders faster and uses less memory for large datasets.</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B" data-correct="true"> B) Plotly produces interactive charts with hover, zoom, and filtering — essential for dashboards and web apps.</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) Plotly has more chart types than Matplotlib.</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Plotly integrates directly with Excel and PowerPoint.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q7. What does "pre-attentive attribute" mean in the context of data visualisation?</div>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) A chart element that requires prior data science knowledge to understand.</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) The dataset preparation step before creating a visualisation.</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"> C) A visual property (colour, size, shape) processed by the brain before conscious thought — used to direct attention instantly.</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) An interactive filter applied to a chart before it is displayed to the user.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q8. Why are pie charts generally considered a poor choice for comparing more than 4–5 categories?</div>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) They take longer to render in Python.</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"> B) The human eye struggles to compare angles and areas accurately — bars (lengths) are far easier to compare.</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Pie charts cannot be exported to PDF or PNG format.</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) They don't support colour encoding of categories.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q9. What is Seaborn's primary strength compared to raw Matplotlib?</div>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Seaborn can create 3D charts that Matplotlib cannot.</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Seaborn produces interactive charts by default.</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"> C) Seaborn provides high-level statistical visualisations (distributions, correlations, categorical summaries) with minimal code, integrating natively with Pandas.</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Seaborn runs faster than Matplotlib on large datasets.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q10. According to eye-tracking research, where should the most critical KPI be placed on a dashboard?</div>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Bottom-right — the last thing the viewer sees, leaving the strongest impression.</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Centre of the screen — it receives the most attention.</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C" data-correct="true"> C) Top-left — users scan in an F-pattern and see this area first.</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Top-right — opposite the brand logo, which anchors the left side.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q11. Which chart type is best suited to show a sales conversion funnel (Website Visits → Sign-ups → Paid)?</div>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Scatter plot — shows the correlation between each stage.</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) Line chart — shows how users progress over time.</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C" data-correct="true"> C) Funnel chart — explicitly represents sequential drop-off between stages.</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Treemap — shows hierarchical breakdown of user segments.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q12. What is the "5-second rule" in dashboard design?</div>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) A dashboard should load in under 5 seconds for good UX.</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B" data-correct="true"> B) A new viewer should be able to identify the most important message within 5 seconds — if not, the visual hierarchy needs improvement.</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Charts should refresh every 5 seconds to show live data.</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) The dashboard title should be readable in 5 seconds — no more than 6 words.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q13. Why should you avoid red-green colour encoding to mean "bad/good" in charts?</div>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Red and green have poor contrast on white backgrounds.</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) These colours are culturally interpreted differently in different countries.</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"> C) Approximately 8% of men have red-green colour-vision deficiency and cannot distinguish these colours — silently excluding a significant portion of your audience.</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Red and green are not available in Matplotlib's default colour palette.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q14. What is the purpose of a "small multiples" layout (e.g., FacetGrid in Seaborn)?</div>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) To show the same data in multiple chart types simultaneously for comparison.</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B" data-correct="true"> B) To show the same chart repeated for each subgroup, making it easy to compare patterns across categories without overcrowding a single chart.</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) To create a grid of unrelated charts on one dashboard.</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) To display high-resolution charts at multiple sizes for different screen types.</label>
+                        </div></div>
+
+                        <div class="content-card quiz-item">
+                        <div class="quiz-item">
+                            <div class="quiz-question">Q15. In the SCR storytelling framework, what is the role of the "Complication"?</div>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) A technical explanation of the data cleaning steps taken before analysis.</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) A list of data quality issues that may affect the conclusions.</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"> C) The tension or problem that disrupts the status quo — the hook that makes the audience care about the resolution.</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) The recommendation slide presented at the end of the analysis.</label>
+                        </div></div>
+
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display:none;">
+                        <div class="results-title">// QUIZ_RESULTS</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div><!-- end quiz tab -->
+
+            <!-- ═══════════════════════════════ RESOURCES TAB ═══════════════════════════════ -->
+            <div id="recursos" class="tab-panel">
+                <div class="content-card">
+                    <h3>📚 Support Materials — Storytelling & Visualization</h3>
+                    <a href="#" class="resource-link">→ Book: "Storytelling with Data" — Cole Nussbaumer Knaflic (the definitive practical guide)</a>
+                    <a href="#" class="resource-link">→ Book: "The Visual Display of Quantitative Information" — Edward Tufte (foundational theory)</a>
+                    <a href="#" class="resource-link">→ Tool: Matplotlib Documentation — https://matplotlib.org/stable/gallery/</a>
+                    <a href="#" class="resource-link">→ Tool: Seaborn Gallery — https://seaborn.pydata.org/examples/ (inspiration and code)</a>
+                    <a href="#" class="resource-link">→ Tool: Plotly & Dash Docs — https://plotly.com/python/ (interactive charts)</a>
+                    <a href="#" class="resource-link">→ Checker: Coblis — Colour Blind Simulator (test your palette accessibility)</a>
+                    <a href="#" class="resource-link">→ Gallery: The Python Graph Gallery — pythongraph.org (chart selection and code)</a>
+                    <a href="#" class="resource-link">→ Framework: Pyramid Principle — Barbara Minto (SCR narrative structure origin)</a>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════ EVALUATION TAB ═══════════════════════════════ -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>✅ Domain Criteria: Storytelling & Visualization</h3>
+                    <p style="color:var(--text-secondary);margin-bottom:2rem;">
+                        To successfully complete this module, you must demonstrate competence in selecting, designing, and communicating data visualisations that drive decisions.
+                    </p>
+
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>Understanding the three pillars of data storytelling: Data, Visuals, Narrative</li>
+                                <li>Knowing when to use bar, line, scatter, and histogram charts</li>
+                                <li>Creating basic charts with Matplotlib (bar, line, scatter)</li>
+                                <li>Understanding what the data-ink ratio principle means</li>
+                                <li>Removing chart junk: gridlines, borders, 3D effects</li>
+                            </ul>
+                        </div>
+
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Using Seaborn for statistical visualisations (distributions, heatmaps, pair plots)</li>
+                                <li>Applying the SCR narrative framework to present findings</li>
+                                <li>Choosing appropriate colour palettes (sequential, diverging, qualitative)</li>
+                                <li>Creating interactive charts with Plotly Express</li>
+                                <li>Using annotation to bridge charts and narrative</li>
+                            </ul>
+                        </div>
+
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Building a multi-page dashboard with Plotly Dash and live filters</li>
+                                <li>Designing accessible visualisations (colour-blind safe, WCAG contrast)</li>
+                                <li>Applying small multiples and FacetGrid for multi-group comparisons</li>
+                                <li>Creating publication-quality figures with rcParams and custom themes</li>
+                                <li>Adapting storytelling style for executive, technical, and operational audiences</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end tabs-container -->
+    </main>
+
+    <script>
+    // Tab navigation
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+        const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+        document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+        document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+        window.scrollTo({ top: 150, behavior: 'smooth' });
+    }
+
+    // Lab simulations
+    function runLab() {
+        const output = document.getElementById('lab-output');
+        output.innerHTML =
+`<span style="color:#2dd4bf">// Chart Quality Assessment Report</span>
+<span style="color:#94a3b8">Analysing code structure and design decisions...</span>
+
+<span style="color:#22c55e">✓</span> <span style="color:#e8ecf8">Chart type:</span>        Bar chart — <span style="color:#22c55e">correct for comparison</span>
+<span style="color:#22c55e">✓</span> <span style="color:#e8ecf8">Spines removed:</span>    Top & right — <span style="color:#22c55e">reduces chart junk ✓</span>
+<span style="color:#22c55e">✓</span> <span style="color:#e8ecf8">Reference line:</span>    Target line added — <span style="color:#22c55e">context provided ✓</span>
+<span style="color:#22c55e">✓</span> <span style="color:#e8ecf8">Meaningful title:</span>  Insight-driven, not a label — <span style="color:#22c55e">excellent ✓</span>
+<span style="color:#f59e0b">⚠</span> <span style="color:#e8ecf8">Value labels:</span>      Missing on bars — <span style="color:#f59e0b">consider adding for quick reading</span>
+<span style="color:#f59e0b">⚠</span> <span style="color:#e8ecf8">Colour palette:</span>    Single colour — <span style="color:#f59e0b">add highlight on underperforming months</span>
+<span style="color:#ef4444">✗</span> <span style="color:#e8ecf8">Y-axis starts:</span>     At 0? Verify — <span style="color:#ef4444">truncated Y-axis distorts bar heights</span>
+
+<span style="color:#94a3b8">──────────────────────────────────────</span>
+<span style="color:#2dd4bf">Design Score:  74 / 100</span>
+<span style="color:#94a3b8">Data-ink ratio: Good | Clutter: Low | Clarity: High</span>
+
+<span style="color:rgba(34, 197, 94,0.6)">// Tip: Add value annotations on bars and use a
+// highlight colour (e.g. red) on months that missed
+// target — the story becomes immediately visible.</span>`;
+    }
+
+    function runPalette() {
+        const output = document.getElementById('palette-output');
+        output.innerHTML =
+`<span style="color:#2dd4bf">// Accessibility Report — Colour Palette Analysis</span>
+<span style="color:#94a3b8">WCAG 2.1 minimum contrast on dark bg: 3.0:1 (AA Large)</span>
+
+<span style="color:#22c55e">Revenue  #22c55e</span>  Luminance: 0.215  Contrast: <span style="color:#22c55e">4.5:1 ✓ PASSES AA</span>
+<span style="color:#ef4444">Costs    #ef4444</span>  Luminance: 0.137  Contrast: <span style="color:#22c55e">3.0:1 ✓ PASSES AA Large</span>
+<span style="color:#22c55e">Profit   #22c55e</span>  Luminance: 0.168  Contrast: <span style="color:#22c55e">3.6:1 ✓ PASSES AA Large</span>
+<span style="color:#38bdf8">Forecast #38bdf8</span>  Luminance: 0.341  Contrast: <span style="color:#22c55e">6.9:1 ✓ PASSES AAA</span>
+
+<span style="color:#94a3b8">──────────────────────────────────────</span>
+<span style="color:#f59e0b">⚠  Colour-blind warning:</span>
+   Revenue (green) + Costs (red) are distinguishable
+   for most viewers but may be confused by
+   Deuteranopia (red-green) users.
+
+<span style="color:#2dd4bf">Recommendation:</span>
+   Replace Costs red with <span style="color:#a78bfa">#a78bfa (violet)</span> — safe for
+   all colour-blind types and still clearly negative.
+   Or add hatching as a secondary encoding channel.
+
+<span style="color:#22c55e">Overall rating: Good (3/4 fully accessible)</span>`;
+    }
+
+    // Quiz manager
+    class QuizManager {
+        constructor() {
+            this.questionsData = {
+                q1:  { correct: 'C', exp: 'Tufte\'s data-ink ratio principle states every pixel should represent data. Removing gridlines, borders, and decorative elements maximises clarity.' },
+                q2:  { correct: 'B', exp: 'Horizontal bar charts are ideal for ranking 7+ categories — labels fit naturally, and bar lengths are easy to compare. Pie charts fail beyond 4–5 slices.' },
+                q3:  { correct: 'C', exp: 'In Matplotlib, a Figure is the full canvas. An Axes is one individual chart within it. One Figure can contain many Axes (subplots).' },
+                q4:  { correct: 'C', exp: 'SCR stands for Situation → Complication → Resolution — a narrative structure from the Pyramid Principle used to present insights persuasively to business audiences.' },
+                q5:  { correct: 'C', exp: 'Diverging palettes use two hues from a neutral midpoint, perfectly encoding data where both direction and magnitude matter (profit/loss, above/below average).' },
+                q6:  { correct: 'B', exp: 'Plotly\'s defining feature is interactivity — hover tooltips, zoom, pan, and dynamic filters. This makes it essential for dashboards and web applications.' },
+                q7:  { correct: 'C', exp: 'Pre-attentive attributes (colour, size, shape, position) are processed by the visual system before conscious thought — within ~200ms. Use one to direct attention instantly.' },
+                q8:  { correct: 'B', exp: 'Humans compare lengths (bars) far more accurately than angles/areas (pie slices). Beyond 4–5 slices, ranking and precise comparison become impossible.' },
+                q9:  { correct: 'C', exp: 'Seaborn provides high-level statistical charts (distributions, heatmaps, pair plots, categorical summaries) with minimal code and native Pandas integration.' },
+                q10: { correct: 'C', exp: 'Eye-tracking research shows an F-pattern: top-left is seen first. The most critical KPI should occupy this prime position to be seen immediately.' },
+                q11: { correct: 'C', exp: 'Funnel charts are specifically designed to show sequential drop-off between stages — making conversion rates and bottlenecks visually obvious.' },
+                q12: { correct: 'B', exp: 'The 5-second rule tests visual hierarchy: a new viewer should grasp the key message within 5 seconds. If they can\'t, redesign to make the primary insight more prominent.' },
+                q13: { correct: 'C', exp: 'Red-green colour blindness affects ~8% of men. Using red/green as bad/good encoding silently excludes a significant audience segment from understanding the chart.' },
+                q14: { correct: 'B', exp: 'Small multiples show the same chart repeated per subgroup — enabling pattern comparison across groups without the clutter of overlaying all series on one chart.' },
+                q15: { correct: 'C', exp: 'The Complication introduces the tension or problem — the hook that makes the audience care. Without it, the data has no urgency and the recommendation lacks context.' },
+            };
+            this.init();
+        }
+
+        init() {
+            document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+            document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+        }
+
+        submitQuiz() {
+            const form = document.getElementById('quiz-form');
+            const formData = new FormData(form);
+            let score = 0, feedbackHTML = '';
+
+            Object.keys(this.questionsData).forEach((key, index) => {
+                const userAnswer = formData.get(key);
+                const isCorrect = userAnswer === this.questionsData[key].correct;
+                if (isCorrect) score++;
+                feedbackHTML += `
+                    <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                        <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                        <div>
+                            <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                            ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+                        </div>
+                    </div>`;
+            });
+
+            this.displayResults(score, feedbackHTML);
+        }
+
+        displayResults(score, feedbackHTML) {
+            const total = Object.keys(this.questionsData).length;
+            const percent = Math.round((score / total) * 100);
+            const resultsDiv = document.getElementById('quiz-results');
+            const scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+
+            document.getElementById('quiz-score').innerHTML = `
+                <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                <p style="color:var(--text-secondary)">${percent >= 70 ? '🎉 Amazing! You have mastered the fundamentals of data storytelling.' : '📖 Keep practising — review the sections where you lost points.'}</p>`;
+
+            document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        clearQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-results').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+
+</body>
+</html>
+

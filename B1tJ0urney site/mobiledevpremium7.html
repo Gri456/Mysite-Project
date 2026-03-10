@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - App Sustainability & Growth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14; --blue: #d000ff; --purple: #c266ff; --cyan: #a200ff;
+            --text-light: #e8ecf8; --text-secondary: #b6c0de;
+            --card-bg: rgba(255,255,255,0.05); --border-color: rgba(255,255,255,0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(91,124,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(91,124,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1; }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(207,75,255,0.1) 0%, rgba(217,91,255,0.05) 50%, transparent 100%); pointer-events: none; z-index: -1; }
+
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,20,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); }
+        .section-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(162,0,255,0.15); border: 1px solid rgba(162,0,255,0.3); color: var(--purple); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.3rem 0.9rem; border-radius: 50px; margin-bottom: 1.25rem; text-transform: uppercase; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; line-height: 1.6; }
+        .highlight { color: var(--purple); font-weight: 600; }
+        .styled-list { list-style: none; margin: 0.75rem 0; }
+        .styled-list li { margin-bottom: 0.6rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--purple); }
+        .code-block { background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.6; color: #a8ff78; }
+
+        /* New components */
+        .info-box { background: rgba(162,0,255,0.07); border: 1px solid rgba(162,0,255,0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+        .info-box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--purple); }
+        .section-divider { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .concept-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .concept-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 0.35rem; }
+        .concept-title { font-weight: 600; font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.4rem; }
+        .concept-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+        .metrics-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .metrics-table th { background: rgba(162,0,255,0.15); color: var(--purple); padding: 0.75rem 1rem; text-align: left; font-weight: 600; }
+        .metrics-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .metrics-table tr:hover td { background: rgba(255,255,255,0.03); color: var(--text-light); }
+        .step-flow { display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0; }
+        .step-item { display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; }
+        .step-num { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; font-weight: 700; font-size: 0.8rem; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+        .step-content { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+        .step-content strong { color: var(--text-light); }
+
+        /* Existing components */
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .metric-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; text-align: center; }
+        .metric-abbr { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .metric-name { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3; }
+        .metric-dau .metric-abbr { color: var(--purple); }
+        .metric-mau .metric-abbr { color: #10b981; }
+        .metric-ret .metric-abbr { color: #f59e0b; }
+        .metric-churn .metric-abbr { color: #ef4444; }
+        .metric-sess .metric-abbr { color: var(--purple); }
+        .metric-conv .metric-abbr { color: #ff79c6; }
+        .mono-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .mono-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mono-title { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--purple); }
+        .mono-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
+        .lifecycle { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; align-items: center; }
+        .lifecycle-step { background: rgba(91,124,255,0.1); border: 1px solid rgba(91,124,255,0.3); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.78rem; color: var(--purple); }
+        .lifecycle-arrow { color: var(--blue); font-size: 0.9rem; }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 440px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header-bar { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); border-radius: 8px 8px 0 0; }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.82rem; border-radius: 0 0 8px 8px; line-height: 1.6; }
+
+        .resource-link { color: var(--purple); text-decoration: none; display: block; margin: 0.5rem 0; font-size: 0.9rem; }
+        .resource-link:hover { text-decoration: underline; }
+
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--purple); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(162,0,255,0.1), rgba(208,0,255,0.05)); border: 1px solid rgba(162,0,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--purple); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; background: rgba(255,255,255,0.03); margin-bottom: 0.75rem; }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--purple); border-bottom-color: var(--purple); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--purple); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .metrics-grid, .mono-grid, .concept-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 280px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+            <span class="premium-badge">Premium</span>
+        </div>
+        <nav>
+            <a href="premium-mobile.html" class="btn btn-back">← Voltar</a>
+            <a href="browse.html" class="btn btn-primary">Explorar</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objetivo: App Sustainability & Growth</h1>
+        <p class="course-description">Building an app is only the beginning. Learn the business, technical, and operational strategies that keep apps alive, growing, and profitable — from analytics and retention to monetization, scalability, and long-term maintenance.</p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+            <div class="meta-item"><span>🎯</span><span>• Analytics • ASO • Retention • Monetization • Scalability • GDPR • Roadmap</span></div>
+            <div class="meta-item"><span>📌</span><span>Prerequisite: Testing, QA & Publishing</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem; margin-top:5px; color:var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'aprender')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'laboratorio')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'recursos')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'avaliacao')">Assessment</button>
+        </nav>
+
+        <!-- LEARN -->
+        <div id="aprender" class="tab-panel active">
+
+            <div class="content-card">
+                <h3>Long-Term Success in Mobile Development</h3>
+                <p>Building an app is only the beginning. Successful apps survive because they follow a sustainability strategy that includes:</p>
+                <ul class="styled-list">
+                    <li>Understanding user behavior through analytics</li>
+                    <li>Measuring the right performance metrics</li>
+                    <li>Monetizing ethically and sustainably</li>
+                    <li>Maintaining the app over time</li>
+                    <li>Growing the user base through acquisition and retention</li>
+                    <li>Ensuring performance and security at scale</li>
+                    <li>Planning future development with a product roadmap</li>
+                </ul>
+                <div class="lifecycle" style="margin-top:1rem;">
+                    <div class="lifecycle-step">Build</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">Launch</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">Acquire</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">Retain</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">Monetize</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">Scale</div><span class="lifecycle-arrow">→</span>
+                    <div class="lifecycle-step">Iterate</div>
+                </div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Why most apps fail — the real reasons behind the 95% that don't survive year one:</p>
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-label">Failure Mode 1</div>
+                        <div class="concept-title">Building Without Measuring</div>
+                        <div class="concept-desc">50%+ of mobile teams ship features based on gut feeling, not data. Without analytics, you can't know which features users actually use, where they drop off, or why they uninstall. Every decision becomes a guess. Analytics is not a nice-to-have — it's the feedback loop that makes iteration possible.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Failure Mode 2</div>
+                        <div class="concept-title">Acquisition Without Retention</div>
+                        <div class="concept-desc">Pouring money into user acquisition while ignoring retention is pouring water into a bucket with holes. An app with 40% Day-1 retention and zero paid marketing will outlast an app with 10% retention and a massive ad budget. Retention multiplies the value of every acquired user.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Failure Mode 3</div>
+                        <div class="concept-title">Wrong Monetization Timing</div>
+                        <div class="concept-desc">Monetizing too aggressively before providing value causes immediate churn. Monetizing too late means the app can't sustain itself. The sweet spot: deliver clear value first, demonstrate it repeatedly, then offer a natural upgrade. Users must feel they're paying for something, not paying to remove annoyance.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Failure Mode 4</div>
+                        <div class="concept-title">Technical Neglect</div>
+                        <div class="concept-desc">An app that isn't maintained decays. Libraries become incompatible with new OS versions. Security vulnerabilities are discovered. APIs change and break. App store policies tighten. An un-maintained app gets delisted, fails on new devices, or becomes a security liability. Maintenance is an operational cost, not a one-time task.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">📊 Analytics</div>
+                <h3>Analytics – How Apps Understand Their Users</h3>
+                <p>Analytics tools collect insights that drive every product decision.</p>
+                <p style="margin-top:0.75rem;"><strong>Popular analytics tools:</strong> Firebase Analytics · Mixpanel · Amplitude · Google Analytics · App Store / Play Console analytics</p>
+                <p style="margin-top:1rem;"><strong>Key metrics to track:</strong></p>
+                <div class="metrics-grid" style="margin-top:0.75rem;">
+                    <div class="metric-card metric-dau"><div class="metric-abbr">DAU</div><div class="metric-name">Daily Active Users</div></div>
+                    <div class="metric-card metric-mau"><div class="metric-abbr">MAU</div><div class="metric-name">Monthly Active Users</div></div>
+                    <div class="metric-card metric-ret"><div class="metric-abbr">D1/D7/D30</div><div class="metric-name">Retention Rate</div></div>
+                    <div class="metric-card metric-churn"><div class="metric-abbr">Churn</div><div class="metric-name">% Users Who Left</div></div>
+                    <div class="metric-card metric-sess"><div class="metric-abbr">Session</div><div class="metric-name">Avg. Session Duration</div></div>
+                    <div class="metric-card metric-conv"><div class="metric-abbr">CVR</div><div class="metric-name">Conversion Rate</div></div>
+                </div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Analytics implementation with Firebase — tracking custom events and funnels in production:</p>
+                <div class="code-block"><pre>// ── Firebase Analytics: Custom Event Tracking ─────────────────────────
+
+// Android (Kotlin) — log events that matter to your business
+class AnalyticsTracker(private val analytics: FirebaseAnalytics) {
+
+    // Product viewed — track which items users look at most
+    fun trackProductViewed(productId: String, productName: String, price: Double) {
+        analytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM) {
+            param(FirebaseAnalytics.Param.ITEM_ID, productId)
+            param(FirebaseAnalytics.Param.ITEM_NAME, productName)
+            param(FirebaseAnalytics.Param.PRICE, price)
+            param(FirebaseAnalytics.Param.CURRENCY, "USD")
+        }
+    }
+
+    // Conversion funnel — track each step of checkout
+    fun trackCheckoutStep(step: Int, stepName: String, cartValue: Double) {
+        analytics.logEvent("checkout_step") {
+            param("step_number", step.toLong())
+            param("step_name", stepName)   // "cart" | "address" | "payment" | "confirm"
+            param("cart_value", cartValue)
+        }
+    }
+
+    // Feature discovery — understand which features get used
+    fun trackFeatureUsed(featureName: String, source: String) {
+        analytics.logEvent("feature_used") {
+            param("feature_name", featureName)
+            param("source", source)   // "onboarding" | "home_tab" | "settings"
+        }
+    }
+
+    // User properties — segment users for targeted analysis
+    fun setUserProperties(userId: String, plan: String, daysSinceSignup: Int) {
+        analytics.setUserId(userId)
+        analytics.setUserProperty("subscription_plan", plan)   // "free" | "pro" | "enterprise"
+        analytics.setUserProperty("days_since_signup", daysSinceSignup.toString())
+    }
+}
+
+// iOS (Swift) — identical event model, different syntax
+import FirebaseAnalytics
+
+class AnalyticsTracker {
+    func trackProductViewed(productId: String, name: String, price: Double) {
+        Analytics.logEvent(AnalyticsEventViewItem, parameters: [
+            AnalyticsParameterItemID: productId,
+            AnalyticsParameterItemName: name,
+            AnalyticsParameterPrice: price,
+            AnalyticsParameterCurrency: "USD"
+        ])
+    }
+
+    func trackCheckoutAbandoned(step: String, reason: String) {
+        Analytics.logEvent("checkout_abandoned", parameters: [
+            "step": step,
+            "reason": reason   // "payment_failed" | "session_timeout" | "back_button"
+        ])
+    }
+}
+
+// ── Funnel analysis query (BigQuery export) ───────────────────────────
+// Firebase exports raw events to BigQuery — query your own data
+/*
+SELECT
+  user_pseudo_id,
+  COUNTIF(event_name = 'view_item') as product_views,
+  COUNTIF(event_name = 'add_to_cart') as add_to_carts,
+  COUNTIF(event_name = 'begin_checkout') as checkouts_started,
+  COUNTIF(event_name = 'purchase') as purchases,
+  ROUND(SAFE_DIVIDE(
+    COUNTIF(event_name = 'purchase'),
+    COUNTIF(event_name = 'view_item')
+  ) * 100, 2) as overall_cvr_percent
+FROM `project.analytics_dataset.events_*`
+WHERE _TABLE_SUFFIX BETWEEN '20241101' AND '20241130'
+GROUP BY user_pseudo_id
+HAVING product_views > 0
+ORDER BY purchases DESC
+*/</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">📐 The DAU/MAU Ratio — Your Single Most Important Engagement Metric</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        <strong style="color:var(--text-light);">DAU/MAU</strong> (Stickiness) = what % of your monthly users come back every day. <strong style="color:var(--text-light);">Facebook: ~65%</strong> (considered world-class). <strong style="color:var(--text-light);">Average app: 10–20%</strong>. <strong style="color:var(--text-light);">Below 10%</strong>: serious engagement problem. Improving DAU/MAU means your app is building habit. It's driven by: notification quality, daily value proposition, and how well the app fits into users' existing routines.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">📈 Acquisition</div>
+                <h3>User Acquisition – How Apps Gain Users</h3>
+                <p>Apps acquire users through multiple channels:</p>
+                <ul class="styled-list">
+                    <li>App Store Optimization (ASO) — organic discovery at zero marginal cost</li>
+                    <li>Social media campaigns — Instagram, TikTok, YouTube</li>
+                    <li>Paid ads (Meta Ads, Google UAC, Apple Search Ads)</li>
+                    <li>SEO web landing pages that redirect to app store</li>
+                    <li>Influencer partnerships</li>
+                    <li>Cross-promotion with other apps</li>
+                    <li>Viral growth loops and referrals</li>
+                </ul>
+                <div class="code-explanation" style="margin-top:1rem;">
+                    <p><span class="highlight">ASO key factors:</span> Title & keywords · Description copy · Screenshots & video previews · Ratings & reviews · Localization</p>
+                </div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">ASO strategy and attribution tracking — measuring where users actually come from:</p>
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-label">ASO: Title</div>
+                        <div class="concept-title">Highest Keyword Weight</div>
+                        <div class="concept-desc">The app name carries the most search ranking weight of any metadata field. Include your primary keyword naturally. Bad: "Todoist". Better: "Todoist: To-Do List & Planner". The App Store indexes the title for search. Up to 30 characters on iOS, 50 on Android.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">ASO: Screenshots</div>
+                        <div class="concept-title">Your #1 Conversion Driver</div>
+                        <div class="concept-desc">60% of users decide to download based on screenshots alone — before reading a single word. Screenshot 1 must communicate the core value in under 3 seconds. Use captions. Show the app doing its most impressive thing. A/B test with Google Play's store listing experiments. Localize screenshots for key markets.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">ASO: Ratings</div>
+                        <div class="concept-title">Social Proof at Scale</div>
+                        <div class="concept-desc">Apps below 4.0 stars lose 80% of potential downloads. Timing matters: ask for a review at peak satisfaction moments (after completing a task, after a win in a game). Never ask after a crash or failed action. Use SKStoreReviewRequest (iOS) or ReviewManager (Android) — both limit prompts to prevent overuse.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">Paid Attribution</div>
+                        <div class="concept-title">Knowing What Works</div>
+                        <div class="concept-desc">Attribution tools (AppsFlyer, Adjust, Branch) tell you exactly which channel each install came from — even across platforms. Without attribution, you're spending blind. Key metric: CPI (Cost Per Install) vs LTV (Lifetime Value). A channel with CPI $3 but LTV $8 is profitable. CPI $3 but LTV $2 is burning money.</div>
+                    </div>
+                </div>
+                <div class="code-block"><pre>// ── Deep Link Tracking — connect marketing campaigns to in-app behavior ─
+
+// iOS: Universal Links + Branch SDK attribution
+import BranchPluginSupport
+
+// Track where users come from in the onboarding flow
+BranchPlugin.shared().initSession(launchOptions: launchOptions) { params, error in
+    guard let params = params else { return }
+
+    let channel = params["~channel"] as? String ?? "organic"   // "instagram" | "google_uac"
+    let campaign = params["~campaign"] as? String ?? "none"
+    let referringLink = params["~referring_link"] as? String ?? ""
+
+    // Save to analytics for LTV attribution
+    AnalyticsTracker.shared.setUserProperty("acquisition_channel", channel)
+    AnalyticsTracker.shared.setUserProperty("acquisition_campaign", campaign)
+
+    // If user came from a specific referral code, apply it
+    if let referralCode = params["referral_code"] as? String {
+        ReferralService.shared.applyReferral(code: referralCode)
+    }
+}
+
+// Android: Firebase Dynamic Links
+class DeepLinkHandler {
+    fun handleIncomingLink(intent: Intent) {
+        FirebaseDynamicLinks.getInstance()
+            .getDynamicLink(intent)
+            .addOnSuccessListener { pendingDynamicLink ->
+                val deepLink = pendingDynamicLink?.link
+                val channel  = deepLink?.getQueryParameter("utm_source") ?: "organic"
+                val campaign = deepLink?.getQueryParameter("utm_campaign") ?: "none"
+
+                analytics.setUserProperty("acquisition_channel", channel)
+                analytics.setUserProperty("acquisition_campaign", campaign)
+
+                // Navigate to specific content if link includes destination
+                deepLink?.getQueryParameter("product_id")?.let { productId ->
+                    navigator.navigateTo(ProductDetailScreen(productId))
+                }
+            }
+    }
+}</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🔄 Retention</div>
+                <h3>Retention – The Real Secret to Success</h3>
+                <p>Most apps lose 90% of users within 30 days. Retention is what separates successful apps from forgotten ones.</p>
+                <p style="margin-top:0.75rem;"><strong>Retention strategies:</strong></p>
+                <ul class="styled-list">
+                    <li>Push notifications — value-based, never spam</li>
+                    <li>Email onboarding sequences</li>
+                    <li>Rewards, streaks, and gamification</li>
+                    <li>New user tutorials and guided first-use</li>
+                    <li>Regular feature updates that bring users back</li>
+                    <li>Personalized content and recommendations</li>
+                    <li>In-app communities and social features</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Retention engineering — the mechanics behind apps that users return to daily:</p>
+                <div class="step-flow">
+                    <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Nail the Aha Moment.</strong> The "aha moment" is the instant a new user first experiences your app's core value. Spotify's aha moment is the first time you hear a recommended song you love. For Duolingo, completing your first lesson. Identify yours by analyzing which action correlates with D30 retention — then optimize onboarding to get users there faster.</div></div>
+                    <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Intelligent Push Notifications.</strong> Push notifications sent at the right moment increase retention by 20–40%. Rules for non-annoying pushes: (a) send only when there's genuine value, (b) personalize based on behavior (not broadcast blasts), (c) respect time zones, (d) use rich notifications with images, (e) A/B test copy. Apps that spam pushes see 35% unsubscribe rates within a week.</div></div>
+                    <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Habit Loop Design.</strong> BJ Fogg's Hooked Model: Trigger (push or internal cue) → Action (open app) → Variable Reward (new content, social validation, progress) → Investment (saves, follows, streaks). The investment makes the next trigger more compelling. Instagram, TikTok, and Duolingo all follow this model. Design your variable reward so it's unpredictable enough to maintain interest.</div></div>
+                    <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Cohort Analysis.</strong> Retention isn't one number — it varies by acquisition channel, onboarding version, device, and user segment. Cohort analysis groups users by signup week and tracks their retention curves separately. A new onboarding flow that improved D7 retention from 20% to 28% in a specific cohort is worth scaling. Without cohorts, improvements are invisible.</div></div>
+                </div>
+                <div class="code-block"><pre>// ── Smart Push Notifications — personalized, not broadcast ─────────────
+
+// iOS: UNUserNotificationCenter with personalization
+import UserNotifications
+
+class NotificationScheduler {
+
+    // Schedule based on individual user behavior
+    func schedulePersonalizedReminder(for user: User) {
+        let center = UNUserNotificationCenter.current()
+
+        let content = UNMutableNotificationContent()
+
+        // Personalize based on user's last action
+        switch user.lastActivity {
+        case .abandonedCart(let itemName):
+            content.title = "Still thinking it over?"
+            content.body  = "\(itemName) is waiting in your cart."
+            content.sound = .default
+            content.userInfo = ["type": "cart_reminder", "product": itemName]
+
+        case .streakAtRisk(let streakDays):
+            content.title = "Don't break your \(streakDays)-day streak! 🔥"
+            content.body  = "Just 2 minutes keeps your streak alive."
+            content.sound = UNNotificationSound(named: UNNotificationSoundName("streak.aiff"))
+
+        case .newContent(let contentTitle):
+            content.title = "New for you"
+            content.body  = contentTitle
+            content.sound = .default
+        }
+
+        // Schedule at user's personal optimal time (from behavior data)
+        let optimalHour = user.analyticsProfile.peakEngagementHour   // e.g., 19 (7pm)
+        var dateComponents = DateComponents()
+        dateComponents.hour = optimalHour
+        dateComponents.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: "personalized-\(user.id)-\(Date().timeIntervalSince1970)",
+            content: content,
+            trigger: trigger
+        )
+        center.add(request)
+    }
+}
+
+// Android: WorkManager for reliable background scheduling
+class RetentionNotificationWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+        val userId = inputData.getString("user_id") ?: return Result.failure()
+        val user = userRepository.getUser(userId)
+
+        if (user.daysSinceLastOpen >= 3 && user.hasEnabledNotifications) {
+            val notification = buildPersonalizedNotification(user)
+            notificationManager.notify(user.id.hashCode(), notification)
+        }
+
+        return Result.success()
+    }
+}</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">💰 Monetization</div>
+                <h3>Monetization Models</h3>
+                <p>Monetization must be ethical, sustainable, and aligned with user expectations. Choosing the wrong model can kill even a great app.</p>
+                <div class="mono-grid" style="margin-top:1rem;">
+                    <div class="mono-card"><div class="mono-title">In-App Purchases (IAP)</div><div class="mono-desc">Extra features, content, items, or upgrades purchased inside the app.</div></div>
+                    <div class="mono-card"><div class="mono-title">Subscriptions</div><div class="mono-desc">Recurring payment for continued access. Best for long-term revenue sustainability.</div></div>
+                    <div class="mono-card"><div class="mono-title">Freemium</div><div class="mono-desc">Core version free, premium features gated behind payment.</div></div>
+                    <div class="mono-card"><div class="mono-title">Advertising</div><div class="mono-desc">Rewarded ads, banners, interstitials — requires balance to avoid poor UX.</div></div>
+                    <div class="mono-card"><div class="mono-title">Marketplace / Commission</div><div class="mono-desc">Take a % of transactions facilitated (Uber, Airbnb, Fiverr model).</div></div>
+                    <div class="mono-card"><div class="mono-title">Sponsorships</div><div class="mono-desc">Brands sponsor content, features, or placements within the app.</div></div>
+                </div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Subscription implementation with RevenueCat — the industry standard for mobile subscription management:</p>
+                <div class="code-block"><pre>// ── RevenueCat: Subscription Management ───────────────────────────────
+// RevenueCat handles entitlements, receipt validation, cross-platform sync
+
+// iOS (Swift) — configure at app launch
+import RevenueCat
+
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        Purchases.logLevel = .debug
+        Purchases.configure(withAPIKey: "your_revenuecat_api_key")
+        return true
+    }
+}
+
+// Present paywall — show offerings from RevenueCat dashboard
+class PaywallViewController: UIViewController {
+
+    func loadOfferings() {
+        Purchases.shared.getOfferings { offerings, error in
+            guard let offering = offerings?.current else { return }
+
+            // Offerings configured in RevenueCat dashboard (no app update needed)
+            self.displayPackages(offering.availablePackages)
+        }
+    }
+
+    func purchase(_ package: Package) {
+        Purchases.shared.purchase(package: package) { transaction, customerInfo, error, userCancelled in
+            guard error == nil, !userCancelled else { return }
+
+            // Check entitlement — abstracted from specific products
+            if customerInfo?.entitlements["pro"]?.isActive == true {
+                self.unlockProFeatures()
+                self.trackSubscription(package: package)
+            }
+        }
+    }
+
+    func trackSubscription(package: Package) {
+        Analytics.logEvent("subscription_started", parameters: [
+            "product_id":  package.storeProduct.productIdentifier,
+            "price":       package.storeProduct.price,
+            "period":      package.packageType.description   // "monthly" | "annual"
+        ])
+    }
+}
+
+// Check entitlement anywhere in the app
+func isProUser() async -> Bool {
+    let customerInfo = try? await Purchases.shared.customerInfo()
+    return customerInfo?.entitlements["pro"]?.isActive == true
+}
+
+// ── Paywall design best practices ─────────────────────────────────────
+// The paywall is your most important conversion screen. Rules:
+// 1. Show value before price — benefits first, then cost
+// 2. Annual plan as default — users are 30% more likely to pick annual if it's highlighted
+// 3. Free trial — apps with 7-day trials see 2-3x higher conversion than no-trial
+// 4. Social proof — "Join 500,000 subscribers" next to the CTA
+// 5. Clear cancel messaging — "Cancel anytime" reduces fear of commitment</pre></div>
+                <table class="metrics-table" style="margin-top:1rem;">
+                    <thead><tr><th>Model</th><th>Best App Type</th><th>Revenue Predictability</th><th>Risk</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Subscription</strong></td><td>Productivity, fitness, learning, media</td><td>⭐⭐⭐⭐⭐ Highest (ARR)</td><td>Churn if value isn't felt monthly</td></tr>
+                        <tr><td><strong>IAP (Consumable)</strong></td><td>Games, social (coins, boosts)</td><td>⭐⭐⭐ Moderate (spiky)</td><td>Depends on small % of "whales"</td></tr>
+                        <tr><td><strong>IAP (One-time unlock)</strong></td><td>Utility, tools</td><td>⭐⭐ Low (one-time)</td><td>Revenue ceiling; no recurring</td></tr>
+                        <tr><td><strong>Rewarded Ads</strong></td><td>Games, free utilities</td><td>⭐⭐ Low-Medium</td><td>Revenue falls with adblockers, privacy rules</td></tr>
+                        <tr><td><strong>Freemium</strong></td><td>SaaS tools, collaboration</td><td>⭐⭐⭐⭐ High when paired with subscription</td><td>Free tier must attract; premium must compel</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚡ Scalability</div>
+                <h3>Scalability – Preparing for Growth</h3>
+                <p>Apps must scale both technically and operationally.</p>
+                <div class="code-explanation" style="margin-top:1rem;">
+                    <p><span class="highlight">Technical scalability:</span> API rate limit management · Efficient database queries · Caching layers (Redis, CDN) · Load balancing · Cloud auto-scaling · Optimized memory and CPU usage</p>
+                </div>
+                <div class="code-explanation">
+                    <p><span class="highlight">Operational scalability:</span> Support ticket systems · Automated testing pipelines · CI/CD for fast, safe releases · Modular code architecture for parallel development</p>
+                </div>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Backend scalability patterns — what changes between 1K and 1M users:</p>
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-label">1K → 10K Users</div>
+                        <div class="concept-title">Single Server Era</div>
+                        <div class="concept-desc">One VPS (DigitalOcean, Linode) handles everything. PostgreSQL on the same machine. No caching needed yet. Focus: get the product right. Cost: ~$20/month. This is fine — premature optimization is the enemy of shipping.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">10K → 100K Users</div>
+                        <div class="concept-title">Separation of Concerns</div>
+                        <div class="concept-desc">Separate database server. Add Redis for session storage and hot data caching. Use a CDN (Cloudflare) for static assets and API caching. Add basic monitoring (Datadog, Sentry). Slow queries start hurting — add database indexes now. Cost: ~$200–500/month.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">100K → 1M Users</div>
+                        <div class="concept-title">Horizontal Scaling</div>
+                        <div class="concept-desc">Multiple app server instances behind a load balancer. Read replicas for the database to distribute query load. Async job queues (Sidekiq, Celery) for background processing. Feature flags for gradual rollouts. Start splitting into microservices only where a specific service is the bottleneck. Cost: $1K–5K/month.</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-label">1M+ Users</div>
+                        <div class="concept-title">Platform Engineering</div>
+                        <div class="concept-desc">Kubernetes for container orchestration. Global CDN with edge computing. Database sharding or move to distributed DB (CockroachDB, Cassandra for specific workloads). ML-powered auto-scaling predicts traffic spikes. Dedicated SRE team. Chaos engineering tests. Cost: $10K–100K+/month.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🔧 Maintenance</div>
+                <h3>App Maintenance – The Long-Term Reality</h3>
+                <p>Maintenance is continuous, not optional. An app that isn't maintained will eventually break:</p>
+                <ul class="styled-list">
+                    <li>Fixing bugs reported by users or detected by Crashlytics</li>
+                    <li>Updating third-party libraries and frameworks</li>
+                    <li>Supporting new OS versions (iOS 18+, Android 15+)</li>
+                    <li>Improving UI/UX based on user feedback</li>
+                    <li>Adding features requested by users</li>
+                    <li>Rewriting technical debt before it becomes critical</li>
+                    <li>Responding to app store reviews publicly</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Crash monitoring with Crashlytics — catching issues before users write 1-star reviews:</p>
+                <div class="code-block"><pre>// ── Firebase Crashlytics: Production Crash Monitoring ─────────────────
+
+// iOS (Swift) — always initialize in AppDelegate, before any other setup
+import FirebaseCrashlytics
+
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    func application(_ app: UIApplication,
+                     didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        FirebaseApp.configure()
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
+        return true
+    }
+}
+
+// Add context to crash reports — makes debugging 10x faster
+class CheckoutViewModel {
+    func processPayment(amount: Double, method: PaymentMethod) {
+        // Set custom keys — visible in Crashlytics dashboard on any crash
+        Crashlytics.crashlytics().setCustomValue(amount, forKey: "payment_amount")
+        Crashlytics.crashlytics().setCustomValue(method.rawValue, forKey: "payment_method")
+        Crashlytics.crashlytics().setCustomValue(cartItems.count, forKey: "cart_item_count")
+
+        do {
+            let result = try paymentService.charge(amount: amount, method: method)
+            Crashlytics.crashlytics().log("Payment succeeded: \(result.transactionId)")
+        } catch {
+            // Log non-fatal errors — shows in Crashlytics without crashing
+            Crashlytics.crashlytics().record(error: error)
+            showError("Payment failed. Please try again.")
+        }
+    }
+}
+
+// Android (Kotlin) — identical pattern
+class CheckoutViewModel : ViewModel() {
+    fun processPayment(amount: Double, method: String) {
+        FirebaseCrashlytics.getInstance().apply {
+            setCustomKey("payment_amount", amount)
+            setCustomKey("payment_method", method)
+        }
+
+        viewModelScope.launch {
+            try {
+                val result = paymentRepository.charge(amount, method)
+                FirebaseCrashlytics.getInstance().log("Payment OK: ${result.id}")
+            } catch (e: Exception) {
+                FirebaseCrashlytics.getInstance().recordException(e)
+                _uiState.value = UiState.Error("Payment failed")
+            }
+        }
+    }
+}
+
+// ── Dependency update strategy — keeping libraries current ────────────
+// dependabot.yml (GitHub) — auto-creates PRs for outdated dependencies
+/*
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"   # creates PR every Monday
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]   # manual review for major versions
+
+  - package-ecosystem: "swift"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+*/</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🔐 Security</div>
+                <h3>Security & Compliance in Sustainable Apps</h3>
+                <p>A sustainable app must remain secure. Security breaches destroy reputation instantly.</p>
+                <ul class="styled-list">
+                    <li>Secure token storage (Keychain, EncryptedSharedPreferences)</li>
+                    <li>Data encryption at rest and in transit (HTTPS/TLS)</li>
+                    <li>Preventing man-in-the-middle attacks (certificate pinning)</li>
+                    <li>Proper permission handling — request only what's needed</li>
+                    <li>GDPR compliance — user data rights, consent, deletion</li>
+                    <li>API rate limiting to prevent abuse</li>
+                    <li>PCI DSS compliance for payment flows</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">Implementing GDPR-compliant data management and secure token storage:</p>
+                <div class="code-block"><pre>// ── GDPR: Consent Management + Right to Erasure ───────────────────────
+
+// iOS — consent flow before any data collection
+class ConsentManager {
+    private let defaults = UserDefaults.standard
+
+    var hasGivenConsent: Bool {
+        get { defaults.bool(forKey: "gdpr_consent_given") }
+        set { defaults.set(newValue, forKey: "gdpr_consent_given") }
+    }
+
+    var consentDate: Date? {
+        get { defaults.object(forKey: "gdpr_consent_date") as? Date }
+    }
+
+    func recordConsent(analytics: Bool, marketing: Bool, thirdParty: Bool) {
+        // Store what user agreed to — required for GDPR audit trail
+        let consent = GDPRConsent(
+            analytics: analytics,
+            marketing: marketing,
+            thirdParty: thirdParty,
+            timestamp: Date(),
+            appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
+        )
+        // Store securely + send to your backend for legal record
+        KeychainService.shared.store(consent, key: "gdpr_consent")
+        ConsentAPI.shared.recordConsent(consent)
+
+        // Configure SDKs based on consent
+        if analytics   { FirebaseApp.configure() } else { Analytics.setAnalyticsCollectionEnabled(false) }
+        if marketing   { Purchases.configure(withAPIKey: revenuecatKey) }
+        if thirdParty  { /* enable third-party SDKs */ }
+    }
+
+    // Right to Erasure (GDPR Article 17) — user requests deletion
+    func deleteAllUserData(userId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        Task {
+            // 1. Delete from local storage
+            try KeychainService.shared.deleteAll()
+            UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
+
+            // 2. Request deletion from backend (must delete within 30 days per GDPR)
+            try await UserAPI.shared.deleteAccount(userId: userId)
+
+            // 3. Revoke Firebase and analytics identifiers
+            Analytics.resetAnalyticsData()
+            Crashlytics.crashlytics().setUserID("")
+
+            completion(.success(()))
+        }
+    }
+}
+
+// ── Secure Token Storage ───────────────────────────────────────────────
+
+// iOS — NEVER store tokens in UserDefaults — use Keychain
+class KeychainService {
+    static let shared = KeychainService()
+
+    func storeToken(_ token: String, for key: String) throws {
+        let data = token.data(using: .utf8)!
+        let query: [String: Any] = [
+            kSecClass as String:            kSecClassGenericPassword,
+            kSecAttrAccount as String:      key,
+            kSecValueData as String:        data,
+            kSecAttrAccessible as String:   kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        ]
+        SecItemDelete(query as CFDictionary)   // delete if exists
+        let status = SecItemAdd(query as CFDictionary, nil)
+        guard status == errSecSuccess else {
+            throw KeychainError.saveFailed(status)
+        }
+    }
+}
+
+// Android — EncryptedSharedPreferences (API 23+)
+class SecureTokenStorage(context: Context) {
+    private val masterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+
+    private val prefs = EncryptedSharedPreferences.create(
+        context, "secure_prefs", masterKey,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+
+    fun saveToken(key: String, token: String) = prefs.edit().putString(key, token).apply()
+    fun getToken(key: String): String? = prefs.getString(key, null)
+    fun clearAll() = prefs.edit().clear().apply()
+}</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🗺️ Roadmap</div>
+                <h3>Product Roadmapping – Planning the Future</h3>
+                <p>A product roadmap structures development so the app evolves logically, not chaotically.</p>
+                <div class="code-explanation" style="margin-top:1rem;">
+                    <p><span class="highlight">Roadmap components:</span> Long-term vision (1–2 year) · Quarterly feature themes · Monthly fixes and improvements · Prioritization frameworks (RICE, MoSCoW) · User feedback integration cycle</p>
+                </div>
+                <p style="margin-top:0.75rem;"><strong>Prioritization frameworks:</strong></p>
+                <ul class="styled-list">
+                    <li>RICE — Reach × Impact × Confidence ÷ Effort</li>
+                    <li>MoSCoW — Must have, Should have, Could have, Won't have</li>
+                    <li>ICE — Impact × Confidence × Ease</li>
+                </ul>
+
+                <!-- NEW -->
+                <hr class="section-divider">
+                <p style="margin-bottom:0.75rem; font-size:0.9rem;">RICE scoring in practice — making objective prioritization decisions:</p>
+                <div class="code-block"><pre>// ── RICE Prioritization Calculator ────────────────────────────────────
+// RICE Score = (Reach × Impact × Confidence) / Effort
+// Higher score = higher priority
+
+interface Feature {
+    name: string;
+    reach: number;       // users affected per quarter (e.g., 2000)
+    impact: number;      // 0.25=minimal | 0.5=low | 1=medium | 2=high | 3=massive
+    confidence: number;  // 0.5=low | 0.8=medium | 1.0=high (how sure are you?)
+    effort: number;      // person-weeks to implement
+}
+
+function calculateRICE(feature: Feature): number {
+    return (feature.reach * feature.impact * feature.confidence) / feature.effort;
+}
+
+// Example backlog prioritization session
+const backlog: Feature[] = [
+    {
+        name: "Offline mode",
+        reach: 8000, impact: 2, confidence: 0.8, effort: 6,
+        // score = (8000 × 2 × 0.8) / 6 = 2133
+    },
+    {
+        name: "Dark mode",
+        reach: 12000, impact: 0.5, confidence: 1.0, effort: 2,
+        // score = (12000 × 0.5 × 1.0) / 2 = 3000
+    },
+    {
+        name: "Biometric login",
+        reach: 10000, impact: 1, confidence: 0.8, effort: 1,
+        // score = (10000 × 1 × 0.8) / 1 = 8000 ← prioritize first
+    },
+    {
+        name: "Widget support",
+        reach: 5000, impact: 1, confidence: 0.5, effort: 8,
+        // score = (5000 × 1 × 0.5) / 8 = 312.5 ← defer
+    }
+];
+
+const prioritized = backlog
+    .map(f => ({ ...f, score: calculateRICE(f) }))
+    .sort((a, b) => b.score - a.score);
+
+prioritized.forEach(f =>
+    console.log(`${f.name}: ${f.score.toFixed(0)} points`)
+);
+// Output:
+// Biometric login: 8000 points  ← build first
+// Dark mode: 3000 points        ← Q2
+// Offline mode: 2133 points     ← Q3
+// Widget support: 313 points    ← defer / deprioritize</pre></div>
+                <div class="info-box">
+                    <div class="info-box-title">🔄 The Continuous Discovery Cycle</div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                        The best mobile teams run a weekly cycle: <strong style="color:var(--text-light);">Monday</strong> — review last week's metrics and crash reports. <strong style="color:var(--text-light);">Tuesday</strong> — read user reviews and support tickets, tag themes. <strong style="color:var(--text-light);">Wednesday</strong> — 3 user interviews from opt-in list in app. <strong style="color:var(--text-light);">Thursday</strong> — update RICE scores based on new data, propose roadmap changes. <strong style="color:var(--text-light);">Friday</strong> — team alignment on next sprint priorities. This cadence means the roadmap is never more than 1 week stale.
+                    </p>
+                </div>
+            </div>
+
+            <div class="content-card" style="border-left: 5px solid var(--purple);">
+                <h3>Section Conclusion</h3>
+                <p>You now understand the full sustainability lifecycle of mobile apps:</p>
+                <ul class="styled-list">
+                    <li>The 4 failure modes: building without measuring, acquisition without retention, wrong monetization timing, technical neglect</li>
+                    <li>Analytics: custom event tracking with Firebase, funnel queries in BigQuery, DAU/MAU as stickiness signal</li>
+                    <li>Acquisition: ASO strategy (title weight, screenshot conversion, rating timing), paid attribution with AppsFlyer/Adjust, CPI vs LTV analysis</li>
+                    <li>Retention: aha moment identification, smart push notifications (personalized, not broadcast), habit loop design, cohort analysis</li>
+                    <li>Monetization: RevenueCat implementation, model-to-app-type matching, paywall best practices (annual default, free trial, social proof)</li>
+                    <li>Scalability: 4-stage growth model (1K → 10K → 100K → 1M+ users) with infrastructure changes at each threshold</li>
+                    <li>Maintenance: Crashlytics with context keys for faster debugging, Dependabot for automated dependency updates</li>
+                    <li>Security: GDPR consent management with audit trail, Right to Erasure implementation, Keychain/EncryptedSharedPreferences for tokens</li>
+                    <li>Roadmapping: RICE scoring with real examples, weekly continuous discovery cycle</li>
+                </ul>
+                <p style="margin-top:1rem;">These topics turn a simple app into a long-lasting, successful digital product.</p>
+            </div>
+
+        </div>
+
+        <!-- LAB -->
+        <div id="laboratorio" class="tab-panel">
+            <h3 style="margin-bottom:1rem;">App Health Score Calculator</h3>
+            <p style="margin-bottom:1rem; font-size:0.9rem; color:var(--text-secondary);">Configure your app's current metrics and get an instant sustainability health score with actionable recommendations.</p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header-bar">APP METRICS CONFIGURATION</div>
+                    <textarea class="lab-textarea" id="lab-input">// Enter your app's current metrics
+
+const appMetrics = {
+  day1Retention: 35,      // % of users who return on Day 1
+  day30Retention: 10,     // % of users who return on Day 30
+  crashRate: 2.5,         // crashes per 100 sessions
+  appStoreRating: 4.1,    // 1.0 – 5.0
+  monetizationModel: "freemium", // none | ads | iap | freemium | subscription
+  hasAnalytics: true,     // true | false
+  hasASO: false,          // title, keywords, screenshots optimized?
+  gdprCompliant: true     // true | false
+};
+
+// Click "Calculate Health Score" to evaluate your app!</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header-bar">HEALTH SCORE + RECOMMENDATIONS</div>
+                    <div class="lab-output" id="lab-output">Click "Calculate Health Score" to evaluate your app's sustainability...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="runLab()">▶ Calculate Health Score</button>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: App Sustainability & Growth</h3>
+                <p style="color:var(--text-secondary); margin-bottom:2rem;">Test your knowledge on analytics, acquisition, retention, monetization, scalability, GDPR, and product roadmapping. Answer all 15 questions.</p>
+                <form id="quiz-form">
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">1. What is the difference between acquisition and retention?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Acquisition gains new users; retention keeps existing users</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Acquisition improves UI; retention improves backend</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Acquisition removes users; retention adds users</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Acquisition handles data storage; retention handles security</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">2. What does DAU stand for?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Daily App Update</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Daily Active Users</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Data Access Unit</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Device Application Usage</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">3. What is a conversion funnel?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"> A) A server monitoring tool</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B"> B) A model showing user steps from discovery to completing a goal</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C"> C) A UI design pattern</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"> D) A database query structure</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">4. Why is ASO important?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"> A) It increases battery performance</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B"> B) It improves app visibility in app stores, increasing organic downloads</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C"> C) It speeds up networking</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"> D) It reduces crash rates</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">5. Which of the following are valid monetization models?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Subscriptions and in-app purchases</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Debugging and testing</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C"> C) UI design and development</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Networking and caching</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">6. What is churn rate?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Number of new downloads per day</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B"> B) The percentage of users who stop using the app in a given period</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C"> C) App rendering speed</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"> D) API response time</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">7. Why are crash reports essential for long-term apps?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"> A) They help marketing teams</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B"> B) They identify bugs and stability issues that can be fixed before users churn</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C"> C) They improve UI colors</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"> D) They reduce server costs automatically</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">8. What does MVP stand for in product development?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Mobile Visual Prototype</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B"> B) Minimum Viable Product</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Model View Protocol</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Management Value Plan</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">9. Why is scalability important for growing apps?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"> A) It allows the app to handle increasing users and data without breaking</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B"> B) It reduces UI complexity</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C"> C) It removes the need for APIs</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"> D) It limits the number of features</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">10. What is GDPR?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"> A) A mobile UI design guideline</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B"> B) European data protection regulation governing user data rights and privacy</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C"> C) A mobile development framework</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"> D) A cloud storage provider</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">11. What is a product roadmap?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"> A) A GPS navigation feature</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B"> B) A strategic plan outlining product goals, features, and their timeline</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C"> C) A UI layout template</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"> D) A database schema</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">12. What is a subscription monetization model?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"> A) A one-time purchase</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B"> B) A recurring payment giving users continued access to the service</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C"> C) A completely free service</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"> D) A hardware purchase model</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">13. Why must apps be tested on multiple devices?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"> A) To reduce marketing costs</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B"> B) To ensure compatibility across screen sizes, OS versions, and hardware</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C"> C) To strengthen branding</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"> D) To improve ASO keyword ranking</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">14. What does ethical monetization mean?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Maximizing profits at any cost</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Generating revenue without exploiting, misleading, or manipulating users</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Offering all features for free</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Avoiding all forms of advertising</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--purple); font-weight:600; margin-bottom:1rem;">15. What is long-term app maintenance?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Designing seasonal UI themes</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Continuously updating, fixing bugs, and improving software to keep it functional and competitive</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Removing inactive users</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Deleting old app versions from the store</label>
+                    </div>
+
+                </form>
+
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+
+                <div id="quiz-results" class="quiz-results" style="display:none;">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESOURCES -->
+        <div id="recursos" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem;">Support Materials</h3>
+            <div class="content-card">
+                <a href="#" class="resource-link">→ Firebase Analytics – Google's Mobile Analytics Platform</a>
+                <a href="#" class="resource-link">→ Mixpanel – User Behavior Analytics for Mobile Apps</a>
+                <a href="#" class="resource-link">→ Amplitude – Product Analytics and Retention Insights</a>
+                <a href="#" class="resource-link">→ App Store Optimization Guide – Apple Developer</a>
+                <a href="#" class="resource-link">→ Google Play ASO Best Practices – Android Developers</a>
+                <a href="#" class="resource-link">→ GDPR Compliance for Apps – Official EU Resources</a>
+                <a href="#" class="resource-link">→ RICE Prioritization Framework – Intercom Blog</a>
+                <a href="#" class="resource-link">→ MoSCoW Method – Product Management Guide</a>
+                <a href="#" class="resource-link">→ RevenueCat – Mobile Subscription Management SDK</a>
+                <a href="#" class="resource-link">→ Liftoff State of Mobile Gaming Report – Retention Benchmarks</a>
+            </div>
+        </div>
+
+        <!-- ASSESSMENT -->
+        <div id="avaliacao" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Mastery Criteria: App Sustainability & Growth</h3>
+                <p style="color:var(--text-secondary); margin-bottom:2rem;">To successfully complete this module, demonstrate understanding across the following competency levels:</p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>What DAU, MAU, retention rate, and churn rate are</li>
+                            <li>The difference between acquisition and retention</li>
+                            <li>What ASO is and why it matters</li>
+                            <li>The main monetization models (IAP, subscription, freemium, ads)</li>
+                            <li>What GDPR is and why apps must comply</li>
+                            <li>What a product roadmap is</li>
+                            <li>Why apps need long-term maintenance</li>
+                            <li>What ethical monetization means</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Setting up Firebase Analytics for an app</li>
+                            <li>Tracking custom events (button taps, purchase funnels)</li>
+                            <li>Implementing push notifications for retention</li>
+                            <li>Optimizing an App Store listing with keywords and screenshots</li>
+                            <li>Choosing an appropriate monetization model for a given app</li>
+                            <li>Implementing a GDPR-compliant data consent flow</li>
+                            <li>Prioritizing a feature backlog with RICE or MoSCoW</li>
+                            <li>Interpreting D1/D7/D30 retention reports</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>Building a full acquisition funnel with attribution tracking</li>
+                            <li>A/B testing onboarding flows to improve Day 1 retention</li>
+                            <li>Implementing a paywall with RevenueCat or StoreKit</li>
+                            <li>Designing a scalable backend architecture for millions of users</li>
+                            <li>Running store listing experiments (Google Play, Apple Product Pages)</li>
+                            <li>Building a viral growth loop (referral mechanics)</li>
+                            <li>Analyzing cohort data to identify churn drivers</li>
+                            <li>Implementing certificate pinning and full GDPR deletion flows</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+        const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+        document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+        document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+        window.scrollTo({ top: 150, behavior: 'smooth' });
+    }
+
+    function runLab() {
+        const input  = document.getElementById('lab-input').value;
+        const output = document.getElementById('lab-output');
+
+        const d1Match     = input.match(/day1Retention:\s*(\d+\.?\d*)/);
+        const d30Match    = input.match(/day30Retention:\s*(\d+\.?\d*)/);
+        const crashMatch  = input.match(/crashRate:\s*(\d+\.?\d*)/);
+        const ratingMatch = input.match(/appStoreRating:\s*(\d+\.?\d*)/);
+
+        const d1     = d1Match     ? parseFloat(d1Match[1])     : 25;
+        const d30    = d30Match    ? parseFloat(d30Match[1])    : 5;
+        const crash  = crashMatch  ? parseFloat(crashMatch[1])  : 5;
+        const rating = ratingMatch ? parseFloat(ratingMatch[1]) : 3.5;
+
+        const hasAnalytics   = input.includes('hasAnalytics: true')   || input.includes('hasAnalytics:true');
+        const hasASO         = input.includes('hasASO: true')         || input.includes('hasASO:true');
+        const gdpr           = input.includes('gdprCompliant: true')  || input.includes('gdprCompliant:true');
+        const isSubscription = input.includes('"subscription"');
+        const noMono         = input.includes('"none"');
+
+        let score = 0;
+        const issues = [], wins = [];
+
+        if (d1 >= 40)       { score += 15; wins.push('✓ Excellent Day 1 retention (' + d1 + '%)'); }
+        else if (d1 >= 25)  { score += 8; }
+        else                { issues.push('✗ Low Day 1 retention (' + d1 + '%) — add onboarding tutorial'); }
+
+        if (d30 >= 15)      { score += 15; wins.push('✓ Strong Day 30 retention (' + d30 + '%)'); }
+        else if (d30 >= 8)  { score += 8; }
+        else                { issues.push('✗ High churn — Day 30 retention of ' + d30 + '% is below benchmark'); }
+
+        if (crash <= 1)     { score += 20; wins.push('✓ Excellent crash rate (' + crash + ' per 100 sessions)'); }
+        else if (crash <= 3){ score += 12; }
+        else                { issues.push('✗ High crash rate (' + crash + '/100 sessions) — investigate with Crashlytics'); }
+
+        if (rating >= 4.5)  { score += 20; wins.push('✓ Outstanding App Store rating (' + rating + ')'); }
+        else if (rating >= 4.0){ score += 14; wins.push('✓ Good App Store rating (' + rating + ')'); }
+        else if (rating >= 3.5){ score += 8;  issues.push('⚠ Rating (' + rating + ') below 4.0 — respond to reviews'); }
+        else                { issues.push('✗ Low rating (' + rating + ') — critical UX or reliability issues'); }
+
+        if (hasAnalytics)   { score += 10; wins.push('✓ Analytics tracking enabled'); }
+        else                { issues.push('✗ No analytics — flying blind on user behavior'); }
+
+        if (hasASO)         { score += 10; wins.push('✓ App Store Optimization applied'); }
+        else                { issues.push('✗ ASO not applied — missing organic acquisition potential'); }
+
+        if (gdpr)           { score += 5; wins.push('✓ GDPR compliant'); }
+        else                { issues.push('✗ GDPR not compliant — legal risk if operating in EU'); }
+
+        if (isSubscription) { score += 5; wins.push('✓ Subscription model — best for long-term revenue'); }
+        else if (noMono)    { issues.push('✗ No monetization model — consider freemium or subscriptions'); }
+        else                { score += 3; }
+
+        const grade      = score >= 80 ? '🟢 Healthy' : score >= 60 ? '🟡 Needs Work' : '🔴 At Risk';
+        const gradeColor = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ef4444';
+
+        output.innerHTML = `
+            <span style="color:#28e0ff;font-weight:bold;">▶ App Health Score</span><br><br>
+            <span style="color:${gradeColor};font-size:1.3rem;font-weight:bold;">${score}/100 — ${grade}</span><br><br>
+            ${wins.length ? `<strong style="color:#50fa7b;">What's working:</strong><br>${wins.map(w => `<span style="color:#50fa7b;">${w}</span>`).join('<br>')}<br><br>` : ''}
+            ${issues.length ? `<strong style="color:#ef4444;">Issues to fix:</strong><br>${issues.map(i => `<span style="color:${i.startsWith('⚠') ? '#f59e0b' : '#ef4444'}">${i}</span>`).join('<br>')}` : ''}
+            <br><br>
+            <em style="color:#6272a4;">Tip: Adjust your metrics and recalculate to track improvements!</em>
+        `;
+    }
+
+    class QuizManager {
+        constructor() {
+            this.questionsData = {
+                q1:  { correct: 'A', exp: 'Acquisition brings new users to the app (downloads); retention keeps existing users coming back regularly.' },
+                q2:  { correct: 'B', exp: 'DAU = Daily Active Users — the number of unique users who open and use the app on any given day.' },
+                q3:  { correct: 'B', exp: 'A conversion funnel models the steps users take from first discovery (or download) to completing a key goal (purchase, signup, etc.).' },
+                q4:  { correct: 'B', exp: 'ASO (App Store Optimization) improves an app\'s visibility in search results and category rankings, increasing organic downloads without paid ads.' },
+                q5:  { correct: 'A', exp: 'Subscriptions and in-app purchases (IAP) are both established mobile monetization models. Debugging and testing are development activities, not revenue models.' },
+                q6:  { correct: 'B', exp: 'Churn rate is the percentage of users who stop using the app over a given period. High churn means the app isn\'t retaining its audience.' },
+                q7:  { correct: 'B', exp: 'Crash reports (from tools like Firebase Crashlytics or Sentry) reveal exactly where and why apps crash, enabling developers to fix issues before users churn.' },
+                q8:  { correct: 'B', exp: 'MVP stands for Minimum Viable Product — the simplest version of a product that delivers value and allows early feedback from real users.' },
+                q9:  { correct: 'A', exp: 'Scalability ensures the app can handle more users, more data, and more load as it grows — without crashing, slowing down, or incurring excessive costs.' },
+                q10: { correct: 'B', exp: 'GDPR (General Data Protection Regulation) is an EU law that gives users rights over their data — including consent, access, and the right to be forgotten.' },
+                q11: { correct: 'B', exp: 'A product roadmap is a strategic plan that outlines the product\'s vision, upcoming features, and their prioritized timeline for development.' },
+                q12: { correct: 'B', exp: 'A subscription model charges users on a recurring basis (monthly or annually) for continued access to a service — providing predictable, sustainable revenue.' },
+                q13: { correct: 'B', exp: 'Different devices have different screen sizes, hardware capabilities, and OS versions. Testing across devices ensures the app works correctly for all users.' },
+                q14: { correct: 'B', exp: 'Ethical monetization means generating revenue in ways that are transparent, fair, and respectful — not using dark patterns, hidden fees, or manipulative mechanics.' },
+                q15: { correct: 'B', exp: 'Long-term maintenance means continuously fixing bugs, updating frameworks, supporting new OS versions, and improving the app to remain functional and competitive.' }
+            };
+            this.init();
+        }
+        init() {
+            document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+            document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+        }
+        submitQuiz() {
+            const fd = new FormData(document.getElementById('quiz-form'));
+            let score = 0, html = '';
+            Object.keys(this.questionsData).forEach((k, i) => {
+                const ans = fd.get(k);
+                const ok  = ans === this.questionsData[k].correct;
+                if (ok) score++;
+                html += `<div class="feedback-item ${ok ? 'feedback-correct' : 'feedback-incorrect'}"><span class="feedback-icon">${ok ? '✓' : '✗'}</span><div><strong>Question ${i+1}:</strong> ${this.questionsData[k].exp}${!ok ? `<br><small style="color:var(--text-secondary)">Correct: Option ${this.questionsData[k].correct}</small>` : ''}</div></div>`;
+            });
+            const total = Object.keys(this.questionsData).length;
+            const pct   = Math.round((score / total) * 100);
+            const cls   = pct >= 80 ? 'score-excellent' : pct >= 50 ? 'score-good' : 'score-poor';
+            document.getElementById('quiz-score').innerHTML = `<div class="${cls}">${score}/${total} (${pct}%)</div><p style="color:var(--text-secondary)">${pct >= 70 ? 'Excellent! You understand what it takes to build a sustainable mobile product.' : 'Review the analytics, retention, and monetization sections and try again.'}</p>`;
+            document.getElementById('quiz-feedback').innerHTML = html;
+            const r = document.getElementById('quiz-results');
+            r.style.display = 'block';
+            r.scrollIntoView({ behavior: 'smooth' });
+        }
+        clearQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-results').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+    document.addEventListener('DOMContentLoaded', () => new QuizManager());
+</script>
+</body>
+</html>
+

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana Silva | B1tJ0urney Team</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome para ícones (opcional, mas recomendado) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 10% 20%, #0a1f3b, #030614);
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Fundo digital */
+        .digital-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ===== NAVBAR (mesma do about) ===== */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00aaff, #6a0dad, #00ffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-wrapper {
+            position: relative;
+            padding: 3px;
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            border-radius: 0.9em;
+            transition: all 0.4s ease;
+            display: inline-block;
+        }
+
+        .btn-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            border-radius: 0.9em;
+            z-index: -10;
+            filter: blur(0);
+            transition: filter 0.4s ease;
+        }
+
+        .btn-wrapper:hover::before {
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            filter: blur(1.2em);
+        }
+
+        .btn-wrapper .nav-btn {
+            font-size: 1.1em;
+            padding: 0.6em 1.2em;
+            border-radius: 0.7em;
+            border: none;
+            background-color: #000;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 2px 2px 3px #000000b4;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        /* ===== PERFIL ===== */
+        .profile-header {
+            display: flex;
+            gap: 4rem;
+            align-items: center;
+            margin: 4rem 0;
+            flex-wrap: wrap;
+        }
+
+        /* Avatar - PODE SER PERSONALIZADO (imagem, gradiente, icone) */
+        .avatar-large {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            /* Gradiente personalizável por membro */
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 0 40px rgba(78, 205, 196, 0.6);
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .avatar-large:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 60px rgba(78, 205, 196, 0.9);
+        }
+
+        /* Nome com gradiente personalizável */
+        .profile-info h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-info .role {
+            font-size: 1.8rem;
+            color: #4ecdc4;
+            text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .profile-info .tagline {
+            font-size: 1.3rem;
+            color: #b0e0ff;
+            font-style: italic;
+            border-left: 4px solid #4ecdc4;
+            padding-left: 1.5rem;
+        }
+
+        /* ===== SECÇÕES PERSONALIZÁVEIS ===== */
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+            color: #fff;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 2px;
+        }
+
+        /* Card de conteúdo */
+        .content-card {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(78, 205, 196, 0.3);
+            border-color: #4ecdc4;
+        }
+
+        /* Grid para skills/interesses */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .skill-tag {
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid #4ecdc4;
+            border-radius: 40px;
+            padding: 0.8rem 1.2rem;
+            text-align: center;
+            font-weight: 600;
+            color: #4ecdc4;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .skill-tag:hover {
+            background: #4ecdc4;
+            color: #030614;
+            box-shadow: 0 0 20px #4ecdc4;
+            transform: scale(1.05);
+        }
+
+        /* Timeline para experiência */
+        .timeline-item {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(78, 205, 196, 0.3);
+        }
+
+        .timeline-year {
+            min-width: 100px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4ecdc4;
+        }
+
+        .timeline-content h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.3rem;
+            color: #fff;
+        }
+
+        .timeline-content p {
+            color: #b0c0d0;
+        }
+
+        /* Citações */
+        .quote-block {
+            font-size: 1.3rem;
+            font-style: italic;
+            color: #d0e0ff;
+            padding: 2rem;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 24px;
+            border-left: 6px solid #4ecdc4;
+            margin: 2rem 0;
+        }
+
+        /* Galeria (opcional) */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            opacity: 0.8;
+            transition: 0.3s;
+        }
+
+        .gallery-item:hover {
+            opacity: 1;
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(78, 205, 196, 0.5);
+        }
+
+        /* Botão voltar */
+        .btn-back {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: transparent;
+            border: 2px solid #4ecdc4;
+            color: #4ecdc4;
+            text-decoration: none;
+            border-radius: 40px;
+            font-weight: 600;
+            transition: 0.3s;
+            margin: 2rem 0;
+            font-size: 1.1rem;
+        }
+
+        .btn-back:hover {
+            background: #4ecdc4;
+            color: #030614;
+            box-shadow: 0 0 30px #4ecdc4;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-info .tagline {
+                border-left: none;
+                border-top: 4px solid #4ecdc4;
+                padding-top: 1rem;
+            }
+
+            .timeline-item {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        /* ===== VARIÁVEIS POR MEMBRO (edita aqui para cada pessoa) ===== */
+        :root {
+            /* Cores principais da pessoa */
+            --member-primary: #ff6b6b;
+            /* Rosa/vermelho - para Ana */
+            --member-secondary: #4ecdc4;
+            /* Verde água */
+            --member-accent: #45b7d1;
+            /* Azul claro */
+            --member-glow: rgba(78, 205, 196, 0.7);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="digital-bg"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/" class="logo" style="text-decoration:none; color:inherit;">B1tJ0urney</a>
+        <div class="nav-links">
+            <div class="btn-wrapper"><a href="../index.html" class="nav-btn">Início</a></div>
+            <div class="btn-wrapper"><a href="index.html" class="nav-btn">Sobre</a></div>
+            <div class="btn-wrapper"><a href="#" class="nav-btn">Cursos</a></div>
+            <div class="btn-wrapper"><a href="index.html#equipa" class="nav-btn">Equipa</a></div>
+            <div class="btn-wrapper"><a href="#" class="nav-btn">Contacto</a></div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- CABEÇALHO DO PERFIL -->
+        <div class="profile-header">
+            <div class="avatar-large">
+                <!-- Pode ser imagem: <img src="foto-ana.jpg" alt="Ana"> -->
+                AS <!-- Iniciais (ou ícone) -->
+            </div>
+            <div class="profile-info">
+                <h1>Ana Silva</h1>
+                <div class="role">Fundadora & Head of Education</div>
+                <div class="tagline">"Ensinar é aprender duas vezes. E programar é ensinar o futuro."</div>
+            </div>
+        </div>
+
+        <!-- SECÇÃO 1: BIOGRAFIA (personalizável) -->
+        <div class="content-card">
+            <h2 class="section-title">⚡ A Jornada</h2>
+            <p style="font-size: 1.2rem; margin-bottom: 1rem;">Ana é engenheira informática pelo IST e mestre em
+                Educação Digital. Começou a programar aos 12 anos num curso de verão e nunca mais parou. Durante 8 anos
+                foi professora universitária, mas sentiu que o ensino tradicional não acompanhava a indústria.</p>
+            <p style="font-size: 1.2rem;">Em 2023 fundou a B1tJ0urney com o sonho de criar um método de ensino prático,
+                divertido e acessível. Já orientou mais de 500 alunos, muitos dos quais hoje trabalham em empresas como
+                Google, Cloudflare e startups portuguesas.</p>
+        </div>
+
+        <!-- SECÇÃO 2: SKILLS & INTERESSES (bloco colorido) -->
+        <div class="content-card">
+            <h2 class="section-title">🛠️ Áreas de domínio</h2>
+            <div class="skills-grid">
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">React</span>
+                <span class="skill-tag">Node.js</span>
+                <span class="skill-tag">Educação</span>
+                <span class="skill-tag">Mentoria</span>
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">UX Design</span>
+                <span class="skill-tag">Liderança</span>
+            </div>
+        </div>
+
+        <!-- SECÇÃO 3: EXPERIÊNCIA (timeline) -->
+        <div class="content-card">
+            <h2 class="section-title">📌 Marcos da carreira</h2>
+            <div class="timeline-item">
+                <div class="timeline-year">2023 →</div>
+                <div class="timeline-content">
+                    <h3>Fundação da B1tJ0urney</h3>
+                    <p>Criação da escola com foco em gamificação e mentoria personalizada.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2018-2023</div>
+                <div class="timeline-content">
+                    <h3>Professora Auxiliar, IST</h3>
+                    <p>Responsável por cadeiras de Introdução à Programação e Desenvolvimento Web.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2015-2018</div>
+                <div class="timeline-content">
+                    <h3>Engenheira de Software, Microsoft</h3>
+                    <p>Desenvolvimento de ferramentas educacionais para a área de Azure.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECÇÃO 4: CITAÇÃO / FILOSOFIA (destaque) -->
+        <div class="quote-block">
+            <i class="fas fa-quote-left" style="color: #4ecdc4; font-size: 2rem; margin-right: 1rem;"></i>
+            O código é a linguagem mais próxima da magia que temos. Com ele, podemos construir mundos, resolver
+            problemas e conectar pessoas. Na B1tJ0urney, queremos dar essa varinha mágica a todos.
+        </div>
+
+        <!-- SECÇÃO 5: PROJETOS PESSOAIS (personalizável) -->
+        <div class="content-card">
+            <h2 class="section-title">🚀 Fora do escritório</h2>
+            <p>Quando não está a codificar ou a ensinar, Ana adora:</p>
+            <ul style="margin-top: 1rem; list-style: none;">
+                <li style="margin-bottom: 0.5rem;">♟️ Jogar xadrez (tem rating de 1800 online)</li>
+                <li style="margin-bottom: 0.5rem;">🚵‍♀️ Percorrer trilhos de bicicleta</li>
+                <li style="margin-bottom: 0.5rem;">📚 Ler ficção científica (Asimov é o favorito)</li>
+                <li style="margin-bottom: 0.5rem;">🎸 Tocar guitarra elétrica (banda de covers dos anos 80)</li>
+            </ul>
+        </div>
+
+        <!-- SECÇÃO 6: PROJETOS - SHOWCASE COM MÉTRICAS -->
+        <div class="content-card">
+            <h2 class="section-title">💻 Projetos em destaque</h2>
+            <div class="projects-metrics">
+                <!-- Projeto 1 -->
+                <div class="metric-card">
+                    <div class="metric-header" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <i class="fas fa-code"></i>
+                        <span class="metric-year">2024</span>
+                    </div>
+                    <div class="metric-body">
+                        <h3>Plataforma Adaptativa</h3>
+                        <div class="metric-stats">
+                            <div class="stat">
+                                <span class="stat-value">10k+</span>
+                                <span class="stat-label">utilizadores</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">40%</span>
+                                <span class="stat-label">+retenção</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">4.8</span>
+                                <span class="stat-label">⭐ rating</span>
+                            </div>
+                        </div>
+                        <div class="metric-tech">
+                            <i class="fab fa-react"></i>
+                            <i class="fab fa-node"></i>
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <a href="#" class="metric-link">Ver detalhes →</a>
+                    </div>
+                </div>
+
+                <!-- Projeto 2 -->
+                <div class="metric-card">
+                    <div class="metric-header" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <i class="fas fa-robot"></i>
+                        <span class="metric-year">2024</span>
+                    </div>
+                    <div class="metric-body">
+                        <h3>Assistente IA</h3>
+                        <div class="metric-stats">
+                            <div class="stat">
+                                <span class="stat-value">5k+</span>
+                                <span class="stat-label">conversas</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">98%</span>
+                                <span class="stat-label">satisfação</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">24/7</span>
+                                <span class="stat-label">disponível</span>
+                            </div>
+                        </div>
+                        <div class="metric-tech">
+                            <i class="fab fa-python"></i>
+                            <i class="fas fa-brain"></i>
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <a href="#" class="metric-link">Ver detalhes →</a>
+                    </div>
+                </div>
+
+                <!-- Projeto 3 -->
+                <div class="metric-card">
+                    <div class="metric-header" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                        <i class="fas fa-gamepad"></i>
+                        <span class="metric-year">2023</span>
+                    </div>
+                    <div class="metric-body">
+                        <h3>DevQuest</h3>
+                        <div class="metric-stats">
+                            <div class="stat">
+                                <span class="stat-value">15k+</span>
+                                <span class="stat-label">jogadores</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">500+</span>
+                                <span class="stat-label">missões</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">1º</span>
+                                <span class="stat-label">ranking</span>
+                            </div>
+                        </div>
+                        <div class="metric-tech">
+                            <i class="fab fa-js"></i>
+                            <i class="fas fa-paint-brush"></i>
+                            <i class="fas fa-cubes"></i>
+                        </div>
+                        <a href="#" class="metric-link">Ver detalhes →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECÇÃO 7: REDES SOCIAIS / CONTACTO (com ícones) -->
+        <div class="content-card" style="text-align: center;">
+            <h2 class="section-title">🔗 Liga-te</h2>
+            <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin: 2rem 0;">
+                <a href="#" style="color: #4ecdc4; font-size: 2rem;"><i class="fab fa-linkedin"></i></a>
+                <a href="#" style="color: #4ecdc4; font-size: 2rem;"><i class="fab fa-github"></i></a>
+                <a href="#" style="color: #4ecdc4; font-size: 2rem;"><i class="fab fa-twitter"></i></a>
+                <a href="#" style="color: #4ecdc4; font-size: 2rem;"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+
+        <!-- Botão voltar -->
+        <div style="text-align: center;">
+            <a href="index.html#equipa" class="btn-back"><i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>
+                Voltar à equipa</a>
+        </div>
+    </main>
+
+    <footer>
+        <a href="/" class="logo" style="font-size: 2rem;" style="text-decoration:none; color:inherit;">B1tJ0urney</a>
+        <p style="margin-top: 2rem;">© 2025 B1tJ0urney. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        // Script para personalização dinâmica (opcional)
+        // Podes mudar cores via JavaScript se quiseres
+        console.log("Página da Ana Silva - Personalidade em destaque!");
+    </script>
+</body>
+
+</html>

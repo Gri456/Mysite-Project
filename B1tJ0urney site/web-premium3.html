@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Basic JavaScript</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #5b7cff;
+            --purple: #7a4bff;
+            --cyan: #28e0ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 125, 230, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Gradient overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--blue), var(--cyan));
+            color: white;
+            box-shadow: 0 4px 15px rgba(91, 124, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(91, 124, 255, 0.4);
+        }
+        /* Main content */
+        .main-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .course-header {
+            margin-bottom: 2rem;
+        }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente baseado no Tailwind: from-blue-700 via-cyan-500 to-blue-600 */
+    background: linear-gradient(to right, #1d4ed8, #06b6d4, #2563eb);
+
+    /* Faz o gradiente aparecer apenas no texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback */
+}
+
+        .course-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .progress-section {
+            margin-bottom: 2rem;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Tabs */
+        .tabs-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .tab-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+        .tab-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+        .tab-button:hover {
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-button.active {
+            color: var(--text-light);
+            background: rgba(91, 124, 255, 0.1);
+        }
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+        .tab-content {
+            padding: 2rem;
+            min-height: 400px;
+        }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        
+        /* List improvement */
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Quiz Styles */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { 
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem; 
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;
+            transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+
+        /* Lab Styles */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #fff; color: #333; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Evaluation section styles */
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .evaluation-column {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .evaluation-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid;
+        }
+
+        .evaluation-title.essential {
+            color: var(--cyan);
+            border-bottom-color: var(--cyan);
+        }
+
+        .evaluation-title.important {
+            color: #ffd700;
+            border-bottom-color: #ffd700;
+        }
+
+        .evaluation-title.advanced {
+            color: #ff6b6b;
+            border-bottom-color: #ff6b6b;
+        }
+
+        .evaluation-icon {
+            font-size: 1.1rem;
+        }
+
+        .evaluation-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .evaluation-list li {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .evaluation-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .evaluation-column:nth-child(1) .evaluation-list li::before {
+            color: var(--cyan);
+        }
+
+        .evaluation-column:nth-child(2) .evaluation-list li::before {
+            color: #ffd700;
+        }
+
+        .evaluation-column:nth-child(3) .evaluation-list li::before {
+            color: #ff6b6b;
+        }
+
+        @media (max-width: 768px) {
+            .evaluation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /*Quiz*/
+        /* Adding quiz styles */
+        .quiz-question {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--blue);
+        }
+
+        .quiz-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--blue);
+        }
+
+        .option-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            font-family: 'Courier New', monospace;
+        }
+
+        .quiz-option:hover .option-text {
+            color: var(--text-light);
+        }
+
+        .quiz-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91, 124, 255, 0.1), rgba(40, 224, 255, 0.05));
+            border: 1px solid rgba(91, 124, 255, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .results-title {
+            color: var(--cyan);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .quiz-score {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-feedback {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .feedback-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+    }
+    .feedback-correct { border-left: 4px solid #10b981; }
+    .feedback-incorrect { border-left: 4px solid #ef4444; }
+    
+    .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+    .feedback-correct .feedback-icon { color: #10b981; }
+    .feedback-incorrect .feedback-icon { color: #ef4444; }
+
+    .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+    .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+    .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+            .evaluation-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                margin-top: 1rem;
+            }
+            .evaluation-column {
+                background: rgba(255,255,255,0.02);
+                padding: 1.5rem;
+                border-radius: 12px;
+                border: 1px solid var(--border-color);
+            }
+            .evaluation-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 1rem;
+                font-size: 1.1rem;
+            }
+            .essential { color: var(--cyan); }
+            .important { color: var(--blue); }
+            .advanced { color: var(--purple); }
+            .evaluation-list {
+                list-style: none;
+                font-size: 0.9rem;
+                color: var(--text-secondary);
+            }
+            .evaluation-list li {
+                margin-bottom: 0.6rem;
+                padding-left: 1.2rem;
+                position: relative;
+            }
+            .evaluation-list li::before {
+                content: '•';
+                position: absolute;
+                left: 0;
+                color: inherit;
+            }
+            .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+        </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium.html" class="btn btn-back">← Back</a>
+                <a href="browse.html" class="btn btn-primary">Browse</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Basic JavaScript</h1>
+            <p class="course-description">
+                Master JavaScript from the ground up. Learn to create logic, respond to user actions, and make websites more interactive.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item">
+                    <span>⏱</span>
+                    <span>6–8h</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>• ES6+ • DOM • Fetch</span>
+                </div>
+                <div class="meta-item">
+                    <span>📌</span>
+                    <span>JavaScript Basics</span>
+                </div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'learn')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'lab')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'resources')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'evaluation')">Evaluation</button>
+            </nav>
+
+            <div id="learn" class="tab-panel active">
+    <div class="content-card">
+        <h3>🧠 3.1 JavaScript: The Engine of Interactivity</h3>
+        <p>If HTML is the skeleton and CSS is the decoration, JavaScript is the muscular and nervous system that allows the page to react to user actions.</p>
+        <div class="code-explanation">
+            <strong>The Pillars of Modern JS:</strong>
+            <br>• <span class="highlight">ES6+ Syntax:</span> Cleaner, more readable, and modular code.
+            <br>• <span class="highlight">DOM Manipulation:</span> The power to change HTML and CSS in real time.
+            <br>• <span class="highlight">Asynchronous Programming:</span> Load data without blocking navigation.
+        </div>
+    </div>
+
+    <div class="content-card">
+        <h3>⚡ 3.2 Modern Syntax (ES6+)</h3>
+        <p>The evolution of JavaScript brought tools that make development faster and less error-prone.</p>
+        <div class="code-block">
+            <pre><code><span class="comment">// 1. Scope Variables</span>
+<span class="tag">const</span> PI = <span class="string">3.14</span>; <span class="comment">// Immutable</span>
+<span class="tag">let</span> counter = <span class="string">0</span>; <span class="comment">// Can change</span>
+
+<span class="comment">// 2. Arrow Functions</span>
+<span class="tag">const</span> greet = (name) => <span class="string">`Hello, ${name}!`</span>;
+
+<span class="comment">// 3. Destructuring</span>
+<span class="tag">const</span> { title, price } = product;</code></pre>
+        </div>
+        <ul class="styled-list">
+            <li><strong>Template Literals:</strong> Use backticks to create dynamic strings.</li>
+            <li><strong>Spread Operator (...):</strong> Makes copying and merging objects or arrays easier.</li>
+            <li><strong>Modules:</strong> Project organization through <code>import</code> and <code>export</code>.</li>
+        </ul>
+    </div>
+
+    <div class="content-card">
+        <h3>🌳 3.3 DOM Manipulation</h3>
+        <p>The DOM (Document Object Model) is the tree that represents your HTML. With JS, you can "bring to life" every branch of this tree.</p>
+        
+        <div class="code-explanation">
+            <strong>Common Operations:</strong>
+            <br>• <code>querySelector()</code>: Selects elements like CSS does.
+            <br>• <code>addEventListener()</code>: Listens for clicks, scrolls, or form submissions.
+            <br>• <code>createElement()</code>: Generates dynamic content without reloading the page.
+        </div>
+    </div>
+
+    <div class="content-card">
+        <h3>⏳ 3.4 Asynchronous JavaScript (Fetch API)</h3>
+        <p>Essential for communicating with external servers and APIs without interrupting the user experience.</p>
+        <div class="code-block">
+            <pre><code><span class="tag">async function</span> loadData() {
+  <span class="tag">try</span> {
+    <span class="tag">const</span> response = <span class="tag">await</span> fetch(<span class="string">'https://api.example.com'</span>);
+    <span class="tag">const</span> data = <span class="tag">await</span> response.json();
+    console.log(data);
+  } <span class="tag">catch</span> (error) {
+    console.error(<span class="string">"Network error!"</span>);
+  }
+}</code></pre>
+        </div>
+        <p>Using <strong>Async/Await</strong> is the most modern and readable way to handle Promises (promises of future data).</p>
+    </div>
+
+    <div class="content-card">
+        <h3>🚀 3.5 Browser APIs and Optimization</h3>
+        <p>The browser offers native tools to improve performance and user experience:</p>
+        <ul class="styled-list">
+            <li><strong>Local Storage:</strong> Saves preferences (like Dark Theme) permanently in the browser.</li>
+            <li><strong>Intersection Observer:</strong> Detects when an element appears on screen (ideal for scroll animations).</li>
+            <li><strong>Debouncing:</strong> Prevents heavy functions (like searches) from running hundreds of times per second.</li>
+        </ul>
+    </div>
+
+    <div class="content-card" style="border-left: 5px solid var(--cyan);">
+        <h3>💡 3.6 Best Practices (Clean Code)</h3>
+        <ul class="styled-list">
+            <li><strong>Priority:</strong> Always use <code>const</code>; reserve <code>let</code> only for counters or changing values.</li>
+            <li><strong>Modularity:</strong> Create small functions that do only one thing.</li>
+            <li><strong>Separation:</strong> Never use inline JS (onclick in HTML). Keep logic in the <code>.js</code> file.</li>
+            <li><strong>Naming:</strong> Use variable names that explain what they store (e.g., <code>isUserLoggedIn</code> instead of <code>x</code>).</li>
+        </ul>
+    </div>
+
+    <div class="content-card" style="background: linear-gradient(45deg, rgba(122, 75, 255, 0.1), rgba(40, 224, 255, 0.1));">
+        <h3>✅ Module Conclusion</h3>
+        <p>Mastering modern JavaScript is the final step to becoming a professional Full-Stack or Front-End developer. With these foundations, you're ready to learn frameworks like <strong>React, Vue, or Node.js</strong>.</p>
+        <p><strong>Challenge:</strong> Open the Lab and try using <code>console.log</code> to print a variable created with <code>const</code>!</p>
+    </div>
+
+    <div class="content-card">
+    <h3>📦 3.7 Data Types and Structures</h3>
+    <p>Understanding data types is fundamental to writing reliable JavaScript.</p>
+    <ul class="styled-list">
+        <li><strong>Primitive:</strong> string, number, boolean, null, undefined, symbol</li>
+        <li><strong>Reference:</strong> object, array, function</li>
+    </ul>
+    <div class="code-block">
+<pre><code>const name = "Alice";
+const age = 25;
+const isLogged = true;
+
+const user = {
+    name: "Alice",
+    age: 25
+};
+
+const items = ["HTML", "CSS", "JS"];</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🔁 3.8 Arrays and Iteration</h3>
+    <p>Modern JavaScript provides powerful methods to work with lists.</p>
+    <div class="code-block">
+<pre><code>const prices = [10, 20, 30];
+
+// Loop
+prices.forEach(price => console.log(price));
+
+// Transform
+const discounted = prices.map(p => p * 0.9);
+
+// Filter
+const expensive = prices.filter(p => p > 15);</code></pre>
+    </div>
+    <div class="code-explanation">
+        Methods like <span class="highlight">map</span>, <span class="highlight">filter</span>, and <span class="highlight">reduce</span> are widely used in modern frameworks.
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🎯 3.9 Event Handling</h3>
+    <p>Events allow your application to react to user interaction.</p>
+    <div class="code-block">
+<pre><code>const button = document.querySelector(".btn");
+
+button.addEventListener("click", () => {
+    alert("Button clicked!");
+});</code></pre>
+    </div>
+    <ul class="styled-list">
+        <li>click</li>
+        <li>input</li>
+        <li>submit</li>
+        <li>scroll</li>
+        <li>keydown</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🧩 3.10 Event Delegation</h3>
+    <p>Instead of adding listeners to many elements, listen on a parent.</p>
+    <div class="code-block">
+<pre><code>document.querySelector(".list").addEventListener("click", (e) => {
+    if (e.target.tagName === "LI") {
+        console.log("Item clicked:", e.target.textContent);
+    }
+});</code></pre>
+    </div>
+    <div class="code-explanation">
+        Improves performance and simplifies dynamic content handling.
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>⏱ 3.11 Timers and the Event Loop</h3>
+    <p>JavaScript runs on a single thread, but asynchronous tasks are handled through the event loop.</p>
+    <div class="code-block">
+<pre><code>setTimeout(() => {
+    console.log("Executed after 2 seconds");
+}, 2000);
+
+setInterval(() => {
+    console.log("Repeating task");
+}, 1000);</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🗂 3.12 Working with Local Storage</h3>
+    <p>Store small amounts of data directly in the browser.</p>
+    <div class="code-block">
+<pre><code>// Save
+localStorage.setItem("theme", "dark");
+
+// Read
+const theme = localStorage.getItem("theme");
+
+// Remove
+localStorage.removeItem("theme");</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🔍 3.13 Error Handling and Debugging</h3>
+    <ul class="styled-list">
+        <li>Use <code>try...catch</code> for risky operations</li>
+        <li>Use <code>console.log</code> and <code>console.table</code></li>
+        <li>Inspect errors in DevTools</li>
+        <li>Avoid silent failures</li>
+    </ul>
+    <div class="code-block">
+<pre><code>try {
+    JSON.parse("invalid json");
+} catch (error) {
+    console.error("Parsing failed:", error);
+}</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>⚡ 3.14 Performance Tips</h3>
+    <ul class="styled-list">
+        <li>Avoid unnecessary DOM manipulation</li>
+        <li>Cache element selections</li>
+        <li>Use debouncing for search inputs</li>
+        <li>Minimize heavy loops</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🧠 3.15 JavaScript Mental Model</h3>
+    <ul class="styled-list">
+        <li>Think in functions and reusable logic</li>
+        <li>Separate data from UI manipulation</li>
+        <li>Prefer immutability when possible</li>
+        <li>Write predictable and testable code</li>
+    </ul>
+</div>
+
+<div class="content-card" style="border-left: 5px solid var(--purple);">
+    <h3>🏆 3.16 Professional Readiness</h3>
+    <p>If you understand everything in this module, you can:</p>
+    <ul class="styled-list">
+        <li>Manipulate the DOM dynamically</li>
+        <li>Handle user interactions</li>
+        <li>Fetch and process external data</li>
+        <li>Build small interactive applications</li>
+        <li>Start learning frameworks like React or Vue</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🔐 3.17 Scope and Closures</h3>
+    <p>Scope defines where a variable can be accessed. Closures allow a function to remember variables from its outer scope.</p>
+    <div class="code-block">
+<pre><code>function createCounter() {
+    let count = 0;
+
+    return function () {
+        count++;
+        console.log(count);
+    };
+}
+
+const counter = createCounter();
+counter(); // 1
+counter(); // 2</code></pre>
+    </div>
+    <div class="code-explanation">
+        Closures are widely used in modules, event handlers, and frameworks.
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🧭 3.18 Understanding "this"</h3>
+    <p>The value of <code>this</code> depends on how a function is called.</p>
+    <div class="code-block">
+<pre><code>const user = {
+    name: "Alice",
+    greet() {
+        console.log("Hello " + this.name);
+    }
+};
+
+user.greet();</code></pre>
+    </div>
+    <ul class="styled-list">
+        <li>In objects: refers to the object</li>
+        <li>In arrow functions: inherits from the outer scope</li>
+        <li>In event handlers: refers to the element</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>📡 3.19 Working with JSON</h3>
+    <p>Most APIs communicate using JSON (JavaScript Object Notation).</p>
+    <div class="code-block">
+<pre><code>const jsonString = '{"name":"Alice"}';
+
+// Convert to object
+const obj = JSON.parse(jsonString);
+
+// Convert to JSON
+const json = JSON.stringify(obj);</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🧪 3.20 Defensive Programming</h3>
+    <p>Professional code anticipates errors and unexpected data.</p>
+    <ul class="styled-list">
+        <li>Check if values exist before using them</li>
+        <li>Use optional chaining <code>?.</code></li>
+        <li>Use default values</li>
+    </ul>
+    <div class="code-block">
+<pre><code>const user = {};
+console.log(user.profile?.name || "Guest");</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🧱 3.21 Modular Code Structure</h3>
+    <p>Large projects are divided into modules to improve organization and scalability.</p>
+    <div class="code-block">
+<pre><code>// utils.js
+export function sum(a, b) {
+    return a + b;
+}
+
+// main.js
+import { sum } from './utils.js';
+console.log(sum(2, 3));</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>⚙️ 3.22 Debounce and Throttle</h3>
+    <p>Used to control how often a function executes during rapid events.</p>
+    <ul class="styled-list">
+        <li><strong>Debounce:</strong> Runs after the user stops typing</li>
+        <li><strong>Throttle:</strong> Limits execution rate (e.g., scroll events)</li>
+    </ul>
+    <div class="code-block">
+<pre><code>function debounce(fn, delay) {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn(...args), delay);
+    };
+}</code></pre>
+    </div>
+</div>
+
+<div class="content-card">
+    <h3>🖥 3.23 Browser DevTools Workflow</h3>
+    <ul class="styled-list">
+        <li>Use the Console to test code quickly</li>
+        <li>Set breakpoints in the Sources tab</li>
+        <li>Inspect network requests in the Network tab</li>
+        <li>Analyze performance with the Performance tab</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>📈 3.24 Memory and Garbage Collection</h3>
+    <p>JavaScript automatically frees unused memory, but poor patterns can cause leaks.</p>
+    <ul class="styled-list">
+        <li>Remove unused event listeners</li>
+        <li>Avoid global variables</li>
+        <li>Clear intervals and timeouts</li>
+        <li>Be careful with large objects in closures</li>
+    </ul>
+</div>
+
+<div class="content-card">
+    <h3>🧠 3.25 Problem-Solving Approach</h3>
+    <ul class="styled-list">
+        <li>Break problems into small steps</li>
+        <li>Write pseudocode first</li>
+        <li>Test small pieces frequently</li>
+        <li>Use the console to inspect values</li>
+        <li>Focus on logic before optimization</li>
+    </ul>
+</div>
+
+<div class="content-card" style="border-left: 5px solid var(--cyan);">
+    <h3>🚀 3.26 Ready for the Next Level</h3>
+    <p>If you understand this entire module, you now have a solid foundation in core JavaScript.</p>
+    <ul class="styled-list">
+        <li>Variables, functions, and data structures</li>
+        <li>DOM manipulation and events</li>
+        <li>Async programming and APIs</li>
+        <li>Code organization and debugging</li>
+        <li>Performance and browser tools</li>
+    </ul>
+    <p><strong>Next Step:</strong> Advanced JavaScript (Closures Deep Dive, Prototypes, Classes, and Architecture).</p>
+</div>
+</div>
+
+            <div id="lab" class="tab-panel">
+                <h3>SQL Data Console</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Practice data extraction. Try filtering customers with high spending.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">SQL EDITOR</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT customer_name, total_spent 
+FROM sales 
+WHERE total_spent > 1500
+ORDER BY total_spent DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">QUERY RESULT</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Click "Run" to simulate the database query...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Run Query</button>
+            </div>
+
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>Quiz: Modern JavaScript and DOM</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your logic and knowledge about DOM manipulation and ES6+. Answer 15 questions to validate your progress.</p>
+        
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What is the main difference between let and const?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) let is global, const is local.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B" data-correct="true"> B) let allows reassignment, const creates an immutable variable.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C"> C) const can be redeclared, let cannot.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) There is no difference.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. What does the spread operator (...) do?</p>
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Combines only strings.</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B" data-correct="true"> B) Copies or expands elements from an iterable (arrays or objects).</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Deletes items from an array.</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Sorts data automatically.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. How do you select a DOM element by its class?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) document.getElement()</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B" data-correct="true"> B) document.querySelector('.className')</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C"> C) document.getClass('.className')</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) document.selectClass()</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. What is an event listener?</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) A function that runs automatically on load.</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B" data-correct="true"> B) A function that waits and responds to events (clicks or keys).</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C"> C) A CSS-only feature.</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) A special type of variable.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. What is the DOM (Document Object Model)?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) A database.</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B"> B) A programming language.</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C" data-correct="true"> C) A representation of the page as a tree of objects.</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) A browser plugin.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. Which is a correct example of an arrow function?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A"> A) function add(a, b) { return a + b; }</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) add = function(a, b) { a + b }</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C" data-correct="true"> C) const add = (a, b) => a + b;</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) arrow add(a, b)</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. What is asynchronous programming?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Code that runs only once.</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Code that blocks everything else from executing.</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"> C) Code that allows tasks to run without blocking the main thread.</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Code that runs faster than normal.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. What is the await keyword used for?</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) To stop the browser completely.</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"> B) To pause the function until a Promise is resolved.</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C"> C) To create a new Promise.</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) To repeat a block of code.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. What is event delegation?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Placing events on each element individually.</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Sending events to the server.</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"> C) Using a parent element to manage events for children.</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Preventing default browser behavior.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. Why should you avoid using var nowadays?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Because it's slower.</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Because it doesn't store numbers.</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C" data-correct="true"> C) Because it has function scope and causes unexpected bugs.</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Because it's illegal in modern JS.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What is an HTTP response status code?</p>
+                <label class="quiz-option"><input type="radio" name="q11" value="A"> A) A password.</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B"> B) A type of IP address.</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C" data-correct="true"> C) A code indicating the request result (e.g., 200, 404).</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) An aesthetic feature.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. What does destructuring allow you to do?</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Delete objects from memory.</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Only rename variables.</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"> C) Extract values from arrays/objects into distinct variables.</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Combine multiple functions.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. How do you create a new element in the DOM?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) document.newElement()</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B"> B) create.element()</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"> C) document.createElement('div')</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) new DOMElement()</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. What is a Promise?</p>
+                <label class="quiz-option"><input type="radio" name="q14" value="A"> A) A loop.</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B"> B) A simple variable type.</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C" data-correct="true"> C) An object representing the eventual success or failure of an async operation.</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) A browser event.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. Why are template literals (using backticks) useful?</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) They reduce file size.</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B" data-correct="true"> B) They make variable interpolation and multi-line strings easier.</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C"> C) They replace CSS files.</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) They improve security.</label>
+            </div>
+        </form>
+
+        <div class="quiz-controls" style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button id="submit-quiz" class="btn btn-primary">Submit Assessment</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback" class="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+class QuizManager {
+    constructor() {
+        this.questionsData = {
+            q1: { correct: 'B', exp: 'Const does not allow reassignment after the initial value, let does.' },
+            q2: { correct: 'B', exp: 'The ... operator "spreads" items from an array or object into a new one.' },
+            q3: { correct: 'B', exp: 'querySelector uses CSS syntax, so the dot (.) indicates a class.' },
+            q4: { correct: 'B', exp: 'Event Listeners are the mechanism that makes the page reactive to actions.' },
+            q5: { correct: 'C', exp: 'The DOM is the interface that allows JS to access HTML.' },
+            q6: { correct: 'C', exp: 'Arrow functions use the => symbol and are more concise.' },
+            q7: { correct: 'C', exp: 'Allows loading external data without freezing the UI.' },
+            q8: { correct: 'B', exp: 'Await forces the code to wait for the response before continuing.' },
+            q9: { correct: 'C', exp: 'More efficient: one listener on the parent element manages all child items.' },
+            q10: { correct: 'C', exp: 'Var ignores block scope, which causes redeclaration bugs.' },
+            q11: { correct: 'C', exp: '200 OK, 404 Not Found, etc., are crucial for debugging.' },
+            q12: { correct: 'C', exp: 'Allows creating variables from object properties quickly.' },
+            q13: { correct: 'C', exp: 'This method creates the node in the DOM, which must then be appended.' },
+            q14: { correct: 'C', exp: 'Promises manage the flow of time in operations that take a while.' },
+            q15: { correct: 'B', exp: 'Backticks eliminate the need to concatenate with the + symbol.' }
+        };
+        this.init();
+    }
+
+    init() {
+        document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+        document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+    }
+
+    submitQuiz() {
+        const form = document.getElementById('quiz-form');
+        const formData = new FormData(form);
+        let score = 0;
+        let feedbackHTML = '';
+
+        Object.keys(this.questionsData).forEach((key, index) => {
+            const userAnswer = formData.get(key);
+            const isCorrect = userAnswer === this.questionsData[key].correct;
+            
+            if (isCorrect) score++;
+
+            feedbackHTML += `
+    <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+        <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+        <div>
+            <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+            ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+        </div>
+    </div>
+`;
+        });
+
+        this.displayResults(score, feedbackHTML);
+    }
+
+    displayResults(score, feedbackHTML) {
+        const total = Object.keys(this.questionsData).length;
+        const percent = Math.round((score / total) * 100);
+        const resultsDiv = document.getElementById('quiz-results');
+        
+        let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+
+        document.getElementById('quiz-score').innerHTML = `
+            <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+            <p style="color: var(--text-secondary)">${percent >= 70 ? 'Excellent! You have mastered the structure of the modern Web.' : 'Review Flexbox and Semantic concepts and try again.'}</p>
+        `;
+
+        document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clearQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-results').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new QuizManager();
+});
+</script>
+            <div id="resources" class="tab-panel">
+                    <div class="content-card">
+                        <h3 class="content-title">Recommended Documents</h3>
+                        <p class="content-text">
+                            Here you have a curated list of essential resources to deepen your knowledge 
+                            in HTML and CSS. These documents will help you master the fundamental concepts.
+                        </p>
+                        
+                        <div class="resources-list">
+                            <div class="resource-category">
+                                <h4 class="category-title">Official Documentation</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">MDN Web Docs - HTML</a></li>
+                                    <li><a href="#" class="resource-link">MDN Web Docs - CSS</a></li>
+                                    <li><a href="#" class="resource-link">W3C HTML5 Specification</a></li>
+                                    <li><a href="#" class="resource-link">CSS Working Group Specifications</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Guides and Tutorials</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML5 Semantic Elements Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Flexbox Complete Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Grid Layout Tutorial</a></li>
+                                    <li><a href="#" class="resource-link">Web Accessibility Guidelines (WCAG)</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Tools and Validators</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">W3C HTML Validator</a></li>
+                                    <li><a href="#" class="resource-link">W3C CSS Validator</a></li>
+                                    <li><a href="#" class="resource-link">Can I Use - Browser Support</a></li>
+                                    <li><a href="#" class="resource-link">WebAIM Accessibility Checker</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Quick References</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML Elements Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Properties Cheat Sheet</a></li>
+                                    <li><a href="#" class="resource-link">HTML Entities Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Selectors Reference</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="resources-note">
+                            <p>💡 <strong>Note:</strong> You can edit this list in the future to add your own favorite resources.</p>
+                        </div>
+                    </div>
+            </div>
+
+            <div id="evaluation" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Mastery Criteria: Basic JavaScript</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Here are the criteria organized by importance levels to assess your mastery of JavaScript fundamentals.
+                </p>
+                
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential">
+                            <span>💠</span> Essential
+                        </h4>
+                        <ul class="evaluation-list">
+                            <li>Practical difference between <code>const</code> and <code>let</code></li>
+                            <li>Basic data types (Strings, Numbers, Booleans)</li>
+                            <li>Logical and comparison operators</li>
+                            <li>Conditional structures (if/else, switch)</li>
+                            <li>Basic manipulation of Arrays and Objects</li>
+                            <li>Creating simple functions</li>
+                            <li>Using <code>console.log()</code> for debugging</li>
+                            <li>Template Literals (using backticks ``)</li>
+                        </ul>
+                    </div>
+
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important">
+                            <span>⭐</span> Important
+                        </h4>
+                        <ul class="evaluation-list">
+                            <li>Element selection (<code>querySelector</code>)</li>
+                            <li>Event management (<code>addEventListener</code>)</li>
+                            <li>Loops and iterations (<code>forEach</code>, <code>map</code>)</li>
+                            <li>Arrow Functions and their syntax</li>
+                            <li>Class and style manipulation via JS</li>
+                            <li>Destructuring of arrays and objects</li>
+                            <li>Scope concepts (Global vs Block)</li>
+                            <li>Using <code>localStorage</code> for persistence</li>
+                        </ul>
+                    </div>
+
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced">
+                            <span>🚀</span> Advanced
+                        </h4>
+                        <ul class="evaluation-list">
+                            <li>Consuming APIs with <code>fetch()</code></li>
+                            <li>Asynchronous Programming (<code>Async/Await</code>)</li>
+                            <li>Error handling (<code>try/catch</code>)</li>
+                            <li>Reactivity concept (State)</li>
+                            <li>Creating reusable Components</li>
+                            <li>Module logic (<code>import/export</code>)</li>
+                            <li>Event Delegation for performance</li>
+                            <li>Working with JSON and data processing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+                </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-panel");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            let progressMap = { 'learn': 25, 'lab': 50, 'quiz': 75, 'resources': 90, 'evaluation': 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executed successfully.</strong><br><br>Results (Top 3):<br>-----------------------<br>1. Carlos Alberto | €4,250.00<br>2. Beatriz Ramos | €2,100.50<br>3. Ricardo Jorge | €1,880.00<br><br><em>Tip: The WHERE filter worked correctly, eliminating records below €1500.</em>";
+        }
+    </script>
+</body>
+</html>
+

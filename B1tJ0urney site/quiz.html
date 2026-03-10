@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BitJourney | Teste de Orientação (6 áreas)</title>
+  <style>
+    :root{--bg:#0b0f1a;--card:#111729;--muted:#9fb3c8;--text:#e6f0ff;--a1:#6e8bff;--a2:#7a5cff;--a3:#2dd4bf;--good:#22c55e;--warn:#f59e0b}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:var(--text);background:radial-gradient(1200px 600px at 10% 0%,#101b3a 0%,var(--bg) 60%),radial-gradient(1000px 500px at 100% 0%,#1a103a 0%,transparent 60%),var(--bg);min-height:100vh}
+    header{padding:32px 16px 8px;text-align:center}
+    .brand{display:inline-flex;gap:10px;font-weight:800;letter-spacing:.5px;background:linear-gradient(90deg,var(--a1),var(--a2),var(--a3));-webkit-background-clip:text;background-clip:text;color:transparent;font-size:clamp(22px,4vw,32px)}
+    .subtitle{color:var(--muted);font-size:14px;margin-top:6px}
+    .container{max-width:1000px;margin:16px auto 80px;padding:0 16px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);overflow:hidden}
+    .card-header{padding:18px 20px;background:linear-gradient(90deg,rgba(110,139,255,.2),rgba(122,92,255,.15),rgba(45,212,191,.12));border-bottom:1px solid rgba(255,255,255,.08)}
+    .card-body{padding:16px}
+    .q-group{padding:10px 8px}
+    .q-title{font-weight:700;margin:16px 0 8px}
+    .q-item{border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);border-radius:14px;padding:14px;margin:10px 0}
+    .q-text{font-weight:600;margin-bottom:10px}
+    .opt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px}
+    .opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.03)}
+    .opt input{accent-color:#7a5cff;width:18px;height:18px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:22px 0}
+    .btn{appearance:none;border:none;cursor:pointer;font-weight:800;padding:12px 18px;border-radius:14px;letter-spacing:.3px;color:white;background:linear-gradient(90deg,var(--a1),var(--a2));box-shadow:0 10px 20px rgba(122,92,255,.25);transition:transform .08s ease,filter .2s}
+    .btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+    .btn[disabled]{opacity:.55;cursor:not-allowed;filter:grayscale(.2)}
+    .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--text)}
+    .error{color:#ff6b6b;text-align:center;font-size:14px;min-height:18px}
+    .result{margin-top:22px;display:none}
+    .result.show{display:block}
+    .res-grid{display:grid;gap:14px;grid-template-columns:1fr}
+    .bars{display:grid;gap:10px}
+    .bar-row{display:grid;grid-template-columns:120px 1fr 60px;align-items:center;gap:10px}
+    .label{color:#dbe7ff}
+    .bar{height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+    .fill{height:100%;width:0;background:linear-gradient(90deg,var(--a3),var(--a2));transition:width .4s ease}
+    .rec{border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;background:linear-gradient(180deg,rgba(110,139,255,.08),rgba(45,212,191,.06))}
+    .rec h4{margin:0 0 6px}
+    .rec a{display:inline-block;margin-top:8px;font-weight:700;color:white;background:linear-gradient(90deg,var(--a2),var(--a3));padding:8px 12px;border-radius:12px;text-decoration:none}
+    footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 40px}
+    @media (max-width:520px){.bar-row{grid-template-columns:1fr;gap:6px}.label{text-align:left}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">BitJourney · Find your Journey</div>
+    <div class="subtitle">Responde às 15 questões. No final vês a percentagem nas 6 áreas (Web, Cyber, Data, IA, Mobile, Cloud).</div>
+  </header>
+
+  <main class="container">
+    <section class="card" aria-labelledby="quizTitle">
+      <div class="card-header"><h2 id="quizTitle">Teste de Orientação Tecnológica</h2></div>
+      <div class="card-body">
+        <form id="quizForm" novalidate></form>
+        <div class="actions">
+          <button id="btnSubmit" class="btn" type="button" disabled>Ver Resultado</button>
+          <button id="btnReset" class="btn secondary" type="button">Limpar</button>
+        </div>
+        <div id="error" class="error" role="alert" aria-live="polite"></div>
+
+        <div id="result" class="result card">
+          <div class="card-header">
+            <h3 style="margin:0">O teu resultado (percentagens por área)</h3>
+            <p class="subtitle" style="margin:6px 0 0">Cálculo baseado nas 15 respostas (cada questão conta 1 ponto).</p>
+          </div>
+          <div class="card-body">
+            <div class="res-grid">
+              <div class="bars" id="bars"></div>
+              <div class="rec" id="recommend"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer>© <span id="year"></span> BitJourney — educativo, prático e gratuito.</footer>
+  </main>
+
+  <script>
+  const PAGES = {
+    web: 'webdev.html',
+    cyber: 'cybersecurity.html',
+    data: 'data-science.html',
+    ai: 'artificial-intelligence.html',
+    mobile: 'mobile-development.html',
+    cloud: 'cloud-computing.html',
+  };
+
+  const DIM_LABEL = {
+    web: 'Web Development',
+    cyber: 'Cybersecurity',
+    data: 'Data Science',
+    ai: 'Inteligência Artificial',
+    mobile: 'Mobile Development',
+    cloud: 'Cloud Computing',
+  };
+
+  // 15 perguntas com 6 opções (a..f) mapeadas para as 6 áreas
+  const QUESTIONS = [
+    {
+      title: '1. Quando enfrentas um desafio, preferes…',
+      options: [
+        {k:'web', text:'a) Tornar a solução clara e fácil de visualizar.'},
+        {k:'cyber', text:'b) Identificar pontos fracos antes que causem problemas.'},
+        {k:'data', text:'c) Procurar padrões escondidos para entender melhor.'},
+        {k:'ai', text:'d) Imaginar uma solução totalmente nova.'},
+        {k:'mobile', text:'e) Criar algo simples e prático que qualquer pessoa use.'},
+        {k:'cloud', text:'f) Organizar tudo para funcionar de forma estável.'},
+      ]
+    },
+    {
+      title: '2. Numa equipa, tu costumas ser…',
+      options: [
+        {k:'web', text:'a) O que dá forma e estética ao projeto.'},
+        {k:'cyber', text:'b) O que encontra problemas e vulnerabilidades.'},
+        {k:'data', text:'c) O que traz factos e dados para apoiar.'},
+        {k:'ai', text:'d) O que sugere ideias fora da caixa.'},
+        {k:'mobile', text:'e) O que pensa na experiência do utilizador.'},
+        {k:'cloud', text:'f) O que garante que nada falhe e tem plano B.'},
+      ]
+    },
+    {
+      title: '3. No teu tempo livre, o que mais te atrai?',
+      options: [
+        {k:'web', text:'a) Criar algo artístico ou visual.'},
+        {k:'cyber', text:'b) Resolver enigmas ou puzzles lógicos.'},
+        {k:'data', text:'c) Explorar números, estatísticas ou gráficos.'},
+        {k:'ai', text:'d) Imaginar invenções futuristas.'},
+        {k:'mobile', text:'e) Testar gadgets e ferramentas novas.'},
+        {k:'cloud', text:'f) Montar/organizar sistemas complexos.'},
+      ]
+    },
+    {
+      title: '4. O que te dá mais satisfação num projeto?',
+      options: [
+        {k:'web', text:'a) Ver o resultado a ganhar vida.'},
+        {k:'cyber', text:'b) Saber que preveniste falhas sérias.'},
+        {k:'data', text:'c) Descobrir algo escondido nos detalhes.'},
+        {k:'ai', text:'d) Criar algo que automatiza e facilita o dia a dia.'},
+        {k:'mobile', text:'e) Ver pessoas a usarem sem dificuldade.'},
+        {k:'cloud', text:'f) Garantir que funciona 24/7 sem falhas.'},
+      ]
+    },
+    {
+      title: '5. Se pudesses escolher uma atividade, seria…',
+      options: [
+        {k:'web', text:'a) Construir algo criativo com praticidade.'},
+        {k:'cyber', text:'b) Resolver um caso como um detetive.'},
+        {k:'data', text:'c) Analisar resultados e relatórios.'},
+        {k:'ai', text:'d) Inventar algo fora da realidade atual.'},
+        {k:'mobile', text:'e) Construir algo pequeno e útil.'},
+        {k:'cloud', text:'f) Montar uma rede/estrutura em grupo.'},
+      ]
+    },
+    {
+      title: '6. Que frase mais combina contigo?',
+      options: [
+        {k:'web', text:'a) “Adoro dar forma às ideias.”'},
+        {k:'cyber', text:'b) “Mais vale prevenir do que remediar.”'},
+        {k:'data', text:'c) “Tudo tem um padrão, basta procurar.”'},
+        {k:'ai', text:'d) “E se automatizássemos isto?”'},
+        {k:'mobile', text:'e) “Quanto mais simples, melhor.”'},
+        {k:'cloud', text:'f) “Tudo organizado traz bons resultados.”'},
+      ]
+    },
+    {
+      title: '7. Quando jogas, preferes…',
+      options: [
+        {k:'web', text:'a) Personalizar cenários ou personagens.'},
+        {k:'cyber', text:'b) Descobrir falhas e explorar bugs.'},
+        {k:'data', text:'c) Analisar estatísticas para vencer.'},
+        {k:'ai', text:'d) Criar rotinas/automação para evoluir mais rápido.'},
+        {k:'mobile', text:'e) Usar ferramentas rápidas e úteis para evoluir.'},
+        {k:'cloud', text:'f) Gerir recursos para a equipa toda.'},
+      ]
+    },
+    {
+      title: '8. Qual destes ambientes te atrai mais?',
+      options: [
+        {k:'web', text:'a) Um estúdio criativo.'},
+        {k:'cyber', text:'b) Um centro de investigação criminal.'},
+        {k:'data', text:'c) Um laboratório cheio de dados.'},
+        {k:'ai', text:'d) Um espaço futurista com protótipos.'},
+        {k:'mobile', text:'e) Uma startup ágil e prática.'},
+        {k:'cloud', text:'f) Um centro de operações global.'},
+      ]
+    },
+    {
+      title: '9. Quando alguém te pede ajuda, tu…',
+      options: [
+        {k:'web', text:'a) Mostras de forma visual e prática.'},
+        {k:'cyber', text:'b) Apontas riscos escondidos.'},
+        {k:'data', text:'c) Usas exemplos concretos e provas.'},
+        {k:'ai', text:'d) Sugeres uma ideia inesperada.'},
+        {k:'mobile', text:'e) Ensinas de forma simples e prática.'},
+        {k:'cloud', text:'f) Estruturas um processo para não falhar.'},
+      ]
+    },
+    {
+      title: '10. O que mais te irrita?',
+      options: [
+        {k:'web', text:'a) Algo mal feito e feio.'},
+        {k:'cyber', text:'b) Descuidar na segurança.'},
+        {k:'data', text:'c) Decisões sem base em factos.'},
+        {k:'ai', text:'d) Falta de abertura para inovação.'},
+        {k:'mobile', text:'e) Ferramentas complicadas de usar.'},
+        {k:'cloud', text:'f) Desorganização em sistemas grandes.'},
+      ]
+    },
+    {
+      title: '11. Que papel terias num filme de aventura?',
+      options: [
+        {k:'web', text:'a) O inventor criativo.'},
+        {k:'cyber', text:'b) O guardião protetor.'},
+        {k:'data', text:'c) O investigador atento.'},
+        {k:'ai', text:'d) O cientista visionário.'},
+        {k:'mobile', text:'e) O engenheiro de gadgets portáteis.'},
+        {k:'cloud', text:'f) O estratega que coordena tudo.'},
+      ]
+    },
+    {
+      title: '12. O que mais te entusiasma no futuro?',
+      options: [
+        {k:'web', text:'a) Novas formas de expressão criativa.'},
+        {k:'cyber', text:'b) Sistemas cada vez mais seguros.'},
+        {k:'data', text:'c) Informação precisa para decisões melhores.'},
+        {k:'ai', text:'d) Máquinas que aprendem e ajudam.'},
+        {k:'mobile', text:'e) Tecnologia acessível no dia a dia.'},
+        {k:'cloud', text:'f) Serviços digitais que nunca falham.'},
+      ]
+    },
+    {
+      title: '13. Se pudesses escolher um passatempo, seria…',
+      options: [
+        {k:'web', text:'a) Desenhar ou criar algo visual.'},
+        {k:'cyber', text:'b) Resolver desafios lógicos.'},
+        {k:'data', text:'c) Explorar relatórios e gráficos.'},
+        {k:'ai', text:'d) Imaginar invenções futuristas.'},
+        {k:'mobile', text:'e) Testar novas apps ou gadgets.'},
+        {k:'cloud', text:'f) Organizar coleções ou sistemas.'},
+      ]
+    },
+    {
+      title: '14. Qual destes valores combina mais contigo?',
+      options: [
+        {k:'web', text:'a) Criatividade.'},
+        {k:'cyber', text:'b) Segurança.'},
+        {k:'data', text:'c) Precisão.'},
+        {k:'ai', text:'d) Inovação.'},
+        {k:'mobile', text:'e) Simplicidade.'},
+        {k:'cloud', text:'f) Organização.'},
+      ]
+    },
+    {
+      title: '15. Se tivesses de escolher uma frase final…',
+      options: [
+        {k:'web', text:'a) “Gosto de dar forma a ideias.”'},
+        {k:'cyber', text:'b) “Prefiro estar preparado para tudo.”'},
+        {k:'data', text:'c) “Os dados falam por si.”'},
+        {k:'ai', text:'d) “O futuro pode ser diferente e inovador.”'},
+        {k:'mobile', text:'e) “Tudo deve ser simples, prático e útil.”'},
+        {k:'cloud', text:'f) “O todo é maior que as partes.”'},
+      ]
+    },
+  ];
+
+  const form = document.getElementById('quizForm');
+  const btnSubmit = document.getElementById('btnSubmit');
+  const btnReset = document.getElementById('btnReset');
+  const errorEl = document.getElementById('error');
+  const resultEl = document.getElementById('result');
+  const barsEl = document.getElementById('bars');
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  function renderQuiz(){
+    const frag = document.createDocumentFragment();
+    QUESTIONS.forEach((q, idx)=>{
+      const box = document.createElement('div');
+      box.className = 'q-item';
+      const title = document.createElement('div');
+      title.className = 'q-text';
+      title.textContent = q.title;
+      const grid = document.createElement('div');
+      grid.className = 'opt-grid';
+      q.options.forEach((opt,i)=>{
+        const label = document.createElement('label');
+        label.className = 'opt';
+        const input = document.createElement('input');
+        input.type = 'radio'; input.name = `q${idx+1}`; input.value = opt.k; input.required = true;
+        const span = document.createElement('span'); span.textContent = opt.text;
+        label.appendChild(input); label.appendChild(span); grid.appendChild(label);
+      });
+      box.appendChild(title); box.appendChild(grid); frag.appendChild(box);
+    });
+    form.appendChild(frag);
+  }
+
+  function answersComplete(){
+    for(let i=1;i<=QUESTIONS.length;i++){
+      if(!form.querySelector(`input[name="q${i}"]:checked`)) return false;
+    }
+    return true;
+  }
+
+  function computeScores(){
+    const counts = {web:0, cyber:0, data:0, ai:0, mobile:0, cloud:0};
+    for(let i=1;i<=QUESTIONS.length;i++){
+      const sel = form.querySelector(`input[name="q${i}"]:checked`);
+      if(!sel) return null; // incompleto
+      counts[sel.value]++;
+    }
+    const total = QUESTIONS.length; // 15
+    const perc = Object.fromEntries(Object.entries(counts).map(([k,v])=>[k, +(v*100/total).toFixed(1)]));
+    return {counts, perc};
+  }
+
+  function renderBars(perc){
+    barsEl.innerHTML='';
+    const order = Object.entries(perc).sort((a,b)=>b[1]-a[1]);
+    order.forEach(([k,val])=>{
+      const row = document.createElement('div'); row.className='bar-row';
+      const lab = document.createElement('div'); lab.className='label'; lab.textContent = DIM_LABEL[k];
+      const bar = document.createElement('div'); bar.className='bar';
+      const fill = document.createElement('div'); fill.className='fill'; fill.style.width = val+'%';
+      const pct = document.createElement('div'); pct.textContent = val.toFixed(1)+'%'; pct.style.textAlign='right';
+      bar.appendChild(fill); row.appendChild(lab); row.appendChild(bar); row.appendChild(pct); barsEl.appendChild(row);
+    });
+  }
+
+  function renderRecommendation(perc){
+    const rec = document.getElementById('recommend');
+    const entries = Object.entries(perc);
+    const max = Math.max(...entries.map(([,v])=>v));
+    const top = entries.filter(([,v])=>v===max).map(([k])=>k);
+    rec.innerHTML = '';
+    const h = document.createElement('h4'); h.textContent = top.length>1? 'Áreas recomendadas': 'Área recomendada';
+    const p = document.createElement('p'); p.style.margin='0 0 8px'; p.textContent = 'Clica para explorar conteúdos gratuitos e caminhos profissionais.';
+    rec.appendChild(h); rec.appendChild(p);
+    top.forEach(k=>{
+      const a = document.createElement('a'); a.href=PAGES[k]; a.textContent = DIM_LABEL[k]; a.style.marginRight='8px'; rec.appendChild(a);
+    });
+  }
+
+  function saveLocal(scores){
+    try{ localStorage.setItem('bitjourney_quiz_v2', JSON.stringify({ts:Date.now(), ...scores})); }catch(_){/* ignore */}
+  }
+
+  function showResult(){
+    if(!answersComplete()){
+      errorEl.textContent='Responde a todas as perguntas antes de submeter.';
+      return;
+    }
+    errorEl.textContent='';
+    const scores = computeScores();
+    renderBars(scores.perc);
+    renderRecommendation(scores.perc);
+    saveLocal(scores);
+    document.getElementById('result').classList.add('show');
+    document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function resetQuiz(){ form.reset(); document.getElementById('result').classList.remove('show'); errorEl.textContent=''; btnSubmit.disabled = true; }
+
+  // Enable/disable submit based on completeness
+  function wireCompletionWatcher(){
+    form.addEventListener('change',()=>{ btnSubmit.disabled = !answersComplete(); });
+  }
+
+  // boot
+  renderQuiz(); wireCompletionWatcher();
+  document.getElementById('year').textContent = new Date().getFullYear();
+  document.getElementById('btnSubmit').addEventListener('click', showResult);
+  document.getElementById('btnReset').addEventListener('click', resetQuiz);
+  </script>
+</body>
+</html>

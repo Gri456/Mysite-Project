@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Fundamentals of Data Science</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+    --bg-dark: #0b0d14;
+
+    /* Nova paleta verde */
+    --green-primary: #22c55e;     /* verde principal */
+    --green-secondary: #4ade80;   /* verde claro */
+    --green-accent: #16a34a;      /* verde forte */
+    --green-cyan: #2dd4bf;        /* verde-água (mantém vibe tech) */
+    --cyan: #28e0ff;              /* ciano para detalhes e destaques */
+
+    --text-light: #e8ecf8;
+    --text-secondary: #b6c0de;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px; font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary {
+    background: linear-gradient(135deg, var(--green-primary), var(--green-cyan));
+    color: white;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente: from-lime-500 via-green-400 to-lime-400 */
+    background: linear-gradient(to right, #84cc16, #4ade80, #a3e635);
+
+    /* Faz o gradiente aplicar apenas ao texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback para browsers antigos */
+}
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill {
+    height: 100%;background: linear-gradient(90deg, var(--green-primary), var(--green-cyan));width: 0%; transition: width 0.3s ease;
+}
+
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active {
+    background: rgba(15, 155, 67, 0.3);
+} 
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--green-primary), var(--green-cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--green-primary);; display: flex; align-items: center; gap: 10px; }
+        .content-card h4 { margin: 1.2rem 0 0.6rem; color: var(--green-cyan);; font-size: 1rem; }
+        .code-explanation { border-left: 3px solid var(--green-primary);; padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--green-cyan);; font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Code block */
+        .code-block {
+            background: #0a0c12;
+            border: 1px solid rgba(91,124,255,0.3);
+            border-radius: 8px; padding: 1.2rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; }
+        .code-block code { font-family: 'Courier New', Consolas, monospace; font-size: 0.875rem; line-height: 1.7; color: #c9d1d9; }
+        .code-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: block; }
+
+        /* Tip / Warning boxes */
+        .tip-box { background: rgba(34, 197, 94, 0.08);
+    border-left: 4px solid var(--green-primary); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .tip-box strong { color: var(--green-primary); }
+        .warning-box { background: rgba(255, 165, 0, 0.07); border-left: 4px solid #ffa500; border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .warning-box strong { color: #ffa500; }
+
+        /* Two-column grid */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+        .mini-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mini-card h5 { color: var(--cyan); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .mini-card p, .mini-card li { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+
+        /* Chapter header */
+        .chapter-header {
+            background: linear-gradient(
+                135deg,
+                rgba(34, 197, 94, 0.15),
+                rgba(45, 212, 191, 0.08)
+            );
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; margin-top: 2.5rem;
+        }
+        .chapter-header:first-child { margin-top: 0; }
+        .chapter-header h2 { font-size: 1.4rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.4rem; }
+        .chapter-header p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-secondary); font-size: 0.88rem; }
+        .data-table thead tr { border-bottom: 2px solid var(--border-color); text-align: left; }
+        .data-table th { padding: 10px; font-weight: 600; color: var(--text-light); }
+        .data-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .data-table td { padding: 10px; }
+
+        /* Inline formula highlight */
+        .formula { font-family: monospace; background: rgba(40,224,255,0.1); padding: 2px 8px; border-radius: 4px; color: var(--cyan); font-size: 0.9rem; }
+
+        /* Quiz */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(40, 224, 255, 0.05)); border: 1px solid rgba(34, 197, 94, 0.08); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #0a0c12; color: #c9d1d9; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-data-science.html" class="btn btn-back">← Back</a>
+                <a href="browse.html" class="btn btn-primary">Explore</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objective: Fundamentals & Ecosystem</h1>
+            <p class="course-description">
+                Master the fundamentals of data science. Learn to navigate between mathematics, code, and business strategy to extract real value from large volumes of information.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• Introduction • Market • Business</span></div>
+                <div class="meta-item"><span>📌</span><span>Basic concepts of Data Science</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- ===================== LEARN TAB ===================== -->
+            <div id="aprender" class="tab-panel active">
+
+                <!-- ─────────────── CHAPTER 1 ─────────────── -->
+                <div class="chapter-header">
+                    <h2>📡 Chapter 1 — What Is Data Science & Why It Matters</h2>
+                    <p>From the definition of the field to where it sits in the modern technological ecosystem — everything you need to understand before writing a single line of code.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔍 1.1 What Is Data Science?</h3>
+                    <p>Data Science is an interdisciplinary field that combines <span class="highlight">statistics, mathematics, programming, and domain expertise</span> to extract actionable knowledge from data. Its goal is not just to describe what happened, but to understand <em>why</em> it happened and predict <em>what will happen</em>.</p>
+                    <div class="tip-box">
+                        <strong>💡 Simple definition:</strong> Data Science is the process of turning raw, messy data into clear, reliable insights that drive real decisions — from vaccine distribution to which song Spotify recommends next.
+                    </div>
+                    <h4>The Six Disciplines Inside Data Science</h4>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>📊 Statistics</h5>
+                            <p>The mathematical foundation. Used to measure trends, validate hypotheses, and quantify uncertainty. Without statistics, there's no way to tell signal from noise.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>🧮 Mathematics</h5>
+                            <p>Linear algebra (matrices, vectors), calculus (gradients), and probability theory. The engine behind every machine learning algorithm.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>💻 Programming</h5>
+                            <p>The scaling tool. Automates data pipelines, processes millions of rows, and deploys models. Python and SQL dominate.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>🤖 Machine Learning</h5>
+                            <p>Building systems that learn patterns from data without being explicitly programmed for each case.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>📈 Visualization</h5>
+                            <p>The bridge between analysis and decision. A chart can communicate in seconds what 50 slides cannot.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>🏢 Business Understanding</h5>
+                            <p>The "north star". Defines what actually matters. A technically perfect model that answers the wrong question delivers zero value.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🌍 1.2 Data Science in the Real World</h3>
+                    <p>Data Science is not confined to tech companies. It's reshaping every industry:</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Industry</th>
+                                <th>Application</th>
+                                <th>Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Healthcare</strong></td><td>Early cancer detection from medical images</td><td>Earlier diagnosis = higher survival rates</td></tr>
+                            <tr><td><strong>Finance</strong></td><td>Real-time fraud detection on card transactions</td><td>Saves billions annually</td></tr>
+                            <tr><td><strong>Retail</strong></td><td>Demand forecasting and inventory optimization</td><td>Less waste, fewer stockouts</td></tr>
+                            <tr><td><strong>Agriculture</strong></td><td>Satellite + sensor data for crop yield prediction</td><td>Optimizes irrigation and fertilizers</td></tr>
+                            <tr><td><strong>Entertainment</strong></td><td>Recommendation engines (Netflix, Spotify)</td><td>70%+ of content watched comes from recommendations</td></tr>
+                            <tr><td><strong>Transportation</strong></td><td>Route optimization, surge pricing, ETA</td><td>Uber/Lyft efficiency gains</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔄 1.3 The Data Science Lifecycle</h3>
+                    <p>Every Data Science project follows a structured process. Understanding this lifecycle prevents the #1 mistake: jumping straight to modelling before understanding the problem.</p>
+                    <div class="code-explanation">
+                        <strong>Step 1 — Business Understanding:</strong> Define the problem. What decision will this analysis support? What does "success" look like? Who are the stakeholders?
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 2 — Data Collection:</strong> Identify and gather data sources. APIs, databases, files, surveys, sensors. Understand what's available and what's missing.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 3 — Data Cleaning (EDA):</strong> The most time-consuming step (~70–80% of work). Handle missing values, fix inconsistencies, remove duplicates, detect outliers.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 4 — Exploratory Analysis:</strong> Visualize distributions, discover correlations, generate hypotheses. This step guides which models to try.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 5 — Modelling:</strong> Train machine learning or statistical models. Select algorithms, tune hyperparameters, evaluate with correct metrics.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 6 — Deployment:</strong> Put the model in production. Connect it to real systems. Monitor for data drift and performance degradation.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 7 — Communication:</strong> Present results clearly to business stakeholders. Translate technical findings into business language.
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ Reality check:</strong> In industry, steps 2–4 consume 70–80% of a data scientist's time. Modelling is only ~10%. This surprises beginners every time.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>⚖️ 1.4 Data Science vs. Related Fields</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Focus</th>
+                                <th>Time Horizon</th>
+                                <th>Tools</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Business Intelligence (BI)</strong></td>
+                                <td>What happened? Dashboards and reports.</td>
+                                <td>Past</td>
+                                <td>Power BI, Tableau, SQL</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Data Analytics</strong></td>
+                                <td>Why did it happen? Root-cause analysis.</td>
+                                <td>Past + Present</td>
+                                <td>Excel, SQL, Python</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Data Science</strong></td>
+                                <td>What will happen? Predictive models.</td>
+                                <td>Present + Future</td>
+                                <td>Python, R, ML libraries</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Data Engineering</strong></td>
+                                <td>Build reliable data pipelines and infrastructure.</td>
+                                <td>Ongoing</td>
+                                <td>Spark, Kafka, Airflow</td>
+                            </tr>
+                            <tr>
+                                <td><strong>MLOps</strong></td>
+                                <td>Deploy and monitor ML models in production reliably.</td>
+                                <td>Ongoing</td>
+                                <td>Docker, Kubernetes, MLflow</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ─────────────── CHAPTER 2 ─────────────── -->
+                <div class="chapter-header">
+                    <h2>🛠️ Chapter 2 — The Data Science Toolkit</h2>
+                    <p>Languages, libraries, and environments that every data scientist needs to master. We go deep on Python and SQL — the two non-negotiable pillars.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🐍 2.1 Python for Data Science — Core Language</h3>
+                    <p>Python is the dominant language in Data Science. It wins because of its readable syntax, the richness of its ecosystem, and the huge community. Here are the fundamentals you must master:</p>
+                    <div class="code-block">
+                        <span class="code-label">Python — Data Types and Structures</span>
+                        <pre><code># Primitive types
+name = "Alice"        # str
+age = 28              # int
+score = 9.5           # float
+is_active = True      # bool
+
+# Lists — ordered, mutable
+grades = [85, 92, 78, 95, 88]
+grades.append(91)
+grades.sort(reverse=True)
+top3 = grades[:3]  # Slicing: [95, 92, 91]
+
+# Dictionaries — key-value pairs
+user = {
+    "name": "Alice",
+    "age": 28,
+    "skills": ["Python", "SQL", "Statistics"]
+}
+print(user["skills"][0])  # "Python"
+
+# List comprehensions — concise and fast
+squares = [x**2 for x in range(1, 11)]
+# [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+
+evens = [x for x in range(20) if x % 2 == 0]
+# [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+
+# Functions
+def calculate_bmi(weight_kg, height_m):
+    """Calculate Body Mass Index."""
+    bmi = weight_kg / (height_m ** 2)
+    return round(bmi, 2)
+
+bmi = calculate_bmi(70, 1.75)
+print(f"BMI: {bmi}")  # BMI: 22.86</code></pre>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Python — File I/O & Error Handling</span>
+                        <pre><code">import csv
+import json
+
+# Reading CSV
+with open("data.csv", "r") as f:
+    reader = csv.DictReader(f)
+    data = [row for row in reader]
+
+# Reading JSON
+with open("config.json", "r") as f:
+    config = json.load(f)
+
+# Error handling — critical in data pipelines
+def safe_convert_to_float(value):
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return None  # Don't crash the pipeline!
+
+# Applied to a list
+raw_values = ["3.5", "N/A", "7.2", None, "5.0"]
+clean = [safe_convert_to_float(v) for v in raw_values]
+# [3.5, None, 7.2, None, 5.0]</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🗄️ 2.2 SQL — The Language of Data</h3>
+                    <p>SQL (Structured Query Language) is the universal language for querying relational databases. A data scientist who cannot write fluent SQL is operating with one hand tied behind their back.</p>
+                    <div class="code-block">
+                        <span class="code-label">SQL — From Basics to Analytical Queries</span>
+                        <pre><code>-- Basic SELECT with filtering and sorting
+SELECT
+    customer_name,
+    country,
+    total_spent,
+    registration_date
+FROM customers
+WHERE total_spent > 500
+  AND country = 'Portugal'
+ORDER BY total_spent DESC
+LIMIT 10;
+
+-- Aggregations — counting and grouping
+SELECT
+    category,
+    COUNT(*) AS total_products,
+    ROUND(AVG(price), 2) AS avg_price,
+    MAX(price) AS max_price,
+    SUM(stock_quantity) AS total_stock
+FROM products
+GROUP BY category
+HAVING COUNT(*) > 5  -- Filter AFTER grouping (not WHERE)
+ORDER BY avg_price DESC;
+
+-- JOINs — combining tables
+SELECT
+    o.order_id,
+    c.customer_name,
+    p.product_name,
+    oi.quantity,
+    oi.unit_price,
+    (oi.quantity * oi.unit_price) AS line_total
+FROM orders o
+INNER JOIN customers c ON o.customer_id = c.id
+INNER JOIN order_items oi ON o.order_id = oi.order_id
+INNER JOIN products p ON oi.product_id = p.id
+WHERE o.order_date >= '2024-01-01';
+
+-- Window Functions — powerful for analytics
+SELECT
+    customer_name,
+    total_spent,
+    RANK() OVER (ORDER BY total_spent DESC) AS spending_rank,
+    ROUND(total_spent / SUM(total_spent) OVER () * 100, 2) AS pct_of_total,
+    AVG(total_spent) OVER (
+        PARTITION BY country
+        ORDER BY registration_date
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS rolling_avg_3
+FROM customers;</code></pre>
+                    </div>
+                    <div class="tip-box">
+                        <strong>💡 Window Functions</strong> are the most powerful SQL feature for analytics. <code>OVER()</code> lets you compute aggregations without collapsing rows — essential for ranking, running totals, and moving averages.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🐼 2.3 Pandas — The Data Science Workhorse</h3>
+                    <p><span class="highlight">Pandas</span> is the Python library for data manipulation. Think of it as a programmable Excel that can handle millions of rows with ease.</p>
+                    <div class="code-block">
+                        <span class="code-label">Pandas — Core Operations</span>
+                        <pre><code>import pandas as pd
+import numpy as np
+
+# Load data
+df = pd.read_csv("sales.csv")
+
+# Explore the dataset
+print(df.shape)         # (rows, columns)
+print(df.dtypes)        # Data type of each column
+print(df.head(5))       # First 5 rows
+print(df.describe())    # Statistical summary
+print(df.info())        # Memory usage + null counts
+print(df.isnull().sum()) # Count missing values per column
+
+# Selecting data
+col = df["price"]                          # Single column → Series
+subset = df[["name", "price", "category"]] # Multiple columns → DataFrame
+row = df.loc[0]                            # Row by label
+cell = df.loc[0, "price"]                  # Specific cell
+filtered = df[df["price"] > 100]           # Boolean filtering
+
+# Multiple conditions
+expensive_electronics = df[
+    (df["price"] > 500) &
+    (df["category"] == "Electronics") &
+    (df["stock"] > 0)
+]
+
+# Data cleaning
+df["price"] = pd.to_numeric(df["price"], errors="coerce")  # Fix types
+df.dropna(subset=["price", "name"], inplace=True)            # Drop rows with NaN
+df["category"].fillna("Unknown", inplace=True)               # Fill NaN
+df.drop_duplicates(subset=["product_id"], inplace=True)      # Remove duplicates
+df.rename(columns={"prod_nm": "product_name"}, inplace=True) # Rename
+
+# Feature engineering
+df["revenue"] = df["quantity"] * df["price"]
+df["price_tier"] = pd.cut(
+    df["price"],
+    bins=[0, 50, 200, 500, float("inf")],
+    labels=["Budget", "Mid", "Premium", "Luxury"]
+)
+df["month"] = pd.to_datetime(df["date"]).dt.month
+
+# Groupby — similar to SQL GROUP BY
+summary = df.groupby("category").agg(
+    total_revenue=("revenue", "sum"),
+    avg_price=("price", "mean"),
+    product_count=("product_id", "count")
+).round(2).sort_values("total_revenue", ascending=False)
+
+# Apply custom functions
+def classify_margin(margin):
+    if margin > 0.4: return "High"
+    if margin > 0.2: return "Medium"
+    return "Low"
+
+df["margin_class"] = df["margin"].apply(classify_margin)
+
+# Merging DataFrames — like SQL JOINs
+merged = pd.merge(df_orders, df_customers, on="customer_id", how="inner")
+combined = pd.concat([df_2023, df_2024], ignore_index=True)
+
+# Pivot table
+pivot = df.pivot_table(
+    values="revenue",
+    index="category",
+    columns="month",
+    aggfunc="sum",
+    fill_value=0
+)</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔢 2.4 NumPy — Numerical Computing Foundation</h3>
+                    <p><span class="highlight">NumPy</span> provides fast, vectorized array operations. It's the foundation that Pandas, Scikit-Learn, and TensorFlow all build upon.</p>
+                    <div class="code-block">
+                        <span class="code-label">NumPy — Arrays and Operations</span>
+                        <pre><code">import numpy as np
+
+# Creating arrays
+arr = np.array([1, 2, 3, 4, 5])
+matrix = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+zeros = np.zeros((3, 4))      # 3x4 matrix of 0s
+ones = np.ones((2, 5))        # 2x5 matrix of 1s
+identity = np.eye(4)           # 4x4 identity matrix
+rand_data = np.random.randn(1000, 5)  # 1000 rows, 5 features (normal dist)
+
+# Vectorized operations — no loops needed!
+prices = np.array([100, 200, 150, 80, 300])
+discounted = prices * 0.9           # Apply 10% discount to all
+tax = prices * 0.23                 # Add 23% tax
+above_average = prices[prices > prices.mean()]  # Boolean indexing
+
+# Broadcasting
+monthly_sales = np.array([[100, 120, 90], [200, 180, 220]])  # 2 products, 3 months
+targets = np.array([150, 200])   # Shape (2,)
+gap = monthly_sales - targets[:, np.newaxis]  # Broadcasting
+
+# Linear Algebra
+A = np.array([[2, 1], [5, 3]])
+b = np.array([4, 7])
+x = np.linalg.solve(A, b)  # Solve Ax = b
+eigenvalues, eigenvectors = np.linalg.eig(A)
+
+# Statistics
+data = np.random.normal(50, 10, 10000)  # Mean=50, Std=10, 10k samples
+print(f"Mean: {np.mean(data):.2f}")
+print(f"Std: {np.std(data):.2f}")
+print(f"Median: {np.median(data):.2f}")
+print(f"Percentiles: {np.percentile(data, [25, 50, 75])}")</code></pre>
+                    </div>
+                </div>
+
+                <!-- ─────────────── CHAPTER 3 ─────────────── -->
+                <div class="chapter-header">
+                    <h2>📊 Chapter 3 — Statistics for Data Science</h2>
+                    <p>Statistics is not just formulas — it's a way of thinking about uncertainty, variation, and evidence. This chapter covers the concepts you'll use every single day.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>📐 3.1 Descriptive Statistics — Understanding Your Data</h3>
+                    <p>Before modelling anything, you must understand the data you have. Descriptive statistics summarizes its key properties.</p>
+                    <h4>Measures of Central Tendency</h4>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>Mean (Average)</h5>
+                            <p>Sum of all values ÷ count. Sensitive to outliers. Formula: <span class="formula">x̄ = Σxᵢ / n</span></p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Median</h5>
+                            <p>Middle value when sorted. Robust to outliers. Use for skewed distributions like income or house prices.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Mode</h5>
+                            <p>Most frequent value. Useful for categorical data. A dataset can have multiple modes (bimodal, multimodal).</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>When to Use Which?</h5>
+                            <p>Mean → symmetric data. Median → skewed data or outliers present. Mode → categorical variables.</p>
+                        </div>
+                    </div>
+                    <h4>Measures of Spread</h4>
+                    <div class="code-block">
+                        <span class="code-label">Spread Metrics in Python</span>
+                        <pre><code>import numpy as np
+
+salaries = np.array([2200, 2500, 2800, 3000, 3200, 3500, 8000])  # Outlier at 8000
+
+# Range — simple but affected by outliers
+data_range = salaries.max() - salaries.min()  # 5800
+
+# Variance — average squared deviation from mean
+variance = np.var(salaries)          # Population variance
+variance_s = np.var(salaries, ddof=1) # Sample variance (ddof=1 → Bessel's correction)
+
+# Standard Deviation — square root of variance (same units as data)
+std = np.std(salaries, ddof=1)       # ≈ 1886 (large due to outlier)
+
+# IQR — Interquartile Range — robust to outliers
+q1, q3 = np.percentile(salaries, [25, 75])
+iqr = q3 - q1  # Middle 50% spread
+
+# Outlier detection using IQR rule
+lower_fence = q1 - 1.5 * iqr
+upper_fence = q3 + 1.5 * iqr
+outliers = salaries[(salaries < lower_fence) | (salaries > upper_fence)]
+# array([8000])
+
+# Coefficient of Variation — relative spread
+cv = (np.std(salaries, ddof=1) / np.mean(salaries)) * 100  # % variation
+print(f"Mean: {np.mean(salaries):.0f} | Median: {np.median(salaries):.0f}")
+print(f"Std: {std:.0f} | IQR: {iqr:.0f}")
+print(f"Outliers: {outliers}")</code></pre>
+                    </div>
+                    <h4>Distribution Shape</h4>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>Skewness</h5>
+                            <p>Measures asymmetry. <strong>Right-skewed</strong> (positive): tail on the right, mean > median. Common in income. <strong>Left-skewed</strong>: tail on the left.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Kurtosis</h5>
+                            <p>Measures "tail heaviness". High kurtosis = more extreme outliers than a normal distribution. Important for risk modelling.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔗 3.2 Correlation & Relationships</h3>
+                    <p>Understanding how variables relate to each other is foundational to feature engineering and model interpretation.</p>
+                    <div class="code-block">
+                        <span class="code-label">Correlation Analysis</span>
+                        <pre><code>import pandas as pd
+import numpy as np
+
+df = pd.read_csv("housing.csv")
+
+# Pearson Correlation — linear relationships
+# Range: -1 (perfect negative) to +1 (perfect positive) | 0 = no linear relationship
+corr_matrix = df.corr(method="pearson")
+price_corr = corr_matrix["price"].sort_values(ascending=False)
+
+# Spearman Correlation — monotonic relationships (doesn't assume linearity)
+# Better for ordinal data or non-linear relationships
+spearman = df.corr(method="spearman")
+
+# Key relationships for housing data
+print(price_corr)
+# area          0.85   ← strong positive correlation
+# bathrooms     0.72
+# bedrooms      0.61
+# age          -0.43   ← older homes are cheaper
+# distance_center -0.58 ← further = cheaper
+
+# CRITICAL: Correlation ≠ Causation
+# Ice cream sales correlate with drowning deaths — both caused by summer (heat)
+# Always ask: is there a confounding variable?</code></pre>
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ Anscombe's Quartet:</strong> Four datasets with nearly identical correlation coefficients (~0.82) but completely different distributions. Always visualize your data — never rely on summary statistics alone.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🎲 3.3 Probability — The Language of Uncertainty</h3>
+                    <p>Probability is how we reason about outcomes we're not certain of. Every ML model outputs probabilities. You need to speak this language.</p>
+                    <h4>Key Rules</h4>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>Addition Rule</h5>
+                            <p><span class="formula">P(A∪B) = P(A) + P(B) - P(A∩B)</span><br><br>Probability of A or B occurring.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Multiplication Rule</h5>
+                            <p><span class="formula">P(A∩B) = P(A) × P(B|A)</span><br><br>Probability of both A and B occurring.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Conditional Probability</h5>
+                            <p><span class="formula">P(A|B) = P(A∩B) / P(B)</span><br><br>Probability of A given that B occurred.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Bayes' Theorem</h5>
+                            <p><span class="formula">P(A|B) = P(B|A)×P(A) / P(B)</span><br><br>Update beliefs when new evidence arrives. Foundation of spam filters, medical diagnosis, and Bayesian ML.</p>
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Bayes' Theorem — Medical Test Example</span>
+                        <pre><code># Disease: affects 1% of the population
+# Test accuracy: 99% true positive rate (sensitivity)
+# False positive rate: 5% (specificity 95%)
+
+p_disease = 0.01          # Prior probability
+p_positive_given_disease = 0.99   # Sensitivity
+p_positive_given_healthy = 0.05   # False positive rate
+p_healthy = 1 - p_disease
+
+# P(positive) = total probability of testing positive
+p_positive = (p_positive_given_disease * p_disease +
+              p_positive_given_healthy * p_healthy)
+
+# Bayes: P(disease | positive test)
+p_disease_given_positive = (p_positive_given_disease * p_disease) / p_positive
+
+print(f"P(disease | positive test) = {p_disease_given_positive:.1%}")
+# Output: P(disease | positive test) = 16.6%
+# Even with 99% accurate test, most positives are false positives!
+# This is why context (base rates) matters enormously in interpretation.</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🧪 3.4 Hypothesis Testing</h3>
+                    <p>Hypothesis testing is the formal process for determining if a pattern in data is <span class="highlight">statistically significant</span> or just random chance.</p>
+                    <div class="code-explanation">
+                        <strong>The Framework:</strong><br>
+                        1. <strong>H₀ (Null Hypothesis):</strong> Assume there is no effect / no difference. The "boring" hypothesis.<br>
+                        2. <strong>H₁ (Alternative Hypothesis):</strong> What you're trying to prove — that there IS an effect.<br>
+                        3. <strong>p-value:</strong> Probability of observing this result (or more extreme) if H₀ is true.<br>
+                        4. <strong>Decision:</strong> If p-value &lt; α (typically 0.05), reject H₀. The result is "statistically significant."
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">A/B Test — T-Test in Python</span>
+                        <pre><code>from scipy import stats
+import numpy as np
+
+# A/B test: Does the new website button color increase conversion time?
+control_group = np.random.normal(45, 12, 200)   # Original: mean=45s, n=200
+treatment_group = np.random.normal(38, 11, 200)  # New design: mean=38s
+
+# Independent two-sample t-test
+t_statistic, p_value = stats.ttest_ind(control_group, treatment_group)
+
+print(f"T-statistic: {t_statistic:.3f}")
+print(f"P-value: {p_value:.4f}")
+
+alpha = 0.05
+if p_value < alpha:
+    print(f"✅ Reject H₀: The difference is statistically significant (p={p_value:.4f})")
+    print("The new design likely has a real effect.")
+else:
+    print(f"❌ Fail to reject H₀: No significant difference (p={p_value:.4f})")
+
+# Effect size — statistical significance ≠ practical significance!
+# Cohen's d: small=0.2, medium=0.5, large=0.8
+pooled_std = np.sqrt((np.std(control_group)**2 + np.std(treatment_group)**2) / 2)
+cohens_d = (np.mean(control_group) - np.mean(treatment_group)) / pooled_std
+print(f"Cohen's d: {cohens_d:.3f} (practical significance)")</code></pre>
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ p-value ≠ importance!</strong> A tiny p-value doesn't mean the effect is large or practically meaningful. With 1 million users, even a 0.1% difference can be "significant". Always report effect sizes alongside p-values.
+                    </div>
+                </div>
+
+                <!-- ─────────────── CHAPTER 4 ─────────────── -->
+                <div class="chapter-header">
+                    <h2>👁️ Chapter 4 — Exploratory Data Analysis (EDA)</h2>
+                    <p>EDA is the art of letting the data speak before you force it into a model. It reveals structure, anomalies, patterns, and relationships that drive every modelling decision.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔬 4.1 The EDA Process</h3>
+                    <p>Exploratory Data Analysis has no fixed recipe — but it follows a consistent progression from overview to specifics.</p>
+                    <div class="code-block">
+                        <span class="code-label">EDA Workflow — Step by Step</span>
+                        <pre><code>import pandas as pd
+import numpy as np
+
+df = pd.read_csv("titanic.csv")
+
+# ── STEP 1: First look ────────────────────────────────
+print("Shape:", df.shape)           # (891, 12)
+print("\nColumns:", df.columns.tolist())
+print("\nTypes:\n", df.dtypes)
+print("\nFirst rows:\n", df.head())
+
+# ── STEP 2: Missing data audit ────────────────────────
+missing = pd.DataFrame({
+    "missing_count": df.isnull().sum(),
+    "missing_pct": (df.isnull().mean() * 100).round(2)
+}).sort_values("missing_pct", ascending=False)
+print(missing[missing["missing_count"] > 0])
+
+# ── STEP 3: Target variable distribution ──────────────
+print(df["Survived"].value_counts(normalize=True))
+# 0    0.616  ← 62% did not survive
+# 1    0.384  ← 38% survived
+# Imbalanced classes! Must handle this in modelling.
+
+# ── STEP 4: Numerical features ────────────────────────
+print(df[["Age", "Fare", "SibSp", "Parch"]].describe())
+
+# ── STEP 5: Categorical features ──────────────────────
+for col in ["Pclass", "Sex", "Embarked"]:
+    print(f"\n{col}:\n", df[col].value_counts())
+
+# ── STEP 6: Target relationships ─────────────────────
+survival_by_sex = df.groupby("Sex")["Survived"].mean()
+survival_by_class = df.groupby("Pclass")["Survived"].mean()
+print("\nSurvival by Sex:\n", survival_by_sex)
+print("\nSurvival by Class:\n", survival_by_class)
+
+# ── STEP 7: Detect outliers ────────────────────────────
+q1, q3 = df["Fare"].quantile([0.25, 0.75])
+iqr = q3 - q1
+fare_outliers = df[df["Fare"] > q3 + 1.5 * iqr]
+print(f"\nFare outliers: {len(fare_outliers)} rows")</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>📉 4.2 Data Visualization with Matplotlib & Seaborn</h3>
+                    <p>Choosing the right chart for the right question is a skill in itself. Here's your guide:</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Question</th><th>Best Chart</th><th>Library Function</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Distribution of one variable</td><td>Histogram, Box plot, Violin plot</td><td><code>sns.histplot</code>, <code>sns.boxplot</code></td></tr>
+                            <tr><td>Relationship between two numerics</td><td>Scatter plot</td><td><code>sns.scatterplot</code></td></tr>
+                            <tr><td>Trend over time</td><td>Line chart</td><td><code>plt.plot</code></td></tr>
+                            <tr><td>Compare categories</td><td>Bar chart</td><td><code>sns.barplot</code></td></tr>
+                            <tr><td>Proportion of a whole</td><td>Stacked bar (not pie!)</td><td><code>df.plot(kind="bar", stacked=True)</code></td></tr>
+                            <tr><td>Correlations across all variables</td><td>Heatmap</td><td><code>sns.heatmap(df.corr())</code></td></tr>
+                            <tr><td>Distribution by category</td><td>Box plot / Violin plot</td><td><code>sns.violinplot</code></td></tr>
+                            <tr><td>Pairwise relationships</td><td>Pair plot</td><td><code>sns.pairplot</code></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="code-block">
+                        <span class="code-label">Seaborn — Production-quality EDA Charts</span>
+                        <pre><code>import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set style
+sns.set_theme(style="darkgrid", palette="muted")
+
+# 1. Distribution + outlier detection
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+sns.histplot(df["Age"].dropna(), kde=True, ax=axes[0], bins=30)
+axes[0].set_title("Age Distribution")
+sns.boxplot(x="Pclass", y="Fare", data=df, ax=axes[1])
+axes[1].set_title("Fare by Passenger Class")
+plt.tight_layout()
+
+# 2. Correlation heatmap
+numerical_cols = df.select_dtypes(include=[np.number]).columns
+corr = df[numerical_cols].corr()
+mask = np.triu(np.ones_like(corr, dtype=bool))  # Upper triangle mask
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr, mask=mask, annot=True, fmt=".2f",
+            cmap="coolwarm", center=0, square=True)
+plt.title("Feature Correlation Matrix")
+
+# 3. Target analysis
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+sns.barplot(x="Sex", y="Survived", data=df, ax=axes[0])
+sns.barplot(x="Pclass", y="Survived", data=df, ax=axes[1])
+sns.histplot(data=df, x="Age", hue="Survived", multiple="fill",
+             bins=20, ax=axes[2])
+plt.tight_layout()
+plt.show()</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🧹 4.3 Data Cleaning — Real-World Techniques</h3>
+                    <p>Data in the wild is <em>always</em> messy. Here are the most important techniques for handling the most common issues:</p>
+                    <div class="code-block">
+                        <span class="code-label">Handling Missing Values</span>
+                        <pre><code>import pandas as pd
+import numpy as np
+
+# Missing value strategies depend on the column and amount missing
+
+# 1. DROP — for columns with >50% missing (usually)
+df.dropna(thresh=len(df) * 0.5, axis=1, inplace=True)
+
+# 2. FILL WITH STATISTICS — numerical columns
+df["Age"].fillna(df["Age"].median(), inplace=True)  # Median (robust)
+df["Fare"].fillna(df.groupby("Pclass")["Fare"].transform("median"), inplace=True)
+
+# 3. FILL WITH CATEGORY — categorical columns
+df["Embarked"].fillna(df["Embarked"].mode()[0], inplace=True)
+df["Cabin"].fillna("Unknown", inplace=True)
+
+# 4. INTERPOLATE — for time series
+df["temperature"].interpolate(method="time", inplace=True)
+
+# 5. KNN IMPUTATION — for correlated features (better accuracy)
+from sklearn.impute import KNNImputer
+imputer = KNNImputer(n_neighbors=5)
+df[["Age", "Fare"]] = imputer.fit_transform(df[["Age", "Fare"]])</code></pre>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Outlier Treatment</span>
+                        <pre><code"># Method 1: IQR Clipping (Winsorization)
+def iqr_clip(series, multiplier=1.5):
+    q1, q3 = series.quantile([0.25, 0.75])
+    iqr = q3 - q1
+    return series.clip(q1 - multiplier * iqr, q3 + multiplier * iqr)
+
+df["Fare"] = iqr_clip(df["Fare"])
+
+# Method 2: Z-score filtering (remove rows > 3 standard deviations)
+from scipy import stats
+z_scores = np.abs(stats.zscore(df[["Age", "Fare"]]))
+df_clean = df[(z_scores < 3).all(axis=1)]
+
+# Method 3: Log transformation — compress extreme values
+import numpy as np
+df["Fare_log"] = np.log1p(df["Fare"])  # log(1+x) handles zeros safely</code></pre>
+                    </div>
+                </div>
+
+                <!-- ─────────────── CHAPTER 5 ─────────────── -->
+                <div class="chapter-header">
+                    <h2>🤖 Chapter 5 — Introduction to Machine Learning</h2>
+                    <p>Machine Learning is the computational heart of Data Science. This chapter demystifies how models learn from data and introduces the key categories and workflows.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🧠 5.1 What Is Machine Learning?</h3>
+                    <p>Machine Learning (ML) is a branch of AI where systems <span class="highlight">learn patterns from data</span> instead of being explicitly programmed with rules. The key insight: rather than writing rules for every scenario, you give the algorithm examples and let it find the rules itself.</p>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>Traditional Programming</h5>
+                            <p><strong>Input:</strong> Rules + Data<br><strong>Output:</strong> Answers<br><br>Example: <em>"If email contains 'FREE MONEY', mark as spam"</em></p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Machine Learning</h5>
+                            <p><strong>Input:</strong> Data + Answers<br><strong>Output:</strong> Rules (the model)<br><br>Example: <em>Show 10,000 spam/not-spam emails → model learns the rules</em></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🗂️ 5.2 Types of Machine Learning</h3>
+                    <div class="code-explanation">
+                        <strong>Supervised Learning:</strong> The model learns from <em>labelled</em> data — each training example has the correct answer (label). Most common in business. Used for classification (spam/not spam) and regression (predict house price).
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Unsupervised Learning:</strong> The model finds patterns in <em>unlabelled</em> data. No "correct answer" provided. Used for clustering (customer segments), dimensionality reduction, and anomaly detection.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Semi-supervised Learning:</strong> Small amount of labelled data + large amount of unlabelled. Common when labelling is expensive (medical imaging).
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Reinforcement Learning:</strong> An agent learns by interacting with an environment and receiving rewards or penalties. Used in game AI, robotics, and recommendation systems.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>⚙️ 5.3 The ML Workflow with Scikit-Learn</h3>
+                    <p><span class="highlight">Scikit-Learn</span> is the standard Python library for classical ML. Its consistent API makes it incredibly efficient — all models follow the same <code>.fit() → .predict()</code> pattern.</p>
+                    <div class="code-block">
+                        <span class="code-label">Complete ML Pipeline — Classification</span>
+                        <pre><code>import pandas as pd
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.pipeline import Pipeline
+
+# ── 1. Load and prepare data ──────────────────────────
+df = pd.read_csv("titanic.csv")
+df = df[["Survived", "Pclass", "Sex", "Age", "Fare", "SibSp", "Parch"]]
+df.dropna(inplace=True)
+
+# Encode categorical
+df["Sex"] = LabelEncoder().fit_transform(df["Sex"])  # male=1, female=0
+
+# Features and target
+X = df.drop("Survived", axis=1)
+y = df["Survived"]
+
+# ── 2. Train/Test split ───────────────────────────────
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)  # stratify → maintain class proportions in both splits
+
+# ── 3. Pipeline — scaling + model together ────────────
+pipeline = Pipeline([
+    ("scaler", StandardScaler()),          # Step 1: scale features
+    ("classifier", RandomForestClassifier( # Step 2: train model
+        n_estimators=100,
+        max_depth=5,
+        random_state=42
+    ))
+])
+
+pipeline.fit(X_train, y_train)
+
+# ── 4. Evaluate ───────────────────────────────────────
+y_pred = pipeline.predict(X_test)
+
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
+
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+# Cross-validation — more reliable than single split
+cv_scores = cross_val_score(pipeline, X, y, cv=5, scoring="accuracy")
+print(f"\nCV Accuracy: {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")
+
+# ── 5. Feature importance ─────────────────────────────
+rf_model = pipeline.named_steps["classifier"]
+importances = pd.Series(rf_model.feature_importances_, index=X.columns)
+print("\nFeature Importances:")
+print(importances.sort_values(ascending=False))</code></pre>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>📏 5.4 Model Evaluation Metrics</h3>
+                    <p>Choosing the right metric is as important as choosing the right model. Accuracy alone is misleading — especially with imbalanced data.</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Metric</th><th>Formula</th><th>When to Use</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Accuracy</strong></td><td>Correct / Total</td><td>Only when classes are balanced</td></tr>
+                            <tr><td><strong>Precision</strong></td><td>TP / (TP + FP)</td><td>When false positives are costly (e.g. spam filter)</td></tr>
+                            <tr><td><strong>Recall (Sensitivity)</strong></td><td>TP / (TP + FN)</td><td>When false negatives are costly (e.g. cancer screening)</td></tr>
+                            <tr><td><strong>F1 Score</strong></td><td>2×(P×R)/(P+R)</td><td>Balanced trade-off between Precision and Recall</td></tr>
+                            <tr><td><strong>AUC-ROC</strong></td><td>Area under ROC curve</td><td>Overall model discrimination ability</td></tr>
+                            <tr><td><strong>MAE</strong></td><td>Mean Absolute Error</td><td>Regression — interpretable, robust to outliers</td></tr>
+                            <tr><td><strong>RMSE</strong></td><td>√(Mean Squared Error)</td><td>Regression — penalizes large errors more</td></tr>
+                            <tr><td><strong>R² Score</strong></td><td>1 - SS_res/SS_tot</td><td>Regression — % of variance explained (0–1)</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="warning-box">
+                        <strong>⚠️ The 99% accuracy trap:</strong> If only 1% of transactions are fraudulent, a model that predicts "not fraud" for every transaction gets 99% accuracy — but catches zero frauds. Always analyse Precision, Recall, and the Confusion Matrix.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>⚠️ 5.5 Overfitting vs Underfitting</h3>
+                    <p>These are the two most common failure modes in machine learning. Understanding them is essential for building models that generalize.</p>
+                    <div class="two-col">
+                        <div class="mini-card">
+                            <h5>Underfitting (High Bias)</h5>
+                            <p>Model is too simple — fails to capture the underlying patterns. <br><br>Symptoms: poor performance on training AND test data.<br><br>Solution: Use a more complex model, add more features, reduce regularization.</p>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Overfitting (High Variance)</h5>
+                            <p>Model memorizes training data including noise — doesn't generalize to new data.<br><br>Symptoms: excellent training accuracy, poor test accuracy.<br><br>Solution: Get more data, use regularization, cross-validation, or simpler model.</p>
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <span class="code-label">Detecting Overfitting</span>
+                        <pre><code>from sklearn.model_selection import learning_curve
+import numpy as np
+
+train_sizes, train_scores, val_scores = learning_curve(
+    model, X, y, cv=5,
+    train_sizes=np.linspace(0.1, 1.0, 10),
+    scoring="accuracy"
+)
+
+train_mean = train_scores.mean(axis=1)
+val_mean = val_scores.mean(axis=1)
+
+# If large gap between train_mean and val_mean → OVERFITTING
+# If both are low and converging → UNDERFITTING
+# If both are high and close → GOOD FIT ✅
+
+# Regularization to prevent overfitting
+from sklearn.linear_model import Ridge, Lasso
+ridge = Ridge(alpha=1.0)   # L2 regularization — shrinks coefficients
+lasso = Lasso(alpha=0.1)   # L1 regularization — can zero out features</code></pre>
+                    </div>
+                </div>
+
+                <!-- ─────────────── CHAPTER 6 ─────────────── -->
+                <div class="chapter-header">
+                    <h2>💼 Chapter 6 — Data Science in Business</h2>
+                    <p>Technical skills without business context generate reports nobody reads. This chapter teaches you how to frame problems, communicate results, and create real impact.</p>
+                </div>
+
+                <div class="content-card">
+                    <h3>🎯 6.1 Translating Business Problems into Data Problems</h3>
+                    <p>The highest-value skill in Data Science is not coding — it's problem formulation. Here's the framework:</p>
+                    <div class="code-explanation">
+                        <strong>Step 1 — Business Question:</strong> "How can we reduce customer churn?"
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 2 — Analytical Question:</strong> "Can we predict which customers are likely to cancel their subscription in the next 30 days?"
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 3 — ML Formulation:</strong> Binary classification. Target: churn (yes/no) within 30 days. Features: usage patterns, payment history, support tickets, demographic data.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 4 — Success Metric:</strong> Recall &gt; 70% (we'd rather contact a non-churner than miss a churner). Business KPI: reduce monthly churn rate from 3.2% to &lt; 2%.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Step 5 — Deployment Plan:</strong> Weekly batch prediction → flagged customers → automated email campaign + sales team follow-up.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>📣 6.2 Data Storytelling — Communicating Insights</h3>
+                    <p>Your analysis is only as valuable as your ability to communicate it. Data storytelling is the craft of making data understandable and compelling to non-technical audiences.</p>
+                    <ul class="styled-list">
+                        <li><strong>Lead with the "so what":</strong> Start with the key insight and recommendation, not the methodology. Executives want conclusions first.</li>
+                        <li><strong>One message per chart:</strong> Each visualization should communicate one clear point. Don't pack 5 ideas into one chart.</li>
+                        <li><strong>Use annotations:</strong> Add callouts that explain what to see in the chart. Don't make people figure it out themselves.</li>
+                        <li><strong>Connect to business impact:</strong> Always translate "precision increased by 8%" into "this would have prevented €240,000 in fraudulent transactions last quarter".</li>
+                        <li><strong>Know your audience:</strong> A chart for the CTO looks different from one for the data team. Always adjust complexity and terminology.</li>
+                        <li><strong>Tell the uncertainty:</strong> Communicate confidence intervals. Don't present "the model predicts X" — say "the model predicts X with ±Y margin".</li>
+                    </ul>
+                    <div class="tip-box">
+                        <strong>💡 The Barbara Minto Principle (Pyramid Principle):</strong> Structure your communication as Answer → Key points → Supporting evidence. Never bury the conclusion at the end — executives will have stopped reading.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🔄 6.3 The Modern Data Stack</h3>
+                    <p>Understanding the ecosystem of tools that organizations use helps you know where Data Science fits in the larger data pipeline:</p>
+                    <div class="code-explanation">
+                        <strong>Data Sources:</strong> Databases (PostgreSQL, MySQL), APIs, CRM systems (Salesforce), web analytics (Google Analytics), IoT sensors, flat files.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Ingestion & Storage:</strong> ETL/ELT tools (Fivetran, dbt), data warehouses (BigQuery, Snowflake, Redshift), data lakes (S3, Azure Data Lake).
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Processing & Analysis:</strong> SQL, Python (Pandas, Spark), Jupyter Notebooks, dbt for transformations.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>ML & Experimentation:</strong> Scikit-learn, PyTorch, TensorFlow, MLflow for experiment tracking, Weights & Biases.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Visualization & BI:</strong> Tableau, Power BI, Looker, Metabase, or custom Plotly/Dash apps.
+                    </div>
+                    <div class="code-explanation">
+                        <strong>Deployment & MLOps:</strong> Docker, FastAPI, AWS SageMaker, Google Vertex AI, Azure ML, GitHub Actions for CI/CD.
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>🛡️ 6.4 Ethics in Data Science</h3>
+                    <p>As data science becomes more influential, ethical responsibilities grow proportionally. These are not optional considerations — they determine whether your work creates benefit or harm.</p>
+                    <ul class="styled-list">
+                        <li><strong>Data Privacy (GDPR/LGPD):</strong> Understand legal requirements around collecting, storing, and processing personal data. Anonymize and pseudonymize where possible.</li>
+                        <li><strong>Algorithmic Bias:</strong> If your training data reflects historical discrimination, your model will too. Always audit model performance across demographic groups (age, gender, ethnicity).</li>
+                        <li><strong>Explainability:</strong> In high-stakes decisions (loan approvals, medical diagnoses), black-box models are often unacceptable. Use interpretable models or explainability tools (SHAP, LIME).</li>
+                        <li><strong>Data Consent:</strong> Was the data collected with appropriate consent? Can people opt out? Is it being used for the purpose it was collected?</li>
+                        <li><strong>Environmental Impact:</strong> Large ML models require enormous compute. Training GPT-3 consumed roughly 552 tonnes of CO₂. Consider proportionality of model complexity to task.</li>
+                    </ul>
+                    <div class="warning-box">
+                        <strong>⚠️ Real case:</strong> Amazon's hiring algorithm trained on 10 years of (predominantly male) resumes learned to penalize CVs that included the word "women's" (as in "women's chess club"). It was scrapped in 2018.
+                    </div>
+                </div>
+
+                <div class="content-card" style="background: linear-gradient(45deg, rgba(91,124,255,0.1), rgba(40,224,255,0.1)); border-left: 5px solid var(--cyan);">
+                    <h3>🏆 Module Summary — Your Data Science Foundation</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Completing this module means you now have a solid foundation across all pillars of Data Science:</p>
+                    <div class="two-col">
+                        <div>
+                            <ul class="styled-list">
+                                <li>What Data Science is and where it's applied</li>
+                                <li>The full Data Science lifecycle (7 steps)</li>
+                                <li>Python fundamentals: lists, dicts, functions, file I/O</li>
+                                <li>SQL from basics to window functions</li>
+                                <li>Pandas for data manipulation at scale</li>
+                                <li>NumPy for vectorized numerical computing</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <ul class="styled-list">
+                                <li>Descriptive statistics: mean, median, std, IQR</li>
+                                <li>Probability, Bayes' theorem, hypothesis testing</li>
+                                <li>EDA: visualizations, correlations, cleaning</li>
+                                <li>Introduction to ML: supervised vs unsupervised</li>
+                                <li>Scikit-learn pipeline and evaluation metrics</li>
+                                <li>Business framing, storytelling, and ethics</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="tip-box" style="margin-top: 1rem;">
+                        <strong>🎯 Next Step:</strong> Move on to Module 2 — Statistics & Probability Deep Dive. Or start a hands-on project: download a dataset from Kaggle and apply the full lifecycle from EDA to model deployment.
+                    </div>
+                </div>
+
+            </div><!-- end #aprender -->
+
+            <!-- ===================== LAB TAB ===================== -->
+            <div id="laboratorio" class="tab-panel">
+                <h3>SQL Data Console</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Practice data extraction. Try filtering customers with high spending.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">SQL EDITOR</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT customer_name, total_spent 
+FROM sales 
+WHERE total_spent > 1500
+ORDER BY total_spent DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">QUERY RESULT</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Click "Run" to simulate the database query...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Run Query</button>
+            </div>
+
+            <!-- ===================== QUIZ TAB ===================== -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Data Science Fundamentals Quiz</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge of Data Science fundamentals. Answer the 15 questions and receive immediate feedback.</p>
+                    <form id="quiz-form">
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">1. What is Data Science?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) The exclusive study of databases</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) The creation of charts for reports</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C" data-correct="true"> C) Transforming data into knowledge to support decisions</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Web application programming</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">2. What is the main goal of Data Science?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Storing large volumes of data</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Automating only technical tasks</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C" data-correct="true"> C) Supporting data-driven decision making</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Completely replacing human work</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">3. What are the main areas that make up Data Science?</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) Design, marketing, and sales</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B" data-correct="true"> B) Statistics, programming, and business understanding</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Networking, security, and hardware</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Math, physics, and chemistry</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">4. What is the primary role of a Data Scientist?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Creating dashboards daily</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B" data-correct="true"> B) Solving real-world problems using data</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) Programming operating systems</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Maintaining servers and networks</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">5. Why is business understanding essential in Data Science?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) To create prettier charts</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) To choose better programming languages</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C" data-correct="true"> C) To ensure solutions generate real value</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) To reduce data volume</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">6. Which of the following is a common application of Data Science?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Writing legal documents</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B" data-correct="true"> B) Content recommendation on digital platforms</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) Assembling computers</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Creating static websites</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">7. Why is statistics important in Data Science?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) To speed up code</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) To create graphical interfaces</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"> C) To understand patterns and uncertainty in data</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) To store data in the cloud</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">8. Why is programming an essential skill for Data Science?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) To replace statistics</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"> B) To automate and analyze data at scale</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) To design layouts</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) To manage teams</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">9. Which of these languages is most used in Data Science today?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Java</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) C++</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"> C) Python</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) PHP</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">10. Which of these languages is especially strong in statistics?</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Python</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) JavaScript</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C" data-correct="true"> C) R</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) HTML</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">11. Why is real-world data rarely ready for analysis?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Because it is always small</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B" data-correct="true"> B) Because it contains errors, missing values, and inconsistencies</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Because it is too simple</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Because it always comes in the correct format</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">12. Which of the following skills is considered an important "soft skill"?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Python programming</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Calculating averages</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"> C) Communicating results</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Writing SQL queries</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">13. What is the main difference between Data Science and traditional analysis?</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Data Science doesn't use statistics</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Data analysis doesn't use programming</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"> C) Data Science also focuses on prediction and automation</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) There is no difference</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">14. Why might a model fail even if it is technically correct?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Because it uses too much data</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B" data-correct="true"> B) Because it doesn't solve the real business problem</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Because it is written in Python</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Because it is very complex</label>
+                        </div>
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question">15. Why is Data Science said to be a combination of science and art?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Because it involves graphic design</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Because it follows only fixed rules</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"> C) Because it combines scientific methods with creativity</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Because it doesn't use math</label>
+                        </div>
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display: none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+            class QuizManager {
+                constructor() {
+                    this.questionsData = {
+                        q1: { correct: 'C', exp: 'Data Science focuses on transforming raw data into intelligent decisions.' },
+                        q2: { correct: 'C', exp: 'The main goal is to support evidence-based decision making.' },
+                        q3: { correct: 'B', exp: 'The classic triad is Statistics, Programming, and Business Knowledge.' },
+                        q4: { correct: 'B', exp: 'A data scientist uses data to solve real-world problems.' },
+                        q5: { correct: 'C', exp: 'Without understanding the business, data does not generate value or ROI.' },
+                        q6: { correct: 'B', exp: 'Recommendation algorithms (Netflix/Spotify) are pure examples of DS.' },
+                        q7: { correct: 'C', exp: 'Statistics allows quantifying uncertainty and validating patterns.' },
+                        q8: { correct: 'B', exp: 'Programming allows processing massive volumes of data that Excel cannot handle.' },
+                        q9: { correct: 'C', exp: 'Python is the leading language due to its vast AI library.' },
+                        q10: { correct: 'C', exp: 'R was created by and for statisticians.' },
+                        q11: { correct: 'B', exp: 'Real-world data is usually dirty and requires deep cleaning.' },
+                        q12: { correct: 'C', exp: 'Knowing how to explain complex data to laypeople is a vital soft skill.' },
+                        q13: { correct: 'C', exp: 'While analytics looks at the past, DS focuses on predicting the future.' },
+                        q14: { correct: 'B', exp: 'Technical accuracy does not matter if the model does not solve the real problem.' },
+                        q15: { correct: 'C', exp: 'It requires the rigor of the scientific method and the creativity to formulate hypotheses.' }
+                    };
+                    this.init();
+                }
+                init() {
+                    document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                    document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+                }
+                submitQuiz() {
+                    const form = document.getElementById('quiz-form');
+                    const formData = new FormData(form);
+                    let score = 0;
+                    let feedbackHTML = '';
+                    Object.keys(this.questionsData).forEach((key, index) => {
+                        const userAnswer = formData.get(key);
+                        const isCorrect = userAnswer === this.questionsData[key].correct;
+                        if (isCorrect) score++;
+                        feedbackHTML += `
+                            <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                                <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                                <div>
+                                    <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                    ${!isCorrect ? `<br><small class="correct-answer">
+                                            Correct answer: Option ${this.questionsData[key].correct}
+                                        </small>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    this.displayResults(score, feedbackHTML);
+                }
+                displayResults(score, feedbackHTML) {
+                    const total = Object.keys(this.questionsData).length;
+                    const percent = Math.round((score / total) * 100);
+                    const resultsDiv = document.getElementById('quiz-results');
+                    let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+                    document.getElementById('quiz-score').innerHTML = `
+                        <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                        <p style="color: var(--text-secondary)">${percent >= 70 ? 'Amazing! You have mastered the fundamentals.' : 'Keep practising to improve.'}</p>`;
+                    document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                    resultsDiv.style.display = 'block';
+                    resultsDiv.scrollIntoView({ behavior: 'smooth' });
+                }
+                clearQuiz() {
+                    document.getElementById('quiz-form').reset();
+                    document.getElementById('quiz-results').style.display = 'none';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+            document.addEventListener('DOMContentLoaded', () => { new QuizManager(); });
+            </script>
+
+            <!-- ===================== RESOURCES TAB ===================== -->
+            <div id="recursos" class="tab-panel">
+                <div class="content-card">
+                    <h3>Support Materials</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Curated resources for every pillar of this module.</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                        <div class="mini-card">
+                            <h5>Python & Pandas</h5>
+                            <a href="#" class="resource-link">→ Definitive Guide: Python for Data Analysis</a>
+                            <a href="#" class="resource-link">→ Pandas Documentation (official)</a>
+                            <a href="#" class="resource-link">→ Pandas Cheat Sheet PDF</a>
+                            <a href="#" class="resource-link">→ NumPy User Guide</a>
+                        </div>
+                        <div class="mini-card">
+                            <h5>SQL</h5>
+                            <a href="#" class="resource-link">→ Cheat Sheet: Essential SQL Commands</a>
+                            <a href="#" class="resource-link">→ Mode Analytics SQL Tutorial</a>
+                            <a href="#" class="resource-link">→ Window Functions Explained</a>
+                            <a href="#" class="resource-link">→ SQL Practice: Leetcode / HackerRank</a>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Statistics & ML</h5>
+                            <a href="#" class="resource-link">→ Scikit-Learn: Choosing the Right Algorithm</a>
+                            <a href="#" class="resource-link">→ StatQuest YouTube Channel</a>
+                            <a href="#" class="resource-link">→ Khan Academy Statistics</a>
+                            <a href="#" class="resource-link">→ Hands-On ML (O'Reilly)</a>
+                        </div>
+                        <div class="mini-card">
+                            <h5>Communication</h5>
+                            <a href="#" class="resource-link">→ Workshop: Storytelling with Data</a>
+                            <a href="#" class="resource-link">→ Seaborn Visualization Gallery</a>
+                            <a href="#" class="resource-link">→ Matplotlib Cheat Sheet</a>
+                            <a href="#" class="resource-link">→ Kaggle — Free Datasets</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================== ASSESSMENT TAB ===================== -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: Fundamentals & Ecosystem</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        To successfully complete this module, demonstrate understanding at the following competency levels:
+                    </p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>Clear definition of Data Science vs BI</li>
+                                <li>Understanding of the Data Lifecycle</li>
+                                <li>Identification of business problems solvable with data</li>
+                                <li>Basic knowledge of Python and SQL</li>
+                                <li>Difference between Mean, Median, and Mode</li>
+                                <li>Understanding of supervised vs unsupervised learning</li>
+                                <li>Ability to load and inspect a dataset with Pandas</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Data cleaning capability (handle missing values, outliers)</li>
+                                <li>Basic statistical exploration with describe()</li>
+                                <li>Interpretation of scatter plots and correlation heatmaps</li>
+                                <li>Use of libraries (Pandas/NumPy/Scikit-Learn)</li>
+                                <li>Communication of technical insights to non-technical audience</li>
+                                <li>Understanding of train/test split and cross-validation</li>
+                                <li>Ability to read and interpret a confusion matrix</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Development and tuning of predictive models</li>
+                                <li>Evaluation of metrics beyond accuracy (F1, AUC-ROC)</li>
+                                <li>Basic model deployment with Flask or FastAPI</li>
+                                <li>Data storytelling for executives with Matplotlib/Seaborn</li>
+                                <li>Optimization of SQL queries and use of window functions</li>
+                                <li>Bias detection and ethical considerations in models</li>
+                                <li>Understanding of overfitting and regularization techniques</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end tabs-container -->
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+            document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executed successfully.</strong><br><br>Results (Top 3):<br>-----------------------<br>1. Carlos Alberto | €4,250.00<br>2. Beatriz Ramos | €2,100.50<br>3. Ricardo Jorge | €1,880.00<br><br><em>Tip: The WHERE filter worked correctly, eliminating records below €1500.</em>";
+        }
+    </script>
+</body>
+</html>
+

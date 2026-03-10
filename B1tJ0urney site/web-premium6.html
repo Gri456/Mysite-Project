@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Backend & APIs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #5b7cff;
+            --purple: #7a4bff;
+            --cyan: #28e0ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 125, 230, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Gradient overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--blue), var(--cyan));
+            color: white;
+            box-shadow: 0 4px 15px rgba(91, 124, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(91, 124, 255, 0.4);
+        }
+        /* Main content */
+        .main-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .course-header {
+            margin-bottom: 2rem;
+        }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente baseado no Tailwind: from-blue-700 via-cyan-500 to-blue-600 */
+    background: linear-gradient(to right, #1d4ed8, #06b6d4, #2563eb);
+
+    /* Faz o gradiente aparecer apenas no texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback */
+}
+
+        .course-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .progress-section {
+            margin-bottom: 2rem;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Tabs */
+        .tabs-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .tab-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+        .tab-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+        .tab-button:hover {
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-button.active {
+            color: var(--text-light);
+            background: rgba(91, 124, 255, 0.1);
+        }
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+        .tab-content {
+            padding: 2rem;
+            min-height: 400px;
+        }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        
+        /* List improvement */
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Quiz Styles */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { 
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem; 
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;
+            transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+
+        /* Lab Styles */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #fff; color: #333; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Evaluation section styles */
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .evaluation-column {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .evaluation-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid;
+        }
+
+        .evaluation-title.essential {
+            color: var(--cyan);
+            border-bottom-color: var(--cyan);
+        }
+
+        .evaluation-title.important {
+            color: #ffd700;
+            border-bottom-color: #ffd700;
+        }
+
+        .evaluation-title.advanced {
+            color: #ff6b6b;
+            border-bottom-color: #ff6b6b;
+        }
+
+        .evaluation-icon {
+            font-size: 1.1rem;
+        }
+
+        .evaluation-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .evaluation-list li {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .evaluation-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .evaluation-column:nth-child(1) .evaluation-list li::before {
+            color: var(--cyan);
+        }
+
+        .evaluation-column:nth-child(2) .evaluation-list li::before {
+            color: #ffd700;
+        }
+
+        .evaluation-column:nth-child(3) .evaluation-list li::before {
+            color: #ff6b6b;
+        }
+
+        @media (max-width: 768px) {
+            .evaluation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /*Quiz*/
+        /* Adding quiz styles */
+        .quiz-question {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--blue);
+        }
+
+        .quiz-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--blue);
+        }
+
+        .option-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            font-family: 'Courier New', monospace;
+        }
+
+        .quiz-option:hover .option-text {
+            color: var(--text-light);
+        }
+
+        .quiz-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91, 124, 255, 0.1), rgba(40, 224, 255, 0.05));
+            border: 1px solid rgba(91, 124, 255, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .results-title {
+            color: var(--cyan);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .quiz-score {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-feedback {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .feedback-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+    }
+    .feedback-correct { border-left: 4px solid #10b981; }
+    .feedback-incorrect { border-left: 4px solid #ef4444; }
+    
+    .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+    .feedback-correct .feedback-icon { color: #10b981; }
+    .feedback-incorrect .feedback-icon { color: #ef4444; }
+
+    .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+    .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+    .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+            .evaluation-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                margin-top: 1rem;
+            }
+            .evaluation-column {
+                background: rgba(255,255,255,0.02);
+                padding: 1.5rem;
+                border-radius: 12px;
+                border: 1px solid var(--border-color);
+            }
+            .evaluation-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 1rem;
+                font-size: 1.1rem;
+            }
+            .essential { color: var(--cyan); }
+            .important { color: var(--blue); }
+            .advanced { color: var(--purple); }
+            .evaluation-list {
+                list-style: none;
+                font-size: 0.9rem;
+                color: var(--text-secondary);
+            }
+            .evaluation-list li {
+                margin-bottom: 0.6rem;
+                padding-left: 1.2rem;
+                position: relative;
+            }
+            .evaluation-list li::before {
+                content: '•';
+                position: absolute;
+                left: 0;
+                color: inherit;
+            }
+            .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+        </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium.html" class="btn btn-back">← Back</a>
+                <a href="browse.html" class="btn btn-primary">Browse</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Backend & APIs</h1>
+            <p class="course-description">
+                In this module you will deepen fundamental Backend and API concepts, learning to build servers and create communication interfaces between web applications.<br>
+                The focus is on understanding how backends enable creating robust, secure and scalable applications.
+            <div class="course-meta">
+                <div class="meta-item">
+                    <span>⏱</span>
+                    <span>8–10h</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>• Node.js • Express • REST APIs • Databases • Security</span>
+                </div>
+                <div class="meta-item">
+                    <span>📌</span>
+                    <span>Basic JavaScript knowledge</span>
+                </div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'learn')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'lab')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'resources')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'evaluation')">Evaluation</button>
+            </nav>
+
+           <div id="learn" class="tab-panel active">
+
+    <!-- INTRODUÇÃO PROFUNDA -->
+    <div class="content-card">
+        <h3>🌐 6.0 Understanding Backend Architecture</h3>
+        <p>
+            The backend is the invisible engine of every modern application. While the frontend handles visuals and user interaction,
+            the backend is responsible for logic, authentication, data processing, storage, and security.
+        </p>
+
+        <div class="code-explanation">
+            <strong>Frontend vs Backend:</strong><br>
+            • <span class="highlight">Frontend:</span> What the user sees (HTML, CSS, JavaScript).<br>
+            • <span class="highlight">Backend:</span> What processes requests and manages data.<br>
+            • <span class="highlight">Database:</span> Persistent storage system.
+        </div>
+
+        <p>
+            A typical architecture follows this flow:
+        </p>
+        <ul class="styled-list">
+            <li>User sends request (browser → server)</li>
+            <li>Server processes logic</li>
+            <li>Server queries database</li>
+            <li>Server returns response (usually JSON)</li>
+        </ul>
+    </div>
+
+    <!-- NODE.JS -->
+    <div class="content-card">
+        <h3>🟢 6.1 Node.js – JavaScript on the Server</h3>
+        <p>
+            Node.js allows JavaScript to run outside the browser. It is event-driven and non-blocking,
+            meaning it can handle many simultaneous connections efficiently.
+        </p>
+
+<pre><code>// Basic Node server example
+const http = require('http');
+
+const server = http.createServer((req, res) => {
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.end('Hello Backend World');
+});
+
+server.listen(3000);</code></pre>
+
+        <p>
+            Node is ideal for APIs, real-time apps, microservices, and scalable systems.
+        </p>
+    </div>
+
+    <!-- EXPRESS -->
+    <div class="content-card">
+        <h3>⚡ 6.2 Express – Simplifying Server Creation</h3>
+        <p>
+            Express is a minimal framework built on top of Node.js that simplifies routing and middleware handling.
+        </p>
+
+<pre><code>const express = require('express');
+const app = express();
+
+app.get('/users', (req, res) => {
+    res.json({ message: "List of users" });
+});
+
+app.listen(3000);</code></pre>
+
+        <p>
+            Express makes it easy to build REST APIs using HTTP methods like GET, POST, PUT and DELETE.
+        </p>
+    </div>
+
+    <!-- REST -->
+    <div class="content-card">
+        <h3>🔗 6.3 REST API Principles</h3>
+        <p>
+            REST (Representational State Transfer) is an architectural style for designing APIs.
+        </p>
+
+        <ul class="styled-list">
+            <li><strong>Stateless:</strong> Each request contains all necessary information.</li>
+            <li><strong>Resource-Based:</strong> Everything is treated as a resource (users, products).</li>
+            <li><strong>HTTP Methods:</strong> GET, POST, PUT, DELETE.</li>
+            <li><strong>JSON Format:</strong> Standard response format.</li>
+        </ul>
+
+        <div class="code-explanation">
+            Example endpoint structure:<br>
+            GET /users<br>
+            GET /users/1<br>
+            POST /users<br>
+            PUT /users/1<br>
+            DELETE /users/1
+        </div>
+    </div>
+
+    <!-- DATABASE FUNDAMENTALS -->
+    <div class="content-card">
+        <h3>🗄 6.4 Databases Deep Dive</h3>
+        <p>
+            Databases store persistent application data. Choosing the correct type affects scalability and consistency.
+        </p>
+
+        <h4 style="margin-top: 1rem;">📊 Relational Databases (SQL)</h4>
+        <ul class="styled-list">
+            <li>Structured tables</li>
+            <li>Primary and foreign keys</li>
+            <li>ACID compliance</li>
+            <li>Complex JOIN operations</li>
+        </ul>
+
+        <h4 style="margin-top: 1rem;">📄 NoSQL Databases</h4>
+        <ul class="styled-list">
+            <li>Flexible schema</li>
+            <li>Document-based (JSON)</li>
+            <li>Horizontal scaling</li>
+            <li>High performance for large distributed systems</li>
+        </ul>
+    </div>
+
+    <!-- AUTHENTICATION -->
+    <div class="content-card">
+        <h3>🔐 6.5 Authentication & Authorization</h3>
+        <p>
+            Authentication verifies identity. Authorization verifies permissions.
+        </p>
+
+        <ul class="styled-list">
+            <li>Password hashing (bcrypt)</li>
+            <li>JWT (JSON Web Tokens)</li>
+            <li>Session-based authentication</li>
+            <li>Role-based access control (RBAC)</li>
+        </ul>
+
+<pre><code>// Example JWT usage
+const jwt = require('jsonwebtoken');
+
+const token = jwt.sign({ userId: 1 }, "secretKey", { expiresIn: "1h" });</code></pre>
+    </div>
+
+    <!-- SECURITY -->
+    <div class="content-card" style="border-left: 5px solid var(--cyan);">
+        <h3>🛡 6.6 Security Best Practices</h3>
+        <ul class="styled-list">
+            <li>Use HTTPS</li>
+            <li>Validate all user input</li>
+            <li>Use parameterized queries</li>
+            <li>Never store passwords in plain text</li>
+            <li>Use environment variables (.env)</li>
+            <li>Rate limiting to prevent abuse</li>
+        </ul>
+    </div>
+
+    <!-- PERFORMANCE -->
+    <div class="content-card">
+        <h3>🚀 6.7 Scalability & Performance</h3>
+        <p>
+            As traffic grows, backend architecture must scale.
+        </p>
+
+        <ul class="styled-list">
+            <li>Caching (Redis)</li>
+            <li>Load balancing</li>
+            <li>Database indexing</li>
+            <li>Horizontal scaling (multiple servers)</li>
+            <li>Microservices architecture</li>
+        </ul>
+    </div>
+
+    <!-- CONCLUSÃO -->
+    <div class="content-card" style="background: linear-gradient(45deg, rgba(122, 75, 255, 0.1), rgba(40, 224, 255, 0.1));">
+        <h3>🎯 Final Takeaways</h3>
+        <p>
+            Mastering Backend & APIs means understanding:
+        </p>
+        <ul class="styled-list">
+            <li>Server creation with Node & Express</li>
+            <li>REST API design principles</li>
+            <li>Database modeling and optimization</li>
+            <li>Authentication & security strategies</li>
+            <li>Performance and scalability concepts</li>
+        </ul>
+
+        <p>
+            Once you control these foundations, you can build production-ready systems and full-stack applications.
+        </p>
+    </div>
+
+    <!-- HTTP PROTOCOL DEEP DIVE -->
+<div class="content-card">
+    <h3>🌍 6.8 HTTP Protocol – Deep Technical Understanding</h3>
+
+    <p>
+        HTTP (Hypertext Transfer Protocol) is the foundation of all web communication.
+        Every frontend-to-backend interaction is an HTTP request-response cycle.
+    </p>
+
+    <div class="code-explanation">
+        <strong>Request Structure:</strong><br>
+        • Method (GET, POST, PUT, DELETE)<br>
+        • URL (endpoint)<br>
+        • Headers (metadata)<br>
+        • Body (optional data payload)
+    </div>
+
+    <p>
+        HTTP is stateless — meaning the server does not remember previous requests.
+        Authentication tokens or sessions are used to simulate state.
+    </p>
+
+    <h4>📌 Status Codes Breakdown</h4>
+    <ul class="styled-list">
+        <li><strong>200 OK:</strong> Successful request</li>
+        <li><strong>201 Created:</strong> Resource created</li>
+        <li><strong>204 No Content:</strong> Success without body</li>
+        <li><strong>400 Bad Request:</strong> Client input error</li>
+        <li><strong>401 Unauthorized:</strong> Authentication required</li>
+        <li><strong>403 Forbidden:</strong> Authenticated but no permission</li>
+        <li><strong>404 Not Found:</strong> Resource does not exist</li>
+        <li><strong>500 Internal Server Error:</strong> Server failure</li>
+    </ul>
+
+    <p>
+        Proper status codes are critical for clean API design and frontend integration.
+    </p>
+</div>
+
+<!-- ADVANCED ROUTING -->
+<div class="content-card">
+    <h3>🧭 6.9 Advanced Routing & Modularization</h3>
+
+    <p>
+        Professional backends do not define all routes in a single file.
+        Routes are modularized by feature.
+    </p>
+
+<pre><code>// routes/user.routes.js
+const router = require("express").Router();
+router.get("/", getUsers);
+router.post("/", createUser);
+module.exports = router;</code></pre>
+
+    <p>
+        Then imported into the main server:
+    </p>
+
+<pre><code>app.use("/api/v1/users", userRoutes);</code></pre>
+
+    <h4>📌 Best Practices</h4>
+    <ul class="styled-list">
+        <li>Versioned routes (/api/v1/)</li>
+        <li>Feature-based folder structure</li>
+        <li>Controller separation</li>
+        <li>Input validation middleware before controller logic</li>
+    </ul>
+</div>
+
+<!-- MVC -->
+<div class="content-card">
+    <h3>🏗 6.10 MVC Architecture</h3>
+    <ul class="styled-list">
+        <li>Model → Data layer</li>
+        <li>View → Response formatting</li>
+        <li>Controller → Request handling</li>
+        <li>Separation of concerns</li>
+        <li>Maintainable folder structure</li>
+    </ul>
+</div>
+
+<!-- CLEAN CODE -->
+<div class="content-card">
+    <h3>🧼 6.11 Clean Code & Backend Standards</h3>
+    <ul class="styled-list">
+        <li>Single Responsibility Principle</li>
+        <li>DRY (Don't Repeat Yourself)</li>
+        <li>Meaningful naming conventions</li>
+        <li>Error handling patterns</li>
+        <li>Service layer abstraction</li>
+    </ul>
+</div>
+
+<!-- DATA MODELING -->
+<div class="content-card">
+    <h3>📊 6.12 Advanced Data Modeling</h3>
+    <ul class="styled-list">
+        <li>One-to-One relationships</li>
+        <li>One-to-Many relationships</li>
+        <li>Many-to-Many relationships</li>
+        <li>Index strategy planning</li>
+        <li>Denormalization trade-offs</li>
+    </ul>
+</div>
+
+<!-- QUERY OPTIMIZATION -->
+<div class="content-card">
+    <h3>⚡ 6.13 Query Optimization – Real Performance Engineering</h3>
+
+    <p>
+        Poorly written queries are one of the main causes of backend bottlenecks.
+    </p>
+
+    <h4>🔎 Indexing Strategy</h4>
+    <p>
+        Indexes dramatically improve read performance but slightly slow writes.
+        They should be applied on frequently filtered or joined columns.
+    </p>
+
+<pre><code>CREATE INDEX idx_user_email ON users(email);</code></pre>
+
+    <h4>🚨 N+1 Problem</h4>
+    <p>
+        Happens when fetching related data in loops instead of using joins.
+    </p>
+
+    <ul class="styled-list">
+        <li>Bad: 1 query for users + 1 query per user for orders</li>
+        <li>Good: Single JOIN query</li>
+    </ul>
+
+    <h4>📊 Execution Plans</h4>
+    <p>
+        Use EXPLAIN to analyze how the database executes queries.
+    </p>
+</div>
+
+<!-- REDIS -->
+<div class="content-card">
+    <h3>⚡ 6.14 Caching with Redis</h3>
+    <ul class="styled-list">
+        <li>In-memory data store</li>
+        <li>TTL (Time To Live)</li>
+        <li>Session storage</li>
+        <li>Rate limiting counters</li>
+        <li>Cache invalidation strategies</li>
+    </ul>
+</div>
+
+<!-- MESSAGE QUEUES -->
+<div class="content-card">
+    <h3>📬 6.15 Message Queues & Asynchronous Systems</h3>
+
+    <p>
+        In scalable systems, heavy tasks should not block HTTP responses.
+        Instead, they are processed asynchronously via message queues.
+    </p>
+
+    <h4>Example Use Cases</h4>
+    <ul class="styled-list">
+        <li>Sending emails</li>
+        <li>Generating reports</li>
+        <li>Image processing</li>
+        <li>Payment confirmation</li>
+    </ul>
+
+    <p>
+        Flow:
+    </p>
+
+    <div class="code-explanation">
+        Client → API → Queue → Worker → Database
+    </div>
+
+    <p>
+        This decouples services and improves reliability.
+    </p>
+</div>
+
+<!-- MICROSERVICES -->
+<div class="content-card">
+    <h3>🧩 6.16 Microservices Architecture</h3>
+
+    <p>
+        Microservices divide a system into independently deployable services.
+    </p>
+
+    <h4>Core Principles</h4>
+    <ul class="styled-list">
+        <li>Each service has its own database</li>
+        <li>Services communicate via HTTP or message broker</li>
+        <li>Independent deployment pipelines</li>
+        <li>Failure isolation</li>
+    </ul>
+
+    <h4>Trade-Off</h4>
+    <p>
+        Microservices increase operational complexity and require DevOps maturity.
+    </p>
+</div>
+
+<!-- MONOLITH VS MICROSERVICES -->
+<div class="content-card">
+    <h3>⚖ 6.17 Monolith vs Microservices</h3>
+    <ul class="styled-list">
+        <li>Deployment complexity</li>
+        <li>Team scalability</li>
+        <li>Operational overhead</li>
+        <li>When to choose each</li>
+    </ul>
+</div>
+
+<!-- GRAPHQL -->
+<div class="content-card">
+    <h3>🔎 6.18 GraphQL vs REST</h3>
+    <ul class="styled-list">
+        <li>Single endpoint</li>
+        <li>Flexible queries</li>
+        <li>Overfetching vs Underfetching</li>
+        <li>Resolvers</li>
+        <li>Schema design</li>
+    </ul>
+</div>
+
+<!-- API SECURITY -->
+<div class="content-card">
+    <h3>🛡 6.19 Advanced API Security – Attack Surface Analysis</h3>
+
+    <h4>🔐 CORS</h4>
+    <p>
+        Cross-Origin Resource Sharing defines which domains can access your API.
+    </p>
+
+    <h4>🧨 Common Attacks</h4>
+    <ul class="styled-list">
+        <li>SQL Injection</li>
+        <li>XSS (Cross-Site Scripting)</li>
+        <li>CSRF (Cross-Site Request Forgery)</li>
+        <li>Brute force attacks</li>
+    </ul>
+
+    <h4>🛠 Mitigation</h4>
+    <ul class="styled-list">
+        <li>Helmet security headers</li>
+        <li>Rate limiting</li>
+        <li>Input validation schemas</li>
+        <li>Password hashing with salt</li>
+    </ul>
+</div>
+
+<!-- RATE LIMITING -->
+<div class="content-card">
+    <h3>🚦 6.20 Rate Limiting & Throttling</h3>
+    <ul class="styled-list">
+        <li>Prevent brute-force attacks</li>
+        <li>IP-based limits</li>
+        <li>Token bucket algorithm</li>
+        <li>API usage tiers</li>
+    </ul>
+</div>
+
+<!-- LOGGING -->
+<div class="content-card">
+    <h3>📈 6.21 Logging Strategies</h3>
+    <ul class="styled-list">
+        <li>Winston logger</li>
+        <li>Log levels (info, warn, error)</li>
+        <li>Structured logs (JSON)</li>
+        <li>Centralized logging systems</li>
+    </ul>
+</div>
+
+<!-- MONITORING -->
+<div class="content-card">
+    <h3>📡 6.22 Monitoring & Metrics</h3>
+    <ul class="styled-list">
+        <li>Application metrics</li>
+        <li>Health check endpoints</li>
+        <li>Uptime monitoring</li>
+        <li>Performance benchmarking</li>
+    </ul>
+</div>
+
+<!-- TESTING ADVANCED -->
+<div class="content-card">
+    <h3>🧪 6.23 Backend Testing – Production Standards</h3>
+
+    <p>
+        Backend testing ensures stability and prevents regressions.
+    </p>
+
+    <h4>Testing Types</h4>
+    <ul class="styled-list">
+        <li>Unit tests (isolated functions)</li>
+        <li>Integration tests (DB + API)</li>
+        <li>End-to-end tests</li>
+        <li>Load testing</li>
+    </ul>
+
+<pre><code>it("should create user", async () => {
+   const res = await request(app)
+      .post("/users")
+      .send({ email: "test@test.com" });
+   expect(res.statusCode).toBe(201);
+});</code></pre>
+
+    <p>
+        CI pipelines should fail if tests do not pass.
+    </p>
+</div>
+
+<!-- DOCKER -->
+<div class="content-card">
+    <h3>🐳 6.24 Docker – Environment Standardization</h3>
+
+    <p>
+        Docker ensures your backend runs identically in development and production.
+    </p>
+
+<pre><code>FROM node:18
+WORKDIR /app
+COPY package*.json .
+RUN npm install
+COPY . .
+CMD ["node", "server.js"]</code></pre>
+
+    <p>
+        This eliminates "works on my machine" problems.
+    </p>
+</div>
+
+<!-- CI/CD -->
+<div class="content-card">
+    <h3>🔄 6.25 CI/CD Pipelines</h3>
+    <ul class="styled-list">
+        <li>Automated testing before deploy</li>
+        <li>GitHub Actions</li>
+        <li>Staging environments</li>
+        <li>Rollback strategies</li>
+    </ul>
+</div>
+
+<!-- CLOUD -->
+<div class="content-card">
+    <h3>☁ 6.26 Cloud Infrastructure & Scaling</h3>
+
+    <h4>Core Infrastructure Components</h4>
+    <ul class="styled-list">
+        <li>Virtual machines (EC2)</li>
+        <li>Managed databases (RDS)</li>
+        <li>Object storage (S3)</li>
+        <li>Load balancers</li>
+        <li>Auto-scaling groups</li>
+    </ul>
+
+    <p>
+        Production systems require redundancy and failover planning.
+    </p>
+</div>
+
+<!-- WEBSOCKETS -->
+<div class="content-card">
+    <h3>🔌 6.27 Real-Time Communication</h3>
+    <ul class="styled-list">
+        <li>WebSockets</li>
+        <li>Socket.io</li>
+        <li>Live notifications</li>
+        <li>Chat systems</li>
+    </ul>
+</div>
+
+<!-- FILE STORAGE -->
+<div class="content-card">
+    <h3>📁 6.28 File Upload & Storage</h3>
+    <ul class="styled-list">
+        <li>Multipart/form-data</li>
+        <li>Cloud storage (S3)</li>
+        <li>Image processing</li>
+        <li>Security validation</li>
+    </ul>
+</div>
+
+<!-- API DOCUMENTATION -->
+<div class="content-card">
+    <h3>📚 6.29 API Documentation</h3>
+    <ul class="styled-list">
+        <li>Swagger / OpenAPI</li>
+        <li>Postman collections</li>
+        <li>API versioning</li>
+        <li>Public vs Private APIs</li>
+    </ul>
+</div>
+
+<!-- DESIGN PATTERNS -->
+<div class="content-card">
+    <h3>🎨 6.30 Backend Design Patterns</h3>
+    <ul class="styled-list">
+        <li>Repository pattern</li>
+        <li>Factory pattern</li>
+        <li>Dependency injection</li>
+        <li>Singleton pattern</li>
+    </ul>
+</div>
+
+<!-- SCALING DATABASE -->
+<div class="content-card">
+    <h3>📦 6.31 Database Scaling</h3>
+    <ul class="styled-list">
+        <li>Read replicas</li>
+        <li>Sharding</li>
+        <li>Partitioning</li>
+        <li>Horizontal scaling</li>
+    </ul>
+</div>
+
+<!-- BACKUP STRATEGY -->
+<div class="content-card">
+    <h3>💾 6.32 Backup & Disaster Recovery</h3>
+    <ul class="styled-list">
+        <li>Automated backups</li>
+        <li>Point-in-time recovery</li>
+        <li>Redundancy planning</li>
+        <li>Failover systems</li>
+    </ul>
+</div>
+
+<!-- ARCHITECTURE MATURITY -->
+<div class="content-card">
+    <h3>🏆 6.33 Backend Maturity Levels</h3>
+    <ul class="styled-list">
+        <li>Basic CRUD API</li>
+        <li>Secured & structured API</li>
+        <li>Scalable distributed system</li>
+        <li>Enterprise-grade infrastructure</li>
+    </ul>
+</div>
+</div>
+
+            <div id="lab" class="tab-panel">
+                <h3>SQL Data Console</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Practice data extraction. Try filtering customers with high spending.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">SQL EDITOR</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT customer_name, total_spent 
+FROM sales 
+WHERE total_spent > 1500
+ORDER BY total_spent DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">QUERY RESULT</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Click "Run" to simulate the database query...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Run Query</button>
+            </div>
+
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>📊 Quiz: Databases (SQL & NoSQL)</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your mastery of data structuring, CRUD, security and scalability.</p>
+        
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What does SQL stand for?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A" data-correct="true"> A) Structured Query Language</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Simple Query Logic</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Standard Question List</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) System Query Level</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. What is a relational database?</p>
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) A database that stores data as files</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B"> B) A database that stores unstructured data only</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C" data-correct="true"> C) A database that organizes data into tables with relationships</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) A database that stores images</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. What is a NoSQL document?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) A SQL table</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B"> B) A text file</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C" data-correct="true"> C) A JSON-like data structure</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) A database index</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. Give an example of a NoSQL database.</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) MySQL</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B"> B) PostgreSQL</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C" data-correct="true"> C) MongoDB</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) SQLite</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. Give one advantage of SQL.</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) No schema required</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B" data-correct="true"> B) Strong consistency and structured queries</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Poor scalability</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) No relationships</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. Give one advantage of NoSQL.</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Fixed schema</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) Vertical scaling only</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C" data-correct="true"> C) Flexible schema and easy horizontal scaling</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Complex joins</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. What does CRUD mean?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A" data-correct="true"> A) Create, Read, Update, Delete</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B"> B) Copy, Replace, Upload, Download</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Create, Remove, Update, Deploy</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) Connect, Read, Use, Debug</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. What is a JOIN in SQL?</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) A database backup</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B"> B) A way to merge databases</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C" data-correct="true"> C) A method to combine rows from multiple tables</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) A type of index</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. What is an ORM?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) A database engine</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B"> B) A query language</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"> C) A tool that maps database tables to application objects</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) A server framework</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. Why are indexes important?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) They increase storage size</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B" data-correct="true"> B) They speed up data retrieval (queries)</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C"> C) They slow down queries</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) They remove duplicates</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What is SQL injection?</p>
+                <label class="quiz-option"><input type="radio" name="q11" value="A"> A) A backup technique</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B"> B) A performance issue</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C" data-correct="true"> C) A security attack using malicious SQL code</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) A database feature</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. How do you prevent SQL injection?</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Using inline SQL only</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Disabling databases</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"> C) Using parameterized queries or prepared statements</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Storing passwords in plain text</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. What is the purpose of environment variables?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) To store images</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B"> B) To hardcode secrets</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"> C) To store configuration and sensitive data securely</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) To replace databases</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. What is the difference between PostgreSQL and MongoDB?</p>
+                <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Both are NoSQL</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B" data-correct="true"> B) PostgreSQL is relational, MongoDB is document-based</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C"> C) MongoDB uses SQL</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) PostgreSQL has no schema</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. How do APIs communicate with databases?</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Direct user input</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Using CSS</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"> C) Through database drivers, queries, or ORMs</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Using HTML forms</label>
+            </div>
+        </form>
+
+        <div class="quiz-controls" style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button id="submit-quiz" class="btn btn-primary">Submit Assessment</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback" class="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+class QuizManager {
+    constructor() {
+        this.questionsData = {
+            q1: { correct: 'A', exp: 'SQL stands for Structured Query Language, the standard language for relational databases.' },
+            q2: { correct: 'C', exp: 'Relational databases organize data in tables that connect through keys (IDs).' },
+            q3: { correct: 'C', exp: 'NoSQL documents (like in MongoDB) use flexible structures very similar to JSON.' },
+            q4: { correct: 'C', exp: 'MongoDB is the most popular example of a document-oriented NoSQL database.' },
+            q5: { correct: 'B', exp: 'SQL ensures data follows a rigid and consistent structure (ACID).' },
+            q6: { correct: 'C', exp: 'NoSQL allows changing data structure quickly and scales horizontally with ease.' },
+            q7: { correct: 'A', exp: 'CRUD are the 4 basic operations: Create, Read, Update and Delete.' },
+            q8: { correct: 'C', exp: 'JOINS allow querying data from two or more related tables in a single result.' },
+            q9: { correct: 'C', exp: 'ORMs (like Prisma or Sequelize) allow manipulating the database using language objects (JS).' },
+            q10: { correct: 'B', exp: 'Indexes work like a book index: they help the database find data without reading the entire table.' },
+            q11: { correct: 'C', exp: 'SQL Injection happens when an attacker inserts malicious commands into a text field.' },
+            q12: { correct: 'C', exp: 'Prepared Statements clean user data before it reaches the database.' },
+            q13: { correct: 'C', exp: 'Environment variables (.env) protect sensitive data like passwords and API keys.' },
+            q14: { correct: 'B', exp: 'PostgreSQL is Relational (Tables), while MongoDB is NoSQL (Documents).' },
+            q15: { correct: 'C', exp: 'The API uses drivers or ORMs to translate server code into database commands.' }
+        };
+        this.init();
+    }
+
+    init() {
+        document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+        document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+    }
+
+    submitQuiz() {
+        const form = document.getElementById('quiz-form');
+        const formData = new FormData(form);
+        let score = 0;
+        let feedbackHTML = '';
+
+        Object.keys(this.questionsData).forEach((key, index) => {
+            const userAnswer = formData.get(key);
+            const isCorrect = userAnswer === this.questionsData[key].correct;
+            
+            if (isCorrect) score++;
+
+            feedbackHTML += `
+    <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+        <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+        <div>
+            <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+            ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}
+        </div>
+    </div>
+`;
+        });
+
+        this.displayResults(score, feedbackHTML);
+    }
+
+    displayResults(score, feedbackHTML) {
+        const total = Object.keys(this.questionsData).length;
+        const percent = Math.round((score / total) * 100);
+        const resultsDiv = document.getElementById('quiz-results');
+        
+        let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+        document.getElementById('quiz-score').innerHTML = `
+            <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+            <p style="color: var(--text-secondary)">${percent >= 70 ? 'Amazing! You master modern tools.' : 'Review Framework concepts and try again.'}</p>
+        `;
+
+        document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    clearQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-results').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new QuizManager();
+});
+</script>
+            <div id="resources" class="tab-panel">
+                    <div class="content-card">
+                        <h3 class="content-title">Recommended Documents</h3>
+                        <p class="content-text">
+                            Here you have a curated list of essential resources to deepen your knowledge 
+                            in HTML and CSS. These documents will help you master the fundamental concepts.
+                        </p>
+                        
+                        <div class="resources-list">
+                            <div class="resource-category">
+                                <h4 class="category-title">Official Documentation</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">MDN Web Docs - HTML</a></li>
+                                    <li><a href="#" class="resource-link">MDN Web Docs - CSS</a></li>
+                                    <li><a href="#" class="resource-link">W3C HTML5 Specification</a></li>
+                                    <li><a href="#" class="resource-link">CSS Working Group Specifications</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Guides and Tutorials</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML5 Semantic Elements Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Flexbox Complete Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Grid Layout Tutorial</a></li>
+                                    <li><a href="#" class="resource-link">Web Accessibility Guidelines (WCAG)</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Tools and Validators</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">W3C HTML Validator</a></li>
+                                    <li><a href="#" class="resource-link">W3C CSS Validator</a></li>
+                                    <li><a href="#" class="resource-link">Can I Use - Browser Support</a></li>
+                                    <li><a href="#" class="resource-link">WebAIM Accessibility Checker</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Quick References</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML Elements Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Properties Cheat Sheet</a></li>
+                                    <li><a href="#" class="resource-link">HTML Entities Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Selectors Reference</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="resources-note">
+                            <p>💡 <strong>Note:</strong> You can edit this list in the future to add your own favorite resources.</p>
+                        </div>
+                    </div>
+            </div>
+
+            <div id="evaluation" class="tab-panel">
+    <div class="content-card">
+        <h3>🎯 Mastery Criteria: Frontend Frameworks</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            Here are the criteria organized by importance levels to assess your mastery in Frontend Frameworks (React, Vue or similar).
+        </p>
+        
+        <div class="evaluation-grid">
+            <div class="evaluation-column">
+                <h4 class="evaluation-title essential">
+                    <span>💠</span> Essential
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Component-based architecture</li>
+                    <li>Creating functional components</li>
+                    <li>Correct use of props</li>
+                    <li>State management (useState or equivalent)</li>
+                    <li>Conditional rendering</li>
+                    <li>List rendering (map / v-for)</li>
+                    <li>Events and user interaction handling</li>
+                    <li>Communication with APIs (fetch / axios)</li>
+                    <li>Creating SPA with Router</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title important">
+                    <span>⭐</span> Important
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Additional hooks (useEffect or equivalent)</li>
+                    <li>Separation of concerns (UI vs logic)</li>
+                    <li>Scalable project structure</li>
+                    <li>Controlled forms</li>
+                    <li>Input validation</li>
+                    <li>Global state management (Context API, Redux, Pinia, etc.)</li>
+                    <li>Component lazy loading</li>
+                    <li>Code splitting</li>
+                    <li>UI error handling</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title advanced">
+                    <span>🚀</span> Advanced
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Performance optimization (memoization and re-render control)</li>
+                    <li>Server-Side Rendering (Next.js / Nuxt)</li>
+                    <li>Static Site Generation (SSG)</li>
+                    <li>Hydration and hybrid rendering</li>
+                    <li>Micro-frontends</li>
+                    <li>Testing (Jest, Testing Library, Cypress)</li>
+                    <li>Advanced state management and caching (React Query, SWR)</li>
+                    <li>Accessibility (ARIA and WCAG best practices)</li>
+                    <li>Bundle optimization and performance analysis</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-panel");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            let progressMap = { 'learn': 25, 'lab': 50, 'quiz': 75, 'resources': 90, 'evaluation': 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executed successfully.</strong><br><br>Results (Top 3):<br>-----------------------<br>1. Carlos Alberto | €4,250.00<br>2. Beatriz Ramos | €2,100.50<br>3. Ricardo Jorge | €1,880.00<br><br><em>Tip: The WHERE filter worked correctly, eliminating records below €1500.</em>";
+        }
+    </script>
+</body>
+</html>
+

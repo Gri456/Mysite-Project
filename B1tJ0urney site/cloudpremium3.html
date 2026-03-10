@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Automation & Service Mesh</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #020d12;
+            --blue: #00d4ff; --purple: #00aacc; --cyan: #00e5ff;
+            --text-light: #e8f8fc; --text-secondary: #8cc8d8;
+            --card-bg: rgba(0,212,255,0.04); --border-color: rgba(0,212,255,0.15);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; overflow-x: hidden; }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0,212,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(0,180,220,0.07) 1px, transparent 1px);
+            background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1;
+        }
+        @keyframes gridMove { 0%{transform:translate(0,0)} 100%{transform:translate(50px,50px)} }
+        body::after {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(0,180,220,0.08) 0%, rgba(0,212,255,0.04) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(2,13,18,0.88); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(0,212,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: #001a20; font-weight: 700; box-shadow: 0 4px 15px rgba(0,212,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,212,255,0.45); }
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(to right, #00b8d4, #00e5ff, #00acc1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(0,212,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; font-family: 'Inter', sans-serif; }
+        .tab-button:hover { color: var(--text-light); background: rgba(0,212,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(0,212,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .content-card { background: rgba(0,212,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; color: #00b8d4; transition: color 0.3s; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+        pre { background: rgba(0,0,0,0.45); border: 1px solid var(--border-color); border-radius: 6px; padding: 1.1rem; overflow-x: auto; margin: 1rem 0; }
+        code { font-family: 'Courier New', monospace; font-size: 0.88rem; color: #a0e8f4; line-height: 1.6; }
+        /* Quiz */
+        .quiz-item { background: rgba(0,212,255,0.02); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .quiz-question { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(0,212,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all 0.3s ease; margin-bottom: 0.5rem; }
+        .quiz-option:hover { background: rgba(0,212,255,0.08); border-color: var(--blue); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); flex-shrink: 0; }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; font-family: 'Courier New', monospace; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,229,255,0.04)); border: 1px solid rgba(0,212,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; background: rgba(255,255,255,0.02); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer { color: #ef4444; font-weight: 600; }
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .evaluation-column { background: rgba(0,212,255,0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); }
+        .evaluation-title { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; font-size: 1rem; font-weight: 600; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .essential { color: var(--cyan); border-bottom-color: var(--cyan) !important; }
+        .important { color: #ffd700; border-bottom-color: #ffd700 !important; }
+        .advanced { color: #ff6b6b; border-bottom-color: #ff6b6b !important; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.875rem; color: var(--text-secondary); }
+        .evaluation-list li { padding-left: 1.2rem; position: relative; line-height: 1.4; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        /* Resources */
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.6rem 0; font-size: 0.95rem; transition: opacity 0.2s; }
+        .resource-link:hover { text-decoration: underline; opacity: 0.85; }
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .lab-header { background: rgba(0,212,255,0.08); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.5px; }
+        .lab-textarea { flex: 1; background: #000d12; color: #00d4ff; font-family: 'Courier New', monospace; padding: 1rem; border: none; resize: none; outline: none; font-size: 0.88rem; line-height: 1.6; }
+        .lab-output { flex: 1; background: #001018; color: #a0e8f4; padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; }
+        /* Architecture diagram */
+        .arch-diagram { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #a0e8f4; line-height: 1.8; overflow-x: auto; }
+        /* Tags */
+        .tag-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.75rem 0; }
+        .tag { font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 999px; border: 1px solid rgba(0,212,255,0.25); color: #a0e8f4; background: rgba(0,212,255,0.06); }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+            <span class="premium-badge">Premium • Cloud</span>
+        </div>
+        <nav style="display:flex;gap:.75rem">
+            <a href="premium-cloud.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objective: Automation & Service Mesh</h1>
+        <p class="course-description">
+            Master container orchestration with Kubernetes and Helm, automate deployments with ArgoCD, and manage inter-service communication with Istio and Linkerd service meshes.
+        </p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>6–8h</span></div>
+            <div class="meta-item"><span>🎯</span><span>Kubernetes · Helm · ArgoCD · Istio · Linkerd</span></div>
+            <div class="meta-item"><span>📌</span><span>Requires: Cloud Architecture + IaC basics</span></div>
+        </div>
+        <div class="tag-row">
+            <span class="tag">Kubernetes</span>
+            <span class="tag">Helm</span>
+            <span class="tag">Istio</span>
+            <span class="tag">ArgoCD</span>
+            <span class="tag">Linkerd</span>
+            <span class="tag">GitOps</span>
+            <span class="tag">Service Mesh</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary)">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'learn')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'lab')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'resources')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'evaluation')">Evaluation</button>
+        </nav>
+
+        <!-- ══════════════════════════ LEARN ══════════════════════════ -->
+        <div id="learn" class="tab-panel active">
+
+            <div class="content-card">
+                <h3>⚙️ 3.1 Why Container Orchestration?</h3>
+                <p>Containers solve the "it works on my machine" problem. But in production you need to run hundreds of containers reliably, at scale, with automatic recovery from failures.</p>
+                <div class="code-explanation">
+                    <strong>Problems orchestration solves:</strong><br>
+                    • <span class="highlight">Scheduling</span> — which node should run this container?<br>
+                    • <span class="highlight">Self-healing</span> — restart failed containers automatically.<br>
+                    • <span class="highlight">Scaling</span> — add/remove instances based on load.<br>
+                    • <span class="highlight">Rolling updates</span> — deploy new versions with zero downtime.<br>
+                    • <span class="highlight">Service discovery</span> — how do services find each other?
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>☸️ 3.2 Kubernetes Architecture</h3>
+                <p>Kubernetes (K8s) is an open-source container orchestration platform, originally developed by Google. It manages containerised workloads across a cluster of machines.</p>
+                <div class="arch-diagram">
+┌─────────────────────────────────────────────────────┐
+│                   CONTROL PLANE                      │
+│  ┌──────────┐  ┌──────────┐  ┌────────────────────┐ │
+│  │ API      │  │etcd      │  │ Scheduler +        │ │
+│  │ Server   │  │(state)   │  │ Controller Manager │ │
+│  └──────────┘  └──────────┘  └────────────────────┘ │
+└─────────────────────────────────────────────────────┘
+            │              │              │
+┌───────────▼──┐  ┌────────▼──┐  ┌───────▼──────────┐
+│   Worker 1   │  │  Worker 2 │  │    Worker 3       │
+│  ┌─────────┐ │  │ ┌───────┐ │  │  ┌─────────────┐ │
+│  │ Pod A   │ │  │ │ Pod B │ │  │  │ Pod C Pod D  │ │
+│  │ Pod E   │ │  │ │ Pod F │ │  │  │             │ │
+│  └─────────┘ │  │ └───────┘ │  │  └─────────────┘ │
+│  kubelet     │  │ kubelet   │  │  kubelet          │
+└──────────────┘  └───────────┘  └───────────────────┘</div>
+                <ul class="styled-list">
+                    <li><strong>API Server:</strong> Entry point — all kubectl commands hit the API server.</li>
+                    <li><strong>etcd:</strong> Distributed key-value store holding the entire cluster state.</li>
+                    <li><strong>Scheduler:</strong> Assigns pods to nodes based on resource availability.</li>
+                    <li><strong>Controller Manager:</strong> Ensures desired state matches actual state.</li>
+                    <li><strong>kubelet:</strong> Agent on each worker node — runs and monitors pods.</li>
+                    <li><strong>kube-proxy:</strong> Maintains network rules for pod communication.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3>📦 3.3 Core Kubernetes Resources</h3>
+                <ul class="styled-list">
+                    <li><strong>Pod:</strong> One or more containers sharing a network namespace and storage. The smallest deployable unit.</li>
+                    <li><strong>Deployment:</strong> Manages a ReplicaSet to maintain the desired number of pod replicas. Handles rolling updates and rollbacks.</li>
+                    <li><strong>Service:</strong> Stable DNS name and virtual IP for a set of pods. Types: ClusterIP, NodePort, LoadBalancer.</li>
+                    <li><strong>Ingress:</strong> HTTP/HTTPS routing rules — exposes services externally with path and host-based routing.</li>
+                    <li><strong>ConfigMap:</strong> Inject non-sensitive configuration into pods as env vars or files.</li>
+                    <li><strong>Secret:</strong> Like ConfigMap but base64-encoded — for passwords, tokens, certificates.</li>
+                    <li><strong>PersistentVolume (PV) / PVC:</strong> Decouple storage lifecycle from pod lifecycle.</li>
+                    <li><strong>Namespace:</strong> Logical cluster partitioning — isolate environments (dev, staging, prod).</li>
+                    <li><strong>DaemonSet:</strong> Run one pod per node — useful for log agents, monitoring agents.</li>
+                    <li><strong>StatefulSet:</strong> For stateful apps — stable network IDs and persistent storage per pod.</li>
+                </ul>
+                <pre><code># Deployment manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-server
+  namespace: production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: api-server
+    spec:
+      containers:
+      - name: api
+        image: myregistry/api:v2.1.0
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>💻 3.4 Essential kubectl Commands</h3>
+                <pre><code># Cluster info
+kubectl cluster-info
+kubectl get nodes -o wide
+
+# Workloads
+kubectl get pods -n production
+kubectl get pods -A                        # all namespaces
+kubectl describe pod api-server-abc123 -n production
+kubectl logs api-server-abc123 --follow
+kubectl exec -it api-server-abc123 -- /bin/sh
+
+# Apply and manage
+kubectl apply -f deployment.yaml
+kubectl delete -f deployment.yaml
+kubectl rollout status deployment/api-server
+kubectl rollout history deployment/api-server
+kubectl rollout undo deployment/api-server
+
+# Scaling
+kubectl scale deployment api-server --replicas=5
+
+# Debugging
+kubectl get events --sort-by=.lastTimestamp
+kubectl top pods -n production
+kubectl port-forward svc/api-server 8080:80</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>📈 3.5 Autoscaling in Kubernetes</h3>
+                <ul class="styled-list">
+                    <li><strong>HPA (Horizontal Pod Autoscaler):</strong> Scales pod count based on CPU, memory, or custom metrics.</li>
+                    <li><strong>VPA (Vertical Pod Autoscaler):</strong> Adjusts CPU/memory requests automatically.</li>
+                    <li><strong>KEDA (Kubernetes Event-Driven Autoscaling):</strong> Scale based on queue depth, HTTP requests, cron — any external metric.</li>
+                    <li><strong>Cluster Autoscaler:</strong> Adds/removes worker nodes based on pending pods.</li>
+                </ul>
+                <pre><code>apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-server-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-server
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>⛵ 3.6 Helm — The Kubernetes Package Manager</h3>
+                <p>Helm packages Kubernetes manifests into reusable, versioned <strong>charts</strong>. Think of it as apt or npm for Kubernetes.</p>
+                <pre><code># Add a chart repository
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+
+# Search and inspect charts
+helm search repo nginx
+helm show values bitnami/nginx > nginx-values.yaml
+
+# Install a release
+helm install my-nginx bitnami/nginx \
+  --namespace production \
+  --create-namespace \
+  --set replicaCount=3 \
+  --set service.type=LoadBalancer \
+  --values custom-values.yaml
+
+# Upgrade a release
+helm upgrade my-nginx bitnami/nginx \
+  --values custom-values.yaml \
+  --atomic \
+  --timeout 5m
+
+# Rollback to a previous revision
+helm rollback my-nginx 2
+
+# List and remove
+helm list -A
+helm uninstall my-nginx -n production</code></pre>
+                <div class="code-explanation">
+                    <strong>Helm chart structure:</strong><br>
+                    <code>my-chart/<br>
+├── Chart.yaml      # metadata (name, version, description)<br>
+├── values.yaml     # default configuration<br>
+├── templates/      # Kubernetes manifests with Go templating<br>
+│   ├── deployment.yaml<br>
+│   ├── service.yaml<br>
+│   └── _helpers.tpl<br>
+└── charts/         # dependencies (sub-charts)</code>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>🔄 3.7 ArgoCD — GitOps Continuous Delivery</h3>
+                <p>ArgoCD implements GitOps for Kubernetes — it continuously watches a Git repository and automatically reconciles the cluster state to match the desired state defined in Git.</p>
+                <ul class="styled-list">
+                    <li><strong>Application CRD:</strong> Defines the source (Git repo + path) and destination (cluster + namespace).</li>
+                    <li><strong>Sync policies:</strong> Manual (you approve) or automated (auto-sync on every commit).</li>
+                    <li><strong>Health checks:</strong> ArgoCD understands Kubernetes resource health natively.</li>
+                    <li><strong>RBAC:</strong> Teams only see and manage their own applications.</li>
+                    <li><strong>App of Apps pattern:</strong> One root ArgoCD application manages other applications — bootstrap an entire cluster from a single repo.</li>
+                    <li><strong>Multi-cluster:</strong> Manage multiple clusters from one ArgoCD installation.</li>
+                </ul>
+                <pre><code># ArgoCD Application manifest
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-api
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/myorg/k8s-manifests
+    targetRevision: main
+    path: apps/my-api
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production
+  syncPolicy:
+    automated:
+      prune: true       # delete removed resources
+      selfHeal: true    # revert manual changes
+    syncOptions:
+    - CreateNamespace=true</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🕸️ 3.8 What is a Service Mesh and Why?</h3>
+                <p>As you decompose applications into microservices, service-to-service communication becomes a major concern. A service mesh addresses this at the infrastructure level — without changing your application code.</p>
+                <div class="code-explanation">
+                    <strong>What a service mesh gives you for free:</strong><br>
+                    • <span class="highlight">mTLS encryption</span> — every service-to-service call is encrypted and authenticated.<br>
+                    • <span class="highlight">Traffic management</span> — canary deployments, A/B testing, retries, timeouts.<br>
+                    • <span class="highlight">Observability</span> — automatic metrics, traces, and logs for all service calls.<br>
+                    • <span class="highlight">Circuit breaking</span> — stop cascading failures when a downstream service degrades.<br>
+                    • <span class="highlight">Rate limiting</span> — protect services from overload.
+                </div>
+                <div class="arch-diagram">Without mesh:    [Service A] ──HTTP──▶ [Service B]
+                               no auth, no encryption, no retry
+
+With mesh:       [Service A]──[Proxy]──mTLS──[Proxy]──[Service B]
+                               automatic encryption, retries, metrics</div>
+            </div>
+
+            <div class="content-card">
+                <h3>🔷 3.9 Istio — Full-Featured Service Mesh</h3>
+                <p>Istio is the most feature-rich service mesh. It uses the Envoy proxy as a sidecar injected into every pod to intercept all network traffic.</p>
+                <ul class="styled-list">
+                    <li><strong>Control Plane (Istiod):</strong> Manages proxy configuration, certificate issuance, and service discovery.</li>
+                    <li><strong>Data Plane:</strong> Envoy sidecars in every pod — handle all inbound and outbound traffic.</li>
+                    <li><strong>VirtualService:</strong> Define routing rules — canary, header-based, weighted splits.</li>
+                    <li><strong>DestinationRule:</strong> Define policies for a destination — load balancing, circuit breaking, TLS settings.</li>
+                    <li><strong>Gateway:</strong> Manage ingress and egress traffic at the mesh boundary.</li>
+                    <li><strong>PeerAuthentication:</strong> Enforce mTLS across the mesh.</li>
+                </ul>
+                <pre><code># Canary release: 90% v1, 10% v2
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: checkout
+spec:
+  hosts:
+  - checkout
+  http:
+  - route:
+    - destination:
+        host: checkout
+        subset: v1
+      weight: 90
+    - destination:
+        host: checkout
+        subset: v2
+      weight: 10
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: checkout
+spec:
+  host: checkout
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 10s
+      baseEjectionTime: 30s
+  subsets:
+  - name: v1
+    labels: { version: v1 }
+  - name: v2
+    labels: { version: v2 }</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🔗 3.10 Linkerd — Lightweight Service Mesh</h3>
+                <p>Linkerd is a CNCF-graduated project focused on simplicity and performance. Unlike Istio, it uses purpose-built micro-proxies written in <strong>Rust</strong> instead of Envoy.</p>
+                <ul class="styled-list">
+                    <li><strong>Ultralight proxies:</strong> Linkerd2-proxy is tiny (~10MB) and has minimal CPU overhead vs Envoy.</li>
+                    <li><strong>Zero-config mTLS:</strong> Automatic mutual TLS with no configuration needed.</li>
+                    <li><strong>Golden metrics:</strong> Success rate, request volume, and latency for every service — automatic.</li>
+                    <li><strong>Traffic splitting:</strong> Weighted routing using the SMI (Service Mesh Interface) spec.</li>
+                    <li><strong>When to choose Linkerd:</strong> When you need a service mesh but Istio's complexity is too high — ideal for smaller teams or simpler requirements.</li>
+                </ul>
+                <pre><code># Install Linkerd
+linkerd install --crds | kubectl apply -f -
+linkerd install | kubectl apply -f -
+linkerd check
+
+# Inject Linkerd into a namespace
+kubectl annotate namespace production \
+  linkerd.io/inject=enabled
+
+# View traffic stats
+linkerd viz stat deployments -n production
+linkerd viz top deployment/api-server -n production</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🔀 3.11 Advanced Traffic Management with Istio</h3>
+                <pre><code># Header-based routing (user segmentation)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: frontend
+spec:
+  hosts:
+  - frontend
+  http:
+  - match:
+    - headers:
+        x-user-segment:
+          exact: "beta"
+    route:
+    - destination:
+        host: frontend
+        subset: v2
+  - route:
+    - destination:
+        host: frontend
+        subset: v1
+---
+# Circuit breaker via DestinationRule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: payment-service
+spec:
+  host: payment-service
+  trafficPolicy:
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 5s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 50</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🔐 3.12 Security in Kubernetes</h3>
+                <ul class="styled-list">
+                    <li><strong>RBAC (Role-Based Access Control):</strong> Control who can do what in the cluster. Use ServiceAccounts for workloads.</li>
+                    <li><strong>NetworkPolicies:</strong> Restrict pod-to-pod communication — default deny, explicit allow.</li>
+                    <li><strong>Pod Security Standards:</strong> Enforce security contexts at namespace level (privileged, baseline, restricted).</li>
+                    <li><strong>OPA/Gatekeeper:</strong> Policy engine — enforce custom rules (e.g., all containers must have resource limits).</li>
+                    <li><strong>Image scanning:</strong> Trivy, Snyk — scan container images in CI before deployment.</li>
+                </ul>
+                <pre><code># NetworkPolicy — default deny all ingress
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: production
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+---
+# Allow only frontend to reach api-server
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-api
+  namespace: production
+spec:
+  podSelector:
+    matchLabels:
+      app: api-server
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>🏗️ 3.13 Deployment Strategies</h3>
+                <ul class="styled-list">
+                    <li><strong>Rolling Update (default):</strong> Gradually replace old pods with new ones. Zero downtime. Built into Deployments.</li>
+                    <li><strong>Blue/Green:</strong> Two identical environments. Switch traffic all at once. Instant rollback.</li>
+                    <li><strong>Canary:</strong> Route small % of traffic to new version. Validate before full rollout. Requires service mesh or Argo Rollouts.</li>
+                    <li><strong>Argo Rollouts:</strong> Kubernetes controller for progressive delivery — canary, blue/green with automated analysis.</li>
+                </ul>
+                <pre><code># Argo Rollouts — Canary with analysis
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+spec:
+  strategy:
+    canary:
+      steps:
+      - setWeight: 10     # 10% traffic to new version
+      - pause: {duration: 5m}
+      - setWeight: 30
+      - pause: {duration: 10m}
+      - setWeight: 100
+      analysis:
+        templates:
+        - templateName: error-rate-check</code></pre>
+            </div>
+
+            <div class="content-card">
+                <h3>📊 3.14 Observability in the Mesh</h3>
+                <p>One of the biggest benefits of a service mesh is automatic observability — without any code changes.</p>
+                <ul class="styled-list">
+                    <li><strong>Metrics:</strong> Istio exposes Prometheus metrics for every service: request rate, error rate, p50/p99 latency.</li>
+                    <li><strong>Distributed Tracing:</strong> Envoy adds trace headers (Jaeger, Zipkin, Tempo) automatically.</li>
+                    <li><strong>Kiali:</strong> Istio's service graph dashboard — visualise traffic flow, health, and configuration.</li>
+                    <li><strong>Grafana dashboards:</strong> Pre-built Istio dashboards for service-level metrics.</li>
+                </ul>
+            </div>
+
+            <div class="content-card" style="border-left:5px solid var(--cyan)">
+                <h3>✅ 3.15 Module Summary</h3>
+                <p>After this module you should be able to:</p>
+                <ul class="styled-list">
+                    <li>Understand Kubernetes control plane and worker node components.</li>
+                    <li>Write and apply Deployment, Service, ConfigMap, and Secret manifests.</li>
+                    <li>Use kubectl to manage, debug, and scale workloads.</li>
+                    <li>Package and release applications with Helm charts.</li>
+                    <li>Set up ArgoCD for GitOps continuous delivery.</li>
+                    <li>Understand when and why to use a service mesh.</li>
+                    <li>Configure Istio traffic management, mTLS, and circuit breaking.</li>
+                    <li>Choose between Istio and Linkerd based on requirements.</li>
+                </ul>
+                <p style="margin-top:0.75rem"><strong>Next:</strong> Cloud Security — protecting everything you just built.</p>
+            </div>
+
+        </div>
+
+        <!-- ══════════════════════════ LAB ══════════════════════════ -->
+        <div id="lab" class="tab-panel">
+            <h3 style="margin-bottom:0.5rem">Lab: Kubernetes Manifest Builder</h3>
+            <p style="color:var(--text-secondary);margin-bottom:1.25rem;font-size:0.9rem">
+                Write a Kubernetes manifest (Deployment, Service, HPA) and click Run to simulate <code>kubectl apply</code> output with a health analysis.
+            </p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header">MANIFEST EDITOR (YAML)</div>
+                    <textarea class="lab-textarea" id="lab-input">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout-api
+  namespace: production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: checkout
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: checkout
+        version: v2
+    spec:
+      containers:
+      - name: checkout
+        image: myregistry/checkout:v2.0.1
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header">kubectl apply OUTPUT</div>
+                    <div class="lab-output" id="lab-output">Click "▶ Run" to simulate kubectl apply...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem" onclick="runLab()">▶ Run</button>
+        </div>
+
+        <!-- ══════════════════════════ QUIZ ══════════════════════════ -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: Automation & Service Mesh</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">
+                    15 questions covering Kubernetes, Helm, ArgoCD, Istio, and Linkerd. Read each question carefully and select the best answer.
+                </p>
+                <form id="quiz-form">
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">1. What is the smallest deployable unit in Kubernetes?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"><span class="option-text">A) Container</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B" data-correct="true"><span class="option-text">B) Pod</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C"><span class="option-text">C) Deployment</span></label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"><span class="option-text">D) ReplicaSet</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">2. Which component stores the entire Kubernetes cluster state?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A"><span class="option-text">A) kubelet</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B"><span class="option-text">B) API Server</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C" data-correct="true"><span class="option-text">C) etcd</span></label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"><span class="option-text">D) Scheduler</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">3. What Kubernetes resource provides a stable DNS name and virtual IP for a group of pods?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"><span class="option-text">A) Pod</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B"><span class="option-text">B) Deployment</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C" data-correct="true"><span class="option-text">C) Service</span></label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"><span class="option-text">D) Ingress</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">4. What is the difference between a ConfigMap and a Secret in Kubernetes?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"><span class="option-text">A) They are identical — ConfigMap is just an alias for Secret</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B" data-correct="true"><span class="option-text">B) ConfigMap stores non-sensitive config; Secret stores sensitive data (base64-encoded)</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C"><span class="option-text">C) Secret stores application config; ConfigMap stores credentials</span></label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"><span class="option-text">D) ConfigMap only works with Deployments; Secret only with StatefulSets</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">5. Which kubectl command shows a real-time stream of pod logs?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"><span class="option-text">A) kubectl get logs my-pod</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B"><span class="option-text">B) kubectl watch logs my-pod</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C" data-correct="true"><span class="option-text">C) kubectl logs my-pod --follow</span></label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"><span class="option-text">D) kubectl stream my-pod</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">6. What does HPA stand for and what does it do?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"><span class="option-text">A) Host Provisioning Agent — provisions cloud VMs</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B" data-correct="true"><span class="option-text">B) Horizontal Pod Autoscaler — scales pod replicas based on metrics</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C"><span class="option-text">C) Helm Package Adapter — converts charts to manifests</span></label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"><span class="option-text">D) HTTP Proxy Agent — manages ingress traffic</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">7. In Helm, what is a "release"?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"><span class="option-text">A) A Git tag on the chart repository</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B"><span class="option-text">B) The YAML values file</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"><span class="option-text">C) A named instance of a chart deployed into a cluster</span></label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"><span class="option-text">D) A versioned container image</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">8. Which Helm command reverts a release to a previous version?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"><span class="option-text">A) helm revert</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B"><span class="option-text">B) helm undo</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C" data-correct="true"><span class="option-text">C) helm rollback</span></label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"><span class="option-text">D) helm restore</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">9. ArgoCD implements which software delivery practice?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"><span class="option-text">A) Blue/Green deployments only</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B"><span class="option-text">B) Continuous Integration (CI)</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"><span class="option-text">C) GitOps — Git as the single source of truth for cluster state</span></label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"><span class="option-text">D) Infrastructure as Code via Terraform</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">10. What happens when ArgoCD has selfHeal: true enabled?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"><span class="option-text">A) ArgoCD restarts unhealthy pods automatically</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B" data-correct="true"><span class="option-text">B) ArgoCD automatically reverts manual changes to match the Git state</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C"><span class="option-text">C) ArgoCD scales deployments when they go unhealthy</span></label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"><span class="option-text">D) ArgoCD sends alerts to Slack when drift is detected</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">11. Which proxy does Istio inject as a sidecar into every pod?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"><span class="option-text">A) Nginx</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B" data-correct="true"><span class="option-text">B) Envoy</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C"><span class="option-text">C) HAProxy</span></label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"><span class="option-text">D) Traefik</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">12. In Istio, which resource defines routing rules (e.g., canary splitting, header-based routing)?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"><span class="option-text">A) DestinationRule</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B" data-correct="true"><span class="option-text">B) VirtualService</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C"><span class="option-text">C) PeerAuthentication</span></label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"><span class="option-text">D) ServiceEntry</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">13. What key differentiates Linkerd from Istio architecturally?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"><span class="option-text">A) Linkerd uses Envoy proxies; Istio uses Nginx</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B"><span class="option-text">B) Linkerd requires manual mTLS config; Istio is automatic</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"><span class="option-text">C) Linkerd uses lightweight Rust micro-proxies; Istio uses Envoy (C++)</span></label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"><span class="option-text">D) Linkerd only supports HTTP/1; Istio supports gRPC</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">14. What is a Kubernetes NetworkPolicy used for?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"><span class="option-text">A) Configure DNS resolution inside pods</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"><span class="option-text">B) Expose services to the internet</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C" data-correct="true"><span class="option-text">C) Restrict or allow pod-to-pod network communication</span></label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"><span class="option-text">D) Load balance traffic across pods</span></label>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="quiz-question">15. Which deployment strategy routes a small percentage of traffic to the new version before a full rollout?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"><span class="option-text">A) Rolling update</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"><span class="option-text">B) Recreate</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C"><span class="option-text">C) Blue/Green</span></label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D" data-correct="true"><span class="option-text">D) Canary</span></label>
+                    </div>
+
+                </form>
+
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+
+                <div id="quiz-results" class="quiz-results" style="display:none">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback" class="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════ RESOURCES ══════════════════════════ -->
+        <div id="resources" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem">Support Materials</h3>
+            <div class="content-card">
+                <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem">Official documentation and deep-dive references:</p>
+                <a href="https://kubernetes.io/docs/home/" target="_blank" class="resource-link">→ Kubernetes Official Documentation</a>
+                <a href="https://kubernetes.io/docs/reference/kubectl/cheatsheet/" target="_blank" class="resource-link">→ kubectl Cheat Sheet</a>
+                <a href="https://helm.sh/docs/" target="_blank" class="resource-link">→ Helm Documentation</a>
+                <a href="https://artifacthub.io/" target="_blank" class="resource-link">→ ArtifactHub — Public Helm Charts</a>
+                <a href="https://argo-cd.readthedocs.io/en/stable/" target="_blank" class="resource-link">→ ArgoCD Official Documentation</a>
+                <a href="https://argoproj.github.io/argo-rollouts/" target="_blank" class="resource-link">→ Argo Rollouts — Progressive Delivery</a>
+                <a href="https://istio.io/latest/docs/" target="_blank" class="resource-link">→ Istio Documentation</a>
+                <a href="https://istio.io/latest/docs/tasks/traffic-management/" target="_blank" class="resource-link">→ Istio Traffic Management Tasks</a>
+                <a href="https://linkerd.io/2.14/overview/" target="_blank" class="resource-link">→ Linkerd Documentation</a>
+                <a href="https://keda.sh/docs/" target="_blank" class="resource-link">→ KEDA — Event-Driven Autoscaling</a>
+                <a href="https://www.cncf.io/landscape/" target="_blank" class="resource-link">→ CNCF Cloud Native Landscape</a>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════ EVALUATION ══════════════════════════ -->
+        <div id="evaluation" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Domain Criteria: Automation & Service Mesh</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">
+                    To successfully complete this module, demonstrate understanding across these three competency levels:
+                </p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>Kubernetes architecture: control plane vs worker nodes</li>
+                            <li>Core resources: Pod, Deployment, Service, Namespace</li>
+                            <li>ConfigMap vs Secret — when to use each</li>
+                            <li>Core kubectl commands: apply, get, describe, logs, exec</li>
+                            <li>Rolling update strategy and rollback</li>
+                            <li>Helm: install, upgrade, rollback commands</li>
+                            <li>What GitOps means and ArgoCD's role</li>
+                            <li>What a service mesh does and why it is useful</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>HPA and Cluster Autoscaler configuration</li>
+                            <li>Helm chart structure (Chart.yaml, values.yaml, templates/)</li>
+                            <li>ArgoCD Application CRD: source, destination, syncPolicy</li>
+                            <li>Istio: VirtualService and DestinationRule for traffic splitting</li>
+                            <li>Istio mTLS and PeerAuthentication</li>
+                            <li>Linkerd vs Istio: trade-offs and when to choose each</li>
+                            <li>NetworkPolicy: default deny and explicit allow</li>
+                            <li>Canary vs Blue/Green vs Rolling strategies</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>StatefulSet and PersistentVolumeClaim lifecycle</li>
+                            <li>KEDA event-driven autoscaling configuration</li>
+                            <li>App of Apps pattern in ArgoCD</li>
+                            <li>Argo Rollouts with automated analysis</li>
+                            <li>Istio circuit breaking via outlierDetection</li>
+                            <li>OPA/Gatekeeper custom admission policies</li>
+                            <li>Multi-cluster Kubernetes management</li>
+                            <li>Service mesh observability: Kiali, Jaeger, Tempo</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+/* ── Tab navigation ── */
+function openTab(evt, tabName) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
+    const map = { learn: 25, lab: 50, quiz: 75, resources: 90, evaluation: 100 };
+    document.getElementById('progress-fill').style.width = map[tabName] + '%';
+    document.getElementById('progress-text').innerText = map[tabName] + '%';
+    window.scrollTo({ top: 150, behavior: 'smooth' });
+}
+
+/* ── Lab ── */
+function runLab() {
+    const input = document.getElementById('lab-input').value;
+    const out   = document.getElementById('lab-output');
+
+    const kindMatch = input.match(/kind:\s*(\w+)/);
+    const nameMatch = input.match(/name:\s*(\S+)/);
+    const nsMatch   = input.match(/namespace:\s*(\S+)/);
+    const repMatch  = input.match(/replicas:\s*(\d+)/);
+    const imgMatch  = input.match(/image:\s*(\S+)/);
+
+    const kind      = kindMatch ? kindMatch[1] : 'Resource';
+    const name      = nameMatch ? nameMatch[1] : 'unknown';
+    const ns        = nsMatch   ? nsMatch[1]   : 'default';
+    const replicas  = repMatch  ? repMatch[1]  : '1';
+    const image     = imgMatch  ? imgMatch[1]  : 'unknown';
+
+    const hasResources = input.includes('resources:');
+    const hasReadiness = input.includes('readinessProbe:') || input.includes('livenessProbe:');
+    const hasRolling   = input.includes('RollingUpdate');
+
+    const warnings = [];
+    if (!hasResources) warnings.push('⚠️  No resource requests/limits — pods may be evicted under pressure.');
+    if (!hasReadiness) warnings.push('⚠️  No readinessProbe — traffic will reach pods before they are ready.');
+    if (!hasRolling && kind === 'Deployment') warnings.push('ℹ️  No explicit update strategy — defaults to RollingUpdate.');
+
+    out.innerHTML =
+`$ kubectl apply -f manifest.yaml
+
+${kind.toLowerCase()}/${name} configured
+
+Namespace:   ${ns}
+Kind:        ${kind}
+Replicas:    ${replicas}
+Image:       ${image}
+
+✓ Manifest syntax valid
+✓ Namespace "${ns}" exists
+✓ ${kind} "${name}" applied
+
+Rollout status:
+  Waiting for deployment "${name}" rollout to finish:
+  0 of ${replicas} updated replicas are available...
+  1 of ${replicas} updated replicas are available...
+  ${replicas} of ${replicas} updated replicas are available.
+  Deployment "${name}" successfully rolled out.
+
+${warnings.length > 0 ? '\nBest practice analysis:\n' + warnings.join('\n') : '✅ No issues detected — manifest follows best practices.'}`;
+}
+
+/* ── Quiz ── */
+const questionsData = {
+    q1:  { correct: 'B', exp: 'A Pod is the smallest deployable unit in K8s — one or more containers sharing a network namespace and storage volumes.' },
+    q2:  { correct: 'C', exp: 'etcd is a distributed key-value store that holds the full state of the Kubernetes cluster. All other components query the API server which reads/writes etcd.' },
+    q3:  { correct: 'C', exp: 'A Service provides a stable DNS name and virtual IP (ClusterIP) for a set of pods, abstracting away individual pod IPs which change on restart.' },
+    q4:  { correct: 'B', exp: 'ConfigMap is for non-sensitive configuration (env vars, config files). Secret is for sensitive data (passwords, tokens) stored base64-encoded with RBAC restrictions.' },
+    q5:  { correct: 'C', exp: 'kubectl logs <pod> --follow (or -f) streams logs in real time. Without --follow it prints the current log buffer and exits.' },
+    q6:  { correct: 'B', exp: 'HPA = Horizontal Pod Autoscaler. It adjusts the number of pod replicas based on observed CPU, memory, or custom/external metrics.' },
+    q7:  { correct: 'C', exp: 'A Helm release is a named, running instance of a chart in a cluster. You can install the same chart multiple times under different release names.' },
+    q8:  { correct: 'C', exp: 'helm rollback <release> <revision> reverts a Helm release to a specific previous revision. helm list shows the revision history.' },
+    q9:  { correct: 'C', exp: 'ArgoCD implements GitOps — it continuously syncs the cluster to match the desired state stored in a Git repository.' },
+    q10: { correct: 'B', exp: 'selfHeal: true means ArgoCD detects and reverts any manual kubectl changes, keeping the cluster in sync with Git at all times.' },
+    q11: { correct: 'B', exp: 'Istio injects Envoy as a sidecar proxy into every pod. Envoy intercepts all inbound and outbound traffic and applies Istio policies.' },
+    q12: { correct: 'B', exp: 'VirtualService defines traffic routing rules: canary splits, header-based routing, retries, and timeouts. DestinationRule defines policies for the destination.' },
+    q13: { correct: 'C', exp: 'Linkerd uses its own purpose-built Rust micro-proxies (linkerd2-proxy), which are significantly lighter than Envoy. This makes Linkerd simpler and lower-overhead.' },
+    q14: { correct: 'C', exp: 'NetworkPolicy restricts or allows network traffic between pods and namespaces. The default in K8s is allow-all; applying a default-deny policy and explicit allows is a security best practice.' },
+    q15: { correct: 'D', exp: 'Canary routes a small percentage (e.g., 5–10%) of traffic to the new version first. After validating, you gradually increase the percentage until 100% are on the new version.' }
+};
+
+document.getElementById('submit-quiz').addEventListener('click', () => {
+    const form = document.getElementById('quiz-form');
+    const data = new FormData(form);
+    let score = 0;
+    let feedbackHTML = '';
+
+    Object.keys(questionsData).forEach((key, index) => {
+        const userAnswer = data.get(key);
+        const isCorrect  = userAnswer === questionsData[key].correct;
+        if (isCorrect) score++;
+
+        feedbackHTML += `
+        <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+            <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+            <div>
+                <strong>Question ${index + 1}:</strong> ${questionsData[key].exp}
+                ${!isCorrect ? `<br><small class="correct-answer">Correct answer: Option ${questionsData[key].correct}</small>` : ''}
+            </div>
+        </div>`;
+    });
+
+    const total   = Object.keys(questionsData).length;
+    const percent = Math.round((score / total) * 100);
+    const cls     = percent >= 80 ? 'score-excellent' : percent >= 53 ? 'score-good' : 'score-poor';
+    const msg     = percent >= 80
+        ? '🎉 Excellent! You have a solid understanding of K8s, Helm, ArgoCD, and Service Mesh. Move on to Cloud Security.'
+        : percent >= 53
+        ? '👍 Good progress. Review the sections on ArgoCD and Istio traffic management and try again.'
+        : '📖 Review the Learn section carefully — focus on Kubernetes resources, Helm, and service mesh concepts.';
+
+    document.getElementById('quiz-score').innerHTML = `
+        <div class="${cls}">${score}/${total} (${percent}%)</div>
+        <p style="color:var(--text-secondary);margin-top:0.5rem">${msg}</p>`;
+    document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+
+    const results = document.getElementById('quiz-results');
+    results.style.display = 'block';
+    results.scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('clear-quiz').addEventListener('click', () => {
+    document.getElementById('quiz-form').reset();
+    document.getElementById('quiz-results').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
+

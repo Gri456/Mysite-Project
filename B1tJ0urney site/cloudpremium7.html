@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - FinOps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #020d12; --blue: #00d4ff; --purple: #00aacc; --cyan: #00e5ff;
+            --text-light: #e8f8fc; --text-secondary: #8cc8d8;
+            --card-bg: rgba(0,212,255,0.04); --border-color: rgba(0,212,255,0.15);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; overflow-x: hidden; }
+        body::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background-image:linear-gradient(rgba(0,212,255,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,220,0.07) 1px,transparent 1px); background-size:50px 50px; animation:gridMove 20s linear infinite; pointer-events:none; z-index:-1; }
+        @keyframes gridMove { 0%{transform:translate(0,0)} 100%{transform:translate(50px,50px)} }
+        body::after { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center,rgba(0,180,220,0.08) 0%,rgba(0,212,255,0.04) 50%,transparent 100%); pointer-events:none; z-index:-1; }
+        .header { position:sticky; top:0; z-index:100; background:rgba(2,13,18,0.88); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-color); box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width:1160px; margin:0 auto; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo-section { display:flex; align-items:center; gap:0.75rem; }
+        .logo { font-size:1.5rem; font-weight:700; color:var(--text-light); }
+        .premium-badge { background:rgba(0,212,255,0.1); border:1px solid var(--border-color); color:var(--text-light); padding:0.25rem 0.75rem; border-radius:50px; font-size:0.75rem; font-weight:500; }
+        .btn { padding:0.5rem 1.25rem; border-radius:50px; font-size:0.875rem; font-weight:500; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; transition:all 0.3s ease; border:none; cursor:pointer; font-family:'Inter',sans-serif; }
+        .btn-back { background:rgba(255,255,255,0.1); border:1px solid var(--border-color); color:var(--text-light); }
+        .btn-back:hover { background:rgba(255,255,255,0.15); transform:translateY(-1px); }
+        .btn-primary { background:linear-gradient(135deg,var(--blue),var(--cyan)); color:#001a20; font-weight:700; box-shadow:0 4px 15px rgba(0,212,255,0.3); }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,212,255,0.45); }
+        .main-content { max-width:1160px; margin:0 auto; padding:2rem; }
+        .course-header { margin-bottom:2rem; }
+        .course-title { font-size:2.5rem; font-weight:700; margin-bottom:1rem; background:linear-gradient(to right,#00b8d4,#00e5ff,#00acc1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .course-description { font-size:1.125rem; color:var(--text-secondary); margin-bottom:1.5rem; line-height:1.6; }
+        .course-meta { display:flex; flex-wrap:wrap; gap:1.5rem; margin-bottom:1.5rem; }
+        .meta-item { display:flex; align-items:center; gap:0.5rem; color:var(--text-secondary); font-size:0.875rem; }
+        .progress-bar { width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--blue),var(--cyan)); width:0%; transition:width 0.3s ease; }
+        .tabs-container { background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display:flex; background:rgba(0,212,255,0.02); border-bottom:1px solid var(--border-color); overflow-x:auto; }
+        .tab-button { flex:1; min-width:120px; padding:1rem 1.5rem; background:none; border:none; color:var(--text-secondary); font-size:0.875rem; font-weight:500; cursor:pointer; transition:all 0.3s ease; position:relative; white-space:nowrap; font-family:'Inter',sans-serif; }
+        .tab-button:hover { color:var(--text-light); background:rgba(0,212,255,0.05); }
+        .tab-button.active { color:var(--text-light); background:rgba(0,212,255,0.1); }
+        .tab-button.active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--blue),var(--cyan)); }
+        .tab-panel { display:none; padding:2rem; animation:fadeIn 0.4s ease; }
+        .tab-panel.active { display:block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .content-card { background:rgba(0,212,255,0.03); padding:1.5rem; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem; }
+        .content-card h3 { margin-bottom:1rem; display:flex; align-items:center; gap:10px; color:#00b8d4; }
+        .code-explanation { border-left:3px solid var(--blue); padding-left:1rem; margin:1rem 0; font-size:0.95rem; line-height:1.7; }
+        .highlight { color:var(--cyan); font-weight:600; }
+        .styled-list { list-style:none; margin:1rem 0; }
+        .styled-list li { margin-bottom:0.8rem; padding-left:1.5rem; position:relative; color:var(--text-secondary); line-height:1.5; }
+        .styled-list li::before { content:'→'; position:absolute; left:0; color:var(--cyan); }
+        pre { background:rgba(0,0,0,0.45); border:1px solid var(--border-color); border-radius:6px; padding:1.1rem; overflow-x:auto; margin:1rem 0; }
+        code { font-family:'Courier New',monospace; font-size:0.88rem; color:#a0e8f4; line-height:1.6; }
+        .quiz-item { background:rgba(0,212,255,0.02); padding:1.5rem; border-radius:8px; border:1px solid var(--border-color); margin-bottom:1.5rem; }
+        .quiz-question { color:var(--text-light); font-size:1rem; font-weight:600; margin-bottom:1rem; line-height:1.4; }
+        .quiz-option { display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:rgba(0,212,255,0.03); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; transition:all 0.3s ease; margin-bottom:0.5rem; }
+        .quiz-option:hover { background:rgba(0,212,255,0.08); border-color:var(--blue); }
+        .quiz-option input[type="radio"] { width:18px; height:18px; accent-color:var(--blue); flex-shrink:0; }
+        .option-text { color:var(--text-secondary); font-size:0.875rem; line-height:1.4; font-family:'Courier New',monospace; }
+        .quiz-option:hover .option-text { color:var(--text-light); }
+        .quiz-controls { display:flex; gap:1rem; margin:2rem 0; justify-content:center; }
+        .quiz-results { background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(0,229,255,0.04)); border:1px solid rgba(0,212,255,0.2); border-radius:8px; padding:1.5rem; margin-top:2rem; }
+        .results-title { color:var(--cyan); font-size:1.1rem; font-weight:600; margin-bottom:1rem; text-align:center; }
+        .quiz-score { text-align:center; font-size:1.25rem; font-weight:600; margin-bottom:1rem; }
+        .quiz-feedback { display:grid; gap:0.75rem; }
+        .feedback-item { display:flex; align-items:flex-start; gap:1rem; padding:1rem; border-radius:8px; margin-bottom:0.5rem; background:rgba(255,255,255,0.02); }
+        .feedback-correct { border-left:4px solid #10b981; }
+        .feedback-incorrect { border-left:4px solid #ef4444; }
+        .feedback-icon { font-weight:bold; font-size:1.2rem; flex-shrink:0; }
+        .feedback-correct .feedback-icon { color:#10b981; }
+        .feedback-incorrect .feedback-icon { color:#ef4444; }
+        .score-excellent { color:#10b981; font-size:2rem; font-weight:bold; }
+        .score-good { color:#f59e0b; font-size:2rem; font-weight:bold; }
+        .score-poor { color:#ef4444; font-size:2rem; font-weight:bold; }
+        .correct-answer { color:#ef4444; font-weight:600; }
+        .evaluation-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem; margin-top:1rem; }
+        .evaluation-column { background:rgba(0,212,255,0.02); padding:1.5rem; border-radius:12px; border:1px solid var(--border-color); }
+        .evaluation-title { display:flex; align-items:center; gap:10px; margin-bottom:1rem; font-size:1rem; font-weight:600; padding-bottom:0.75rem; border-bottom:2px solid; }
+        .essential { color:var(--cyan); border-bottom-color:var(--cyan) !important; }
+        .important { color:#ffd700; border-bottom-color:#ffd700 !important; }
+        .advanced { color:#ff6b6b; border-bottom-color:#ff6b6b !important; }
+        .evaluation-list { list-style:none; display:flex; flex-direction:column; gap:0.65rem; font-size:0.875rem; color:var(--text-secondary); }
+        .evaluation-list li { padding-left:1.2rem; position:relative; line-height:1.4; }
+        .evaluation-list li::before { content:'•'; position:absolute; left:0; font-weight:bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color:var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color:#ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color:#ff6b6b; }
+        .resource-link { color:var(--cyan); text-decoration:none; display:block; margin:0.6rem 0; font-size:0.95rem; transition:opacity 0.2s; }
+        .resource-link:hover { text-decoration:underline; opacity:0.85; }
+        .lab-container { display:flex; gap:1rem; height:440px; margin-top:1rem; }
+        .lab-editor,.lab-preview { flex:1; display:flex; flex-direction:column; border:1px solid var(--border-color); border-radius:8px; overflow:hidden; }
+        .lab-header-bar { background:rgba(0,212,255,0.08); padding:0.5rem 1rem; font-size:0.8rem; color:var(--text-secondary); font-weight:500; letter-spacing:0.5px; }
+        .lab-textarea { flex:1; background:#000d12; color:#00d4ff; font-family:'Courier New',monospace; padding:1rem; border:none; resize:none; outline:none; font-size:0.88rem; line-height:1.6; }
+        .lab-output { flex:1; background:#001018; color:#a0e8f4; padding:1rem; overflow-y:auto; font-family:'Courier New',monospace; font-size:0.85rem; line-height:1.6; white-space:pre-wrap; }
+        .arch-diagram { background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:8px; padding:1.5rem; margin:1rem 0; font-family:'Courier New',monospace; font-size:0.83rem; color:#a0e8f4; line-height:1.9; overflow-x:auto; }
+        .tag-row { display:flex; gap:0.5rem; flex-wrap:wrap; margin:0.75rem 0; }
+        .tag { font-size:0.72rem; padding:0.2rem 0.55rem; border-radius:999px; border:1px solid rgba(0,212,255,0.25); color:#a0e8f4; background:rgba(0,212,255,0.06); }
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1rem 0; }
+        .three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin:1rem 0; }
+        @media(max-width:750px){.two-col,.three-col{grid-template-columns:1fr}.lab-container{flex-direction:column;height:auto}.lab-editor,.lab-preview{height:260px}}
+        .mini-card { background:rgba(0,212,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1rem; }
+        .mini-card h4 { color:var(--cyan); font-size:0.88rem; margin-bottom:0.5rem; }
+        .mini-card p { color:var(--text-secondary); font-size:0.82rem; line-height:1.5; }
+        .cost-bar-wrap { margin:0.5rem 0; }
+        .cost-bar-label { display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-secondary); margin-bottom:3px; }
+        .cost-bar-track { height:14px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+        .cost-bar-fill { height:100%; border-radius:3px; }
+        .bar-od  { background:linear-gradient(90deg,#ef4444,#f97316); }
+        .bar-ri1 { background:linear-gradient(90deg,#f59e0b,#eab308); }
+        .bar-ri3 { background:linear-gradient(90deg,#10b981,#059669); }
+        .bar-sp  { background:linear-gradient(90deg,#00d4ff,#00aacc); }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+            <span class="premium-badge">Premium &bull; Cloud</span>
+        </div>
+        <nav style="display:flex;gap:.75rem">
+            <a href="premium-cloud.html" class="btn btn-back">&#8592; Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objective: FinOps</h1>
+        <p class="course-description">Cloud spend is engineering output made visible. Learn to measure, allocate, forecast, and optimise cloud costs using FinOps practices — from Reserved Instances and Spot strategy to showback/chargeback, Infracost, and Cloud Custodian.</p>
+        <div class="course-meta">
+            <div class="meta-item"><span>&#9201;</span><span>5-6h</span></div>
+            <div class="meta-item"><span>&#127919;</span><span>Cost Explorer &middot; Reserved Instances &middot; Spot &middot; Savings Plans &middot; Infracost &middot; Cloud Custodian</span></div>
+            <div class="meta-item"><span>&#128204;</span><span>Requires: Cloud Architecture + IaC basics</span></div>
+        </div>
+        <div class="tag-row">
+            <span class="tag">FinOps</span><span class="tag">Cost Explorer</span><span class="tag">Reserved Instances</span>
+            <span class="tag">Savings Plans</span><span class="tag">Spot Instances</span><span class="tag">Infracost</span>
+            <span class="tag">Cloud Custodian</span><span class="tag">Showback</span><span class="tag">Chargeback</span><span class="tag">Tagging</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary)">Progress: <span id="progress-text">0%</span></p>
+    </div>
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'learn')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'lab')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'resources')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'evaluation')">Evaluation</button>
+        </nav>
+
+        <!-- LEARN -->
+        <div id="learn" class="tab-panel active">
+
+<div class="content-card">
+<h3>&#128176; 7.1 What is FinOps?</h3>
+<p>FinOps (Financial Operations) is a cultural practice that brings financial accountability to the variable-spend model of cloud. It unites Engineering, Finance, and Business so teams can make informed cost/velocity trade-offs.</p>
+<div class="code-explanation">
+<strong>The FinOps Foundation defines three phases:</strong><br>
+&bull; <span class="highlight">Inform</span> &mdash; gain visibility. You cannot optimise what you cannot see. Tagging, dashboards, anomaly detection.<br>
+&bull; <span class="highlight">Optimise</span> &mdash; act on the data. Right-sizing, Reserved Instances, Spot, waste elimination.<br>
+&bull; <span class="highlight">Operate</span> &mdash; embed cost awareness into culture. Budget alerts, showback/chargeback, FinOps champions per team.
+</div>
+<div class="arch-diagram">FinOps Maturity Model:
+
+  CRAWL  --&gt;  WALK  --&gt;  RUN
+  Basic        Consistent    Continuous
+  tagging      allocation    optimisation
+
+  Crawl:  Some tags, manual cost reviews, reactive to bills
+  Walk:   Full tagging, showback reports, automated anomaly alerts
+  Run:    Chargeback, cost per feature, unit economics, RI automation</div>
+</div>
+
+<div class="content-card">
+<h3>&#127991;&#65039; 7.2 Tagging Strategy &mdash; The Foundation of Cost Visibility</h3>
+<p>Without tags, you cannot allocate costs to teams, products, or environments. Tags are key-value pairs on every resource &mdash; the backbone of showback and chargeback.</p>
+<ul class="styled-list">
+<li><strong>Mandatory tags:</strong> Enforce via SCP/Azure Policy. Common set: <code>env</code>, <code>team</code>, <code>product</code>, <code>cost-centre</code>, <code>owner</code>.</li>
+<li><strong>Consistency:</strong> Agree naming conventions upfront. <code>Environment=prod</code> vs <code>env=production</code> are two different tags to a billing tool.</li>
+<li><strong>Enforce at creation:</strong> Block resource creation without required tags using AWS Config rules or SCPs.</li>
+<li><strong>Tag coverage target:</strong> 95%+ of spend tagged. Use Cost Explorer untagged spend report as a hygiene KPI.</li>
+<li><strong>Inherited tags:</strong> Tags on an AWS Organization OU or Azure Resource Group propagate automatically &mdash; reducing manual effort.</li>
+</ul>
+<pre><code># AWS SCP -- deny EC2 launch without required tags
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Sid": "DenyUntaggedEC2",
+    "Effect": "Deny",
+    "Action": ["ec2:RunInstances"],
+    "Resource": ["arn:aws:ec2:*:*:instance/*"],
+    "Condition": {
+      "Null": {
+        "aws:RequestTag/team":        "true",
+        "aws:RequestTag/env":         "true",
+        "aws:RequestTag/cost-centre": "true"
+      }
+    }
+  }]
+}</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#128202; 7.3 AWS Cost Explorer and Cost Allocation</h3>
+<p>AWS Cost Explorer is the native tool for visualising, understanding, and forecasting AWS spend. It turns raw billing data into actionable insights.</p>
+<ul class="styled-list">
+<li><strong>Cost and Usage Reports (CUR):</strong> Most granular AWS billing data &mdash; hourly line-item per resource. Store in S3, query with Athena for custom analysis.</li>
+<li><strong>Cost Explorer filters:</strong> Slice by service, region, account, tag, instance type, and purchase option. Identify top cost drivers instantly.</li>
+<li><strong>RI/SP coverage:</strong> Shows what % of eligible usage is covered by Reserved Instances or Savings Plans &mdash; and unused commitment.</li>
+<li><strong>Rightsizing recommendations:</strong> AWS analyses CloudWatch CPU/memory metrics and suggests downsizing over-provisioned EC2 instances.</li>
+<li><strong>Anomaly Detection:</strong> ML-based alerts when spend deviates significantly from the predicted pattern &mdash; catches billing surprises before month end.</li>
+<li><strong>Forecasting:</strong> Predicts end-of-month spend based on current usage trends &mdash; feeds budget planning and finance reviews.</li>
+</ul>
+<pre><code># AWS CLI -- top services spend this month
+aws ce get-cost-and-usage \
+  --time-period Start=2025-03-01,End=2025-04-01 \
+  --granularity MONTHLY \
+  --metrics "BlendedCost" \
+  --group-by Type=DIMENSION,Key=SERVICE \
+  --query 'ResultsByTime[].Groups[].{Service:Keys[0],Cost:Metrics.BlendedCost.Amount}' \
+  --output table
+
+# Enable anomaly detection for EC2 service
+aws ce create-anomaly-monitor \
+  --anomaly-monitor '{
+    "MonitorName": "EC2-anomaly",
+    "MonitorType": "DIMENSIONAL",
+    "MonitorDimension": "SERVICE"
+  }'</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#128230; 7.4 Reserved Instances and Savings Plans</h3>
+<p>On-demand is the most expensive option. Committing to usage in advance unlocks up to 72% discount. Choose the right commitment model for each workload type.</p>
+<p style="color:var(--text-secondary);font-size:0.88rem;margin:0.75rem 0 0.4rem">Relative cost comparison (same baseline workload):</p>
+<div class="cost-bar-wrap"><div class="cost-bar-label"><span>On-Demand</span><span>100% &mdash; full price, no commitment</span></div><div class="cost-bar-track"><div class="cost-bar-fill bar-od" style="width:100%"></div></div></div>
+<div class="cost-bar-wrap"><div class="cost-bar-label"><span>1-yr Savings Plan (No Upfront)</span><span>~60% &mdash; moderate saving</span></div><div class="cost-bar-track"><div class="cost-bar-fill bar-ri1" style="width:60%"></div></div></div>
+<div class="cost-bar-wrap"><div class="cost-bar-label"><span>3-yr Reserved (All Upfront)</span><span>~38% &mdash; maximum saving</span></div><div class="cost-bar-track"><div class="cost-bar-fill bar-ri3" style="width:38%"></div></div></div>
+<div class="cost-bar-wrap"><div class="cost-bar-label"><span>Spot Instance</span><span>~10-30% &mdash; cheapest, interruptible</span></div><div class="cost-bar-track"><div class="cost-bar-fill bar-sp" style="width:25%"></div></div></div>
+<div class="two-col" style="margin-top:1rem">
+<div class="mini-card"><h4>&#128203; Reserved Instances (RI)</h4><p>Commit to a specific instance family, size, OS, and region (Standard) or any size/OS in a family (Convertible). 1-year or 3-year terms. All Upfront / Partial / No Upfront. Unused RIs can be sold on the RI Marketplace.</p></div>
+<div class="mini-card"><h4>&#128179; Compute Savings Plans</h4><p>Commit to a dollar amount of compute per hour. Applies automatically to EC2, Fargate, and Lambda &mdash; regardless of region, family, OS, or size. More flexible than RIs. Recommended default for most steady-state workloads.</p></div>
+</div>
+<div class="code-explanation" style="margin-top:1rem">
+<strong>Decision rule:</strong> <span class="highlight">Savings Plans</span> for 24/7 baseline (web tier, databases). <span class="highlight">Spot</span> for fault-tolerant batch jobs and CI/CD runners. <span class="highlight">On-Demand</span> for variable peak traffic above the committed baseline.
+</div>
+</div>
+
+<div class="content-card">
+<h3>&#9889; 7.5 Spot Instances &mdash; Deep Dive</h3>
+<p>Spot Instances use spare EC2 capacity at up to 90% discount. AWS can reclaim them with a 2-minute warning. The key to Spot success is designing workloads that tolerate interruption.</p>
+<ul class="styled-list">
+<li><strong>2-minute warning:</strong> AWS sends a termination notice via instance metadata and EventBridge. Your app must checkpoint state, drain in-flight work, and re-enqueue jobs.</li>
+<li><strong>Instance diversification:</strong> Request 5+ instance families simultaneously. More options = lower interruption probability. Never depend on a single Spot pool.</li>
+<li><strong>price-capacity-optimized strategy:</strong> Allocates from the Spot pool with the lowest interruption risk. Preferred over lowest-price for production workloads.</li>
+<li><strong>Best Spot use cases:</strong> CI/CD runners, batch ETL, ML training, rendering, stateless auto-scaling workers. Avoid: databases, stateful apps, single-instance critical services.</li>
+<li><strong>Karpenter (Kubernetes):</strong> Node autoprovisioner that natively provisions Spot and handles interruption &mdash; replaces the Spot interruption handler DaemonSet.</li>
+</ul>
+<pre><code># EC2 Auto Scaling mixed on-demand + Spot (Terraform)
+resource "aws_autoscaling_group" "app" {
+  name                = "app-asg"
+  vpc_zone_identifier = module.vpc.private_subnets
+  min_size            = 2
+  max_size            = 20
+
+  mixed_instances_policy {
+    instances_distribution {
+      on_demand_base_capacity                  = 2
+      on_demand_percentage_above_base_capacity = 0
+      spot_allocation_strategy                 = "price-capacity-optimized"
+    }
+    launch_template {
+      launch_template_specification {
+        launch_template_id = aws_launch_template.app.id
+        version            = "$Latest"
+      }
+      override { instance_type = "m5.xlarge"  }
+      override { instance_type = "m5a.xlarge" }
+      override { instance_type = "m6i.xlarge" }
+      override { instance_type = "m6a.xlarge" }
+      override { instance_type = "m5n.xlarge" }
+    }
+  }
+}</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#128201; 7.6 Right-Sizing and Waste Elimination</h3>
+<p>The most common finding in any cloud cost audit: instances running at 5-15% CPU utilisation. Right-sizing matches resource allocation to actual workload requirements.</p>
+<div class="arch-diagram">Common waste patterns and fixes:
+
+  Idle EC2/RDS instances        --&gt; Terminate or schedule shutdown
+  Over-provisioned instance sizes --&gt; Downsize based on metrics
+  Unattached EBS volumes        --&gt; Delete or snapshot+delete
+  Old EBS snapshots             --&gt; Lifecycle policy: expire after 30d
+  Unused Elastic IPs            --&gt; Release (charged when unattached)
+  NAT Gateway data transfer     --&gt; Use VPC endpoints / PrivateLink
+  Dev environments running 24/7 --&gt; Auto-shutdown nights+weekends (~70% saving)
+  Oversized RDS                 --&gt; Aurora Serverless v2 for variable load
+  Unused RIs/SPs                --&gt; Sell on RI Marketplace / modify</div>
+<pre><code># AWS CLI -- find unattached EBS volumes (immediate cost saving)
+aws ec2 describe-volumes \
+  --filters Name=status,Values=available \
+  --query 'Volumes[*].{ID:VolumeId,Size:Size,Type:VolumeType,AZ:AvailabilityZone}' \
+  --output table
+
+# Find EC2 instances with < 5% average CPU over 14 days
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/EC2 \
+  --metric-name CPUUtilization \
+  --dimensions Name=InstanceId,Value=i-0123456789abcdef0 \
+  --start-time 2025-03-01T00:00:00Z \
+  --end-time   2025-03-15T00:00:00Z \
+  --period 1209600 \
+  --statistics Average
+
+# Schedule dev environment shutdown (Lambda + EventBridge)
+# Stop all EC2 with env=dev tag at 20:00 Mon-Fri
+resource "aws_cloudwatch_event_rule" "dev_stop" {
+  name                = "stop-dev-instances"
+  schedule_expression = "cron(0 20 ? * MON-FRI *)"
+}
+
+resource "aws_cloudwatch_event_rule" "dev_start" {
+  name                = "start-dev-instances"
+  schedule_expression = "cron(0 8 ? * MON-FRI *)"
+}</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#128101; 7.7 Showback and Chargeback</h3>
+<p>Showback and chargeback are mechanisms to allocate cloud costs to the teams or business units that generated them &mdash; creating financial accountability.</p>
+<div class="two-col">
+<div class="mini-card"><h4>&#128065;&#65039; Showback</h4><p>Show each team their cost without actually charging them. Raises awareness and creates accountability without budget friction. Good starting point for organisations new to FinOps. "You spent $12,400 last month on EC2 in the checkout team."</p></div>
+<div class="mini-card"><h4>&#128183; Chargeback</h4><p>Actually deduct cloud costs from each team's budget. Full financial accountability &mdash; teams internalise the cost of their decisions. Requires mature tagging and clear cost allocation rules. More powerful but needs cultural readiness.</p></div>
+</div>
+<ul class="styled-list" style="margin-top:1rem">
+<li><strong>Shared costs:</strong> Platform, networking, monitoring, and shared services must be allocated. Common methods: even split, proportional to usage, or direct attribution.</li>
+<li><strong>Unit economics:</strong> The most mature FinOps metric &mdash; cost per API call, cost per active user, cost per transaction. Connects engineering decisions to business outcomes.</li>
+<li><strong>FinOps dashboards:</strong> AWS Cost Explorer tags, Grafana with CUR data in Athena, CloudHealth, Apptio Cloudability, Spot.io Eco.</li>
+</ul>
+<pre><code># Athena query -- monthly cost per team from CUR data
+SELECT
+  resource_tags_user_team         AS team,
+  line_item_product_code          AS service,
+  SUM(line_item_blended_cost)     AS total_cost_usd,
+  SUM(line_item_usage_amount)     AS usage_amount
+FROM
+  cost_and_usage_report
+WHERE
+  line_item_line_item_type = 'Usage'
+  AND year = '2025'
+  AND month = '3'
+GROUP BY
+  resource_tags_user_team,
+  line_item_product_code
+ORDER BY
+  total_cost_usd DESC
+LIMIT 50;</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#128176; 7.8 Infracost &mdash; Cost in the CI/CD Pipeline</h3>
+<p>Infracost is an open-source tool that adds cost estimates to Terraform pull requests &mdash; so engineers see the cost impact of their changes before they deploy, not when the bill arrives.</p>
+<ul class="styled-list">
+<li><strong>PR comments:</strong> Infracost posts a cost diff directly on GitHub/GitLab/Bitbucket PRs: "+$347/month" or "-$52/month" with a resource breakdown.</li>
+<li><strong>Supported providers:</strong> AWS, Azure, GCP &mdash; covers EC2, RDS, EBS, Lambda, CloudFront, Load Balancers, and 250+ resources.</li>
+<li><strong>Policy enforcement:</strong> Block PRs that exceed a monthly cost threshold using Infracost Cloud or custom CI steps.</li>
+<li><strong>Usage-based costs:</strong> Define expected usage (requests/month, GB transferred) in a usage YAML file for accurate Lambda and data transfer estimates.</li>
+</ul>
+<pre><code># Install and run Infracost locally
+brew install infracost
+infracost auth login
+
+# Generate cost estimate for a Terraform project
+infracost breakdown --path . --format table
+
+# Output:
+# Name                              Monthly Qty  Unit      Monthly Cost
+# aws_instance.web_server
+#  Instance usage (Linux/UNIX, m5.xlarge)  730  hours         $145.16
+#  root_block_device
+#   Storage (general purpose SSD, gp3)     50  GB               $4.00
+# aws_rds_instance.postgres
+#  Database instance (db.m5.large)         730  hours         $138.70
+#  Storage                                100  GB               $11.50
+# OVERALL TOTAL                                               $299.36/month
+
+# CI integration (GitHub Actions)
+- name: Infracost diff
+  uses: infracost/actions/setup@v3
+  with:
+    api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+- name: Post Infracost comment
+  run: |
+    infracost diff \
+      --path . \
+      --format json \
+      --compare-to infracost-base.json \
+      --out-file infracost-diff.json
+    infracost comment github \
+      --path infracost-diff.json \
+      --repo $GITHUB_REPOSITORY \
+      --github-token ${{ secrets.GITHUB_TOKEN }} \
+      --pull-request ${{ github.event.pull_request.number }}</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#128737;&#65039; 7.9 Cloud Custodian &mdash; Policy-as-Code for Cost Governance</h3>
+<p>Cloud Custodian is an open-source rules engine for cloud governance. Write YAML policies that query, filter, and act on cloud resources &mdash; automatically enforcing cost and compliance standards.</p>
+<ul class="styled-list">
+<li><strong>Declarative policies:</strong> Define what resources to find (filters) and what to do with them (actions) &mdash; tag, stop, terminate, notify, or quarantine.</li>
+<li><strong>Event-driven:</strong> Run on a schedule (CloudWatch Events) or react to real-time events (CloudTrail via Lambda). Detect and remediate immediately.</li>
+<li><strong>Multi-cloud:</strong> AWS, Azure, and GCP support with a unified policy language.</li>
+<li><strong>Dry-run mode:</strong> Test what would happen without taking action &mdash; audit before enforce.</li>
+</ul>
+<pre><code># Cloud Custodian -- auto-stop untagged EC2 instances after 7 days
+policies:
+  - name: enforce-required-tags
+    resource: ec2
+    filters:
+      - "tag:team": absent
+      - type: instance-age
+        days: 7
+    actions:
+      - type: stop
+      - type: notify
+        template: default
+        subject: "[FinOps] Instance stopped - missing team tag"
+        to: ["finops@company.com"]
+        transport:
+          type: sqs
+          queue: https://sqs.eu-west-1.amazonaws.com/123/finops-alerts
+
+  # Delete EBS volumes unattached for 30+ days
+  - name: delete-unattached-volumes
+    resource: ebs
+    filters:
+      - State: available
+      - type: age
+        days: 30
+        op: ge
+    actions:
+      - type: snapshot
+      - type: delete
+
+  # Auto-shutdown dev EC2 instances outside business hours
+  - name: stop-dev-after-hours
+    resource: ec2
+    filters:
+      - "tag:env": dev
+      - State.Name: running
+    actions:
+      - stop
+    mode:
+      type: periodic
+      schedule: "rate(1 hour)"
+      # Only runs outside Mon-Fri 08:00-20:00 UTC
+      # (implement with Lambda time check)</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#128200; 7.10 Budget Alerts and Forecasting</h3>
+<ul class="styled-list">
+<li><strong>AWS Budgets:</strong> Set cost or usage budgets with alert thresholds (e.g., alert at 80% and 100% of monthly budget). Supports per-service, per-tag, and per-account budgets. Can trigger Lambda or SNS for auto-remediation.</li>
+<li><strong>Budget actions:</strong> Automatically apply an IAM policy (deny all) when a budget threshold is exceeded &mdash; enforce spending limits programmatically.</li>
+<li><strong>Cost anomaly alerts:</strong> Configure to alert on absolute ($100 threshold) or percentage (10% above expected) anomalies &mdash; avoids alert fatigue on small accounts.</li>
+<li><strong>Rightsizing forecasting:</strong> Use Compute Optimizer to model the impact of instance type changes on cost and performance before committing.</li>
+</ul>
+<pre><code># AWS Budget with alert + SNS notification (Terraform)
+resource "aws_budgets_budget" "monthly" {
+  name         = "production-monthly-budget"
+  budget_type  = "COST"
+  limit_amount = "5000"
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
+
+  cost_filter {
+    name   = "TagKeyValue"
+    values = ["user:env$production"]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = ["finops@company.com"]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_sns_arns        = [aws_sns_topic.finops_alerts.arn]
+  }
+}</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#128297; 7.11 Multi-Cloud and Kubernetes Cost Management</h3>
+<ul class="styled-list">
+<li><strong>Kubecost:</strong> Kubernetes-native cost monitoring. Allocates pod, namespace, and deployment costs based on actual CPU, memory, and network usage. Integrates with AWS, Azure, and GCP billing.</li>
+<li><strong>OpenCost:</strong> CNCF-backed open-source Kubernetes cost standard &mdash; the open-source alternative to Kubecost Cloud.</li>
+<li><strong>Karpenter + Spot:</strong> Karpenter provisions the cheapest node for each pod's requirements, consolidates under-utilised nodes, and handles Spot interruption &mdash; often reducing K8s node costs by 50-70%.</li>
+<li><strong>Finout / CloudHealth / Apptio:</strong> Multi-cloud FinOps platforms &mdash; unified billing view across AWS, Azure, and GCP with showback/chargeback automation.</li>
+</ul>
+<pre><code># Kubecost -- query namespace costs via API
+curl "http://kubecost.monitoring.svc/model/allocation?window=30d&aggregate=namespace" \
+  | jq '.data[].sets[].allocations | to_entries[] | {
+      namespace: .key,
+      cpuCost: .value.cpuCost,
+      memoryCost: .value.memoryCost,
+      totalCost: .value.totalCost
+    }'
+
+# OpenCost Helm install
+helm repo add opencost https://opencost.github.io/opencost-helm-chart
+helm install opencost opencost/opencost \
+  --namespace opencost \
+  --create-namespace \
+  --set opencost.exporter.cloudProviderApiKey=$AWS_PRICING_KEY</code></pre>
+</div>
+
+<div class="content-card">
+<h3>&#128203; 7.12 FinOps Culture and Organisational Patterns</h3>
+<ul class="styled-list">
+<li><strong>FinOps champions:</strong> Embed one FinOps-aware engineer per team responsible for reviewing cost dashboards weekly and flagging anomalies.</li>
+<li><strong>Weekly cost reviews:</strong> 15-minute review of last week's spend vs forecast. Highlight new top spenders, anomalies, and idle resources.</li>
+<li><strong>Cost in sprint planning:</strong> Include cost impact as a story attribute. "This feature will add ~$800/month in DynamoDB costs" &mdash; visible before it ships.</li>
+<li><strong>Unit economics KPIs:</strong> Track cost per transaction, cost per API call, cost per active user. Connect cloud spend to business outcomes in executive dashboards.</li>
+<li><strong>Golden path templates:</strong> Pre-approved Terraform modules with cost-optimal defaults &mdash; right-sized instances, Spot mixed, auto-shutdown for non-prod. Make the cheapest option the easiest option.</li>
+</ul>
+</div>
+
+<div class="content-card">
+<h3>&#127895; 7.13 Data Transfer Costs &mdash; The Hidden Billing Trap</h3>
+<p>Data transfer charges are one of the most common billing surprises. Understanding the billing model prevents costly architecture mistakes.</p>
+<div class="arch-diagram">AWS Data Transfer Pricing (approximate):
+
+  Within same AZ:          FREE
+  Cross-AZ (same region):  $0.01/GB each direction
+  Cross-region:            $0.02/GB (varies by region pair)
+  To internet:             $0.09/GB first 10TB/month
+
+Expensive patterns:
+  App in us-east-1 --&gt; RDS in eu-west-1     = $0.02/GB x ALL queries
+  ECS task --&gt; S3 via internet              = $0.09/GB (use VPC endpoint!)
+  Cross-AZ microservices (100GB/day)        = $3/day = $90/month
+
+Fixes:
+  Use VPC endpoints for S3/DynamoDB/KMS     = FREE
+  Co-locate services in same AZ (stateless) = FREE
+  CloudFront in front of S3/API             = cheaper egress rate
+  Use S3 Transfer Acceleration only if needed</div>
+</div>
+
+<div class="content-card">
+<h3>&#128269; 7.14 FinOps Maturity Assessment</h3>
+<p>Use this checklist to assess where your organisation is in the FinOps maturity journey:</p>
+<pre><code>CRAWL (basic visibility):
+  [ ] All resources have at minimum env + team tags
+  [ ] Monthly cost review meeting exists
+  [ ] AWS Budgets alerts configured for each account
+  [ ] Cost Explorer accessed regularly by engineering leads
+
+WALK (consistent practice):
+  [ ] 95%+ spend tagged and allocated to teams
+  [ ] Showback reports sent to team leads monthly
+  [ ] Rightsizing recommendations reviewed quarterly
+  [ ] Anomaly detection configured with thresholds
+  [ ] Infracost running on all Terraform PRs
+  [ ] Cloud Custodian policies enforcing tag compliance
+  [ ] Dev/staging environments auto-shutdown nights/weekends
+
+RUN (continuous optimisation):
+  [ ] Chargeback integrated with team budgets
+  [ ] Unit economics tracked per product feature
+  [ ] RI/SP coverage > 70% for stable workloads
+  [ ] Spot usage > 40% of eligible compute
+  [ ] Cost per team reviewed in sprint ceremonies
+  [ ] Kubernetes costs tracked per namespace (Kubecost)
+  [ ] FinOps champion role defined per engineering team</code></pre>
+</div>
+
+<div class="content-card" style="border-left:5px solid var(--cyan)">
+<h3>&#9989; 7.15 Module Summary</h3>
+<p>After this module you should be able to:</p>
+<ul class="styled-list">
+<li>Explain the three phases of FinOps: Inform, Optimise, Operate.</li>
+<li>Design a mandatory tagging strategy and enforce it with SCPs.</li>
+<li>Use AWS Cost Explorer to identify top cost drivers and review RI/SP coverage.</li>
+<li>Choose between Reserved Instances, Savings Plans, and Spot for each workload type.</li>
+<li>Configure an Auto Scaling Group with mixed on-demand/Spot and instance diversification.</li>
+<li>Identify and eliminate common cloud waste patterns.</li>
+<li>Implement showback reports using Athena queries on CUR data.</li>
+<li>Integrate Infracost into a CI/CD pipeline to show cost diffs on PRs.</li>
+<li>Write Cloud Custodian policies to enforce tagging and auto-stop idle resources.</li>
+<li>Set up AWS Budgets with forecast alerts and SNS-driven auto-remediation.</li>
+</ul>
+<p style="margin-top:0.75rem"><strong>Next:</strong> Edge Computing &amp; Future Cloud &mdash; serverless, WebAssembly, AI/ML infrastructure, and platform engineering.</p>
+</div>
+
+        </div>
+
+        <!-- LAB -->
+        <div id="lab" class="tab-panel">
+            <h3 style="margin-bottom:0.5rem">Lab: Cloud Cost Optimiser</h3>
+            <p style="color:var(--text-secondary);margin-bottom:1.25rem;font-size:0.9rem">
+                Define your workload profile below and click Run to get a personalised cost optimisation strategy with projected savings.
+            </p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header-bar">WORKLOAD PROFILE</div>
+                    <textarea class="lab-textarea" id="lab-input">const workload = {
+  name:               "Production Platform",
+  monthlyOnDemand:    12500,    // current monthly spend USD
+  ec2Instances:       24,       // number of EC2 instances
+  avgCpuUtilization:  18,       // % average CPU
+  runningHoursPerDay: 24,       // hours/day instances run
+  environments:       ["prod","staging","dev"],
+  devHoursPerDay:     8,        // how long dev/staging actually used
+  batchWorkloads:     true,     // any batch/CI jobs?
+  statefulWorkloads:  false,    // stateful (DB, cache)?
+  commitmentLevel:    "none",   // "none" | "partial" | "full"
+  taggingCoverage:    65,       // % of spend currently tagged
+};</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header-bar">COST OPTIMISATION REPORT</div>
+                    <div class="lab-output" id="lab-output">Click "&#9658; Analyse" to generate your personalised FinOps recommendations...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem" onclick="runLab()">&#9658; Analyse Costs</button>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: FinOps</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">15 questions covering FinOps fundamentals, cost allocation, Reserved Instances, Spot, right-sizing, Infracost, Cloud Custodian, and showback/chargeback.</p>
+                <form id="quiz-form">
+
+<div class="quiz-item">
+<p class="quiz-question">1. What are the three phases of the FinOps Foundation lifecycle?</p>
+<label class="quiz-option"><input type="radio" name="q1" value="A"><span class="option-text">A) Plan, Execute, Review</span></label>
+<label class="quiz-option"><input type="radio" name="q1" value="B" data-correct="true"><span class="option-text">B) Inform, Optimise, Operate</span></label>
+<label class="quiz-option"><input type="radio" name="q1" value="C"><span class="option-text">C) Measure, Reduce, Report</span></label>
+<label class="quiz-option"><input type="radio" name="q1" value="D"><span class="option-text">D) Tag, Budget, Alert</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">2. Why is resource tagging described as the foundation of FinOps?</p>
+<label class="quiz-option"><input type="radio" name="q2" value="A"><span class="option-text">A) Tags reduce AWS billing costs by 10% automatically</span></label>
+<label class="quiz-option"><input type="radio" name="q2" value="B"><span class="option-text">B) Tags are required for Reserved Instance purchases</span></label>
+<label class="quiz-option"><input type="radio" name="q2" value="C" data-correct="true"><span class="option-text">C) Without tags you cannot allocate costs to teams, products, or environments -- making showback and chargeback impossible</span></label>
+<label class="quiz-option"><input type="radio" name="q2" value="D"><span class="option-text">D) Tags are the only way to enable Cost Anomaly Detection</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">3. What is the AWS Cost and Usage Report (CUR) and how is it typically analysed?</p>
+<label class="quiz-option"><input type="radio" name="q3" value="A"><span class="option-text">A) A monthly PDF report emailed by AWS summarising account spend</span></label>
+<label class="quiz-option"><input type="radio" name="q3" value="B" data-correct="true"><span class="option-text">B) The most granular billing data AWS provides -- hourly line-item per resource, stored in S3 and queried with Athena for custom analysis</span></label>
+<label class="quiz-option"><input type="radio" name="q3" value="C"><span class="option-text">C) A Cost Explorer dashboard available only to AWS Enterprise Support customers</span></label>
+<label class="quiz-option"><input type="radio" name="q3" value="D"><span class="option-text">D) A CloudWatch metric namespace for billing data</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">4. What is the key advantage of a Compute Savings Plan over a Standard Reserved Instance?</p>
+<label class="quiz-option"><input type="radio" name="q4" value="A"><span class="option-text">A) Compute Savings Plans offer deeper discounts than 3-year RIs</span></label>
+<label class="quiz-option"><input type="radio" name="q4" value="B"><span class="option-text">B) Compute Savings Plans can be resold on the RI Marketplace</span></label>
+<label class="quiz-option"><input type="radio" name="q4" value="C" data-correct="true"><span class="option-text">C) Flexibility -- they apply automatically across EC2, Fargate, and Lambda regardless of instance family, size, OS, or region, without locking to a specific instance type</span></label>
+<label class="quiz-option"><input type="radio" name="q4" value="D"><span class="option-text">D) Compute Savings Plans have no minimum term -- they can be cancelled monthly</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">5. How much advance warning does AWS provide before reclaiming a Spot Instance?</p>
+<label class="quiz-option"><input type="radio" name="q5" value="A"><span class="option-text">A) 30 seconds</span></label>
+<label class="quiz-option"><input type="radio" name="q5" value="B"><span class="option-text">B) 30 minutes</span></label>
+<label class="quiz-option"><input type="radio" name="q5" value="C" data-correct="true"><span class="option-text">C) 2 minutes -- via instance metadata endpoint and EventBridge notification</span></label>
+<label class="quiz-option"><input type="radio" name="q5" value="D"><span class="option-text">D) 1 hour -- at the start of each billing period</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">6. Which Spot allocation strategy minimises interruption risk for production workloads?</p>
+<label class="quiz-option"><input type="radio" name="q6" value="A"><span class="option-text">A) lowest-price -- always uses the cheapest pool</span></label>
+<label class="quiz-option"><input type="radio" name="q6" value="B" data-correct="true"><span class="option-text">B) price-capacity-optimized -- allocates from the pool with highest available capacity, minimising interruption probability</span></label>
+<label class="quiz-option"><input type="radio" name="q6" value="C"><span class="option-text">C) capacity-only -- ignores price, maximises availability</span></label>
+<label class="quiz-option"><input type="radio" name="q6" value="D"><span class="option-text">D) diversified -- spreads evenly across all available pools</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">7. What does "instance diversification" mean in the context of Spot Instances?</p>
+<label class="quiz-option"><input type="radio" name="q7" value="A"><span class="option-text">A) Running Spot instances in multiple AWS accounts simultaneously</span></label>
+<label class="quiz-option"><input type="radio" name="q7" value="B"><span class="option-text">B) Splitting workloads across multiple cloud providers</span></label>
+<label class="quiz-option"><input type="radio" name="q7" value="C" data-correct="true"><span class="option-text">C) Requesting multiple instance families and sizes simultaneously so AWS has more pools to allocate from, reducing interruption probability</span></label>
+<label class="quiz-option"><input type="radio" name="q7" value="D"><span class="option-text">D) Running a mix of x86 and ARM instance types</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">8. What is the difference between showback and chargeback?</p>
+<label class="quiz-option"><input type="radio" name="q8" value="A"><span class="option-text">A) Showback is for AWS costs; chargeback is for Azure costs</span></label>
+<label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"><span class="option-text">B) Showback informs teams of their costs without deducting from budgets; chargeback actually transfers the cost to each team's budget creating full financial accountability</span></label>
+<label class="quiz-option"><input type="radio" name="q8" value="C"><span class="option-text">C) Showback is real-time; chargeback is monthly</span></label>
+<label class="quiz-option"><input type="radio" name="q8" value="D"><span class="option-text">D) Showback covers compute; chargeback covers storage and networking</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">9. What does Infracost add to a Terraform pull request workflow?</p>
+<label class="quiz-option"><input type="radio" name="q9" value="A"><span class="option-text">A) Security scanning for IAM policy misconfigurations</span></label>
+<label class="quiz-option"><input type="radio" name="q9" value="B"><span class="option-text">B) Automated Terraform plan execution and apply approval</span></label>
+<label class="quiz-option"><input type="radio" name="q9" value="C" data-correct="true"><span class="option-text">C) A cost estimate comment showing the monthly cost diff of infrastructure changes -- so engineers see financial impact before deployment</span></label>
+<label class="quiz-option"><input type="radio" name="q9" value="D"><span class="option-text">D) Reserved Instance purchase recommendations based on planned resources</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">10. Cloud Custodian policies are written in which format?</p>
+<label class="quiz-option"><input type="radio" name="q10" value="A"><span class="option-text">A) HCL (HashiCorp Configuration Language) like Terraform</span></label>
+<label class="quiz-option"><input type="radio" name="q10" value="B"><span class="option-text">B) Rego (Open Policy Agent policy language)</span></label>
+<label class="quiz-option"><input type="radio" name="q10" value="C" data-correct="true"><span class="option-text">C) YAML -- declarative resource filters and actions that query, evaluate, and remediate cloud resources</span></label>
+<label class="quiz-option"><input type="radio" name="q10" value="D"><span class="option-text">D) Python scripts using the boto3 SDK</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">11. An EC2 instance with 8 vCPUs is running at 6% average CPU for 30 days. What is the most appropriate FinOps action?</p>
+<label class="quiz-option"><input type="radio" name="q11" value="A"><span class="option-text">A) Purchase a 3-year Reserved Instance to lock in the lower price</span></label>
+<label class="quiz-option"><input type="radio" name="q11" value="B"><span class="option-text">B) Move it to Spot to save costs</span></label>
+<label class="quiz-option"><input type="radio" name="q11" value="C" data-correct="true"><span class="option-text">C) Right-size to a smaller instance type -- 6% CPU on 8 vCPUs suggests 2 vCPUs may be sufficient, cutting costs 60-75%</span></label>
+<label class="quiz-option"><input type="radio" name="q11" value="D"><span class="option-text">D) No action -- low CPU is normal and indicates good headroom</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">12. Which data transfer scenario is FREE within AWS?</p>
+<label class="quiz-option"><input type="radio" name="q12" value="A"><span class="option-text">A) Data transfer between EC2 instances in different availability zones</span></label>
+<label class="quiz-option"><input type="radio" name="q12" value="B"><span class="option-text">B) Data transfer from EC2 to the internet (first 1GB/month)</span></label>
+<label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"><span class="option-text">C) Data transfer between EC2 and S3 within the same region via a VPC endpoint</span></label>
+<label class="quiz-option"><input type="radio" name="q12" value="D"><span class="option-text">D) Data transfer between regions via CloudFront</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">13. What does "unit economics" mean in a FinOps context?</p>
+<label class="quiz-option"><input type="radio" name="q13" value="A"><span class="option-text">A) The per-instance cost of Reserved Instances vs On-Demand</span></label>
+<label class="quiz-option"><input type="radio" name="q13" value="B"><span class="option-text">B) The cost per vCPU-hour across different instance families</span></label>
+<label class="quiz-option"><input type="radio" name="q13" value="C" data-correct="true"><span class="option-text">C) Cloud cost expressed as a business metric -- e.g., cost per API call, cost per active user, cost per transaction -- connecting infrastructure spend to business outcomes</span></label>
+<label class="quiz-option"><input type="radio" name="q13" value="D"><span class="option-text">D) The unit price of each AWS service compared to competitors</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">14. Which tool provides cost allocation and showback for workloads running in Kubernetes?</p>
+<label class="quiz-option"><input type="radio" name="q14" value="A"><span class="option-text">A) AWS Cost Explorer -- it has native Kubernetes namespace support</span></label>
+<label class="quiz-option"><input type="radio" name="q14" value="B"><span class="option-text">B) Prometheus -- it collects Kubernetes cost metrics automatically</span></label>
+<label class="quiz-option"><input type="radio" name="q14" value="C" data-correct="true"><span class="option-text">C) Kubecost or OpenCost -- they allocate pod/namespace/deployment costs based on actual resource consumption and cloud provider pricing</span></label>
+<label class="quiz-option"><input type="radio" name="q14" value="D"><span class="option-text">D) kube-state-metrics -- it exposes billing data as Prometheus metrics</span></label>
+</div>
+
+<div class="quiz-item">
+<p class="quiz-question">15. A dev/staging environment runs 24/7 but is only actively used 8 hours per weekday. What is the estimated monthly saving from auto-shutdown outside working hours?</p>
+<label class="quiz-option"><input type="radio" name="q15" value="A"><span class="option-text">A) ~10% saving -- idle instances still consume some resources</span></label>
+<label class="quiz-option"><input type="radio" name="q15" value="B"><span class="option-text">B) ~30% saving -- weekends account for roughly 2/7 of the week</span></label>
+<label class="quiz-option"><input type="radio" name="q15" value="C" data-correct="true"><span class="option-text">C) ~65-70% saving -- 8h/day weekdays = ~57h/week vs 168h/week running time, so ~66% of hours are eliminated</span></label>
+<label class="quiz-option"><input type="radio" name="q15" value="D"><span class="option-text">D) ~50% saving -- you save nights but not weekends</span></label>
+</div>
+
+                </form>
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+                <div id="quiz-results" class="quiz-results" style="display:none">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback" class="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESOURCES -->
+        <div id="resources" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem">Support Materials</h3>
+            <div class="content-card">
+                <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem">Official documentation and FinOps references:</p>
+                <a href="https://www.finops.org/introduction/what-is-finops/" target="_blank" class="resource-link">&#8594; FinOps Foundation -- What is FinOps?</a>
+                <a href="https://docs.aws.amazon.com/cost-management/latest/userguide/ce-what-is.html" target="_blank" class="resource-link">&#8594; AWS Cost Explorer User Guide</a>
+                <a href="https://docs.aws.amazon.com/cur/latest/userguide/what-is-cur.html" target="_blank" class="resource-link">&#8594; AWS Cost and Usage Reports (CUR)</a>
+                <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html" target="_blank" class="resource-link">&#8594; AWS Spot Instances User Guide</a>
+                <a href="https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html" target="_blank" class="resource-link">&#8594; AWS Savings Plans Documentation</a>
+                <a href="https://www.infracost.io/docs/" target="_blank" class="resource-link">&#8594; Infracost Documentation</a>
+                <a href="https://cloudcustodian.io/docs/" target="_blank" class="resource-link">&#8594; Cloud Custodian Documentation</a>
+                <a href="https://www.kubecost.com/kubernetes-cost-optimization/" target="_blank" class="resource-link">&#8594; Kubecost -- Kubernetes Cost Optimisation</a>
+                <a href="https://www.opencost.io/docs/" target="_blank" class="resource-link">&#8594; OpenCost CNCF Project</a>
+                <a href="https://karpenter.sh/docs/" target="_blank" class="resource-link">&#8594; Karpenter Node Autoprovisioner</a>
+                <a href="https://aws.amazon.com/aws-cost-management/aws-budgets/" target="_blank" class="resource-link">&#8594; AWS Budgets Documentation</a>
+                <a href="https://aws.amazon.com/compute-optimizer/" target="_blank" class="resource-link">&#8594; AWS Compute Optimizer</a>
+            </div>
+        </div>
+
+        <!-- EVALUATION -->
+        <div id="evaluation" class="tab-panel">
+            <div class="content-card">
+                <h3>&#127919; Domain Criteria: FinOps</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem">To successfully complete this module, demonstrate understanding across these three competency levels:</p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>&#128306;</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>FinOps phases: Inform, Optimise, Operate</li>
+                            <li>Why tagging is foundational to cost allocation</li>
+                            <li>On-Demand vs Reserved vs Spot -- when to use each</li>
+                            <li>What AWS Cost Explorer does and its main features</li>
+                            <li>Showback vs chargeback -- definitions and difference</li>
+                            <li>What Infracost does and where it runs</li>
+                            <li>Common waste patterns: idle resources, over-provisioning</li>
+                            <li>AWS Budgets -- how to set a cost alert</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>&#11088;</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Reserved Instances vs Compute Savings Plans -- flexibility trade-off</li>
+                            <li>Spot interruption: 2-min warning, price-capacity-optimized strategy</li>
+                            <li>Instance diversification for Spot reliability</li>
+                            <li>Right-sizing workflow: metrics analysis + recommendation action</li>
+                            <li>Cloud Custodian: policy structure (filters + actions)</li>
+                            <li>Data transfer cost model: cross-AZ, cross-region, VPC endpoints</li>
+                            <li>CUR + Athena for custom cost allocation queries</li>
+                            <li>Dev environment auto-shutdown for non-production savings</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>&#128640;</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>Unit economics: cost per transaction/user/API call</li>
+                            <li>Karpenter + Spot consolidation for K8s cost optimisation</li>
+                            <li>Kubecost / OpenCost namespace-level cost allocation</li>
+                            <li>Budget actions: automated IAM deny on budget breach</li>
+                            <li>RI Marketplace: selling and modifying unused commitments</li>
+                            <li>Infracost policy enforcement to block high-cost PRs</li>
+                            <li>Cloud Custodian event-driven real-time remediation</li>
+                            <li>Multi-cloud FinOps with Finout / CloudHealth / Apptio</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function openTab(evt, tabName) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
+    const map = { learn:25, lab:50, quiz:75, resources:90, evaluation:100 };
+    document.getElementById('progress-fill').style.width = map[tabName] + '%';
+    document.getElementById('progress-text').innerText = map[tabName] + '%';
+    window.scrollTo({ top: 150, behavior: 'smooth' });
+}
+
+function runLab() {
+    const input = document.getElementById('lab-input').value;
+    const out   = document.getElementById('lab-output');
+
+    const get = (key, def) => {
+        const m = input.match(new RegExp(key + '\\s*:\\s*["\']?([^,"\'\n}]+)["\']?'));
+        return m ? m[1].trim().replace(/['"]/g,'') : def;
+    };
+
+    const name        = get('name', 'Platform');
+    const monthly     = parseFloat(get('monthlyOnDemand', '10000')) || 10000;
+    const instances   = parseInt(get('ec2Instances', '10')) || 10;
+    const cpu         = parseFloat(get('avgCpuUtilization', '20')) || 20;
+    const hoursDay    = parseFloat(get('runningHoursPerDay', '24')) || 24;
+    const devHours    = parseFloat(get('devHoursPerDay', '8')) || 8;
+    const batch       = input.includes('batchWorkloads: true') || input.includes("batchWorkloads:true");
+    const commitment  = get('commitmentLevel', 'none');
+    const tagging     = parseFloat(get('taggingCoverage', '65')) || 65;
+
+    // Savings calculations
+    const spSaving       = commitment === 'none' ? monthly * 0.40 : commitment === 'partial' ? monthly * 0.18 : 0;
+    const spPct          = commitment === 'none' ? 40 : commitment === 'partial' ? 18 : 0;
+
+    const cpuSaving      = cpu < 20 ? monthly * 0.30 : cpu < 35 ? monthly * 0.15 : 0;
+    const cpuPct         = cpu < 20 ? 30 : cpu < 35 ? 15 : 0;
+
+    // Dev shutdown saving
+    const devRatio       = 0.30; // assume 30% of spend is non-prod
+    const shutdownSaving = monthly * devRatio * (1 - (devHours * 5) / (24 * 7));
+    const shutdownPct    = Math.round((1 - (devHours * 5) / (24 * 7)) * 30);
+
+    const spotSaving     = batch ? monthly * 0.10 : 0;
+    const spotPct        = batch ? 10 : 0;
+
+    const totalSaving    = Math.min(spSaving + cpuSaving + shutdownSaving + spotSaving, monthly * 0.75);
+    const totalPct       = Math.round((totalSaving / monthly) * 100);
+
+    const taggingStatus  = tagging >= 90 ? 'GOOD' : tagging >= 70 ? 'NEEDS IMPROVEMENT' : 'CRITICAL - blocking chargeback';
+
+    out.textContent =
+`FinOps Cost Optimisation Report
+${'='.repeat(50)}
+Workload:  ${name}
+Current monthly spend: $${monthly.toLocaleString()}
+
+TAGGING HEALTH
+${'─'.repeat(50)}
+Coverage: ${tagging}%  ${taggingStatus}
+${tagging < 90 ? 'Action: Enforce mandatory tags via SCP before enabling showback.\n         Target: 95%+ coverage within 60 days.' : 'Action: Maintain coverage. Add cost-centre tag for chargeback.'}
+
+OPPORTUNITY ANALYSIS
+${'─'.repeat(50)}
+
+1. SAVINGS PLANS / RESERVED INSTANCES  [${commitment === 'none' ? 'NOT PURCHASED' : 'PARTIAL'}]
+   Potential saving: ~${spPct}%  ($${Math.round(spSaving).toLocaleString()}/month)
+   ${commitment === 'none' ? 'Recommendation: Purchase 1-yr Compute Savings Plan for steady-state\n   EC2 + Fargate. Start with 70% of baseline, top-up after 3 months.' : commitment === 'partial' ? 'Recommendation: Analyse RI coverage in Cost Explorer.\n   Increase SP commitment to cover 80% of on-demand baseline.' : 'Coverage looks good. Review convertible RI modifications annually.'}
+
+2. RIGHT-SIZING  [CPU avg: ${cpu}%]
+   Potential saving: ~${cpuPct}%  ($${Math.round(cpuSaving).toLocaleString()}/month)
+   ${cpu < 20 ? 'CRITICAL: ' + cpu + '% avg CPU indicates significant over-provisioning.\n   Action: Pull AWS Compute Optimizer recommendations.\n   Downsize ' + instances + ' instances by 1-2 size classes (e.g., m5.2xlarge -> m5.large).' : cpu < 35 ? 'Moderate over-provisioning detected.\n   Action: Review top 20% of instances by cost in Compute Optimizer.' : 'CPU utilisation looks healthy. Review memory metrics too.'}
+
+3. DEV/STAGING AUTO-SHUTDOWN  [${hoursDay}h/day running]
+   Potential saving: ~${shutdownPct}%  ($${Math.round(shutdownSaving).toLocaleString()}/month)
+   Action: Schedule EC2/RDS stop at 20:00, start at 08:00 Mon-Fri.
+   Use Cloud Custodian or AWS Instance Scheduler.
+   Estimated non-prod idle hours eliminated: ${Math.round((1 - (devHours*5)/(24*7))*100)}% of non-prod runtime.
+
+4. SPOT INSTANCES FOR BATCH  [${batch ? 'BATCH WORKLOADS PRESENT' : 'NO BATCH WORKLOADS'}]
+   Potential saving: ~${spotPct}%  ($${Math.round(spotSaving).toLocaleString()}/month)
+   ${batch ? 'Action: Migrate CI/CD runners and batch jobs to Spot.\n   Use price-capacity-optimized strategy + 5 instance type options.' : 'No batch workloads detected. Spot not immediately applicable.'}
+
+TOTAL PROJECTED SAVINGS
+${'─'.repeat(50)}
+  Conservative estimate: $${Math.round(totalSaving * 0.7).toLocaleString()}/month  (${Math.round(totalPct * 0.7)}%)
+  Optimistic estimate:   $${Math.round(totalSaving).toLocaleString()}/month  (${totalPct}%)
+  Annual impact:         $${Math.round(totalSaving * 10).toLocaleString()} - $${Math.round(totalSaving * 12).toLocaleString()}
+
+QUICK WINS (implement this week):
+  1. Enable Cost Anomaly Detection in Cost Explorer.
+  2. Set AWS Budget alert at 80% + 100% of monthly target.
+  3. Run: aws ec2 describe-volumes --filters Name=status,Values=available
+     (delete unattached EBS -- immediate saving).
+  4. Add Infracost to all Terraform PRs.
+  5. Deploy Cloud Custodian with tag-enforcement policy.`;
+}
+
+const questionsData = {
+    q1:  { correct:'B', exp:'The FinOps Foundation lifecycle has three phases: Inform (gain visibility through tagging and dashboards), Optimise (act on insights via rightsizing and commitments), and Operate (embed cost culture into engineering processes).' },
+    q2:  { correct:'C', exp:'Tags are key-value metadata on every cloud resource. Without them, all costs roll up to a single account total -- there is no way to attribute spend to a team, product, or environment. Showback and chargeback require near-complete tag coverage.' },
+    q3:  { correct:'B', exp:'The AWS Cost and Usage Report (CUR) is the most granular billing dataset -- hourly line-item records for every resource. It is stored in S3 and typically queried with Amazon Athena for custom cost allocation, showback dashboards, and anomaly analysis.' },
+    q4:  { correct:'C', exp:'Standard RIs lock you to a specific instance type, OS, and region. Compute Savings Plans commit a $/hour amount but apply automatically to any EC2 instance, Fargate task, or Lambda function regardless of family, size, OS, or region -- much more flexible.' },
+    q5:  { correct:'C', exp:'AWS sends a Spot interruption notice exactly 2 minutes before terminating the instance. The notice arrives via the EC2 instance metadata endpoint (http://169.254.169.254/latest/meta-data/spot/termination-time) and as an EventBridge event.' },
+    q6:  { correct:'B', exp:'price-capacity-optimized selects the Spot pool with the deepest available capacity (lowest interruption risk). The older lowest-price strategy can lead to high interruption rates by concentrating demand in the cheapest pool.' },
+    q7:  { correct:'C', exp:'Instance diversification means configuring your ASG or EC2 Fleet to accept multiple instance families and sizes. AWS then picks from multiple Spot pools -- the more pools available, the lower the probability that all of them are reclaimed simultaneously.' },
+    q8:  { correct:'B', exp:'Showback shows teams what they spent without transferring money -- it raises awareness. Chargeback actually deducts the cost from each team\'s real budget. Chargeback requires mature tagging, clear allocation rules, and cultural readiness for financial accountability.' },
+    q9:  { correct:'C', exp:'Infracost analyses a Terraform plan and posts a comment on the pull request showing exactly how much the infrastructure change will cost per month -- broken down by resource. Teams see "+$347/month" or "-$52/month" before merging.' },
+    q10: { correct:'C', exp:'Cloud Custodian policies are written in YAML. Each policy has a resource type (ec2, s3, rds), a set of filters (conditions to match), and a list of actions (stop, terminate, tag, notify, snapshot). This declarative approach avoids custom scripts.' },
+    q11: { correct:'C', exp:'6% average CPU on 8 vCPUs strongly suggests the instance is massively over-provisioned. Right-sizing to 2 vCPUs (same CPU load, smaller instance) would cut costs by 60-75% immediately. Never buy RIs or Spot on over-sized instances -- fix the size first.' },
+    q12: { correct:'C', exp:'Data transfer between EC2 and S3 within the same region is free when using a VPC Gateway Endpoint (no charge for the endpoint or data transfer). Without the endpoint, traffic routes via the internet and incurs $0.09/GB egress charges.' },
+    q13: { correct:'C', exp:'Unit economics connects cloud spend to business outcomes. Instead of "we spend $50k/month on EC2", the metric becomes "we spend $0.003 per API call" or "$12 per active user per month". This makes infrastructure decisions directly comparable to business value.' },
+    q14: { correct:'C', exp:'Kubecost and OpenCost are purpose-built for Kubernetes cost allocation. They instrument pods and nodes, correlate resource consumption with cloud billing data, and produce per-namespace, per-deployment, and per-label cost reports. AWS Cost Explorer has no native K8s namespace awareness.' },
+    q15: { correct:'C', exp:'8 hours per day x 5 weekdays = 40 hours of actual use per week. A 24/7 week has 168 hours. Auto-shutdown eliminates 128 hours (168-40), which is 76% of runtime. Applying to ~30% of spend (non-prod environments) yields roughly 23% total saving -- commonly cited as 65-70% of non-prod costs.' }
+};
+
+document.getElementById('submit-quiz').addEventListener('click', () => {
+    const form = document.getElementById('quiz-form');
+    const data = new FormData(form);
+    let score = 0;
+    let feedbackHTML = '';
+    Object.keys(questionsData).forEach((key, i) => {
+        const ua = data.get(key);
+        const ok = ua === questionsData[key].correct;
+        if (ok) score++;
+        feedbackHTML += `<div class="feedback-item ${ok?'feedback-correct':'feedback-incorrect'}">
+            <span class="feedback-icon">${ok?'&#10003;':'&#10007;'}</span>
+            <div><strong>Question ${i+1}:</strong> ${questionsData[key].exp}
+            ${!ok?`<br><small class="correct-answer">Correct answer: Option ${questionsData[key].correct}</small>`:''}</div></div>`;
+    });
+    const total = Object.keys(questionsData).length;
+    const pct = Math.round((score/total)*100);
+    const cls = pct>=80?'score-excellent':pct>=53?'score-good':'score-poor';
+    const msg = pct>=80?'&#127881; Excellent! Strong FinOps fundamentals. Move on to Edge Computing &amp; Future Cloud.':pct>=53?'&#128077; Good progress. Review Reserved Instances vs Savings Plans, Spot strategy, and Cloud Custodian.':'&#128218; Review the Learn section carefully -- focus on tagging, commitment models, and cost tools.';
+    document.getElementById('quiz-score').innerHTML = `<div class="${cls}">${score}/${total} (${pct}%)</div><p style="color:var(--text-secondary);margin-top:0.5rem">${msg}</p>`;
+    document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+    const r = document.getElementById('quiz-results');
+    r.style.display = 'block';
+    r.scrollIntoView({ behavior:'smooth' });
+});
+
+document.getElementById('clear-quiz').addEventListener('click', () => {
+    document.getElementById('quiz-form').reset();
+    document.getElementById('quiz-results').style.display = 'none';
+    window.scrollTo({ top:0, behavior:'smooth' });
+});
+</script>
+</body>
+</html>
+

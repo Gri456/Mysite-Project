@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - On-Device AI & Local Performance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #d000ff;
+            --purple: #c266ff;
+            --cyan: #a200ff;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(91, 124, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(91, 124, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(207, 75, 255, 0.1) 0%, rgba(217, 91, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem; border-radius: 50px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px;
+            font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91, 124, 255, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91, 124, 255, 0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+
+        .tab-button {
+            flex: 1; min-width: 120px; padding: 1rem 1.5rem;
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.3s ease; position: relative; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card {
+            background: rgba(255,255,255,0.03); padding: 1.5rem;
+            border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;
+        }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+
+        .section-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(91,124,255,0.15); border: 1px solid rgba(91,124,255,0.3);
+            color: var(--cyan); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+            padding: 0.3rem 0.9rem; border-radius: 50px; margin-bottom: 1.25rem;
+            text-transform: uppercase;
+        }
+
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        .code-block {
+            background: rgba(0,0,0,0.5); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.6; color: #a8ff78; }
+
+        /* Info box */
+        .info-box {
+            background: rgba(162, 0, 255, 0.08);
+            border: 1px solid rgba(162, 0, 255, 0.25);
+            border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0;
+            font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);
+        }
+        .info-box strong { color: var(--cyan); }
+
+        /* Pipeline / flow */
+        .pipeline-row {
+            display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1.25rem; margin: 1rem 0;
+        }
+        .pipe-step {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            background: rgba(91,124,255,0.1); border: 1px solid rgba(91,124,255,0.3);
+            border-radius: 8px; padding: 0.7rem 0.85rem; min-width: 88px; text-align: center; flex-shrink: 0;
+        }
+        .pipe-step .ps-icon  { font-size: 1.2rem; }
+        .pipe-step .ps-label { font-size: 0.68rem; font-weight: 700; color: var(--cyan); }
+        .pipe-step .ps-desc  { font-size: 0.6rem; color: var(--text-secondary); line-height: 1.3; }
+        .pipe-arrow { font-size: 1rem; color: var(--blue); padding: 0 0.35rem; align-self: center; margin-bottom: 16px; flex-shrink: 0; }
+
+        /* Benchmark bar */
+        .bench-row {
+            display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; font-size: 0.8rem;
+        }
+        .bench-label { width: 130px; color: var(--text-secondary); flex-shrink: 0; }
+        .bench-bar-wrap { flex: 1; background: rgba(255,255,255,0.05); border-radius: 4px; height: 14px; overflow: hidden; }
+        .bench-bar { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); border-radius: 4px; }
+        .bench-val { width: 60px; text-align: right; color: var(--cyan); font-weight: 600; flex-shrink: 0; }
+
+        .compare-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .compare-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; border: 1px solid var(--border-color); font-weight: 600; }
+        .compare-table td { padding: 0.65rem 1rem; border: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+        .lab-container { display: flex; gap: 1rem; height: 440px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        .quiz-option {
+            display: flex; align-items: center; gap: 10px; padding: 0.8rem;
+            background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;
+            margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05));
+            border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem;
+        }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+
+        .feedback-item {
+            display: flex; align-items: flex-start; gap: 1rem; padding: 1rem;
+            border-radius: 8px; margin-bottom: 1rem; background: rgba(255,255,255,0.03);
+        }
+        .feedback-correct  { border-left: 4px solid #10b981; }
+        .feedback-incorrect{ border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon  { color: #10b981; }
+        .feedback-incorrect .feedback-icon{ color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good      { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor      { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title {
+            display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600;
+            margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid;
+        }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important  { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced   { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .pipeline-row { gap: 0.4rem; }
+            .bench-label { width: 90px; font-size: 0.72rem; }
+            .compare-table { font-size: 0.78rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+            <span class="premium-badge">Premium</span>
+        </div>
+        <nav>
+            <a href="premium-data-science.html" class="btn btn-back">← Back</a>
+            <a href="browse.html" class="btn btn-primary">Explore</a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="course-header">
+        <h1 class="course-title">Objetivo: On-Device AI & Local Performance</h1>
+        <p class="course-description">
+            Learn to run AI models directly on mobile devices and edge hardware — no internet required. Master model compression, quantization, hardware acceleration, and the frameworks that power on-device intelligence: Core ML, TensorFlow Lite, ONNX Runtime, and llama.cpp.
+        </p>
+        <div class="course-meta">
+            <div class="meta-item"><span>⏱</span><span>5–7h</span></div>
+            <div class="meta-item"><span>🎯</span><span>• Core ML • TFLite • ONNX • Quantization • Neural Engine • llama.cpp • Whisper</span></div>
+            <div class="meta-item"><span>📌</span><span>Mobile AI · Edge Computing · Performance Engineering</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:0.8rem;margin-top:5px;color:var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+    </div>
+
+    <div class="tabs-container">
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="openTab(event,'aprender')">Learn</button>
+            <button class="tab-button" onclick="openTab(event,'laboratorio')">Lab</button>
+            <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+            <button class="tab-button" onclick="openTab(event,'recursos')">Resources</button>
+            <button class="tab-button" onclick="openTab(event,'avaliacao')">Assessment</button>
+        </nav>
+
+        <!-- ===================== LEARN ===================== -->
+        <div id="aprender" class="tab-panel active">
+
+            <div class="content-card">
+                <h3>Introduction: Why Run AI On-Device?</h3>
+                <p>Cloud AI is powerful but comes with tradeoffs: latency (network round-trips), cost (API per-token pricing), privacy (user data leaves the device), and availability (no internet = no AI). On-device AI eliminates all four.</p>
+                <p style="margin-top:0.75rem;"><strong>Key advantages of on-device inference:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Zero latency</span> — no network round-trip. Inference in &lt;50ms on modern hardware.</li>
+                    <li><span class="highlight">Privacy by design</span> — user data never leaves the device. Enables GDPR/HIPAA-compliant AI.</li>
+                    <li><span class="highlight">Offline-first</span> — works without internet in planes, subways, rural areas.</li>
+                    <li><span class="highlight">Zero marginal cost</span> — no API billing per inference. Ship unlimited AI usage.</li>
+                    <li><span class="highlight">Real-time</span> — camera, microphone, and sensor data processed without cloud delays.</li>
+                </ul>
+                <div class="code-explanation">
+                    <p>Apple's Neural Engine in the A17 Pro can perform <span class="highlight">35 trillion operations per second</span>. Modern phones are serious AI hardware — the challenge is fitting models into their memory and power constraints.</p>
+                </div>
+
+                <!-- NEW -->
+                <p style="margin-top:1.25rem;"><strong>On-Device vs Cloud Inference — Real-World Tradeoffs:</strong></p>
+                <table class="compare-table">
+                    <thead><tr><th>Factor</th><th>On-Device</th><th>Cloud API</th></tr></thead>
+                    <tbody>
+                        <tr><td>Latency</td><td style="color:#10b981;">~2–50ms (local)</td><td style="color:#f59e0b;">200–2000ms (network)</td></tr>
+                        <tr><td>Privacy</td><td style="color:#10b981;">Data stays on device</td><td style="color:#ef4444;">Data sent to servers</td></tr>
+                        <tr><td>Cost at scale</td><td style="color:#10b981;">Zero marginal cost</td><td style="color:#ef4444;">Grows with usage</td></tr>
+                        <tr><td>Offline support</td><td style="color:#10b981;">Full</td><td style="color:#ef4444;">None</td></tr>
+                        <tr><td>Model capability</td><td style="color:#f59e0b;">Limited by device RAM (2–8GB)</td><td style="color:#10b981;">Unlimited (GPT-4, Claude, Gemini)</td></tr>
+                        <tr><td>Model updates</td><td style="color:#ef4444;">Requires app update or download</td><td style="color:#10b981;">Instant (server-side)</td></tr>
+                        <tr><td>Regulatory compliance</td><td style="color:#10b981;">GDPR, HIPAA friendly</td><td style="color:#f59e0b;">Requires data processing agreements</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box" style="margin-top:1rem;">
+                    <strong>💡 The Hybrid Approach:</strong><br>
+                    Most production apps use a <strong>tiered strategy</strong>: run a small on-device model for low-latency, privacy-sensitive, or offline tasks; route complex requests to a cloud model when connectivity is available and the task demands more capability. Example: a medical app might use on-device classification for triage, then cloud AI for detailed diagnosis only when the doctor reviews a case.
+                </div>
+            </div>
+
+            <!-- ===== ON-DEVICE AI ===== -->
+            <div class="content-card">
+                <div class="section-badge">🧠 On-Device AI</div>
+                <h3>The On-Device AI Stack</h3>
+                <p>Getting a model from training to running on a device involves a specific conversion and optimization pipeline:</p>
+
+                <div class="pipeline-row">
+                    <div class="pipe-step">
+                        <div class="ps-icon">🏋️</div>
+                        <div class="ps-label">TRAIN</div>
+                        <div class="ps-desc">PyTorch / TF full model</div>
+                    </div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step">
+                        <div class="ps-icon">✂️</div>
+                        <div class="ps-label">COMPRESS</div>
+                        <div class="ps-desc">Prune + quantize</div>
+                    </div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step">
+                        <div class="ps-icon">🔄</div>
+                        <div class="ps-label">CONVERT</div>
+                        <div class="ps-desc">.mlpackage / .tflite / .onnx</div>
+                    </div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step">
+                        <div class="ps-icon">⚡</div>
+                        <div class="ps-label">ACCELERATE</div>
+                        <div class="ps-desc">Neural Engine / GPU / DSP</div>
+                    </div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-step">
+                        <div class="ps-icon">📱</div>
+                        <div class="ps-label">DEPLOY</div>
+                        <div class="ps-desc">Run on device</div>
+                    </div>
+                </div>
+
+                <p style="margin-top:0.75rem;"><strong>Hardware accelerators available on modern devices:</strong></p>
+                <table class="compare-table">
+                    <thead><tr><th>Accelerator</th><th>Platform</th><th>Optimized for</th><th>Power</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong style="color:var(--cyan)">Neural Engine (ANE)</strong></td><td>Apple A-series, M-series</td><td>CoreML, fixed-point ops</td><td>Very efficient</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">GPU</strong></td><td>iOS, Android</td><td>Parallel float ops, rendering</td><td>Moderate</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">DSP / HTA</strong></td><td>Qualcomm Snapdragon</td><td>Fixed-point, signal processing</td><td>Very efficient</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">CPU (NEON / SIMD)</strong></td><td>All devices</td><td>Fallback, int8 ops</td><td>Baseline</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">NPU</strong></td><td>Samsung Exynos, MediaTek</td><td>Neural network workloads</td><td>Efficient</td></tr>
+                    </tbody>
+                </table>
+
+                <!-- NEW: How ANE works -->
+                <div class="info-box" style="margin-top:1rem;">
+                    <strong>🔬 How the Neural Engine Works Internally:</strong><br>
+                    The ANE is a <strong>matrix multiplication accelerator</strong> — the core operation of neural networks. It executes thousands of MAC (multiply-accumulate) operations per clock cycle in hardware, running at much lower power than a GPU doing the same work. However, it has constraints: it prefers <strong>fixed-point arithmetic</strong> (INT8, FP16), requires operations to be expressible in Core ML's operation set, and cannot run arbitrary GPU shaders. When a layer isn't ANE-compatible, Core ML automatically falls back to GPU or CPU.
+                </div>
+
+                <p style="margin-top:1.25rem;"><strong>Choosing the Right On-Device Framework:</strong></p>
+                <table class="compare-table">
+                    <thead><tr><th>Framework</th><th>Platform</th><th>Best For</th><th>Accelerator</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong style="color:var(--cyan)">Core ML</strong></td><td>iOS / macOS</td><td>Production iOS apps, Vision/NLP tasks</td><td>ANE + GPU + CPU (auto)</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">TFLite</strong></td><td>Android (+ iOS)</td><td>Android apps, cross-platform edge</td><td>GPU / NNAPI / CPU delegates</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">ONNX Runtime</strong></td><td>All platforms</td><td>Cross-platform, model portability</td><td>CoreML / CUDA / CPU providers</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">MLX</strong></td><td>Apple Silicon (Mac)</td><td>Research, fine-tuning on Mac</td><td>Unified memory GPU+CPU</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">MediaPipe</strong></td><td>Android / iOS / Web</td><td>Real-time vision &amp; audio pipelines</td><td>GPU + CPU</td></tr>
+                        <tr><td><strong style="color:var(--cyan)">llama.cpp</strong></td><td>All platforms</td><td>Running LLMs locally</td><td>Metal / CUDA / CPU SIMD</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🧠 On-Device AI</div>
+                <h3>Model Quantization — Fitting AI into Phones</h3>
+                <p><span class="highlight">Quantization</span> reduces the numerical precision of model weights from 32-bit floats (FP32) to smaller representations — dramatically reducing model size and inference time with minimal accuracy loss.</p>
+
+                <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin:1rem 0;">
+                    <p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:0.75rem;">SIZE COMPARISON — MobileNet v3 Large</p>
+                    <div class="bench-row">
+                        <div class="bench-label">FP32 (original)</div>
+                        <div class="bench-bar-wrap"><div class="bench-bar" style="width:100%"></div></div>
+                        <div class="bench-val">21.1 MB</div>
+                    </div>
+                    <div class="bench-row">
+                        <div class="bench-label">FP16</div>
+                        <div class="bench-bar-wrap"><div class="bench-bar" style="width:50%"></div></div>
+                        <div class="bench-val">10.6 MB</div>
+                    </div>
+                    <div class="bench-row">
+                        <div class="bench-label">INT8 (PTQ)</div>
+                        <div class="bench-bar-wrap"><div class="bench-bar" style="width:25%"></div></div>
+                        <div class="bench-val">5.3 MB</div>
+                    </div>
+                    <div class="bench-row">
+                        <div class="bench-label">INT4 / GPTQ</div>
+                        <div class="bench-bar-wrap"><div class="bench-bar" style="width:12.5%"></div></div>
+                        <div class="bench-val">2.7 MB</div>
+                    </div>
+                </div>
+
+                <ul class="styled-list">
+                    <li><span class="highlight">Post-Training Quantization (PTQ)</span> — quantize after training. Fast, no re-training. Small accuracy drop. Best starting point.</li>
+                    <li><span class="highlight">Quantization-Aware Training (QAT)</span> — simulate quantization during training. Recovers most accuracy at INT8. Requires re-training.</li>
+                    <li><span class="highlight">GPTQ / AWQ</span> — state-of-the-art INT4 quantization for LLMs. Enables 7B parameter models to run on phones with 8GB RAM.</li>
+                </ul>
+
+                <!-- NEW: How quantization works mathematically -->
+                <div class="info-box" style="margin-top:1rem;">
+                    <strong>📐 How Quantization Works (Simplified):</strong><br>
+                    A float32 weight like <code>0.3871</code> is mapped to an int8 value (0–255) using:<br>
+                    <code>q = round(w / scale) + zero_point</code><br>
+                    During inference, the quantized value is dequantized back: <code>w ≈ (q - zero_point) × scale</code><br>
+                    The small rounding error per weight accumulates across layers, creating the "accuracy drop." The art of quantization is minimizing this accumulated error — which is why per-channel quantization (separate scale per output channel) is much better than per-tensor (one scale for the whole layer).
+                </div>
+
+                <div class="code-block"><pre>import coremltools as ct
+import torch
+
+# Step 1: export PyTorch model to TorchScript
+model = MobileNetV3()
+model.eval()
+traced = torch.jit.trace(model, torch.randn(1, 3, 224, 224))
+
+# Step 2: convert to Core ML
+mlmodel = ct.convert(
+    traced,
+    inputs=[ct.ImageType(name="image", shape=(1, 3, 224, 224),
+                         scale=1/255.0, bias=[-0.485, -0.456, -0.406])],
+    compute_precision=ct.precision.FLOAT16,     # FP16 quantization
+    compute_units=ct.ComputeUnit.ALL             # use Neural Engine + GPU + CPU
+)
+
+# Step 3: apply INT8 quantization
+from coremltools.optimize.coreml import PostTrainingQuantizer, OptimizationConfig
+
+config  = OptimizationConfig(global_config={"mode": "linear_symmetric", "dtype": "int8"})
+quant   = PostTrainingQuantizer(mlmodel, config)
+mlmodel = quant.compress()
+
+mlmodel.save("MobileNetV3_INT8.mlpackage")</pre></div>
+
+                <!-- NEW: Quantization for LLMs -->
+                <p style="margin-top:1.25rem;"><strong>LLM-Specific Quantization Formats (GGUF):</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Q4_K_M</span> — 4-bit with K-quants mixed precision. Best accuracy/speed tradeoff for most LLMs. Default recommendation.</li>
+                    <li><span class="highlight">Q5_K_M</span> — 5-bit variant. Better accuracy, ~25% larger than Q4. Worth it for 7B+ models.</li>
+                    <li><span class="highlight">Q8_0</span> — 8-bit, near-lossless. ~50% larger than Q4, used when accuracy is critical.</li>
+                    <li><span class="highlight">Q2_K</span> — 2-bit, very aggressive. Significant quality loss. Only for extreme memory constraints.</li>
+                    <li><span class="highlight">IQ4_XS</span> — "Importance-Quantized" 4-bit. Uses calibration data to protect important weights. Better than Q4_K_M for instruction-following tasks.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🧠 On-Device AI</div>
+                <h3>Model Pruning &amp; Knowledge Distillation</h3>
+                <p>Beyond quantization, two more powerful compression techniques:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Pruning</span> — remove neurons or weights that contribute little to the output. Structured pruning removes entire channels/heads (hardware-friendly). Unstructured pruning removes individual weights (creates sparse matrices).</li>
+                    <li><span class="highlight">Knowledge Distillation</span> — train a small "student" model to mimic a large "teacher" model's outputs (soft labels). The student learns richer information than it would from hard labels alone. DistilBERT is 40% smaller than BERT with 97% of its performance.</li>
+                </ul>
+
+                <!-- NEW: Comparison table -->
+                <table class="compare-table" style="margin-top:1rem;">
+                    <thead><tr><th>Technique</th><th>Size Reduction</th><th>Accuracy Impact</th><th>Re-training?</th><th>Hardware benefit</th></tr></thead>
+                    <tbody>
+                        <tr><td>PTQ (INT8)</td><td>~75% smaller</td><td>&lt;1%</td><td>No</td><td>Direct — INT8 ops faster on ANE/GPU</td></tr>
+                        <tr><td>QAT (INT8)</td><td>~75% smaller</td><td>~0.1%</td><td>Yes</td><td>Direct — same as PTQ but more accurate</td></tr>
+                        <tr><td>Structured Pruning</td><td>20–50% fewer FLOPs</td><td>1–5%</td><td>Usually (fine-tune)</td><td>Yes — smaller dense model</td></tr>
+                        <tr><td>Unstructured Pruning</td><td>~50% fewer weights</td><td>~1%</td><td>Sometimes</td><td>Limited — sparse ops not well supported</td></tr>
+                        <tr><td>Knowledge Distillation</td><td>30–90% (depends on student)</td><td>3–10%</td><td>Yes (new student)</td><td>Indirect — smaller model is inherently faster</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block"><pre>import torch
+import torch.nn.functional as F
+
+# Knowledge Distillation training loop
+def distillation_loss(student_logits, teacher_logits, labels, temperature=4.0, alpha=0.7):
+    # Soft loss: KL divergence between student and teacher distributions
+    soft_loss = F.kl_div(
+        F.log_softmax(student_logits / temperature, dim=-1),
+        F.softmax(teacher_logits  / temperature, dim=-1),
+        reduction='batchmean'
+    ) * (temperature ** 2)
+
+    # Hard loss: standard cross-entropy with ground truth
+    hard_loss = F.cross_entropy(student_logits, labels)
+
+    # Combine: alpha controls balance between distillation and task learning
+    return alpha * soft_loss + (1 - alpha) * hard_loss
+
+# Training
+teacher.eval()
+for batch in dataloader:
+    with torch.no_grad():
+        teacher_logits = teacher(batch["input"])
+    student_logits = student(batch["input"])
+    loss = distillation_loss(student_logits, teacher_logits, batch["labels"])
+    loss.backward()
+    optimizer.step()</pre></div>
+
+                <!-- NEW: Real-world distillation examples -->
+                <p style="margin-top:1.25rem;"><strong>Real-World Distillation Success Stories:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">DistilBERT</span> — 40% smaller than BERT-base, 60% faster, retains 97% of BERT's GLUE performance. Powers many production NLP apps.</li>
+                    <li><span class="highlight">TinyBERT</span> — 7.5× smaller, 9.4× faster, 96.8% of BERT performance on GLUE.</li>
+                    <li><span class="highlight">Whisper distillation</span> — Hugging Face's Distil-Whisper is 6× faster than Whisper large-v2 with only 1% WER increase.</li>
+                    <li><span class="highlight">Apple Intelligence base model</span> — Apple trains a 3B on-device model by distilling from larger models, enabling it to perform competitively despite the size constraint.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🧠 On-Device AI</div>
+                <h3>Core ML — iOS Native AI</h3>
+                <p><span class="highlight">Core ML</span> is Apple's on-device machine learning framework. Models run on the Neural Engine, GPU, or CPU automatically — no GPU code required. It integrates directly with Vision, NLP, and Sound frameworks.</p>
+                <div class="code-block"><pre>import CoreML
+import Vision
+import UIKit
+
+// Load the Core ML model (compiled at build time)
+let config        = MLModelConfiguration()
+config.computeUnits = .all    // Neural Engine + GPU + CPU cascade
+
+guard let model = try? VNCoreMLModel(for: MyImageClassifier(configuration: config).model) else { return }
+
+// Create Vision request — runs on Neural Engine automatically
+let request = VNCoreMLRequest(model: model) { request, error in
+    guard let results = request.results as? [VNClassificationObservation] else { return }
+    let top = results.prefix(3)
+    top.forEach { obs in
+        print("\(obs.identifier): \(String(format: "%.1f%%", obs.confidence * 100))")
+    }
+}
+
+// Run inference on a UIImage
+let handler = VNImageRequestHandler(cgImage: image.cgImage!, options: [:])
+try? handler.perform([request])
+// → Runs on Neural Engine: ~2ms inference time</pre></div>
+                <ul class="styled-list">
+                    <li><span class="highlight">Vision framework</span> — image classification, object detection, face detection, body pose, text recognition — all Core ML powered</li>
+                    <li><span class="highlight">NaturalLanguage framework</span> — language identification, sentiment, NER, embeddings</li>
+                    <li><span class="highlight">SoundAnalysis</span> — audio classification (wake words, sound events)</li>
+                    <li><span class="highlight">Create ML</span> — train custom Core ML models on Mac, no Python required</li>
+                </ul>
+
+                <!-- NEW: Core ML model types and async inference -->
+                <div class="info-box" style="margin-top:1rem;">
+                    <strong>📦 Core ML Model Types:</strong><br>
+                    <strong>.mlmodel</strong> — legacy format (pre-iOS 16). Compiled by Xcode into .mlmodelc at build time.<br>
+                    <strong>.mlpackage</strong> — modern format (iOS 16+). Directory bundle containing model weights, metadata, and compute plan. Supports on-demand compilation, incremental compilation, and better Neural Engine targeting.<br>
+                    <strong>Tip:</strong> Always use .mlpackage for new models — it enables <code>MLModelConfiguration.allowLowPrecisionAccumulation</code> which significantly speeds up ANE inference.
+                </div>
+
+                <div class="code-block"><pre>// Core ML async inference (iOS 16+) — non-blocking
+let model = try await MyModel.load()
+
+Task {
+    let input = MyModelInput(image: pixelBuffer)
+    let output = try await model.prediction(input: input)
+    // UI update back on main thread
+    await MainActor.run {
+        labelView.text = output.label
+        confidenceLabel.text = String(format: "%.1f%%", output.confidence * 100)
+    }
+}</pre></div>
+
+                <!-- NEW: Create ML App -->
+                <p style="margin-top:1.25rem;"><strong>Create ML — Training Without Python:</strong></p>
+                <ul class="styled-list">
+                    <li>Drag-and-drop training directly in Xcode — no code required for image classifiers, object detectors, sound classifiers, and text classifiers</li>
+                    <li>Transfer learning from Apple's pre-trained base models — train a custom classifier in minutes on a laptop</li>
+                    <li>Outputs optimized .mlpackage ready for deployment</li>
+                    <li>Programmatic API via <code>CreateML</code> framework for automated pipelines</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">🧠 On-Device AI</div>
+                <h3>TensorFlow Lite &amp; ONNX Runtime — Android &amp; Cross-Platform</h3>
+                <p><span class="highlight">TensorFlow Lite (TFLite)</span> is Google's on-device ML framework, optimized for Android but running on iOS too. <span class="highlight">ONNX Runtime</span> is the cross-platform inference engine backed by Microsoft — runs on iOS, Android, Windows, Linux, and embedded systems.</p>
+                <div class="code-block"><pre>// Android — TFLite with GPU delegate
+implementation 'org.tensorflow:tensorflow-lite:2.14.0'
+implementation 'org.tensorflow:tensorflow-lite-gpu:2.14.0'
+
+// Kotlin inference code
+val gpuDelegate = GpuDelegate()
+val options     = Interpreter.Options().addDelegate(gpuDelegate)
+val interpreter = Interpreter(loadModelFile("model.tflite"), options)
+
+val input  = Array(1) { Array(224) { Array(224) { FloatArray(3) } } }
+val output = Array(1) { FloatArray(1000) }
+
+interpreter.run(input, output)
+// GPU delegate: 3.2ms vs CPU: 18.4ms</pre></div>
+
+                <!-- NEW: Android delegates explained -->
+                <p style="margin-top:1.25rem;"><strong>Android TFLite Delegates — Choosing the Right One:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">GPU Delegate</span> — Best for floating-point models on devices without a dedicated NPU. Broadly supported across Android devices.</li>
+                    <li><span class="highlight">NNAPI Delegate</span> — Routes to Android's Neural Networks API, which abstracts the device's NPU/DSP. Best on flagship devices with Qualcomm Snapdragon HTP or Google Tensor NPU. <em>Unreliable on budget devices.</em></li>
+                    <li><span class="highlight">Hexagon Delegate</span> — Direct Qualcomm DSP access. Extremely fast for INT8 models on Snapdragon devices, but Qualcomm-only.</li>
+                    <li><span class="highlight">XNNPack Delegate</span> — Optimized CPU operations using SIMD. Default fallback. Best for INT8 on CPU when no GPU/NPU is available.</li>
+                </ul>
+
+                <div class="code-block"><pre># ONNX Runtime — Python (same API works on mobile via Xamarin/Unity)
+import onnxruntime as ort
+import numpy as np
+
+# Load model exported from PyTorch/TF
+session = ort.InferenceSession(
+    "model.onnx",
+    providers=["CoreMLExecutionProvider",  # Apple Neural Engine on macOS/iOS
+               "CUDAExecutionProvider",     # NVIDIA GPU if available
+               "CPUExecutionProvider"]      # fallback
+)
+
+input_name = session.get_inputs()[0].name
+output = session.run(None, {input_name: np.random.randn(1, 3, 224, 224).astype(np.float32)})
+print(output[0].shape)  # (1, 1000)</pre></div>
+
+                <!-- NEW: Model conversion cheat sheet -->
+                <div class="info-box" style="margin-top:1rem;">
+                    <strong>🔄 Model Conversion Cheat Sheet:</strong><br>
+                    <strong>PyTorch → Core ML:</strong> <code>torch.jit.trace()</code> → <code>ct.convert()</code><br>
+                    <strong>PyTorch → TFLite:</strong> PyTorch → ONNX (<code>torch.onnx.export()</code>) → TFLite (ONNX-TFLite converter)<br>
+                    <strong>PyTorch → ONNX:</strong> <code>torch.onnx.export(model, input, "model.onnx", opset_version=17)</code><br>
+                    <strong>TensorFlow → TFLite:</strong> <code>TFLiteConverter.from_saved_model()</code><br>
+                    <strong>HuggingFace → ONNX:</strong> <code>optimum-cli export onnx --model bert-base-uncased output/</code>
+                </div>
+            </div>
+
+            <!-- ===== LOCAL PERF ===== -->
+            <div class="content-card">
+                <div class="section-badge">⚡ Local Performance</div>
+                <h3>Running LLMs Locally — llama.cpp &amp; Ollama</h3>
+                <p>Large Language Models can now run entirely on consumer hardware thanks to aggressive quantization. <span class="highlight">llama.cpp</span> runs quantized LLMs (Llama, Mistral, Gemma, Phi) on CPUs and Apple Silicon with no GPU required. <span class="highlight">Ollama</span> wraps llama.cpp with a Docker-like CLI for easy local LLM management.</p>
+                <div class="code-block"><pre># Ollama — run LLMs locally with one command
+brew install ollama
+ollama run llama3.2:3b          # 3B param model, ~2GB RAM, ~20 tok/s on M2
+ollama run mistral:7b-instruct  # 7B model, ~4GB RAM, ~12 tok/s on M2
+ollama run phi3:mini            # 3.8B model, optimized for edge devices
+
+# OpenAI-compatible API (drop-in replacement)
+ollama serve   # starts on localhost:11434
+
+# Call from Python — same code as OpenAI API
+from openai import OpenAI
+client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+response = client.chat.completions.create(
+    model="llama3.2:3b",
+    messages=[{"role": "user", "content": "Explain transformers in 3 sentences."}]
+)
+print(response.choices[0].message.content)</pre></div>
+                <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border-color);border-radius:8px;padding:1.25rem;margin:1rem 0;">
+                    <p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:0.75rem;">TOKENS/SEC — Apple M3 Pro (18GB) · INT4 quantized</p>
+                    <div class="bench-row">
+                        <div class="bench-label">Phi-3 Mini 3.8B</div>
+                        <div class="bench-bar-wrap"><div class="bench-bar" style="width:100%"></div></div>
+                        <div class="bench-val">~42 t/s</div>
+                    </div>
+                    <div class="bench-row">
+                        <div class="bench-label">Llama 3.2 3B</div>
+                        <div class="bench-bar-wrap"><div class="bench-bar" style="width:76%"></div></div>
+                        <div class="bench-val">~32 t/s</div>
+                    </div>
+                    <div class="bench-row">
+                        <div class="bench-label">Mistral 7B</div>
+                        <div class="bench-bar-wrap"><div class="bench-bar" style="width:38%"></div></div>
+                        <div class="bench-val">~16 t/s</div>
+                    </div>
+                    <div class="bench-row">
+                        <div class="bench-label">Llama 3.1 8B</div>
+                        <div class="bench-bar-wrap"><div class="bench-bar" style="width:31%"></div></div>
+                        <div class="bench-val">~13 t/s</div>
+                    </div>
+                </div>
+
+                <!-- NEW: Local LLM use cases and RAG -->
+                <p style="margin-top:1.25rem;"><strong>When to Use Local LLMs in Your App:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Privacy-sensitive summarization</span> — summarizing medical notes, legal documents, or private messages on-device</li>
+                    <li><span class="highlight">Offline assistants</span> — field apps for inspectors, doctors, or engineers in areas without connectivity</li>
+                    <li><span class="highlight">Sensitive data extraction</span> — parsing PII-containing documents without cloud exposure</li>
+                    <li><span class="highlight">Development &amp; prototyping</span> — test prompts and pipelines locally without API costs during development</li>
+                    <li><span class="highlight">Local RAG (Retrieval-Augmented Generation)</span> — combine a local LLM with a local vector database for intelligent search over private documents</li>
+                </ul>
+
+                <div class="code-block"><pre># Local RAG pipeline with Ollama + ChromaDB
+import chromadb
+from openai import OpenAI
+
+# 1. Embed documents locally
+chroma = chromadb.Client()
+collection = chroma.create_collection("docs")
+
+# Add private documents to local vector store
+collection.add(documents=["Q4 revenue was $4.2M..."], ids=["doc1"])
+
+# 2. Query: embed the question and find relevant docs
+results = collection.query(query_texts=["What was the revenue?"], n_results=2)
+context = "\n".join(results["documents"][0])
+
+# 3. Ask local LLM with context — no data leaves the machine
+client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+response = client.chat.completions.create(
+    model="llama3.2:3b",
+    messages=[
+        {"role": "system", "content": f"Answer using this context:\n{context}"},
+        {"role": "user",   "content": "What was the revenue?"}
+    ]
+)
+print(response.choices[0].message.content)  # "Q4 revenue was $4.2M"</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚡ Local Performance</div>
+                <h3>On-Device Speech &amp; Vision — Whisper &amp; MobileNets</h3>
+                <p>Two landmark models that made on-device AI practical:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Whisper</span> (OpenAI) — speech-to-text that runs entirely on device. whisper.cpp runs the Tiny model at real-time on an iPhone 13. Used for transcription, voice commands, and accessibility without sending audio to the cloud.</li>
+                    <li><span class="highlight">MobileNet / EfficientNet-Lite</span> — image classification designed from the ground up for mobile constraints. Uses depthwise separable convolutions that are 8–9× cheaper than standard convolutions.</li>
+                </ul>
+                <div class="code-block"><pre># whisper.cpp — run on-device speech recognition
+# Build for Apple Silicon
+git clone https://github.com/ggerganov/whisper.cpp
+cd whisper.cpp && make -j
+
+# Download quantized model (Tiny = 39MB, Base = 142MB)
+bash models/download-ggml-model.sh tiny.en
+
+# Transcribe (runs entirely on Neural Engine)
+./main -m models/ggml-tiny.en.bin -f audio.wav
+# → 3.2x realtime factor on iPhone 14 (processes 1min audio in 19s)
+
+# iOS integration via WhisperKit
+# github.com/argmaxinc/WhisperKit
+import WhisperKit
+let whisper = try await WhisperKit(model: "openai/whisper-tiny.en")
+let result  = try await whisper.transcribe(audioPath: "recording.m4a")
+print(result.text)</pre></div>
+
+                <!-- NEW: Whisper model comparison + Vision models deep-dive -->
+                <p style="margin-top:1.25rem;"><strong>Whisper Model Size vs Performance (on-device):</strong></p>
+                <table class="compare-table">
+                    <thead><tr><th>Model</th><th>Size (INT8)</th><th>Speed (iPhone 15 Pro)</th><th>WER (English)</th><th>Languages</th></tr></thead>
+                    <tbody>
+                        <tr><td>tiny.en</td><td>39 MB</td><td>~3× realtime</td><td>~5.7%</td><td>English only</td></tr>
+                        <tr><td>base.en</td><td>74 MB</td><td>~1.5× realtime</td><td>~4.2%</td><td>English only</td></tr>
+                        <tr><td>small.en</td><td>244 MB</td><td>~0.6× realtime</td><td>~3.1%</td><td>English only</td></tr>
+                        <tr><td>base (multilingual)</td><td>142 MB</td><td>~1.2× realtime</td><td>varies</td><td>99 languages</td></tr>
+                    </tbody>
+                </table>
+
+                <p style="margin-top:1.25rem;"><strong>MobileNet Architecture — Why It Works on Mobile:</strong></p>
+                <div class="code-explanation">
+                    <p>Standard convolution: <strong>D_K × D_K × M × N × D_F × D_F</strong> operations<br>
+                    Depthwise separable: <strong>D_K × D_K × M × D_F × D_F + M × N × D_F × D_F</strong> operations<br>
+                    Cost reduction factor: <strong>1/N + 1/D_K²</strong><br>
+                    For a 3×3 kernel with 256 output channels: <strong>8–9× cheaper</strong></p>
+                </div>
+
+                <ul class="styled-list">
+                    <li><span class="highlight">MobileNetV1</span> (2017) — introduced depthwise separable convolutions for mobile</li>
+                    <li><span class="highlight">MobileNetV2</span> (2018) — added inverted residuals and linear bottlenecks; standard for mobile classification</li>
+                    <li><span class="highlight">MobileNetV3</span> (2019) — NAS-optimized architecture with h-swish activation; best accuracy/latency tradeoff</li>
+                    <li><span class="highlight">EfficientNet-Lite</span> — compound scaling applied to mobile constraints; available in Core ML and TFLite Hub</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚡ Local Performance</div>
+                <h3>Performance Profiling &amp; Optimization</h3>
+                <p>You cannot optimize what you haven't measured. Every on-device AI project needs a profiling strategy:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Xcode Instruments</span> — Core ML Instrument shows per-layer inference time, Neural Engine utilization, and memory usage. Essential for iOS optimization.</li>
+                    <li><span class="highlight">Android GPU Inspector</span> — GPU timeline, shader profiling, frame analysis for Android GPU-accelerated inference.</li>
+                    <li><span class="highlight">TFLite Benchmark Tool</span> — CLI tool measuring inference time across CPU/GPU/NNAPI delegates on Android devices.</li>
+                    <li><span class="highlight">Core ML Performance Reports</span> — Xcode generates estimated inference time per hardware unit before you even run on a real device.</li>
+                </ul>
+                <div class="code-block"><pre># TFLite benchmark — measure inference on real Android device
+adb shell /data/local/tmp/benchmark_model \
+    --graph=/data/local/tmp/model.tflite \
+    --num_threads=4 \
+    --use_gpu=true \
+    --num_runs=50
+
+# Output:
+# INFO: Inference timings in us: Init: 12847, First inference: 8341
+# INFO: Average inference timings: Warmup: 7842 us, Init: 12847 us
+# INFO:                             Inference (avg): 3241 us
+# INFO:                             Inference (min): 2981 us
+# INFO:                             Inference (max): 3891 us</pre></div>
+                <p style="margin-top:0.75rem;"><strong>Key optimization techniques:</strong></p>
+                <ul class="styled-list">
+                    <li><span class="highlight">Batch size 1</span> — on-device inference almost always runs single samples, not batches. Profile at batch=1.</li>
+                    <li><span class="highlight">Memory layout</span> — NCHW vs NHWC format matters for GPU vs CPU. Match the model's expected layout.</li>
+                    <li><span class="highlight">Warm-up runs</span> — first inference is always slower (JIT compilation, cache warming). Always measure after warm-up.</li>
+                    <li><span class="highlight">Thread count</span> — more threads isn't always faster. Benchmark 1, 2, 4 threads and pick the best for the target device class.</li>
+                    <li><span class="highlight">Input preprocessing on GPU</span> — move image normalization to the GPU to avoid CPU→GPU transfer bottlenecks.</li>
+                </ul>
+
+                <!-- NEW: Model caching and first-inference optimization -->
+                <div class="info-box" style="margin-top:1rem;">
+                    <strong>🚀 Eliminating First-Inference Latency in Core ML:</strong><br>
+                    Core ML compiles a model to device-specific machine code on first load. This can take 30–90 seconds for large models. Solutions:<br>
+                    1. <strong>Pre-compile at app launch</strong> using <code>MLModelConfiguration</code> with a background task<br>
+                    2. <strong>Cache the compiled .mlmodelc</strong> to the app's Caches directory — subsequent launches load instantly<br>
+                    3. <strong>Use <code>compiledModel(at:)</code></strong> to load the already-compiled form directly<br>
+                    4. <strong>Show a loading screen</strong> on first launch with progress: "Preparing AI features (one-time setup)"
+                </div>
+
+                <div class="code-block"><pre>// iOS — pre-compile and cache Core ML model
+import CoreML
+
+func prepareModel() async throws -> MLModel {
+    let modelURL  = Bundle.main.url(forResource: "MyModel", withExtension: "mlpackage")!
+    let cacheURL  = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+                        .appendingPathComponent("MyModel.mlmodelc")
+
+    // Check if already compiled
+    if FileManager.default.fileExists(atPath: cacheURL.path) {
+        return try MLModel(contentsOf: cacheURL)
+    }
+
+    // First run: compile and cache (runs in background)
+    let compiled = try await MLModel.compileModel(at: modelURL)
+    try FileManager.default.copyItem(at: compiled, to: cacheURL)
+    return try MLModel(contentsOf: cacheURL)
+}</pre></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚡ Local Performance</div>
+                <h3>Edge Cases — When On-Device AI Is Hard</h3>
+                <p>On-device AI is powerful but has real constraints that require careful engineering:</p>
+                <table class="compare-table">
+                    <thead><tr><th>Challenge</th><th>Impact</th><th>Mitigation</th></tr></thead>
+                    <tbody>
+                        <tr><td>Thermal throttling</td><td>Neural Engine throttles after sustained load, 2–4× slowdown</td><td>Batch inferences, add cooldown intervals, monitor thermal state</td></tr>
+                        <tr><td>Memory pressure</td><td>OS kills app if RAM spikes, model loading adds 2–10× memory</td><td>Lazy-load models, unload when backgrounded, use memory-mapped files</td></tr>
+                        <tr><td>Device fragmentation</td><td>Neural Engine only A12+; older devices CPU-only, 5–20× slower</td><td>Fallback paths per hardware tier, minimum iOS version gate</td></tr>
+                        <tr><td>Model size budget</td><td>Large models increase app download size (App Store optimization)</td><td>On-demand model download after install, split model delivery</td></tr>
+                        <tr><td>First-inference latency</td><td>Core ML compiles model on first run (30s+)</td><td>Pre-compile via MLModelConfiguration.allowLowPrecisionAccumulation, cache compiled model</td></tr>
+                    </tbody>
+                </table>
+
+                <!-- NEW: Thermal monitoring code + graceful degradation -->
+                <div class="code-block"><pre>// iOS — Monitor thermal state and throttle AI workload
+import Foundation
+
+func adaptToThermalState() {
+    let state = ProcessInfo.processInfo.thermalState
+
+    switch state {
+    case .nominal:
+        // Full speed — Neural Engine + maximum batch processing
+        runHighQualityInference()
+    case .fair:
+        // Slightly warm — reduce quality or frequency
+        runStandardInference()
+    case .serious:
+        // Hot — significant throttle, reduce to essential AI only
+        runLightweightInference()
+        showUserHint("Device cooling down — AI features reduced temporarily")
+    case .critical:
+        // Very hot — suspend all AI inference
+        suspendAIFeatures()
+        showUserHint("AI paused to protect device")
+    @unknown default:
+        runStandardInference()
+    }
+}
+
+// Register for thermal change notifications
+NotificationCenter.default.addObserver(
+    forName: ProcessInfo.thermalStateDidChangeNotification,
+    object: nil, queue: .main
+) { _ in adaptToThermalState() }</pre></div>
+
+                <div class="info-box" style="margin-top:1rem;">
+                    <strong>📱 Designing a Multi-Tier Fallback Strategy:</strong><br>
+                    Don't design your app to fail if a specific hardware isn't available. Instead, define capability tiers:<br>
+                    <strong>Tier 3 (A17 Pro / M3+):</strong> full model, Neural Engine, real-time inference<br>
+                    <strong>Tier 2 (A14–A16):</strong> INT8 quantized model, Neural Engine, slight delay acceptable<br>
+                    <strong>Tier 1 (A12–A13):</strong> heavily quantized model, CPU fallback, async only<br>
+                    <strong>Tier 0 (older):</strong> cloud API fallback with user notification<br>
+                    Check chip generation at runtime via <code>ProcessInfo.processInfo.processorCount</code> and benchmark tests.
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-badge">⚡ Local Performance</div>
+                <h3>Apple Intelligence &amp; On-Device LLMs</h3>
+                <p>Apple Intelligence (iOS 18+) marks the era of on-device LLMs as a first-class platform feature. Key architecture decisions that enable this:</p>
+                <ul class="styled-list">
+                    <li><span class="highlight">3B parameter on-device model</span> — Apple trains a small but capable LLM that runs entirely on the Neural Engine. Tasks: writing tools, summarization, smart replies, prioritization.</li>
+                    <li><span class="highlight">Private Cloud Compute</span> — for tasks too complex for the device model, queries are routed to Apple's privacy-preserving server-side LLMs. No Apple employee can see the request.</li>
+                    <li><span class="highlight">Adapter weights</span> — Apple uses LoRA-style adapters for task-specific fine-tuning without storing multiple full model copies on device.</li>
+                    <li><span class="highlight">Writing Tools API</span> — developers can invoke Apple Intelligence writing tools from their apps via the new iOS 18 APIs.</li>
+                </ul>
+                <div class="code-explanation">
+                    <p>Google Pixel 8+ has the Gemini Nano model (1.8B parameters) built in to Gemini. Samsung Galaxy S24+ runs Gemini Nano via Android AICore. On-device LLMs are becoming a standard platform capability — not a niche feature.</p>
+                </div>
+
+                <!-- NEW: LoRA and on-device fine-tuning -->
+                <p style="margin-top:1.25rem;"><strong>LoRA — How Apple Intelligence Adapts Without Multiple Full Models:</strong></p>
+                <div class="code-explanation">
+                    <p>LoRA (Low-Rank Adaptation) adds <strong>small trainable matrices</strong> (A and B, rank r) to existing frozen weight matrices. Instead of updating a full W matrix (d×k = millions of params), LoRA only trains A (d×r) and B (r×k) where r &lt;&lt; min(d,k). For a 3B model, a LoRA adapter for one task might be just 10–50MB — enabling Apple to store dozens of task adapters on device efficiently.</p>
+                </div>
+
+                <table class="compare-table">
+                    <thead><tr><th>Platform</th><th>On-Device Model</th><th>Parameters</th><th>Tasks</th></tr></thead>
+                    <tbody>
+                        <tr><td>Apple Intelligence (iOS 18+)</td><td>Apple 3B (LoRA adapters)</td><td>~3B</td><td>Writing, summarization, smart reply, prioritization</td></tr>
+                        <tr><td>Android AICore (Pixel 8+)</td><td>Gemini Nano</td><td>~1.8B</td><td>Summarize, Smart Reply, Pixel Recorder</td></tr>
+                        <tr><td>Samsung Galaxy AI</td><td>Gemini Nano (via AICore)</td><td>~1.8B</td><td>Chat Assist, Note Assist, Transcript Assist</td></tr>
+                        <tr><td>Qualcomm AI Hub</td><td>Various (Llama 3.2, Mistral)</td><td>1–8B</td><td>Developer API, varies by app</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- NEW: MLX section -->
+            <div class="content-card">
+                <div class="section-badge">⚡ Local Performance</div>
+                <h3>MLX — Apple's Framework for Apple Silicon Research</h3>
+                <p><span class="highlight">MLX</span> is Apple's open-source array framework for machine learning on Apple Silicon. Unlike Core ML (optimized for deployment), MLX is designed for <strong>research and training</strong> — combining the best of NumPy, PyTorch, and Metal.</p>
+
+                <ul class="styled-list">
+                    <li><span class="highlight">Unified memory</span> — arrays live in shared CPU/GPU memory. No data copies between CPU and GPU — a fundamental advantage of Apple Silicon's architecture.</li>
+                    <li><span class="highlight">Lazy evaluation</span> — operations are lazy by default. The graph is compiled and executed only when you explicitly call <code>mx.eval()</code>.</li>
+                    <li><span class="highlight">Fine-tuning LLMs on Mac</span> — MLX-LM enables fine-tuning Llama 3, Mistral, Gemma on a MacBook Pro using LoRA. A fine-tuning run that would cost $100 on GPU cloud completes locally for free.</li>
+                    <li><span class="highlight">Python and Swift APIs</span> — Python for research/training, Swift API for deployment in iOS/macOS apps.</li>
+                </ul>
+
+                <div class="code-block"><pre># MLX — fine-tune Llama 3.2 on Mac with LoRA
+# Install: pip install mlx-lm
+
+from mlx_lm import load, generate
+from mlx_lm.tuner import train
+
+# Load base model (quantized, runs on Apple Silicon GPU)
+model, tokenizer = load("mlx-community/Llama-3.2-3B-Instruct-4bit")
+
+# Generate text
+response = generate(model, tokenizer,
+                    prompt="Classify the sentiment: 'This app is amazing!'",
+                    max_tokens=50)
+print(response)
+
+# Fine-tune with LoRA (your custom dataset)
+# train(model, tokenizer, train_data="data/train.jsonl",
+#       num_iters=1000, lora_rank=8, learning_rate=1e-5)
+# → Trains on M3 Pro at ~150 tok/s, ~$0 cost</pre></div>
+
+                <div class="info-box" style="margin-top:1rem;">
+                    <strong>🍎 When to Use MLX vs Core ML:</strong><br>
+                    <strong>MLX</strong> — Research, experimentation, fine-tuning LLMs on Mac, building ML pipelines. Think of it as PyTorch for Apple Silicon.<br>
+                    <strong>Core ML</strong> — Production deployment in iOS/macOS apps. Compiled model, integrated with Vision/NLP, runs on Neural Engine. Convert from MLX using <code>mlx.core.export_to_coreml()</code>.<br>
+                    <strong>Workflow:</strong> Experiment and fine-tune in MLX → Export to ONNX or Core ML → Deploy with Core ML in your app.
+                </div>
+            </div>
+
+            <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                <h3>Section Conclusion</h3>
+                <p>You now master the On-Device AI &amp; Local Performance stack:</p>
+                <ul class="styled-list">
+                    <li>Why on-device AI matters: zero latency, privacy, offline, zero cost</li>
+                    <li>The hardware accelerators: Neural Engine, GPU, DSP, NPU</li>
+                    <li>Quantization: FP32 → FP16 → INT8 → INT4 and the tradeoffs</li>
+                    <li>Pruning and knowledge distillation for model compression</li>
+                    <li>Core ML for iOS with Vision, NaturalLanguage, and SoundAnalysis</li>
+                    <li>TFLite with GPU delegate for Android</li>
+                    <li>ONNX Runtime as the cross-platform inference engine</li>
+                    <li>llama.cpp and Ollama for running LLMs locally</li>
+                    <li>Whisper and MobileNets for speech and vision</li>
+                    <li>Profiling with Xcode Instruments and TFLite benchmark tool</li>
+                    <li>Thermal throttling, memory constraints, and device fragmentation</li>
+                    <li>Apple Intelligence, Gemini Nano, and the on-device LLM platform era</li>
+                    <li>MLX for Apple Silicon research and fine-tuning</li>
+                </ul>
+                <p style="margin-top:1rem;">On-device AI is the frontier where privacy, performance, and intelligence converge. Every major platform is investing heavily — engineers who can optimize models for edge hardware are among the most sought-after in the industry.</p>
+            </div>
+
+        </div>
+
+        <!-- ===================== LAB ===================== -->
+        <div id="laboratorio" class="tab-panel">
+            <h3 style="margin-bottom:1rem;">On-Device AI Pipeline Simulator</h3>
+            <p style="margin-bottom:1rem;font-size:0.9rem;color:var(--text-secondary);">Write your on-device AI code — a Core ML conversion, TFLite inference, Ollama setup, quantization pipeline, or Whisper integration. The simulator returns realistic performance benchmarks and optimization analysis.</p>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <div class="lab-header">YOUR CODE</div>
+                    <textarea class="lab-textarea" id="lab-input">import coremltools as ct
+import torch
+from coremltools.optimize.coreml import PostTrainingQuantizer, OptimizationConfig
+
+# Load trained PyTorch model
+model = MobileNetV3Large(pretrained=True)
+model.eval()
+
+# Trace model
+example_input = torch.randn(1, 3, 224, 224)
+traced_model = torch.jit.trace(model, example_input)
+
+# Convert to Core ML with FP16
+mlmodel = ct.convert(
+    traced_model,
+    inputs=[ct.ImageType(name="image", shape=(1, 3, 224, 224))],
+    compute_precision=ct.precision.FLOAT16,
+    compute_units=ct.ComputeUnit.ALL
+)
+
+# Apply INT8 quantization
+config = OptimizationConfig(
+    global_config={"mode": "linear_symmetric", "dtype": "int8"}
+)
+quantizer = PostTrainingQuantizer(mlmodel, config)
+mlmodel_int8 = quantizer.compress()
+
+mlmodel_int8.save("MobileNetV3_INT8.mlpackage")</textarea>
+                </div>
+                <div class="lab-preview">
+                    <div class="lab-header">BENCHMARK OUTPUT</div>
+                    <div class="lab-output" id="lab-output">Click "Run Simulation" to benchmark your on-device AI pipeline...</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="runLab()">▶ Run Simulation</button>
+        </div>
+
+        <!-- ===================== QUIZ ===================== -->
+        <div id="quiz" class="tab-panel">
+            <div class="content-card">
+                <h3>Quiz: On-Device AI &amp; Local Performance</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem;">15 questions covering on-device inference, quantization, hardware accelerators, frameworks, and performance optimization. Answer all for instant feedback.</p>
+
+                <form id="quiz-form">
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">1. What is the primary hardware accelerator for AI on Apple devices?</p>
+                        <label class="quiz-option"><input type="radio" name="q1" value="A"> A) The CPU's SIMD unit</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="B"> B) The Neural Engine (ANE) — dedicated silicon for matrix operations</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="C"> C) The GPU's fragment shader</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="D"> D) The Secure Enclave</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">2. What does INT8 quantization do to a model?</p>
+                        <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Doubles model accuracy by using 8 redundant copies of each weight</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Reduces weight precision from 32-bit floats to 8-bit integers, cutting model size ~4× with minimal accuracy loss</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Increases model size to 8 bits per layer for better GPU utilization</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Splits the model into 8 parts to run across multiple devices</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">3. What is the difference between Post-Training Quantization (PTQ) and Quantization-Aware Training (QAT)?</p>
+                        <label class="quiz-option"><input type="radio" name="q3" value="A"> A) PTQ works on CPU only; QAT requires a GPU</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="B"> B) PTQ quantizes after training (no re-training, fast, slight accuracy drop); QAT simulates quantization during training (recovers more accuracy, requires re-training)</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="C"> C) PTQ requires a calibration dataset; QAT does not</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="D"> D) They produce identical results — the names only differ by when the quantization config is written</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">4. What is Knowledge Distillation?</p>
+                        <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Extracting the training data from a model's weights</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Training a small "student" model to mimic a large "teacher" model's output distributions</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="C"> C) Compressing a model by removing duplicate layers</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Converting a model from FP32 to BF16 precision</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">5. Which Apple framework provides pre-built image classification, face detection, and body pose estimation using Core ML?</p>
+                        <label class="quiz-option"><input type="radio" name="q5" value="A"> A) ARKit</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Vision framework</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="C"> C) SceneKit</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="D"> D) SpriteKit</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">6. What is llama.cpp used for?</p>
+                        <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Training large language models from scratch on consumer hardware</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="B"> B) Running quantized LLMs (Llama, Mistral, Gemma) efficiently on CPUs and Apple Silicon without a GPU</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="C"> C) A C++ implementation of the LLVM compiler toolchain</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="D"> D) A memory profiler for large language model inference</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">7. What is thermal throttling in on-device AI?</p>
+                        <label class="quiz-option"><input type="radio" name="q7" value="A"> A) When the model's weights overheat due to floating-point overflow</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="B"> B) When the device reduces compute performance to prevent overheating during sustained AI workloads, causing 2–4× slowdown</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="C"> C) When the app downloads model updates that are too large</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="D"> D) A quantization error that increases with temperature</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">8. What is TFLite's GPU delegate?</p>
+                        <label class="quiz-option"><input type="radio" name="q8" value="A"> A) A plugin that allows TFLite models to be uploaded to Google Cloud GPU servers</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="B"> B) A TFLite extension that routes supported operations to the mobile GPU, significantly reducing inference latency</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="C"> C) A training delegate for on-device fine-tuning using GPU</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="D"> D) A security layer that prevents model extraction via GPU memory dumps</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">9. Why are "warm-up" inference runs important for mobile benchmarking?</p>
+                        <label class="quiz-option"><input type="radio" name="q9" value="A"> A) To heat the device so thermal throttling is stable</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="B"> B) The first inference triggers JIT compilation and cache loading, making it much slower — warm-up runs give stable representative timing</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Warm-up runs train the model further on local data</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="D"> D) They calibrate the quantization range of the model</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">10. What does ONNX Runtime's provider hierarchy (CoreML → CUDA → CPU) mean?</p>
+                        <label class="quiz-option"><input type="radio" name="q10" value="A"> A) The model is split across all three hardware units simultaneously</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="B"> B) ONNX Runtime tries each provider in order and uses the first available one, automatically falling back to CPU if accelerators aren't available</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="C"> C) All three providers must be installed for ONNX Runtime to function</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="D"> D) The providers run the same operation in parallel and vote on the result</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">11. What is Whisper's role in on-device AI?</p>
+                        <label class="quiz-option"><input type="radio" name="q11" value="A"> A) An image segmentation model optimized for mobile cameras</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="B"> B) A speech-to-text model by OpenAI that runs on-device (via whisper.cpp or WhisperKit) without sending audio to the cloud</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="C"> C) A compression algorithm for reducing model size by whispering weights to fewer bits</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="D"> D) A lightweight Transformer variant for on-device NLP</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">12. What technique does Apple Intelligence use to run multiple task-specific AI behaviors without storing multiple full model copies?</p>
+                        <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Full model fine-tuning for each task stored separately</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="B"> B) LoRA-style adapter weights — small task-specific additions to the base model</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Dynamic model generation at runtime using generative AI</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Cloud routing for all tasks through Private Cloud Compute</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">13. What is the main advantage of depthwise separable convolutions used in MobileNet?</p>
+                        <label class="quiz-option"><input type="radio" name="q13" value="A"> A) They use more parameters to achieve higher accuracy</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="B"> B) They factorize standard convolutions into depthwise + pointwise ops, reducing computation by 8–9× with similar accuracy</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="C"> C) They allow models to process variable-size images without resizing</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="D"> D) They replace matrix multiplication with lookup tables</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">14. What is "structured pruning" in model compression?</p>
+                        <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Removing individual weights based on magnitude</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="B"> B) Removing entire neurons, channels, attention heads, or layers — producing smaller dense models that run efficiently on real hardware</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Organizing model weights in a sorted structure for faster lookup</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Splitting the model into structured partitions for parallel execution</label>
+                    </div>
+
+                    <div class="content-card">
+                        <p style="color:var(--cyan);font-weight:600;">15. What is the recommended strategy for handling the first-inference latency issue in Core ML (where model compilation can take 30+ seconds)?</p>
+                        <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Always run inference in the background thread to hide latency</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Pre-compile the model on first launch and cache the compiled .mlmodelc file, avoiding recompilation on subsequent launches</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Use a smaller model — compilation time is always proportional to model size</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="D"> D) Disable Neural Engine compilation and run on CPU to avoid compilation</label>
+                    </div>
+
+                </form>
+
+                <div class="quiz-controls">
+                    <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                    <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                </div>
+
+                <div id="quiz-results" class="quiz-results" style="display:none;">
+                    <div class="results-title">Quiz Results</div>
+                    <div id="quiz-score" class="quiz-score"></div>
+                    <div id="quiz-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== RESOURCES ===================== -->
+        <div id="recursos" class="tab-panel">
+            <h3 style="margin-bottom:1.5rem;">Support Materials</h3>
+            <div class="content-card">
+                <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.85rem;">APPLE / IOS</p>
+                <a href="#" class="resource-link">→ Core ML Documentation — developer.apple.com/documentation/coreml</a>
+                <a href="#" class="resource-link">→ coremltools — Apple's Python conversion library (apple.github.io/coremltools)</a>
+                <a href="#" class="resource-link">→ Vision Framework — developer.apple.com/documentation/vision</a>
+                <a href="#" class="resource-link">→ WhisperKit — On-device Whisper for iOS (github.com/argmaxinc/WhisperKit)</a>
+                <a href="#" class="resource-link">→ Create ML — Train models on Mac without Python</a>
+
+                <p style="color:var(--text-secondary);margin:1.5rem 0 1rem;font-size:0.85rem;">ANDROID &amp; CROSS-PLATFORM</p>
+                <a href="#" class="resource-link">→ TensorFlow Lite — tensorflow.org/lite</a>
+                <a href="#" class="resource-link">→ ONNX Runtime — onnxruntime.ai</a>
+                <a href="#" class="resource-link">→ MediaPipe — Google's cross-platform ML pipeline</a>
+
+                <p style="color:var(--text-secondary);margin:1.5rem 0 1rem;font-size:0.85rem;">LOCAL LLMs &amp; OPTIMIZATION</p>
+                <a href="#" class="resource-link">→ llama.cpp — github.com/ggerganov/llama.cpp</a>
+                <a href="#" class="resource-link">→ Ollama — ollama.ai (local LLM manager)</a>
+                <a href="#" class="resource-link">→ whisper.cpp — github.com/ggerganov/whisper.cpp</a>
+                <a href="#" class="resource-link">→ Hugging Face — Optimum for model quantization and export</a>
+                <a href="#" class="resource-link">→ MLX — Apple's ML framework for Apple Silicon (github.com/ml-explore/mlx)</a>
+            </div>
+        </div>
+
+        <!-- ===================== ASSESSMENT ===================== -->
+        <div id="avaliacao" class="tab-panel">
+            <div class="content-card">
+                <h3>🎯 Mastery Criteria: On-Device AI &amp; Local Performance</h3>
+                <p style="color:var(--text-secondary);margin-bottom:2rem;">To successfully complete this module, demonstrate understanding across the following competency levels:</p>
+                <div class="evaluation-grid">
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                        <ul class="evaluation-list">
+                            <li>The four advantages of on-device AI over cloud AI</li>
+                            <li>What quantization is and the precision levels (FP32, FP16, INT8, INT4)</li>
+                            <li>The difference between PTQ and QAT</li>
+                            <li>What knowledge distillation is and how it compresses models</li>
+                            <li>What Core ML is and which hardware it targets</li>
+                            <li>What TFLite and ONNX Runtime are used for</li>
+                            <li>What llama.cpp and Ollama enable</li>
+                            <li>What thermal throttling is and why it matters</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                        <ul class="evaluation-list">
+                            <li>Converting a PyTorch model to Core ML with coremltools</li>
+                            <li>Applying INT8 PTQ to a Core ML model</li>
+                            <li>Running TFLite inference on Android with GPU delegate</li>
+                            <li>Setting up Ollama and calling it via OpenAI-compatible API</li>
+                            <li>Integrating Vision framework for image classification in Swift</li>
+                            <li>Profiling Core ML inference with Xcode Instruments</li>
+                            <li>Using WhisperKit for on-device speech recognition</li>
+                            <li>Benchmarking with TFLite benchmark tool across delegates</li>
+                        </ul>
+                    </div>
+                    <div class="evaluation-column">
+                        <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                        <ul class="evaluation-list">
+                            <li>Implementing Quantization-Aware Training with PyTorch</li>
+                            <li>Building a knowledge distillation training pipeline</li>
+                            <li>Applying structured pruning to reduce model FLOP count</li>
+                            <li>Building a multi-delegate fallback pipeline for iOS device tiers</li>
+                            <li>Running Whisper with streaming VAD (voice activity detection)</li>
+                            <li>Serving a local LLM with streaming via llama.cpp server</li>
+                            <li>Building an MLX-based fine-tuning pipeline for Apple Silicon</li>
+                            <li>Designing a thermal-aware inference scheduler with device monitoring</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+        const m = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+        document.getElementById('progress-fill').style.width  = m[tabName] + '%';
+        document.getElementById('progress-text').innerText    = m[tabName] + '%';
+        window.scrollTo({ top: 150, behavior: 'smooth' });
+    }
+
+    function runLab() {
+        const input  = document.getElementById('lab-input').value;
+        const output = document.getElementById('lab-output');
+
+        const hasCoreML     = input.includes('coremltools') || input.includes('CoreML') || input.includes('mlpackage') || input.includes('VNCoreML');
+        const hasTFLite     = input.includes('tflite') || input.includes('TFLite') || input.includes('Interpreter(') || input.includes('GpuDelegate');
+        const hasONNX       = input.includes('onnxruntime') || input.includes('ort.') || input.includes('InferenceSession');
+        const hasOllama     = input.includes('ollama') || input.includes('llama') || input.includes('mistral') || input.includes('phi3');
+        const hasWhisper    = input.includes('whisper') || input.includes('WhisperKit') || input.includes('transcribe');
+        const hasDistill    = input.includes('distillation') || input.includes('kl_div') || (input.includes('teacher') && input.includes('student'));
+        const hasQuantize   = input.includes('quantiz') || input.includes('Quantiz') || input.includes('PostTraining') || input.includes('int8') || input.includes('INT8');
+        const hasPrune      = input.includes('prun') || input.includes('sparsity') || input.includes('l1_unstructured');
+
+        const modelName = input.match(/model[:\s=]+["']?([A-Za-z0-9_]+(?:V\d+)?(?:Large|Small|Tiny|Base|Mini)?)/)?.[1] || 'MyModel';
+
+        if (hasWhisper) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Whisper On-Device Transcription</strong>
+
+  Model      : openai/whisper-tiny.en  (39 MB, INT8)
+  Hardware   : Apple Neural Engine (A15 Bionic)
+  Framework  : WhisperKit
+
+<strong style="color:#28e0ff;">── Transcription Result ──</strong>
+  Input      : recording.m4a  (1m 14s audio)
+  Transcript : "The transformer architecture uses self-attention
+                to process sequences in parallel, enabling long-range
+                dependency capture without recurrent connections."
+  Language   : English (confidence: 0.99)
+  Duration   : 14.2s (3.1× realtime)
+
+<strong style="color:#28e0ff;">── Performance Breakdown ──</strong>
+  Audio preprocessing   :  0.8s
+  Mel spectrogram       :  0.3s
+  Encoder (ANE)         :  8.4s
+  Decoder (ANE)         :  4.7s
+  Total                 : 14.2s
+
+<strong style="color:#28e0ff;">── Privacy ──</strong>
+  ✓ Audio never leaves device
+  ✓ No API key required
+  ✓ Works fully offline
+
+<em style="color:#b6c0de;">Tip: Use whisper-base.en for 2× accuracy improvement at 4× the model size (142MB).</em>`;
+
+        } else if (hasOllama) {
+            const modelMatch = input.match(/ollama run ([a-z0-9:.]+)/)?.[1] ||
+                               input.match(/model=["']([^"']+)["']/)?.[1] || 'llama3.2:3b';
+            const tokSpeed = modelMatch.includes('phi') ? 42 : modelMatch.includes('7b') ? 16 : modelMatch.includes('8b') ? 13 : 32;
+            const ramGb    = modelMatch.includes('7b') || modelMatch.includes('8b') ? 4.8 : 2.1;
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Ollama Local LLM Running</strong>
+
+  Model      : ${modelMatch}
+  Backend    : llama.cpp (Metal — Apple Silicon)
+  Quantized  : Q4_K_M (INT4 mixed precision)
+
+<strong style="color:#28e0ff;">── System Resources ──</strong>
+  RAM used   : ${ramGb} GB / 18 GB available
+  GPU layers : 32/32  (fully on Apple GPU)
+  Threads    : 8
+
+<strong style="color:#28e0ff;">── Inference Benchmark ──</strong>
+  Prompt processing : 512 tokens/s
+  Generation speed  : ${tokSpeed} tokens/s
+  TTFT (time-to-first-token) : 48ms
+
+<strong style="color:#28e0ff;">── API Test ──</strong>
+  POST localhost:11434/v1/chat/completions
+  Response (3 sentences about Transformers):
+  "Transformers use self-attention mechanisms to process
+   sequences in parallel, enabling each token to attend
+   to all other tokens simultaneously. This allows capturing
+   long-range dependencies that recurrent networks struggle
+   with. The architecture underpins virtually all modern LLMs."
+
+<em style="color:#b6c0de;">Tip: Use GGUF Q4_K_M for the best accuracy/speed tradeoff. Q2_K cuts size further but loses quality.</em>`;
+
+        } else if (hasTFLite) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ TFLite Inference Benchmark — Android</strong>
+
+  Model    : model.tflite  (5.3 MB, INT8)
+  Device   : Pixel 8 (Tensor G3 chip)
+
+<strong style="color:#28e0ff;">── Delegate Performance ──</strong>
+  CPU (4 threads)  : 18.4ms  ████████████████████
+  GPU delegate     :  3.2ms  ███
+  NNAPI delegate   :  4.8ms  ████
+
+  ✓ GPU delegate selected (5.75× faster than CPU)
+
+<strong style="color:#28e0ff;">── Inference Stats (50 runs, GPU) ──</strong>
+  Average  :  3.2ms
+  Min      :  2.9ms
+  Max      :  3.9ms
+  Std dev  :  0.18ms
+
+<strong style="color:#28e0ff;">── Memory ──</strong>
+  Model load  : 5.3 MB
+  Runtime RAM : 12.4 MB (buffers + activations)
+  Peak RSS    : 48.2 MB
+
+<em style="color:#b6c0de;">Tip: Add the NNAPI delegate as a fallback — newer Android devices have dedicated NPUs that beat GPU for INT8 models.</em>`;
+
+        } else if (hasONNX) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ ONNX Runtime Inference</strong>
+
+  Model      : model.onnx
+  Providers  : [CoreMLExecutionProvider, CPUExecutionProvider]
+
+<strong style="color:#28e0ff;">── Provider Selection ──</strong>
+  CoreMLExecutionProvider : AVAILABLE ✓
+  CUDAExecutionProvider   : not available (no NVIDIA GPU)
+  CPUExecutionProvider    : AVAILABLE ✓ (fallback)
+  → Using CoreML (routes to Neural Engine)
+
+<strong style="color:#28e0ff;">── Benchmark (100 runs, batch=1) ──</strong>
+  CoreML (ANE)  :  2.1ms avg
+  CPU fallback  : 14.8ms avg
+  Speedup       : 7.0×
+
+<strong style="color:#28e0ff;">── Output ──</strong>
+  Input shape  : (1, 3, 224, 224)
+  Output shape : (1, 1000)
+  Top-3 classes:
+    [386] African_elephant  : 0.847
+    [385] Indian_elephant   : 0.112
+    [101] tusker             : 0.031
+
+<em style="color:#b6c0de;">Tip: Export from PyTorch with opset=17 for best CoreML provider compatibility.</em>`;
+
+        } else if (hasDistill) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Knowledge Distillation Training</strong>
+
+  Teacher : BERT-base (110M params, 438 MB)
+  Student : DistilBERT (66M params, 261 MB)
+  Task    : Sentiment Classification (3 classes)
+  Temperature : 4.0  |  Alpha : 0.7
+
+<strong style="color:#28e0ff;">── Training Progress ──</strong>
+  Epoch 1/6 | loss: 1.842 | val_acc: 0.781
+  Epoch 2/6 | loss: 1.324 | val_acc: 0.831
+  Epoch 3/6 | loss: 0.987 | val_acc: 0.862
+  Epoch 4/6 | loss: 0.812 | val_acc: 0.878
+  Epoch 5/6 | loss: 0.743 | val_acc: 0.883
+  Epoch 6/6 | loss: 0.711 | val_acc: 0.887
+
+<strong style="color:#28e0ff;">── Compression Results ──</strong>
+  Teacher accuracy : 0.912
+  Student accuracy : 0.887  (97.2% of teacher)
+  Size reduction   : 40.3%
+  Inference speedup: 1.72×
+
+  vs. training from scratch (student only): 0.854
+  Distillation gain: +3.3% accuracy
+
+<em style="color:#b6c0de;">Tip: Higher temperature (T=4–6) produces softer probability distributions that transfer more information to the student.</em>`;
+
+        } else if (hasPrune) {
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Model Pruning Analysis</strong>
+
+<strong style="color:#28e0ff;">── Before Pruning ──</strong>
+  Parameters : 4,231,456
+  Model size : 16.1 MB  (FP32)
+  Inference  : 8.4ms (CPU, iPhone 14)
+
+<strong style="color:#28e0ff;">── Pruning Applied ──</strong>
+  Method     : L1 Unstructured (magnitude-based)
+  Sparsity   : 50%
+  Layers     : Conv2d, Linear
+
+<strong style="color:#28e0ff;">── After Pruning ──</strong>
+  Non-zero params : 2,115,728  (50% removed)
+  Sparse model size: 16.1 MB (same — sparsity not hardware-accelerated)
+  Accuracy drop  : -0.8%
+
+<strong style="color:#f59e0b;">⚠ Recommendation:</strong>
+  Unstructured pruning creates sparse matrices that are not
+  faster on standard hardware. Consider structured pruning
+  (removing entire channels) for real speedup.
+
+  Or: apply quantization after pruning for combined compression.
+
+<em style="color:#b6c0de;">Tip: Use CoreML's palettization for hardware-friendly sparse compression on Apple Silicon.</em>`;
+
+        } else if (hasCoreML || hasQuantize) {
+            const isInt8    = input.includes('int8') || input.includes('INT8');
+            const isFP16    = input.includes('FLOAT16') || input.includes('fp16') || input.includes('FP16');
+            const precision = isInt8 ? 'INT8' : isFP16 ? 'FP16' : 'FP32';
+            const sizes     = { 'INT8': '5.3 MB', 'FP16': '10.6 MB', 'FP32': '21.1 MB' };
+            const inferences= { 'INT8': '1.8ms', 'FP16': '2.4ms', 'FP32': '4.1ms' };
+            const ane       = { 'INT8': '✓ (max utilization)', 'FP16': '✓', 'FP32': '⚠ partial (ANE prefers lower precision)' };
+
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Core ML Conversion Complete</strong>
+
+  Source     : PyTorch (TorchScript)
+  Model      : ${modelName}
+  Precision  : ${precision}
+  Output     : ${modelName}_${precision}.mlpackage
+
+<strong style="color:#28e0ff;">── Size Comparison ──</strong>
+  FP32 original   : 21.1 MB
+  This model      : ${sizes[precision]}  (${precision === 'FP32' ? 'no change' : precision === 'FP16' ? '−50%' : '−75%'})
+
+<strong style="color:#28e0ff;">── Inference Benchmark (iPhone 15 Pro, A17 Pro) ──</strong>
+  Target hardware : Neural Engine + GPU + CPU
+  Avg latency     : ${inferences[precision]}
+  Neural Engine   : ${ane[precision]}
+
+<strong style="color:#28e0ff;">── Accuracy Check ──</strong>
+  Top-1 accuracy  : ${precision === 'FP32' ? '75.3%' : precision === 'FP16' ? '75.2%' : '74.9%'}  ${precision !== 'FP32' ? '(−' + (precision === 'FP16' ? '0.1' : '0.4') + '% vs FP32)' : '(baseline)'}
+  Top-5 accuracy  : ${precision === 'FP32' ? '92.4%' : precision === 'FP16' ? '92.3%' : '92.0%'}
+
+<strong style="color:#28e0ff;">── Performance Report ──</strong>
+  ct.models.performance_report() estimated:
+    Neural Engine  : ${precision === 'INT8' ? '1.6' : precision === 'FP16' ? '2.1' : '3.8'}ms
+    GPU            : ${precision === 'INT8' ? '2.8' : precision === 'FP16' ? '3.4' : '6.2'}ms
+    CPU            : ${precision === 'INT8' ? '9.2' : precision === 'FP16' ? '14.1' : '28.4'}ms
+
+<em style="color:#b6c0de;">Tip: Profile with Xcode Instruments → Core ML to see per-layer ANE utilization and identify bottlenecks.</em>`;
+
+        } else {
+            output.innerHTML = `<strong style="color:#f59e0b;">⚠ No recognised on-device AI pattern detected.</strong>
+
+Try one of:
+  • Core ML conversion    (coremltools, ct.convert, mlpackage)
+  • TFLite inference      (Interpreter, GpuDelegate, tflite)
+  • ONNX Runtime          (onnxruntime, InferenceSession)
+  • Ollama / llama.cpp    (ollama run, llama, mistral, phi3)
+  • Whisper transcription (WhisperKit, transcribe, whisper)
+  • Knowledge distillation (kl_div, teacher, student)
+  • Model pruning         (l1_unstructured, sparsity)
+
+<em style="color:#b6c0de;">Use the default Core ML template as a starting point.</em>`;
+        }
+    }
+
+    class QuizManager {
+        constructor() {
+            this.questionsData = {
+                q1:  { correct: 'B', exp: 'The Neural Engine (ANE) is Apple\'s dedicated AI silicon. The A17 Pro has an ANE capable of 35 TOPS (trillion operations per second), optimized for the fixed-point matrix operations at the core of neural network inference.' },
+                q2:  { correct: 'B', exp: 'INT8 quantization maps 32-bit float weights to 8-bit integers — reducing each weight from 4 bytes to 1 byte. This gives a 4× size reduction and faster inference on hardware with INT8 acceleration, with typically <1% accuracy loss.' },
+                q3:  { correct: 'B', exp: 'PTQ quantizes a fully trained model without any re-training — fast but slightly less accurate. QAT simulates quantization noise during training itself, allowing the model to adapt to quantization, recovering most of the accuracy at INT8.' },
+                q4:  { correct: 'B', exp: 'Knowledge Distillation trains a small student model using a large teacher model\'s soft probability outputs as additional supervision signals, transferring richer information than hard labels alone. DistilBERT is 40% smaller than BERT with 97% performance.' },
+                q5:  { correct: 'B', exp: 'The Vision framework provides high-level APIs for image analysis tasks — classification, face detection, body pose, text recognition, saliency — all powered by Core ML and automatically dispatched to the Neural Engine.' },
+                q6:  { correct: 'B', exp: 'llama.cpp is a C/C++ inference engine that runs quantized LLMs (Llama, Mistral, Gemma, Phi) efficiently on CPUs and Apple Silicon using Metal, without requiring a discrete GPU — enabling LLMs on consumer hardware.' },
+                q7:  { correct: 'B', exp: 'Thermal throttling is the OS reducing CPU/GPU/ANE clock speeds to prevent hardware damage from sustained heat. During intensive AI workloads, this can cause 2–4× slowdowns after 2–5 minutes of continuous inference.' },
+                q8:  { correct: 'B', exp: 'A TFLite delegate offloads supported operations to specific hardware — the GPU delegate routes compatible ops to the mobile GPU, achieving 5–10× speedup over CPU for floating-point heavy models on Android.' },
+                q9:  { correct: 'B', exp: 'The first inference triggers JIT compilation (Core ML compiles to device-specific machine code), shader compilation (for GPU ops), and cache warming. These overheads are amortized over subsequent calls — benchmark after 3–5 warm-up runs.' },
+                q10: { correct: 'B', exp: 'ONNX Runtime tries each provider in order, using the first one that is available and supports the model\'s operations. This gives automatic hardware acceleration with graceful CPU fallback — no code changes needed.' },
+                q11: { correct: 'B', exp: 'Whisper is OpenAI\'s speech recognition model. whisper.cpp and WhisperKit enable on-device transcription — audio never leaves the device, works offline, and achieves real-time or faster transcription speeds on modern iPhones.' },
+                q12: { correct: 'B', exp: 'Apple Intelligence uses LoRA-style adapters — small sets of additional weights (a few MB each) layered on top of the base 3B parameter model. Different adapters handle different tasks without requiring multiple full model copies.' },
+                q13: { correct: 'B', exp: 'Depthwise separable convolutions split a standard convolution into a depthwise conv (per-channel spatial filtering) + pointwise conv (1×1 cross-channel mixing). This reduces computation by 8–9× while achieving similar accuracy.' },
+                q14: { correct: 'B', exp: 'Structured pruning removes entire structures — neurons, convolutional channels, attention heads, or layers. The result is a smaller but still dense model that runs efficiently on standard hardware, unlike unstructured pruning which creates sparse matrices.' },
+                q15: { correct: 'B', exp: 'Core ML compiles the model to device-specific machine code on first use. This can take 30+ seconds for large models. The solution is to pre-compile during app setup and cache the compiled .mlmodelc to disk, loading the cached version on all subsequent launches.' }
+            };
+            this.init();
+        }
+
+        init() {
+            document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+            document.getElementById('clear-quiz').addEventListener('click',  () => this.clearQuiz());
+        }
+
+        submitQuiz() {
+            const fd = new FormData(document.getElementById('quiz-form'));
+            let score = 0, html = '';
+            Object.keys(this.questionsData).forEach((k, i) => {
+                const ans = fd.get(k);
+                const ok  = ans === this.questionsData[k].correct;
+                if (ok) score++;
+                html += `<div class="feedback-item ${ok ? 'feedback-correct' : 'feedback-incorrect'}">
+                    <span class="feedback-icon">${ok ? '✓' : '✗'}</span>
+                    <div><strong>Question ${i+1}:</strong> ${this.questionsData[k].exp}
+                    ${!ok ? `<br><small style="color:var(--text-secondary)">Correct: Option ${this.questionsData[k].correct}</small>` : ''}
+                    </div></div>`;
+            });
+            const total = Object.keys(this.questionsData).length;
+            const pct   = Math.round((score / total) * 100);
+            const cls   = pct >= 80 ? 'score-excellent' : pct >= 50 ? 'score-good' : 'score-poor';
+            document.getElementById('quiz-score').innerHTML = `
+                <div class="${cls}">${score}/${total} (${pct}%)</div>
+                <p style="color:var(--text-secondary)">${pct >= 70
+                    ? 'Excellent! You are ready to build and optimize on-device AI systems.'
+                    : 'Review quantization, hardware accelerators, and the on-device frameworks — then try again.'}</p>`;
+            document.getElementById('quiz-feedback').innerHTML = html;
+            const r = document.getElementById('quiz-results');
+            r.style.display = 'block';
+            r.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        clearQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-results').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => new QuizManager());
+</script>
+</body>
+</html>
+

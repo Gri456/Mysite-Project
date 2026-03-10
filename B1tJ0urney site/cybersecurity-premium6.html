@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Cryptography, Authentication & Cloud Security</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --orange: #ff6200;
+            --yellow: #ffcc00;
+            --amber: #ff8c00;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(255, 98, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 98, 0, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255, 140, 0, 0.12) 0%, rgba(255, 204, 0, 0.06) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 140, 0, 0.15);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            color: var(--yellow);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-buttons { display: flex; gap: 1rem; align-items: center; }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+
+        .btn-back:hover { background: rgba(255, 140, 0, 0.15); transform: translateY(-1px); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            color: #0f172a;
+            box-shadow: 0 4px 15px rgba(255, 98, 0, 0.35);
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.45); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--orange), var(--amber), var(--yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+
+        .progress-section { margin-bottom: 2rem; }
+
+        .progress-label { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .tabs-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+
+        .tab-button.active { color: var(--text-light); background: rgba(255, 98, 0, 0.1); }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+        }
+
+        .tab-content { padding: 2rem; min-height: 400px; }
+
+        .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-light); }
+
+        .content-text { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.875rem; line-height: 1.7; color: var(--text-light); }
+
+        .code-block .comment { color: #6c757d; font-style: italic; }
+
+        .learn-section { margin-bottom: 2rem; }
+
+        .learn-intro {
+            background: linear-gradient(135deg, rgba(255, 98, 0, 0.12), rgba(255, 204, 0, 0.06));
+            border: 1px solid rgba(255, 140, 0, 0.25);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .learn-intro h4 { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; }
+
+        .learn-intro p { color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem; }
+
+        .code-explanation {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--orange);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .code-explanation h5 { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+
+        .code-explanation p { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; }
+
+        .code-explanation code {
+            background: rgba(255,98,0,0.15);
+            color: var(--yellow);
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+
+        /* Lab styles */
+        .lab-container { display: flex; gap: 1rem; height: 600px; margin-bottom: 1rem; }
+        .lab-editor { flex: 1; display: flex; flex-direction: column; }
+        .lab-preview { flex: 1; display: flex; flex-direction: column; }
+
+        .lab-header {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .lab-textarea {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 1rem;
+            color: var(--text-light);
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+
+        .lab-textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2); }
+
+        .lab-iframe {
+            flex: 1;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            width: 100%;
+        }
+
+        .lab-controls { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+
+        .btn-execute {
+            background: linear-gradient(135deg, var(--orange), var(--yellow));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+        }
+
+        .btn-execute:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4); }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+
+        .lab-instructions {
+            background: rgba(40, 224, 255, 0.1);
+            border: 1px solid rgba(40, 224, 255, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Quiz styles */
+        .quiz-question {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--orange); }
+
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--orange); }
+
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+
+        .quiz-option:hover .option-text { color: var(--text-light); }
+
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+
+        .quiz-results {
+            background: linear-gradient(135deg, rgba(255, 140, 0, 0.12), rgba(255, 204, 0, 0.06));
+            border: 1px solid rgba(255, 140, 0, 0.25);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .results-title { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+
+        .feedback-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .feedback-correct { border-left: 3px solid #4caf50; }
+        .feedback-incorrect { border-left: 3px solid #f44336; }
+        .feedback-icon { font-size: 1.1rem; font-weight: bold; }
+        .feedback-correct .feedback-icon { color: #4caf50; }
+        .feedback-incorrect .feedback-icon { color: #f44336; }
+
+        .score-excellent { color: #4caf50; }
+        .score-good { color: #28e0ff; }
+        .score-fair { color: #ff9800; }
+        .score-poor { color: #f44336; }
+
+        /* Resources styles */
+        .resources-list { margin: 1.5rem 0; }
+        .resource-category { margin-bottom: 2rem; }
+
+        .category-title {
+            color: var(--yellow);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .resource-links { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+
+        .resource-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 0;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .resource-link::before { content: '→'; position: absolute; left: 0; color: var(--orange); font-weight: bold; }
+
+        .resource-link:hover { color: var(--text-light); padding-left: 2rem; }
+
+        .resources-note {
+            background: rgba(255, 140, 0, 0.1);
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .resources-note p { color: var(--text-secondary); margin: 0; }
+
+        /* Evaluation styles */
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .evaluation-column {
+            background: rgba(255, 140, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .evaluation-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid;
+        }
+
+        .evaluation-title.essential { color: var(--yellow); border-bottom-color: var(--yellow); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-icon { font-size: 1.1rem; }
+
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .evaluation-list li {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.4;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: #28e0ff; }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content { padding: 1rem; flex-direction: column; gap: 1rem; }
+            .nav-buttons { width: 100%; justify-content: center; }
+            .course-title { font-size: 2rem; }
+            .course-meta { flex-direction: column; gap: 0.75rem; }
+            .main-content { padding: 1rem; }
+            .tab-nav { flex-direction: column; }
+            .tab-button { flex: none; text-align: left; }
+            .tab-content { padding: 1rem; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .lab-controls { justify-content: center; }
+            .evaluation-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav class="nav-buttons">
+                <a href="premium-cyber-progress.html" class="btn btn-back">← Back to Journey</a>
+                <a href="browse.html" class="btn btn-primary">Explore</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Cryptography, Authentication & Cloud Security — Cybersecurity</h1>
+            <p class="course-description">
+                Understand how to protect data, identities and services in the cloud using cryptography, access control and security best practices.
+            </p>
+
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>Crypto • IAM • Cloud Security</span></div>
+                <div class="meta-item"><span>📌</span><span>Data protection fundamentals</span></div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-label">Progress: <span id="progress-text">0%</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab system -->
+        <div class="tabs-container">
+            <nav class="tab-nav" role="tablist">
+                <button class="tab-button active" data-tab="learn" role="tab" aria-selected="true">Learn</button>
+                <button class="tab-button" data-tab="lab" role="tab" aria-selected="false">Lab</button>
+                <button class="tab-button" data-tab="quiz" role="tab" aria-selected="false">Quiz</button>
+                <button class="tab-button" data-tab="resources" role="tab" aria-selected="false">Resources</button>
+                <button class="tab-button" data-tab="evaluation" role="tab" aria-selected="false">Evaluation</button>
+            </nav>
+
+            <div class="tab-content">
+
+                <!-- Learn Tab -->
+                <div id="panel-learn" class="tab-panel active" role="tabpanel">
+                    <div class="learn-section">
+                        <div class="learn-intro">
+                            <h4>Cryptography, Authentication & Cloud Security Fundamentals</h4>
+                            <p>Cryptography is the foundation of all modern digital security — it protects data in transit, at rest, and guarantees the identity of communicating parties.</p>
+                            <p>In this module you will learn how symmetric and asymmetric ciphers work, hashing, TLS, multi-factor authentication, IAM and best practices for cloud security in environments like AWS, Azure and GCP.</p>
+                        </div>
+
+                        <!-- SYMMETRIC CRYPTOGRAPHY -->
+                        <div class="content-card">
+                            <h3 class="content-title">🔐 Symmetric Cryptography</h3>
+                            <p class="content-text">In symmetric cryptography, the <strong>same key</strong> is used to both encrypt and decrypt the message. It is fast and efficient for large volumes of data, but the challenge is sharing the key securely.</p>
+                            <div class="code-explanation">
+                                <h5>AES — Advanced Encryption Standard</h5>
+                                <p>The most widely used symmetric algorithm in the world. Supports 128, 192 or 256-bit keys. Used in HTTPS, VPNs, encrypted disks and much more. <strong>AES-256</strong> is considered secure against brute-force attacks with current hardware.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Operating Modes — AES-GCM vs AES-CBC</h5>
+                                <p><strong>AES-GCM</strong> (Galois/Counter Mode) is the currently recommended mode — it guarantees confidentiality <em>and</em> integrity (authentication). <strong>AES-CBC</strong> (Cipher Block Chaining) is older, still used but vulnerable to padding oracle attacks if poorly implemented.</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Encrypt a file with AES-256 using OpenSSL</span>
+openssl enc -aes-256-cbc -salt -in file.txt -out file.enc -k "password123"
+
+<span class="comment"># Decrypt</span>
+openssl enc -aes-256-cbc -d -in file.enc -out file_decrypted.txt -k "password123"
+
+<span class="comment"># Encrypt with AES-256-GCM (more secure)</span>
+openssl enc -aes-256-gcm -salt -in file.txt -out file.enc -k "password123"
+
+<span class="comment"># List available algorithms</span>
+openssl enc -list</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- ASYMMETRIC CRYPTOGRAPHY -->
+                        <div class="content-card">
+                            <h3 class="content-title">🔑 Asymmetric Cryptography</h3>
+                            <p class="content-text">Asymmetric cryptography uses a <strong>key pair</strong>: the public key (shared with everyone) and the private key (kept secret). What one key encrypts, only the other can decrypt.</p>
+                            <div class="code-explanation">
+                                <h5>RSA — Rivest–Shamir–Adleman</h5>
+                                <p>The best-known asymmetric algorithm. Based on the difficulty of factoring large prime numbers. Used to share symmetric keys (at the start of a TLS session) and for digital signatures. Minimum recommended size: <strong>2048 bits</strong> (4096 for highly sensitive data).</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>ECC — Elliptic Curve Cryptography</h5>
+                                <p>A modern alternative to RSA — much smaller keys with equivalent security. A 256-bit ECC key is equivalent to a 3072-bit RSA key. Widely used in modern SSH and TLS 1.3. Common algorithms: Ed25519, ECDSA.</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Generate an RSA 2048-bit key pair</span>
+openssl genrsa -out private_key.pem 2048
+openssl rsa -in private_key.pem -pubout -out public_key.pem
+
+<span class="comment"># Encrypt with public key (only the owner of the private key can decrypt)</span>
+openssl rsautl -encrypt -inkey public_key.pem -pubin -in message.txt -out message.enc
+
+<span class="comment"># Decrypt with private key</span>
+openssl rsautl -decrypt -inkey private_key.pem -in message.enc -out message_decrypted.txt
+
+<span class="comment"># Generate SSH key with Ed25519 (more modern and secure than RSA)</span>
+ssh-keygen -t ed25519 -C "your_email@example.com"
+
+<span class="comment"># Generate SSH RSA 4096 key (alternative)</span>
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+<span class="comment"># View the generated SSH public key</span>
+cat ~/.ssh/id_ed25519.pub
+
+<span class="comment"># Copy public key to a remote server</span>
+ssh-copy-id user@192.168.1.10</code></pre>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>How it works in practice — TLS Session</h5>
+                                <p>At the start of an HTTPS connection, the server sends its <strong>certificate</strong> (with public key). The client verifies its validity, generates a symmetric session key, <strong>encrypts it with the server's public key</strong> and sends it. Only the server (with its private key) can decrypt it. From that point, communication uses AES — much faster than RSA for large data volumes.</p>
+                            </div>
+                        </div>
+
+                        <!-- HASHING -->
+                        <div class="content-card">
+                            <h3 class="content-title">🧮 Hashing — Hash Functions</h3>
+                            <p class="content-text">A hash function transforms any data into a fixed-length value (digest). It is <strong>one-way</strong> — it is not possible to reverse the hash to obtain the original data. Even a small change in the input produces a completely different hash.</p>
+                            <div class="code-explanation">
+                                <h5>Common algorithms</h5>
+                                <p><strong>MD5</strong> — 128 bits, considered <em>insecure</em> for security purposes (known collisions). Still used for integrity checks on non-critical files. <strong>SHA-1</strong> — 160 bits, also deprecated for security. <strong>SHA-256 / SHA-512</strong> — SHA-2 family, secure and widely used. <strong>bcrypt / Argon2</strong> — specifically designed for password hashing — intentionally slow to hinder brute force.</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Generate hashes with different algorithms</span>
+echo "password123" | sha256sum
+echo "password123" | sha512sum
+echo "password123" | md5sum
+
+<span class="comment"># Hash a file</span>
+sha256sum file.txt
+sha256sum file.txt > checksums.txt   <span class="comment"># save checksum</span>
+sha256sum -c checksums.txt           <span class="comment"># verify integrity</span>
+
+<span class="comment"># Check if two files are identical</span>
+sha256sum file1.txt file2.txt
+
+<span class="comment"># OpenSSL — more algorithms</span>
+openssl dgst -sha256 file.txt
+openssl dgst -sha512 file.txt
+openssl dgst -md5 file.txt           <span class="comment"># avoid for security purposes</span></code></pre>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Salt — Protection against Rainbow Tables</h5>
+                                <p>A <strong>rainbow table</strong> is a pre-computed list of hashes for common passwords. To render them useless, we add a <strong>salt</strong> — a unique random value concatenated with the password before hashing. Even two identical passwords generate different hashes. bcrypt and Argon2 include salt automatically.</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Conceptual example: hash without salt vs with salt</span>
+<span class="comment"># Without salt (vulnerable to rainbow tables):</span>
+SHA256("password123") = ef92b778...  <span class="comment"># always the same</span>
+
+<span class="comment"># With salt (resistant to rainbow tables):</span>
+SHA256("password123" + "xK9mR2pQ") = a7f3c1d2...  <span class="comment"># unique per user</span>
+SHA256("password123" + "qW5nL8vY") = 9b2e4f71...  <span class="comment"># different with another salt</span>
+
+<span class="comment"># Python — example with bcrypt (install: pip install bcrypt)</span>
+<span class="comment"># import bcrypt</span>
+<span class="comment"># password = b"password123"</span>
+<span class="comment"># salt = bcrypt.gensalt()         # generates random salt</span>
+<span class="comment"># hashed = bcrypt.hashpw(password, salt)</span>
+<span class="comment"># bcrypt.checkpw(password, hashed)  # verifies password</span></code></pre>
+                            </div>
+                        </div>
+
+                        <!-- DIGITAL CERTIFICATES & TLS -->
+                        <div class="content-card">
+                            <h3 class="content-title">🌐 Digital Certificates & TLS/SSL</h3>
+                            <p class="content-text">Digital certificates link a public key to an identity (person, server, organisation), verified by a trusted <strong>Certificate Authority (CA)</strong>.</p>
+                            <div class="code-explanation">
+                                <h5>How an SSL/TLS Certificate Works</h5>
+                                <p>A certificate contains: the server's public key, the domain name, the validity period, and the CA's digital signature. When you access <code>https://</code>, your browser verifies that the certificate is valid and was signed by a trusted CA (such as DigiCert, Let's Encrypt, etc.).</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Inspect a website's certificate</span>
+openssl s_client -connect google.com:443 -showcerts
+
+<span class="comment"># View certificate details</span>
+echo | openssl s_client -connect google.com:443 2>/dev/null | openssl x509 -noout -text
+
+<span class="comment"># View expiry date</span>
+echo | openssl s_client -connect google.com:443 2>/dev/null | openssl x509 -noout -dates
+
+<span class="comment"># Create a self-signed certificate (for testing/labs)</span>
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+
+<span class="comment"># Verify a local certificate</span>
+openssl x509 -in cert.pem -noout -text
+
+<span class="comment"># Let's Encrypt — free certificate for production (uses certbot)</span>
+<span class="comment"># certbot --nginx -d domain.com</span></code></pre>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>TLS 1.2 vs TLS 1.3</h5>
+                                <p><strong>TLS 1.3</strong> (2018) is faster and more secure — it removes legacy algorithms (RC4, DES, SHA-1), reduces the handshake from 2 to 1 round-trip, and uses <em>forward secrecy</em> by default. Avoid using TLS 1.0 and 1.1, which are considered insecure.</p>
+                            </div>
+                        </div>
+
+                        <!-- GPG -->
+                        <div class="content-card">
+                            <h3 class="content-title">🔏 GPG — File and Email Encryption</h3>
+                            <p class="content-text">GPG (GNU Privacy Guard) implements the OpenPGP standard and allows you to encrypt files, digitally sign documents and verify the identity of senders.</p>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Generate a GPG key pair</span>
+gpg --full-generate-key
+
+<span class="comment"># List keys in the keyring</span>
+gpg --list-keys               <span class="comment"># public keys</span>
+gpg --list-secret-keys        <span class="comment"># private keys</span>
+
+<span class="comment"># Encrypt a file with a symmetric key (password)</span>
+gpg -c file.txt               <span class="comment"># generates file.txt.gpg</span>
+
+<span class="comment"># Encrypt for a specific recipient (public key)</span>
+gpg --encrypt --recipient email@example.com file.txt
+
+<span class="comment"># Decrypt</span>
+gpg --decrypt file.txt.gpg
+
+<span class="comment"># Digitally sign a file</span>
+gpg --sign file.txt
+
+<span class="comment"># Verify a signature</span>
+gpg --verify file.txt.gpg
+
+<span class="comment"># Export public key (to share)</span>
+gpg --export --armor email@example.com > public_key.asc
+
+<span class="comment"># Import another person's public key</span>
+gpg --import public_key.asc</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- AUTHENTICATION & MFA -->
+                        <div class="content-card">
+                            <h3 class="content-title">🛡️ Authentication & MFA</h3>
+                            <p class="content-text">Authentication is the process of verifying who you are. There are three possible factors: <strong>something you know</strong> (password), <strong>something you have</strong> (phone, token), <strong>something you are</strong> (biometrics).</p>
+                            <div class="code-explanation">
+                                <h5>MFA — Multi-Factor Authentication</h5>
+                                <p>Combines two or more different factors. Example: password + TOTP code on your phone. Even if the password is compromised, the attacker still needs the second factor. <strong>MFA reduces compromise risk by more than 99%</strong> according to Microsoft studies.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>TOTP — Time-based One-Time Password</h5>
+                                <p>Generates a 6-digit code that changes every 30 seconds, based on a shared secret and the current time. Used by apps like Google Authenticator, Authy and Microsoft Authenticator. The algorithm is defined by RFC 6238.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Passkeys — The Future of Authentication</h5>
+                                <p>Passkeys replace passwords entirely. They use asymmetric cryptography — the private key stays on the device and never leaves. Authentication is done with local biometrics (fingerprint, face). Supported by Google, Apple, Microsoft and most modern browsers.</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Configure MFA for SSH with Google Authenticator</span>
+sudo apt install libpam-google-authenticator
+google-authenticator          <span class="comment"># configure for the current user</span>
+
+<span class="comment"># Edit /etc/pam.d/sshd to enable MFA</span>
+<span class="comment"># auth required pam_google_authenticator.so</span>
+
+<span class="comment"># Edit /etc/ssh/sshd_config</span>
+<span class="comment"># ChallengeResponseAuthentication yes</span>
+<span class="comment"># AuthenticationMethods publickey,keyboard-interactive</span>
+
+<span class="comment"># Restart SSH</span>
+sudo systemctl restart sshd
+
+<span class="comment"># Check login attempts and MFA in the logs</span>
+grep "Accepted\|Failed" /var/log/auth.log</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- IAM -->
+                        <div class="content-card">
+                            <h3 class="content-title">👤 IAM — Identity and Access Management</h3>
+                            <p class="content-text">IAM is the set of policies, processes and technologies that control who has access to what in an organisation or cloud system.</p>
+                            <div class="code-explanation">
+                                <h5>Principle of Least Privilege (PoLP)</h5>
+                                <p>Every user, service or process must have <strong>only the permissions strictly necessary</strong> for their function — nothing more. Dramatically reduces the impact of a compromised account. In AWS, for example, never use the root account for daily operations.</p>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>RBAC — Role-Based Access Control</h5>
+                                <p>Instead of assigning permissions directly to users, you create <strong>roles</strong> with specific permissions and assign users to roles. This simplifies management: changing the permissions of a role affects all users with that role.</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># AWS CLI — IAM Management</span>
+<span class="comment"># List IAM users</span>
+aws iam list-users
+
+<span class="comment"># Create IAM user</span>
+aws iam create-user --user-name alice
+
+<span class="comment"># List policies attached to a user</span>
+aws iam list-attached-user-policies --user-name alice
+
+<span class="comment"># Attach S3 read-only policy to user</span>
+aws iam attach-user-policy --user-name alice --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+
+<span class="comment"># Check effective permissions of a user</span>
+aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::ACCOUNT:user/alice --action-names s3:GetObject
+
+<span class="comment"># List IAM roles</span>
+aws iam list-roles
+
+<span class="comment"># View policies of a role</span>
+aws iam list-attached-role-policies --role-name role-name</code></pre>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Tokens vs Passwords</h5>
+                                <p><strong>Tokens</strong> (such as JWT or OAuth tokens) are temporary credentials with limited validity. They are preferable to passwords in APIs and cloud services because: they expire automatically, can be revoked without changing passwords, and contain only the permissions needed for that session.</p>
+                            </div>
+                        </div>
+
+                        <!-- CLOUD SECURITY -->
+                        <div class="content-card">
+                            <h3 class="content-title">☁️ Cloud Security — AWS, Azure & GCP</h3>
+                            <p class="content-text">Cloud security follows the <strong>shared responsibility model</strong> — the provider (AWS, Azure, GCP) protects the infrastructure, you protect the data, access and configurations.</p>
+                            <div class="code-explanation">
+                                <h5>Common Cloud Security Mistakes</h5>
+                                <p><strong>Public S3 buckets</strong> — one of the most common mistakes, already caused massive data breaches at well-known companies. <strong>Hard-coded credentials</strong> in source code — AWS tokens exposed on GitHub are found within minutes by bots. <strong>Overly permissive Security Groups</strong> — port 22 or 3389 open to 0.0.0.0/0 (the entire internet).</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># AWS S3 — check if a bucket is public</span>
+aws s3api get-bucket-acl --bucket bucket-name
+aws s3api get-bucket-policy --bucket bucket-name
+
+<span class="comment"># Block public access on an S3 bucket</span>
+aws s3api put-public-access-block \
+  --bucket bucket-name \
+  --public-access-block-configuration \
+  "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+
+<span class="comment"># Check for permissive Security Groups (port 22 open to 0.0.0.0/0)</span>
+aws ec2 describe-security-groups --query "SecurityGroups[?contains(IpPermissions[].IpRanges[].CidrIp, '0.0.0.0/0')]"
+
+<span class="comment"># AWS CloudTrail — audit actions in the account</span>
+aws cloudtrail describe-trails
+aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=DeleteBucket
+
+<span class="comment"># Check if MFA is enabled on the AWS root account</span>
+aws iam get-account-summary | grep MFADevices</code></pre>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Encryption in Transit vs at Rest</h5>
+                                <p><strong>In transit</strong> — data protected while travelling over the network, using TLS/HTTPS. <strong>At rest</strong> — data encrypted when stored (disk, database, backups). In AWS, <strong>KMS</strong> (Key Management Service) manages encryption keys for data at rest (S3, RDS, EBS).</p>
+                            </div>
+                        </div>
+
+                        <!-- SECRETS MANAGEMENT -->
+                        <div class="content-card">
+                            <h3 class="content-title">🗝️ Secrets & Credential Management</h3>
+                            <p class="content-text">Passwords, API tokens, private keys and database connection strings are <strong>secrets</strong> — they must never be in source code, unprotected config files, or environment variables in production.</p>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># NEVER DO THIS — credentials in code</span>
+<span class="comment"># db_password = "supersecret123"  ← exposed on GitHub!</span>
+<span class="comment"># AWS_SECRET_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"  ← danger!</span>
+
+<span class="comment"># Better practice — environment variables (development)</span>
+export DB_PASSWORD="supersecret123"
+python app.py  <span class="comment"># access via os.environ.get('DB_PASSWORD')</span>
+
+<span class="comment"># AWS Secrets Manager — cloud solution</span>
+aws secretsmanager create-secret --name prod/db/password --secret-string "supersecret123"
+aws secretsmanager get-secret-value --secret-id prod/db/password
+
+<span class="comment"># Automatic secret rotation (AWS)</span>
+aws secretsmanager rotate-secret --secret-id prod/db/password
+
+<span class="comment"># HashiCorp Vault — open source secrets management solution</span>
+vault kv put secret/db password="supersecret123"
+vault kv get secret/db
+
+<span class="comment"># Check for exposed credentials in git history</span>
+git log --all --full-history -- "*.env"
+git log -p | grep -i "password\|secret\|key\|token"</code></pre>
+                            </div>
+                            <div class="code-explanation">
+                                <h5>Credential Rotation</h5>
+                                <p>Credentials must be rotated regularly — especially after an employee leaves or a compromise is suspected. Tools like AWS Secrets Manager and HashiCorp Vault automate rotation. API tokens should have short validity periods (hours or days, not years).</p>
+                            </div>
+                        </div>
+
+                        <!-- DIGITAL SIGNATURES -->
+                        <div class="content-card">
+                            <h3 class="content-title">✍️ Digital Signatures</h3>
+                            <p class="content-text">A digital signature guarantees <strong>authenticity</strong> (who signed it) and <strong>integrity</strong> (the content has not been altered). It is like a handwritten signature, but mathematically verifiable.</p>
+                            <div class="code-explanation">
+                                <h5>How it works</h5>
+                                <p>The sender calculates the <strong>hash</strong> of the document and <strong>encrypts that hash with their private key</strong> — that is the signature. The receiver calculates the hash of the received document, <strong>decrypts the signature with the sender's public key</strong>, and compares the two hashes. If they match, the document is authentic and has not been altered.</p>
+                            </div>
+                            <div class="code-block">
+                                <pre><code><span class="comment"># Sign a file with an RSA private key</span>
+openssl dgst -sha256 -sign private_key.pem -out signature.sig document.txt
+
+<span class="comment"># Verify signature with public key</span>
+openssl dgst -sha256 -verify public_key.pem -signature signature.sig document.txt
+
+<span class="comment"># Sign with GPG</span>
+gpg --detach-sign --armor document.txt      <span class="comment"># generates document.txt.asc</span>
+
+<span class="comment"># Verify GPG signature</span>
+gpg --verify document.txt.asc document.txt
+
+<span class="comment"># Verify signature of a Linux package (Debian example)</span>
+gpg --verify file.deb.sig file.deb</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- NEXT STEPS -->
+                        <div class="content-card">
+                            <h3 class="content-title">✅ Next Steps</h3>
+                            <p class="content-text">
+                                Now that you have a solid foundation in cryptography, authentication and cloud security, practise in the <strong>Lab</strong>, test your knowledge in the <strong>Quiz</strong> and check the <strong>Resources</strong>. To go deeper, try <strong>TryHackMe</strong> (Cryptography and Cloud Security rooms), the free labs on <strong>AWS Skill Builder</strong> and the security documentation of the <strong>AWS Well-Architected Framework</strong>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lab Tab -->
+                <div id="panel-lab" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Code Lab</h3>
+                        <p class="content-text">
+                            Experiment with HTML and CSS in real time. Write your code in the editor on the left
+                            and see the result instantly in the preview panel.
+                        </p>
+
+                        <div class="lab-instructions">
+                            <strong>Instructions:</strong> Write HTML (with optional CSS and JavaScript) in the editor.
+                            Click <strong>"Run"</strong> or press <strong>Ctrl+Enter</strong> to see the result.
+                            Use <strong>"Reset"</strong> to clear the editor.
+                        </div>
+
+                        <div class="lab-controls">
+                            <button id="execute-btn" class="btn-execute">Run</button>
+                            <button id="reset-btn" class="btn-reset">Reset</button>
+                        </div>
+
+                        <div class="lab-container">
+                            <div class="lab-editor">
+                                <div class="lab-header">HTML Editor</div>
+                                <textarea id="code-editor" class="lab-textarea" placeholder="Write your HTML code here..."><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .highlight {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hello, HTML!</h1>
+    <div class="highlight">
+        <p>This is a basic HTML example with CSS.</p>
+        <p>Try changing the code and click "Run"!</p>
+    </div>
+
+    <script>
+        console.log('JavaScript works too!');
+    </script>
+</body>
+</html></textarea>
+                            </div>
+
+                            <div class="lab-preview">
+                                <div class="lab-header">Preview</div>
+                                <iframe id="preview-iframe" class="lab-iframe" sandbox="allow-scripts"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Tab -->
+                <div id="panel-quiz" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Cryptography, Authentication & Cloud Security Quiz</h3>
+                        <p class="content-text">
+                            Test your knowledge of cryptography, authentication and cloud security. Answer all 15 questions and receive immediate feedback.
+                        </p>
+
+                        <div id="quiz-container">
+                            <form id="quiz-form">
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">1. What is the main difference between symmetric and asymmetric cryptography?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q1" value="a"><span class="option-text">Symmetric uses two different keys</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="b"><span class="option-text">Asymmetric uses only one key</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="c"><span class="option-text">Symmetric uses one shared key; asymmetric uses a public/private key pair</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="d"><span class="option-text">There is no difference</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">2. Why is hashing used to store passwords?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q2" value="a"><span class="option-text">To encrypt files on disk</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="b"><span class="option-text">To store passwords securely — even if the database is leaked, the original password cannot be recovered</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="c"><span class="option-text">To create SSH keys</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="d"><span class="option-text">To enable automatic login</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">3. Which of these is a valid example of Multi-Factor Authentication (MFA)?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q3" value="a"><span class="option-text">Password + username</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="b"><span class="option-text">Password + one-time code from a mobile app</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="c"><span class="option-text">PIN + PIN</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="d"><span class="option-text">Email + password</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">4. What does the principle of least privilege mean?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q4" value="a"><span class="option-text">Grant full access to all users by default</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="b"><span class="option-text">Grant only the minimum permissions needed to perform a task</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="c"><span class="option-text">Remove all access from users</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="d"><span class="option-text">Always use the root account</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">5. A cloud storage bucket left publicly accessible without a valid reason is:</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q5" value="a"><span class="option-text">A best practice</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="b"><span class="option-text">Normal and expected</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="c"><span class="option-text">A security risk that could expose sensitive data</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="d"><span class="option-text">Required by most cloud providers</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">6. What is a "salt" in the context of password hashing?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q6" value="a"><span class="option-text">A method of encrypting the hash</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="b"><span class="option-text">A random value added to a password before hashing to make each hash unique</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="c"><span class="option-text">A second password required for login</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="d"><span class="option-text">A type of symmetric key</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">7. What is IAM in cloud security?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q7" value="a"><span class="option-text">An intrusion detection tool</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="b"><span class="option-text">Identity and Access Management — controls who can access what resources in a cloud environment</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="c"><span class="option-text">A network firewall configuration system</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="d"><span class="option-text">An encryption algorithm</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">8. What is the difference between encryption at rest and encryption in transit?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q8" value="a"><span class="option-text">They are the same thing applied in different contexts</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="b"><span class="option-text">At rest protects stored data; in transit protects data being sent over a network</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="c"><span class="option-text">In transit means the data is being deleted</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="d"><span class="option-text">At rest applies only to databases</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">9. What is the purpose of TLS (Transport Layer Security)?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q9" value="a"><span class="option-text">To store passwords securely in a database</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="b"><span class="option-text">To encrypt data in transit between a client and a server, ensuring confidentiality and integrity</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="c"><span class="option-text">To generate RSA key pairs</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="d"><span class="option-text">To block unauthorised users from accessing a system</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">10. What is a digital signature used for?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q10" value="a"><span class="option-text">Encrypting a file so only one person can read it</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="b"><span class="option-text">Verifying that a message or file was sent by a specific person and has not been tampered with</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="c"><span class="option-text">Generating a random password</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="d"><span class="option-text">Scanning for malware in a file</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">11. What is credential rotation and why is it important?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q11" value="a"><span class="option-text">Changing usernames periodically to confuse attackers</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="b"><span class="option-text">Periodically replacing passwords, keys or tokens to limit the window of exploitation if they are compromised</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="c"><span class="option-text">Sharing credentials between multiple users for convenience</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="d"><span class="option-text">Encrypting credentials with AES before storing them</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">12. What is a KMS (Key Management Service) used for?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q12" value="a"><span class="option-text">Managing user passwords in an Active Directory</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="b"><span class="option-text">Securely creating, storing, rotating and auditing cryptographic keys in a cloud environment</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="c"><span class="option-text">Scanning cloud buckets for public access misconfiguration</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="d"><span class="option-text">Monitoring network traffic for anomalies</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">13. What is SSO (Single Sign-On)?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q13" value="a"><span class="option-text">A method that forces users to log in separately to every application</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="b"><span class="option-text">An authentication method that allows users to access multiple applications with a single set of credentials</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="c"><span class="option-text">A type of two-factor authentication</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="d"><span class="option-text">A protocol for encrypting database connections</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">14. Why should API keys and secrets never be committed to a public Git repository?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q14" value="a"><span class="option-text">Because Git does not support storing text files</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="b"><span class="option-text">Because anyone with access to the repository can find and use those credentials to access your systems or services</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="c"><span class="option-text">Because it slows down the repository</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="d"><span class="option-text">Because Git automatically deletes text files on push</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">15. Which hashing algorithm is considered cryptographically broken and should NOT be used to store passwords?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q15" value="a"><span class="option-text">bcrypt</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="b"><span class="option-text">Argon2</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="c"><span class="option-text">SHA-256</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="d"><span class="option-text">MD5</span></label>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+
+                        <div class="quiz-controls">
+                            <button id="submit-quiz" class="btn-execute" type="button">Submit</button>
+                            <button id="clear-quiz" class="btn-reset" type="button">Clear</button>
+                        </div>
+
+                        <div id="quiz-results" class="quiz-results" style="display: none;">
+                            <h4 class="results-title">Quiz Results</h4>
+                            <div id="quiz-score" class="quiz-score"></div>
+                            <div id="quiz-feedback" class="quiz-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resources Tab -->
+                <div id="panel-resources" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Recommended Resources</h3>
+                        <p class="content-text">
+                            Here is a curated list of essential resources to deepen your knowledge
+                            of Cryptography, Authentication &amp; Cloud Security. These will help you master the fundamental concepts.
+                        </p>
+
+                        <div class="resources-list">
+                            <div class="resource-category">
+                                <h4 class="category-title">Official Documentation</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">MDN Web Docs — HTML</a></li>
+                                    <li><a href="#" class="resource-link">MDN Web Docs — CSS</a></li>
+                                    <li><a href="#" class="resource-link">W3C HTML5 Specification</a></li>
+                                    <li><a href="#" class="resource-link">CSS Working Group Specifications</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Guides &amp; Tutorials</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML5 Semantic Elements Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Flexbox Complete Guide</a></li>
+                                    <li><a href="#" class="resource-link">CSS Grid Layout Tutorial</a></li>
+                                    <li><a href="#" class="resource-link">Web Accessibility Guidelines (WCAG)</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Tools &amp; Validators</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">W3C HTML Validator</a></li>
+                                    <li><a href="#" class="resource-link">W3C CSS Validator</a></li>
+                                    <li><a href="#" class="resource-link">Can I Use — Browser Support</a></li>
+                                    <li><a href="#" class="resource-link">WebAIM Accessibility Checker</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="resource-category">
+                                <h4 class="category-title">Quick References</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">HTML Elements Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Properties Cheat Sheet</a></li>
+                                    <li><a href="#" class="resource-link">HTML Entities Reference</a></li>
+                                    <li><a href="#" class="resource-link">CSS Selectors Reference</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="resources-note">
+                            <p>💡 <strong>Note:</strong> You can edit this list in the future to add your own favourite resources.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Evaluation Tab -->
+                <div id="panel-evaluation" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Evaluation Criteria</h3>
+                        <p class="content-text">
+                            Here are the criteria organised by importance level to assess your mastery
+                            of Cryptography, Authentication &amp; Cloud Security.
+                        </p>
+
+                        <div class="evaluation-grid">
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title essential">
+                                    <span class="evaluation-icon">💠</span>
+                                    Essential
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>Difference between symmetric and asymmetric cryptography</li>
+                                    <li>What hashing is and why it is one-way</li>
+                                    <li>Purpose of MFA</li>
+                                    <li>Concept of IAM</li>
+                                    <li>Principle of least privilege</li>
+                                    <li>Encryption at rest vs encryption in transit</li>
+                                </ul>
+                            </div>
+
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title important">
+                                    <span class="evaluation-icon">⭐</span>
+                                    Important
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>Using SSH keys (RSA vs Ed25519)</li>
+                                    <li>How passwords are stored (hash + salt)</li>
+                                    <li>Credential rotation</li>
+                                    <li>Cloud access policies (RBAC)</li>
+                                    <li>Tokens vs passwords — when to use each</li>
+                                    <li>Secrets management (Vault, Secrets Manager)</li>
+                                </ul>
+                            </div>
+
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title advanced">
+                                    <span class="evaluation-icon">🚀</span>
+                                    Advanced
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>TLS handshake and digital certificates</li>
+                                    <li>Digital signatures with OpenSSL/GPG</li>
+                                    <li>KMS (Key Management Service)</li>
+                                    <li>Federation &amp; SSO (SAML, OAuth, OIDC)</li>
+                                    <li>Detecting compromised credentials in git</li>
+                                    <li>Passkeys and FIDO2</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentProgress = 0;
+
+        function updateProgress(percentage) {
+            currentProgress = percentage;
+            document.getElementById('progress-text').textContent = percentage + '%';
+            document.getElementById('progress-fill').style.width = percentage + '%';
+        }
+
+        class TabSystem {
+            constructor() {
+                this.currentTab = 'learn';
+                this.tabs = ['learn', 'lab', 'quiz', 'resources', 'evaluation'];
+                this.init();
+            }
+
+            init() {
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+                });
+                window.addEventListener('hashchange', () => this.handleHashChange());
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+                this.handleHashChange();
+            }
+
+            switchTab(tabId) {
+                if (!this.tabs.includes(tabId)) return;
+                this.currentTab = tabId;
+
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    const isActive = button.dataset.tab === tabId;
+                    button.classList.toggle('active', isActive);
+                    button.setAttribute('aria-selected', isActive);
+                });
+
+                document.querySelectorAll('.tab-panel').forEach(panel => {
+                    panel.classList.toggle('active', panel.id === `panel-${tabId}`);
+                });
+
+                history.replaceState(null, null, `#${tabId}`);
+                this.updateProgressForTab(tabId);
+            }
+
+            handleHashChange() {
+                const hash = window.location.hash.slice(1);
+                if (hash && this.tabs.includes(hash)) this.switchTab(hash);
+            }
+
+            handleKeyboard(e) {
+                if (!e.target.classList.contains('tab-button')) return;
+                const currentIndex = this.tabs.indexOf(this.currentTab);
+                let newIndex = currentIndex;
+
+                switch(e.key) {
+                    case 'ArrowLeft': e.preventDefault(); newIndex = currentIndex > 0 ? currentIndex - 1 : this.tabs.length - 1; break;
+                    case 'ArrowRight': e.preventDefault(); newIndex = currentIndex < this.tabs.length - 1 ? currentIndex + 1 : 0; break;
+                    case 'Home': e.preventDefault(); newIndex = 0; break;
+                    case 'End': e.preventDefault(); newIndex = this.tabs.length - 1; break;
+                }
+
+                if (newIndex !== currentIndex) {
+                    this.switchTab(this.tabs[newIndex]);
+                    document.querySelector(`[data-tab="${this.tabs[newIndex]}"]`).focus();
+                }
+            }
+
+            updateProgressForTab(tabId) {
+                const progressMap = { 'learn': 20, 'lab': 40, 'quiz': 60, 'resources': 80, 'evaluation': 100 };
+                updateProgress(Math.max(currentProgress, progressMap[tabId] || 0));
+            }
+        }
+
+        class LabEditor {
+            constructor() {
+                this.editor = document.getElementById('code-editor');
+                this.iframe = document.getElementById('preview-iframe');
+                this.executeBtn = document.getElementById('execute-btn');
+                this.resetBtn = document.getElementById('reset-btn');
+                this.defaultCode = this.editor.value;
+                this.init();
+            }
+
+            init() {
+                this.executeBtn.addEventListener('click', () => this.executeCode());
+                this.resetBtn.addEventListener('click', () => this.resetCode());
+                this.editor.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); this.executeCode(); }
+                });
+                setTimeout(() => this.executeCode(), 500);
+            }
+
+            executeCode() {
+                const blob = new Blob([this.editor.value], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                this.iframe.src = url;
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                this.executeBtn.textContent = 'Executed!';
+                this.executeBtn.style.background = 'linear-gradient(135deg, #4caf50, #8bc34a)';
+                setTimeout(() => {
+                    this.executeBtn.textContent = 'Run';
+                    this.executeBtn.style.background = 'linear-gradient(135deg, var(--orange), var(--yellow))';
+                }, 1000);
+            }
+
+            resetCode() {
+                this.editor.value = this.defaultCode;
+                this.executeCode();
+                this.resetBtn.textContent = 'Cleared!';
+                setTimeout(() => { this.resetBtn.textContent = 'Reset'; }, 1000);
+            }
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questions = [
+                    { question: 1,  correct: 'c', explanation: 'Symmetric cryptography uses a single shared key for both encryption and decryption (e.g. AES). Asymmetric uses a public key to encrypt and a private key to decrypt (e.g. RSA).' },
+                    { question: 2,  correct: 'b', explanation: 'Hashing is a one-way function — the original password cannot be recovered from the hash. If a database is breached, attackers only see hashes, not plaintext passwords.' },
+                    { question: 3,  correct: 'b', explanation: 'MFA requires at least two different factors: something you know (password) + something you have (mobile OTP) or something you are (biometric). Two passwords do not count as MFA.' },
+                    { question: 4,  correct: 'b', explanation: 'The principle of least privilege limits access to only what is required to complete a task. This reduces the blast radius if an account is compromised.' },
+                    { question: 5,  correct: 'c', explanation: 'Publicly accessible cloud buckets have caused numerous real-world data breaches. S3 buckets, GCS buckets and Azure Blob containers should default to private unless explicitly required to be public.' },
+                    { question: 6,  correct: 'b', explanation: 'A salt is a random string appended to a password before hashing. It ensures that identical passwords produce different hashes, defeating rainbow table attacks.' },
+                    { question: 7,  correct: 'b', explanation: 'IAM (Identity and Access Management) is a framework for controlling who (users, roles, services) can access which cloud resources and what actions they can perform.' },
+                    { question: 8,  correct: 'b', explanation: 'Encryption at rest protects data stored on disk or in a database. Encryption in transit (e.g. TLS) protects data while it is moving over a network between systems.' },
+                    { question: 9,  correct: 'b', explanation: 'TLS (successor to SSL) encrypts the connection between a client and server, ensuring that data cannot be intercepted or tampered with in transit. It underpins HTTPS, SMTPS, and more.' },
+                    { question: 10, correct: 'b', explanation: 'A digital signature uses the sender\'s private key to sign data. Anyone with the public key can verify the signature, confirming authenticity and integrity without revealing the private key.' },
+                    { question: 11, correct: 'b', explanation: 'Credential rotation limits the lifespan of any compromised credentials. Even if an attacker steals a key or token, it will soon be invalidated by the rotation schedule.' },
+                    { question: 12, correct: 'b', explanation: 'A KMS (e.g. AWS KMS, Google Cloud KMS, HashiCorp Vault) centralises key lifecycle management — creation, storage, rotation, access control and auditing — removing keys from application code.' },
+                    { question: 13, correct: 'b', explanation: 'SSO allows users to authenticate once with an identity provider (e.g. Okta, Azure AD) and gain access to multiple applications without logging in separately to each one.' },
+                    { question: 14, correct: 'b', explanation: 'Secrets committed to public repositories are immediately visible to anyone. Automated tools constantly scan GitHub and similar platforms for leaked API keys, which are often exploited within minutes.' },
+                    { question: 15, correct: 'd', explanation: 'MD5 is cryptographically broken and should never be used for password storage — it is extremely fast to compute, making brute-force attacks trivial. Use bcrypt, scrypt, or Argon2 instead.' }
+                ];
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0;
+                const feedback = [];
+
+                this.questions.forEach(q => {
+                    const userAnswer = formData.get(`q${q.question}`);
+                    const isCorrect = userAnswer === q.correct;
+                    if (isCorrect) score++;
+                    feedback.push({ question: q.question, correct: isCorrect, explanation: q.explanation, correctAnswer: q.correct });
+                });
+
+                this.displayResults(score, feedback);
+            }
+
+            displayResults(score, feedback) {
+                const resultsDiv = document.getElementById('quiz-results');
+                const scoreDiv = document.getElementById('quiz-score');
+                const feedbackDiv = document.getElementById('quiz-feedback');
+                const percentage = Math.round((score / this.questions.length) * 100);
+
+                let scoreClass, message;
+                if (percentage >= 90) { scoreClass = 'score-excellent'; message = 'Excellent! You have a strong grasp of Cryptography, Authentication & Cloud Security!'; }
+                else if (percentage >= 70) { scoreClass = 'score-good'; message = 'Well done! You have a good understanding of these security fundamentals.'; }
+                else if (percentage >= 50) { scoreClass = 'score-fair'; message = 'Not bad, but there is room to improve. Review the concepts again.'; }
+                else { scoreClass = 'score-poor'; message = 'You need more study. Go back to the learning content.'; }
+
+                scoreDiv.innerHTML = `
+                    <div class="${scoreClass}">${score}/${this.questions.length} (${percentage}%)</div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">${message}</div>
+                `;
+
+                feedbackDiv.innerHTML = feedback.map(item => `
+                    <div class="feedback-item ${item.correct ? 'feedback-correct' : 'feedback-incorrect'}">
+                        <span class="feedback-icon">${item.correct ? '✓' : '✗'}</span>
+                        <span>
+                            <strong>Question ${item.question}:</strong> ${item.explanation}
+                            ${!item.correct ? `<br><span style="margin-top: 0.3rem; display: inline-block; font-size: 0.82rem; color: #c0392b; font-weight: 600;">Correct answer: ${item.correctAnswer.toUpperCase()}</span>` : ''}
+                        </span>
+                    </div>
+                `).join('');
+
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            clearQuiz() {
+                document.querySelectorAll('#quiz-form input[type="radio"]').forEach(i => i.checked = false);
+                document.getElementById('quiz-results').style.display = 'none';
+                const btn = document.getElementById('clear-quiz');
+                btn.textContent = 'Cleared!';
+                setTimeout(() => { btn.textContent = 'Clear'; }, 1000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new TabSystem();
+            new LabEditor();
+            new QuizManager();
+        });
+    </script>
+</body>
+</html>
+

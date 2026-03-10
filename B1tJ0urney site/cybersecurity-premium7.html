@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Specialisation + DevSecOps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --orange: #ff6200;
+            --yellow: #ffcc00;
+            --amber: #ff8c00;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(255, 98, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 98, 0, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255, 140, 0, 0.12) 0%, rgba(255, 204, 0, 0.06) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 140, 0, 0.15);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            color: var(--yellow);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-buttons { display: flex; gap: 1rem; align-items: center; }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 140, 0, 0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: #0f172a; box-shadow: 0 4px 15px rgba(255, 98, 0, 0.35); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.45); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--orange), var(--amber), var(--yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-section { margin-bottom: 2rem; }
+        .progress-label { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--orange), var(--yellow)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+
+        .tab-button {
+            flex: 1; min-width: 120px; padding: 1rem 1.5rem;
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.3s ease; position: relative; white-space: nowrap;
+        }
+
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(255, 98, 0, 0.1); }
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+        }
+
+        .tab-content { padding: 2rem; min-height: 400px; }
+        .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
+        .content-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-light); }
+        .content-text { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+
+        .code-block { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.875rem; line-height: 1.5; color: var(--text-light); }
+        .code-block .tag { color: #ff6b6b; }
+        .code-block .attr { color: #4ecdc4; }
+        .code-block .string { color: #95e1d3; }
+        .code-block .comment { color: #6c757d; font-style: italic; }
+        .code-block .keyword { color: #ffcc00; }
+        .code-block .value { color: #a8e6cf; }
+        .code-block .section { color: #ff8c00; font-weight: 600; }
+
+        .learn-section { margin-bottom: 2rem; }
+
+        .learn-intro {
+            background: linear-gradient(135deg, rgba(255, 98, 0, 0.12), rgba(255, 204, 0, 0.06));
+            border: 1px solid rgba(255, 140, 0, 0.25);
+            border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .learn-intro h4 { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .learn-intro p { color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem; }
+
+        .code-explanation { background: rgba(255, 255, 255, 0.02); border-left: 3px solid var(--orange); padding: 1rem 1.5rem; margin: 1rem 0; border-radius: 0 8px 8px 0; }
+        .code-explanation h5 { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .code-explanation p { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; }
+
+        /* ===== LEARN TAB COMPONENTS ===== */
+
+        .concept-section { margin-bottom: 2.5rem; }
+
+        .concept-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .concept-icon {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        .concept-icon.orange { background: rgba(255, 98, 0, 0.2); }
+        .concept-icon.yellow { background: rgba(255, 204, 0, 0.2); }
+        .concept-icon.green  { background: rgba(76, 175, 80, 0.2); }
+        .concept-icon.red    { background: rgba(244, 67, 54, 0.2); }
+        .concept-icon.blue   { background: rgba(33, 150, 243, 0.2); }
+        .concept-icon.purple { background: rgba(156, 39, 176, 0.2); }
+
+        .concept-header h3 { font-size: 1.2rem; font-weight: 700; color: var(--text-light); }
+
+        /* Pipeline visual */
+        .pipeline-visual {
+            display: flex; align-items: center; gap: 0;
+            margin: 1.5rem 0; overflow-x: auto; padding-bottom: 0.5rem;
+        }
+
+        .pipeline-step {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0.5rem; min-width: 90px; flex: 1;
+        }
+
+        .pipeline-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.6rem 0.8rem;
+            text-align: center;
+            font-size: 0.75rem; font-weight: 600;
+            color: var(--text-light);
+            width: 100%;
+            transition: all 0.3s;
+        }
+        .pipeline-box:hover { border-color: var(--orange); background: rgba(255, 98, 0, 0.08); }
+        .pipeline-box.highlight { border-color: var(--orange); background: rgba(255, 98, 0, 0.12); color: var(--yellow); }
+
+        .pipeline-label { font-size: 0.65rem; color: var(--text-secondary); text-align: center; }
+
+        .pipeline-arrow { color: var(--orange); font-size: 1.2rem; flex-shrink: 0; margin: 0 2px; padding-bottom: 1.2rem; }
+
+        /* Compare grid */
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+
+        .compare-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; }
+        .compare-card.sast { border-top: 3px solid #4ecdc4; }
+        .compare-card.dast { border-top: 3px solid #ff6b6b; }
+        .compare-card.sca  { border-top: 3px solid #ffcc00; }
+        .compare-card.iast { border-top: 3px solid #a8e6cf; }
+
+        .compare-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .compare-card.sast .compare-title { color: #4ecdc4; }
+        .compare-card.dast .compare-title { color: #ff6b6b; }
+        .compare-card.sca  .compare-title { color: #ffcc00; }
+        .compare-card.iast .compare-title { color: #a8e6cf; }
+
+        .compare-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+        .compare-list li { font-size: 0.8rem; color: var(--text-secondary); padding-left: 1rem; position: relative; line-height: 1.4; }
+        .compare-list li::before { content: '▸'; position: absolute; left: 0; color: var(--orange); }
+
+        /* Info boxes */
+        .info-box { border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; display: flex; gap: 0.75rem; align-items: flex-start; }
+        .info-box.warning { background: rgba(255, 152, 0, 0.1); border: 1px solid rgba(255, 152, 0, 0.25); }
+        .info-box.danger  { background: rgba(244, 67, 54, 0.1); border: 1px solid rgba(244, 67, 54, 0.25); }
+        .info-box.success { background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.25); }
+        .info-box.info    { background: rgba(33, 150, 243, 0.1); border: 1px solid rgba(33, 150, 243, 0.25); }
+
+        .info-box-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .info-box-text { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; }
+        .info-box-text strong { color: var(--text-light); display: block; margin-bottom: 0.25rem; }
+
+        /* Tools grid */
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+
+        .tool-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; transition: all 0.3s; }
+        .tool-card:hover { border-color: rgba(255, 140, 0, 0.4); background: rgba(255, 140, 0, 0.05); transform: translateY(-2px); }
+        .tool-name { font-size: 0.9rem; font-weight: 700; color: var(--yellow); margin-bottom: 0.25rem; }
+        .tool-category { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--orange); margin-bottom: 0.5rem; }
+        .tool-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
+
+        /* Timeline */
+        .timeline { position: relative; padding-left: 2rem; margin: 1.5rem 0; }
+        .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--orange), var(--yellow)); opacity: 0.4; }
+        .timeline-item { position: relative; margin-bottom: 1.5rem; }
+        .timeline-item::before { content: ''; position: absolute; left: -1.65rem; top: 0.4rem; width: 10px; height: 10px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 8px rgba(255, 98, 0, 0.5); }
+        .timeline-title { font-size: 0.95rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.35rem; }
+        .timeline-text { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.5; }
+
+        /* Section divider */
+        .section-divider { display: flex; align-items: center; gap: 1rem; margin: 2rem 0 1.5rem; }
+        .section-divider-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--border-color), transparent); }
+        .section-divider-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--orange); white-space: nowrap; }
+
+        /* Checklist */
+        .checklist { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin: 1rem 0; }
+        .checklist li { display: flex; align-items: flex-start; gap: 0.75rem; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.4; }
+        .check-icon { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .check-icon.done { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
+        .check-icon.warn { background: rgba(255, 152, 0, 0.2); color: #ff9800; }
+        .check-icon.bad  { background: rgba(244, 67, 54, 0.2); color: #f44336; }
+
+        /* Real example */
+        .real-example { background: linear-gradient(135deg, rgba(11, 13, 20, 0.8), rgba(255, 98, 0, 0.04)); border: 1px solid rgba(255, 140, 0, 0.2); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
+        .real-example-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--orange); margin-bottom: 0.75rem; }
+        .real-example-title { font-size: 1rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.5rem; }
+        .real-example-text { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 600px; margin-bottom: 1rem; }
+        .lab-editor { flex: 1; display: flex; flex-direction: column; }
+        .lab-preview { flex: 1; display: flex; flex-direction: column; }
+        .lab-header { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-bottom: none; border-radius: 8px 8px 0 0; padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; padding: 1rem; color: var(--text-light); font-family: 'Courier New', monospace; font-size: 0.875rem; line-height: 1.5; resize: none; outline: none; }
+        .lab-textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2); }
+        .lab-iframe { flex: 1; background: white; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; width: 100%; }
+        .lab-controls { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+        .btn-execute { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3); }
+        .btn-execute:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4); }
+        .btn-reset { background: rgba(255, 255, 255, 0.1); color: var(--text-light); border: 1px solid var(--border-color); padding: 0.75rem 1.5rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
+        .btn-reset:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .lab-instructions { background: rgba(40, 224, 255, 0.1); border: 1px solid rgba(40, 224, 255, 0.2); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: var(--text-secondary); }
+
+        /* Quiz */
+        .quiz-question { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .question-title { color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+        .quiz-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all 0.3s ease; }
+        .quiz-option:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--orange); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--orange); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(255, 140, 0, 0.12), rgba(255, 204, 0, 0.06)); border: 1px solid rgba(255, 140, 0, 0.25); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--yellow); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border-radius: 6px; font-size: 0.875rem; }
+        .feedback-correct { border-left: 3px solid #4caf50; }
+        .feedback-incorrect { border-left: 3px solid #f44336; }
+        .feedback-icon { font-size: 1.1rem; font-weight: bold; }
+        .feedback-correct .feedback-icon { color: #4caf50; }
+        .feedback-incorrect .feedback-icon { color: #f44336; }
+        .score-excellent { color: #4caf50; }
+        .score-good { color: #28e0ff; }
+        .score-fair { color: #ff9800; }
+        .score-poor { color: #f44336; }
+
+        /* Resources */
+        .resources-list { margin: 1.5rem 0; }
+        .resource-category { margin-bottom: 2rem; }
+        .category-title { color: var(--yellow); font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        .resource-links { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+        .resource-link { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0; border-radius: 4px; transition: all 0.3s ease; font-size: 0.875rem; position: relative; padding-left: 1.5rem; }
+        .resource-link::before { content: '→'; position: absolute; left: 0; color: var(--orange); font-weight: bold; }
+        .resource-link:hover { color: var(--text-light); padding-left: 2rem; }
+        .resources-note { background: rgba(255, 140, 0, 0.1); border: 1px solid rgba(255, 140, 0, 0.2); border-radius: 8px; padding: 1rem; margin-top: 2rem; font-size: 0.875rem; }
+        .resources-note p { color: var(--text-secondary); margin: 0; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 140, 0, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--yellow); border-bottom-color: var(--yellow); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-icon { font-size: 1.1rem; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: #28e0ff; }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content { padding: 1rem; flex-direction: column; gap: 1rem; }
+            .nav-buttons { width: 100%; justify-content: center; }
+            .course-title { font-size: 2rem; }
+            .course-meta { flex-direction: column; gap: 0.75rem; }
+            .main-content { padding: 1rem; }
+            .tab-nav { flex-direction: column; }
+            .tab-button { flex: none; text-align: left; }
+            .tab-content { padding: 1rem; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .lab-controls { justify-content: center; }
+            .compare-grid { grid-template-columns: 1fr; }
+            .pipeline-visual { flex-wrap: wrap; gap: 0.5rem; }
+            .pipeline-arrow { display: none; }
+            .evaluation-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav class="nav-buttons">
+                <a href="premium-cyber-progress.html" class="btn btn-back">← Back to Journey</a>
+                <a href="browse.html" class="btn btn-primary">Explore</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Goal: Specialisation + DevSecOps — Cybersecurity</h1>
+            <p class="course-description">
+                Learn to integrate security into the development lifecycle (DevSecOps), automate security testing and protect CI/CD pipelines.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>DevSecOps • CI/CD • AppSec • Automation</span></div>
+                <div class="meta-item"><span>📌</span><span>Security from code to production</span></div>
+            </div>
+            <div class="progress-section">
+                <div class="progress-label">Progress: <span id="progress-text">0%</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav" role="tablist">
+                <button class="tab-button active" data-tab="learn" role="tab" aria-selected="true">Learn</button>
+                <button class="tab-button" data-tab="lab" role="tab" aria-selected="false">Lab</button>
+                <button class="tab-button" data-tab="quiz" role="tab" aria-selected="false">Quiz</button>
+                <button class="tab-button" data-tab="resources" role="tab" aria-selected="false">Resources</button>
+                <button class="tab-button" data-tab="evaluation" role="tab" aria-selected="false">Evaluation</button>
+            </nav>
+
+            <div class="tab-content">
+
+                <!-- ============================================================ -->
+                <!-- LEARN TAB                                                     -->
+                <!-- ============================================================ -->
+                <div id="panel-learn" class="tab-panel active" role="tabpanel">
+                    <div class="learn-section">
+
+                        <!-- Intro -->
+                        <div class="learn-intro">
+                            <h4>🔐 DevSecOps Fundamentals</h4>
+                            <p>
+                                DevSecOps integrates <strong>Development</strong>, <strong>Security</strong> and <strong>Operations</strong> into a single continuous flow.
+                                Rather than treating security as a final phase, it is embedded from the very first commit all the way through to production.
+                            </p>
+                            <p>
+                                In this module you will learn the DevSecOps model, the key analysis tools, how to protect CI/CD pipelines,
+                                manage secrets securely and apply supply chain security principles.
+                            </p>
+                        </div>
+
+                        <!-- 1. What is DevSecOps -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon orange">🔄</div>
+                                <h3>1. What is DevSecOps?</h3>
+                            </div>
+
+                            <p class="content-text">
+                                DevSecOps is an evolution of the DevOps model that makes security a shared responsibility across the entire team —
+                                not just security specialists. The goal is to eliminate the "wall of security" that occurred when projects reached
+                                the audit stage already in production.
+                            </p>
+
+                            <div class="info-box warning">
+                                <span class="info-box-icon">⚠️</span>
+                                <div class="info-box-text">
+                                    <strong>The problem with the traditional model</strong>
+                                    In a Dev → QA → Sec → Ops flow, security issues are discovered too late.
+                                    Fixing a vulnerability in production costs on average <strong>30× more</strong> than fixing it during development.
+                                </div>
+                            </div>
+
+                            <div class="section-divider">
+                                <div class="section-divider-line"></div>
+                                <span class="section-divider-label">Typical DevSecOps Pipeline</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+
+                            <div class="pipeline-visual">
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box">📝 Plan</div>
+                                    <div class="pipeline-label">Threat Modeling</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box highlight">💻 Code</div>
+                                    <div class="pipeline-label">SAST / Linting</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box highlight">🏗️ Build</div>
+                                    <div class="pipeline-label">SCA / Secrets</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box highlight">🧪 Test</div>
+                                    <div class="pipeline-label">DAST / IAST</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box">📦 Release</div>
+                                    <div class="pipeline-label">Signing</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box">🚀 Deploy</div>
+                                    <div class="pipeline-label">Container Scan</div>
+                                </div>
+                                <div class="pipeline-arrow">→</div>
+                                <div class="pipeline-step">
+                                    <div class="pipeline-box">📊 Monitor</div>
+                                    <div class="pipeline-label">SIEM / Alerts</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Shift Left -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon yellow">⬅️</div>
+                                <h3>2. Shift Left Security</h3>
+                            </div>
+
+                            <p class="content-text">
+                                "Shift Left" means moving security testing to earlier phases in the software development lifecycle —
+                                to the <em>left</em> of the pipeline. In practical terms, this involves:
+                            </p>
+
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-title">Planning Phase — Threat Modeling</div>
+                                    <div class="timeline-text">Identify threats before writing a single line of code. Frameworks like STRIDE and PASTA help map attack vectors directly at the architecture stage.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">Code Phase — Pre-commit Hooks</div>
+                                    <div class="timeline-text">Run security linters and secret detection before every commit. Tools like <code>pre-commit</code>, <code>gitleaks</code> and <code>detect-secrets</code> block issues locally before they ever reach the remote repository.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">Pull Request — Automated SAST</div>
+                                    <div class="timeline-text">Static analysis runs automatically on every PR. Results appear as comments in the code review, integrating security into the normal development workflow.</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-title">CI/CD — Quality Gates</div>
+                                    <div class="timeline-text">The pipeline blocks deployments when it finds high or critical severity vulnerabilities, preventing insecure code from ever reaching production.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. SAST vs DAST vs SCA vs IAST -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon blue">🔍</div>
+                                <h3>3. SAST, DAST, SCA and IAST</h3>
+                            </div>
+
+                            <p class="content-text">
+                                There are four main approaches for testing application security. Each analyses a different aspect and is used at a distinct stage of the pipeline.
+                            </p>
+
+                            <div class="compare-grid">
+                                <div class="compare-card sast">
+                                    <div class="compare-title">SAST — Static Analysis</div>
+                                    <ul class="compare-list">
+                                        <li>Analyses source code without executing the application</li>
+                                        <li>Detects: SQL Injection, XSS, buffer overflows in code</li>
+                                        <li>Phase: during development and CI</li>
+                                        <li>Tools: Semgrep, SonarQube, CodeQL</li>
+                                        <li>⚡ Fast, but can produce false positives</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card dast">
+                                    <div class="compare-title">DAST — Dynamic Analysis</div>
+                                    <ul class="compare-list">
+                                        <li>Tests the application while it is running (black box)</li>
+                                        <li>Detects: runtime flaws, misconfigurations, exposures</li>
+                                        <li>Phase: staging / pre-production</li>
+                                        <li>Tools: OWASP ZAP, Burp Suite, Nikto</li>
+                                        <li>🎯 Finds real vulnerabilities as seen in production</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card sca">
+                                    <div class="compare-title">SCA — Dependency Analysis</div>
+                                    <ul class="compare-list">
+                                        <li>Analyses third-party libraries and packages</li>
+                                        <li>Detects: CVEs in dependencies, problematic licences</li>
+                                        <li>Phase: build and continuous CI</li>
+                                        <li>Tools: Snyk, Dependabot, npm audit, Trivy</li>
+                                        <li>📦 Essential — 85% of code comes from third parties</li>
+                                    </ul>
+                                </div>
+                                <div class="compare-card iast">
+                                    <div class="compare-title">IAST — Interactive Analysis</div>
+                                    <ul class="compare-list">
+                                        <li>Agent inside the application during testing</li>
+                                        <li>Detects: flaws with full execution context</li>
+                                        <li>Phase: during integration testing</li>
+                                        <li>Tools: Contrast Security, Hdiv Security</li>
+                                        <li>🧠 Lowest false positive rate</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Essential Tools -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon green">🛠️</div>
+                                <h3>4. Essential Ecosystem Tools</h3>
+                            </div>
+
+                            <div class="content-card">
+                                <h3 class="content-title">Basic pipeline security checks</h3>
+                                <div class="code-block">
+<pre><code><span class="comment"># Detect secrets in the repository</span>
+<span class="keyword">git secrets</span> <span class="value">--scan</span>
+<span class="keyword">gitleaks</span> <span class="value">detect --source . -v</span>
+
+<span class="comment"># Vulnerabilities in Node.js dependencies</span>
+<span class="keyword">npm audit</span> <span class="value">--audit-level=high</span>
+
+<span class="comment"># Static analysis with Semgrep</span>
+<span class="keyword">semgrep</span> <span class="value">--config=auto .</span>
+
+<span class="comment"># Docker image scan</span>
+<span class="keyword">docker scout</span> <span class="value">cves myapp:latest</span>
+<span class="keyword">trivy image</span> <span class="value">myapp:latest</span>
+
+<span class="comment"># Filesystem scan (IaC, configs, code)</span>
+<span class="keyword">trivy fs</span> <span class="value">. --severity HIGH,CRITICAL</span></code></pre>
+                                </div>
+
+                                <div class="code-explanation">
+                                    <h5>Line-by-line explanation:</h5>
+                                    <p>
+                                        <strong>gitleaks detect</strong> — Searches for API keys, tokens and hardcoded passwords in the full Git history<br>
+                                        <strong>npm audit --audit-level=high</strong> — Analyses dependencies and only fails if there are high or critical severity CVEs<br>
+                                        <strong>semgrep --config=auto</strong> — Multi-language SAST with community rules, detects insecure code patterns<br>
+                                        <strong>trivy image</strong> — Checks CVEs in container layers, including OS and application dependencies<br>
+                                        <strong>trivy fs --severity HIGH,CRITICAL</strong> — Analyses local files, ignoring low-priority alerts
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="tools-grid">
+                                <div class="tool-card">
+                                    <div class="tool-name">Semgrep</div>
+                                    <div class="tool-category">SAST</div>
+                                    <div class="tool-desc">Multi-language static analysis with customisable rules. Integrates natively with GitHub Actions.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">Trivy</div>
+                                    <div class="tool-category">SCA + Container</div>
+                                    <div class="tool-desc">All-in-one scanner for containers, IaC, code and filesystems. Open source and very fast.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">OWASP ZAP</div>
+                                    <div class="tool-category">DAST</div>
+                                    <div class="tool-desc">Open source attack proxy for testing running web applications. Has headless mode for CI/CD integration.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">Gitleaks</div>
+                                    <div class="tool-category">Secrets Detection</div>
+                                    <div class="tool-desc">Detects hardcoded secrets in Git repositories, including the full history of old commits.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">HashiCorp Vault</div>
+                                    <div class="tool-category">Secret Management</div>
+                                    <div class="tool-desc">Centralised management of secrets, certificates and encryption keys with granular access control.</div>
+                                </div>
+                                <div class="tool-card">
+                                    <div class="tool-name">Checkov</div>
+                                    <div class="tool-category">IaC Security</div>
+                                    <div class="tool-desc">Analyses Terraform, CloudFormation and Kubernetes files for security misconfigurations.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Secrets Management -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon red">🔑</div>
+                                <h3>5. Secrets Management — What NEVER to do</h3>
+                            </div>
+
+                            <div class="info-box danger">
+                                <span class="info-box-icon">🚫</span>
+                                <div class="info-box-text">
+                                    <strong>Secrets in code are one of the #1 causes of breaches</strong>
+                                    In 2023, more than 10 million secrets were exposed in public GitHub repositories.
+                                    A leaked AWS key can result in $50,000+ in charges within minutes.
+                                </div>
+                            </div>
+
+                            <div class="content-card">
+                                <h3 class="content-title">❌ Wrong vs ✅ Correct</h3>
+                                <div class="code-block">
+<pre><code><span class="comment"># ❌ NEVER do this</span>
+<span class="tag">DATABASE_URL</span> = <span class="string">"postgresql://admin:SuperSecret123@prod-db:5432/app"</span>
+<span class="tag">AWS_SECRET_KEY</span> = <span class="string">"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"</span>
+<span class="tag">API_TOKEN</span> = <span class="string">"sk-proj-abc123def456..."</span>
+
+<span class="comment"># ✅ Use environment variables</span>
+<span class="tag">DATABASE_URL</span> = <span class="value">os.getenv("DATABASE_URL")</span>
+
+<span class="comment"># ✅ Use a vault (e.g. HashiCorp Vault)</span>
+<span class="keyword">vault kv get</span> <span class="value">secret/myapp/database</span>
+
+<span class="comment"># ✅ GitHub Actions: use encrypted secrets</span>
+<span class="section">env:</span>
+  <span class="tag">AWS_SECRET_KEY</span>: <span class="value">${{ secrets.AWS_SECRET_KEY }}</span></code></pre>
+                                </div>
+                            </div>
+
+                            <ul class="checklist">
+                                <li>
+                                    <div class="check-icon done">✓</div>
+                                    <span>Use environment variables for sensitive configuration in local development</span>
+                                </li>
+                                <li>
+                                    <div class="check-icon done">✓</div>
+                                    <span>Use a secret manager (Vault, AWS Secrets Manager, Azure Key Vault) in production</span>
+                                </li>
+                                <li>
+                                    <div class="check-icon done">✓</div>
+                                    <span>Add <code>.env</code> to <code>.gitignore</code> and never commit configuration files</span>
+                                </li>
+                                <li>
+                                    <div class="check-icon warn">!</div>
+                                    <span>Rotate secrets periodically — even if they have never been exposed</span>
+                                </li>
+                                <li>
+                                    <div class="check-icon bad">✗</div>
+                                    <span>Store passwords, tokens or keys in source code, even "temporarily"</span>
+                                </li>
+                                <li>
+                                    <div class="check-icon bad">✗</div>
+                                    <span>Use the same secret in development and production</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 6. Secure CI/CD Pipeline -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon purple">⚙️</div>
+                                <h3>6. Secure CI/CD Pipeline — GitHub Actions</h3>
+                            </div>
+
+                            <p class="content-text">
+                                A complete DevSecOps pipeline integrates multiple automated security checks.
+                                Below is an example of a GitHub Actions workflow with security gates.
+                            </p>
+
+                            <div class="content-card">
+                                <h3 class="content-title">Example: GitHub Actions with Security Gates</h3>
+                                <div class="code-block">
+<pre><code><span class="section">name:</span> <span class="value">DevSecOps Pipeline</span>
+
+<span class="section">on:</span>
+  <span class="tag">push:</span>
+    <span class="attr">branches:</span> <span class="value">[main, develop]</span>
+  <span class="tag">pull_request:</span>
+
+<span class="section">jobs:</span>
+  <span class="tag">security-scan:</span>
+    <span class="attr">runs-on:</span> <span class="value">ubuntu-latest</span>
+    <span class="attr">steps:</span>
+
+      <span class="comment"># 1. Checkout the code</span>
+      - <span class="attr">uses:</span> <span class="value">actions/checkout@v4</span>
+        <span class="attr">with:</span>
+          <span class="attr">fetch-depth:</span> <span class="value">0</span>  <span class="comment"># full history for Gitleaks</span>
+
+      <span class="comment"># 2. Secret detection</span>
+      - <span class="attr">name:</span> <span class="value">Gitleaks - Secrets Detection</span>
+        <span class="attr">uses:</span> <span class="value">gitleaks/gitleaks-action@v2</span>
+
+      <span class="comment"># 3. SAST with Semgrep</span>
+      - <span class="attr">name:</span> <span class="value">Semgrep - Static Analysis</span>
+        <span class="attr">uses:</span> <span class="value">semgrep/semgrep-action@v1</span>
+        <span class="attr">with:</span>
+          <span class="attr">config:</span> <span class="value">p/owasp-top-ten</span>
+
+      <span class="comment"># 4. Vulnerable dependencies</span>
+      - <span class="attr">name:</span> <span class="value">npm audit</span>
+        <span class="attr">run:</span> <span class="value">npm audit --audit-level=high</span>
+
+      <span class="comment"># 5. Build and container scan</span>
+      - <span class="attr">name:</span> <span class="value">Build Docker Image</span>
+        <span class="attr">run:</span> <span class="value">docker build -t myapp:${{ github.sha }} .</span>
+
+      - <span class="attr">name:</span> <span class="value">Trivy - Container Scan</span>
+        <span class="attr">uses:</span> <span class="value">aquasecurity/trivy-action@master</span>
+        <span class="attr">with:</span>
+          <span class="attr">image-ref:</span> <span class="value">myapp:${{ github.sha }}</span>
+          <span class="attr">severity:</span> <span class="value">HIGH,CRITICAL</span>
+          <span class="attr">exit-code:</span> <span class="value">'1'</span>  <span class="comment"># fails the pipeline if CVEs are found</span></code></pre>
+                                </div>
+
+                                <div class="code-explanation">
+                                    <h5>Key points of this pipeline:</h5>
+                                    <p>
+                                        <strong>fetch-depth: 0</strong> — Required for Gitleaks to analyse the full commit history, not just the latest commit<br>
+                                        <strong>p/owasp-top-ten</strong> — Semgrep ruleset aligned with the OWASP Top 10 (the 10 most critical web vulnerabilities)<br>
+                                        <strong>exit-code: '1'</strong> — Makes the step fail if Trivy finds High/Critical CVEs, automatically blocking the deployment<br>
+                                        <strong>github.sha</strong> — Uses the commit hash as the image tag, ensuring full traceability
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 7. Supply Chain Security & SBOM -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon yellow">📋</div>
+                                <h3>7. Supply Chain Security &amp; SBOM</h3>
+                            </div>
+
+                            <p class="content-text">
+                                The 2020 SolarWinds attack showed the world that the software supply chain is a critical attack vector.
+                                A <strong>SBOM (Software Bill of Materials)</strong> is the "inventory" of all components in your software —
+                                libraries, transitive dependencies, versions and licences.
+                            </p>
+
+                            <div class="real-example">
+                                <div class="real-example-label">📰 Real Case</div>
+                                <div class="real-example-title">SolarWinds Attack (2020)</div>
+                                <div class="real-example-text">
+                                    Attackers compromised SolarWinds' build pipeline and injected malicious code into the Orion software.
+                                    The update was distributed to 18,000 customers, including US government agencies.
+                                    This attack led to new regulations requiring SBOMs for software sold to the US government.
+                                </div>
+                            </div>
+
+                            <div class="content-card">
+                                <h3 class="content-title">Generate an SBOM with Syft</h3>
+                                <div class="code-block">
+<pre><code><span class="comment"># Install Syft (SBOM generator)</span>
+<span class="keyword">curl -sSfL</span> <span class="value">https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh</span>
+
+<span class="comment"># Generate SBOM from a Docker image (SPDX format)</span>
+<span class="keyword">syft</span> <span class="value">myapp:latest -o spdx-json > sbom.spdx.json</span>
+
+<span class="comment"># Generate SBOM from a local project</span>
+<span class="keyword">syft</span> <span class="value">dir:. -o cyclonedx-json > sbom.cyclonedx.json</span>
+
+<span class="comment"># Check for vulnerabilities in the SBOM with Grype</span>
+<span class="keyword">grype sbom:</span><span class="value">./sbom.spdx.json</span>
+
+<span class="comment"># Sign the SBOM with Cosign (supply chain integrity)</span>
+<span class="keyword">cosign sign-blob</span> <span class="value">--key cosign.key sbom.spdx.json</span></code></pre>
+                                </div>
+                            </div>
+
+                            <div class="info-box success">
+                                <span class="info-box-icon">✅</span>
+                                <div class="info-box-text">
+                                    <strong>Supply Chain Security best practices</strong>
+                                    Generate SBOMs on every build • Sign artefacts with Sigstore/Cosign •
+                                    Use lock files (package-lock.json, Pipfile.lock) • Verify dependency checksums •
+                                    Use private repositories for critical dependencies
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 8. IaC Security -->
+                        <div class="concept-section">
+                            <div class="concept-header">
+                                <div class="concept-icon blue">🏗️</div>
+                                <h3>8. Infrastructure as Code (IaC) Security</h3>
+                            </div>
+
+                            <p class="content-text">
+                                With IaC, infrastructure is defined as code — meaning configuration errors can be detected
+                                <em>before</em> any resource is created in the cloud.
+                            </p>
+
+                            <div class="content-card">
+                                <h3 class="content-title">Checkov — Terraform Scan</h3>
+                                <div class="code-block">
+<pre><code><span class="comment"># Example of insecure Terraform code</span>
+<span class="tag">resource</span> <span class="string">"aws_s3_bucket"</span> <span class="string">"data"</span> {
+  <span class="attr">bucket</span> = <span class="string">"my-company-data"</span>
+  <span class="attr">acl</span>    = <span class="value">"public-read"</span>  <span class="comment"># ⚠️ Public bucket!</span>
+}
+
+<span class="comment"># Run Checkov to detect the issue</span>
+<span class="keyword">checkov</span> <span class="value">-d . --framework terraform</span>
+
+<span class="comment"># Output:</span>
+<span class="comment"># Check: CKV_AWS_20: "Ensure the S3 bucket has access control list (ACL) applied"</span>
+<span class="comment"># FAILED for resource: aws_s3_bucket.data</span>
+<span class="comment"># File: main.tf:1-5</span>
+
+<span class="comment"># Fixed version</span>
+<span class="tag">resource</span> <span class="string">"aws_s3_bucket"</span> <span class="string">"data"</span> {
+  <span class="attr">bucket</span> = <span class="string">"my-company-data"</span>
+}
+
+<span class="tag">resource</span> <span class="string">"aws_s3_bucket_acl"</span> <span class="string">"data_acl"</span> {
+  <span class="attr">bucket</span> = <span class="value">aws_s3_bucket.data.id</span>
+  <span class="attr">acl</span>    = <span class="value">"private"</span>  <span class="comment"># ✅ Private by default</span>
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="content-card">
+                            <h3 class="content-title">✅ Summary and Next Steps</h3>
+                            <p class="content-text">
+                                In this module you covered the essential DevSecOps concepts: the shift-left model, the four types of security analysis
+                                (SAST, DAST, SCA, IAST), secure secrets management, CI/CD pipelines with security gates, supply chain security with SBOMs
+                                and IaC analysis with Checkov.
+                            </p>
+                            <div class="info-box info">
+                                <span class="info-box-icon">💡</span>
+                                <div class="info-box-text">
+                                    <strong>Keep learning</strong>
+                                    Practise the commands in the <strong>Lab</strong>, test your knowledge in the <strong>Quiz</strong>,
+                                    and go deeper with the links in the <strong>Resources</strong> section.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- LAB TAB                                                       -->
+                <!-- ============================================================ -->
+                <div id="panel-lab" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Code Lab</h3>
+                        <p class="content-text">
+                            Experiment with HTML and CSS in real time. Write your code in the editor on the left
+                            and see the result instantly in the preview panel.
+                        </p>
+                        <div class="lab-instructions">
+                            <strong>Instructions:</strong> Write HTML (with optional CSS and JavaScript) in the editor.
+                            Click <strong>"Run"</strong> or press <strong>Ctrl+Enter</strong> to see the result.
+                            Use <strong>"Reset"</strong> to clear the editor.
+                        </div>
+                        <div class="lab-controls">
+                            <button id="execute-btn" class="btn-execute">Run</button>
+                            <button id="reset-btn" class="btn-reset">Reset</button>
+                        </div>
+                        <div class="lab-container">
+                            <div class="lab-editor">
+                                <div class="lab-header">HTML Editor</div>
+                                <textarea id="code-editor" class="lab-textarea" placeholder="Write your HTML code here..."><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .highlight {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hello, HTML!</h1>
+    <div class="highlight">
+        <p>This is a basic HTML example with CSS.</p>
+        <p>Try changing the code and click "Run"!</p>
+    </div>
+    <script>
+        console.log('JavaScript works too!');
+    </script>
+</body>
+</html></textarea>
+                            </div>
+                            <div class="lab-preview">
+                                <div class="lab-header">Preview</div>
+                                <iframe id="preview-iframe" class="lab-iframe" sandbox="allow-scripts"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- QUIZ TAB                                                      -->
+                <!-- ============================================================ -->
+                <div id="panel-quiz" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Specialisation + DevSecOps Knowledge Quiz</h3>
+                        <p class="content-text">
+                            Test your knowledge of DevSecOps, CI/CD security and application security practices. Answer all 15 questions and receive immediate feedback.
+                        </p>
+
+                        <div id="quiz-container">
+                            <form id="quiz-form">
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">1. What does "Shift Left Security" mean?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q1" value="a"><span class="option-text">Only testing security in production</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="b"><span class="option-text">Integrating security testing as early as possible in the development process</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="c"><span class="option-text">Removing security tests from the pipeline</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q1" value="d"><span class="option-text">Using only firewalls for protection</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">2. Which tool is used to detect vulnerabilities in Node.js dependencies?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q2" value="a"><span class="option-text">docker scan</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="b"><span class="option-text">npm audit</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="c"><span class="option-text">trivy image</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q2" value="d"><span class="option-text">git log</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">3. Storing passwords or API keys directly in source code is:</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q3" value="a"><span class="option-text">A best practice</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="b"><span class="option-text">Normal and expected in DevOps</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="c"><span class="option-text">A serious security risk</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q3" value="d"><span class="option-text">Required for CI pipelines to work</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">4. What does SAST do?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q4" value="a"><span class="option-text">Tests a running application by sending it real HTTP requests</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="b"><span class="option-text">Analyses source code for security vulnerabilities without executing it</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="c"><span class="option-text">Monitors network traffic in real time</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q4" value="d"><span class="option-text">Creates and manages Docker containers</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">5. What is the purpose of an SBOM (Software Bill of Materials)?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q5" value="a"><span class="option-text">To store application logs</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="b"><span class="option-text">To provide a complete inventory of all software components, libraries and dependencies in an application</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="c"><span class="option-text">To create automated backups of code</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q5" value="d"><span class="option-text">To encrypt data at rest</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">6. What is the key difference between SAST and DAST?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q6" value="a"><span class="option-text">SAST is for cloud; DAST is for on-premises</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="b"><span class="option-text">SAST analyses static source code; DAST tests a live running application</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="c"><span class="option-text">DAST only works on mobile applications</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q6" value="d"><span class="option-text">They are the same tool with different names</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">7. What does SCA (Software Composition Analysis) focus on?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q7" value="a"><span class="option-text">Scanning the network for open ports</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="b"><span class="option-text">Identifying vulnerabilities and licence issues in open-source and third-party dependencies</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="c"><span class="option-text">Analysing application performance under load</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q7" value="d"><span class="option-text">Hardening the operating system</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">8. What is a supply chain attack in software?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q8" value="a"><span class="option-text">An attack that targets the physical hardware supply chain</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="b"><span class="option-text">Compromising a trusted upstream dependency or build tool so that malicious code is automatically distributed to all downstream users</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="c"><span class="option-text">An attack that floods a CI/CD pipeline with fake jobs</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q8" value="d"><span class="option-text">Stealing source code from a private repository</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">9. What is "dependency confusion" in the context of package managers?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q9" value="a"><span class="option-text">When two dependencies have conflicting version requirements</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="b"><span class="option-text">An attack where a malicious public package with the same name as an internal private package is automatically installed instead</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="c"><span class="option-text">A misconfiguration that causes circular imports in code</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q9" value="d"><span class="option-text">Using outdated package manager documentation</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">10. What is the correct way to handle secrets in a CI/CD pipeline?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q10" value="a"><span class="option-text">Store them in a .env file committed to the repository</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="b"><span class="option-text">Use a secrets manager (e.g. HashiCorp Vault, AWS Secrets Manager) or the CI platform's encrypted secret store</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="c"><span class="option-text">Embed them as plain text in the pipeline YAML file</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q10" value="d"><span class="option-text">Share them via email with the team</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">11. What is trivy used for in a DevSecOps pipeline?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q11" value="a"><span class="option-text">Managing Docker container orchestration</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="b"><span class="option-text">Scanning container images, filesystems and IaC configurations for vulnerabilities and misconfigurations</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="c"><span class="option-text">Generating TLS certificates for services</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q11" value="d"><span class="option-text">Running unit tests automatically on each commit</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">12. What is Infrastructure as Code (IaC) security scanning focused on?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q12" value="a"><span class="option-text">Encrypting Terraform state files</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="b"><span class="option-text">Detecting misconfigurations in infrastructure definitions (e.g. Terraform, CloudFormation) before they are deployed</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="c"><span class="option-text">Monitoring live cloud infrastructure for anomalies</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q12" value="d"><span class="option-text">Automatically rolling back failed deployments</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">13. What is Policy as Code (e.g. using OPA)?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q13" value="a"><span class="option-text">Writing documentation for security policies</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="b"><span class="option-text">Defining and enforcing security and compliance rules as machine-readable code that can be automatically evaluated in pipelines</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="c"><span class="option-text">A method for encrypting policy documents</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q13" value="d"><span class="option-text">Deploying firewall rules via a web interface</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">14. Why should CI/CD runners be hardened?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q14" value="a"><span class="option-text">To make builds run faster</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="b"><span class="option-text">Runners execute arbitrary code from pipelines and have access to secrets and production environments — compromising them gives an attacker full pipeline control</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="c"><span class="option-text">To avoid installing too many packages</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q14" value="d"><span class="option-text">To reduce cloud costs</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="quiz-question">
+                                    <h4 class="question-title">15. What is the main security principle behind DevSecOps compared to traditional security approaches?</h4>
+                                    <div class="quiz-options">
+                                        <label class="quiz-option"><input type="radio" name="q15" value="a"><span class="option-text">Security is handled exclusively by a separate dedicated security team after development is complete</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="b"><span class="option-text">Security is everyone's responsibility and is embedded continuously throughout the entire development and deployment lifecycle</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="c"><span class="option-text">Security only applies to production environments</span></label>
+                                        <label class="quiz-option"><input type="radio" name="q15" value="d"><span class="option-text">Developers should not have access to security tooling</span></label>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+
+                        <div class="quiz-controls">
+                            <button id="submit-quiz" class="btn-execute" type="button">Submit</button>
+                            <button id="clear-quiz" class="btn-reset" type="button">Clear</button>
+                        </div>
+
+                        <div id="quiz-results" class="quiz-results" style="display: none;">
+                            <h4 class="results-title">Quiz Results</h4>
+                            <div id="quiz-score" class="quiz-score"></div>
+                            <div id="quiz-feedback" class="quiz-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- RESOURCES TAB                                                 -->
+                <!-- ============================================================ -->
+                <div id="panel-resources" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Recommended Resources</h3>
+                        <p class="content-text">
+                            Here is a curated list of essential resources to deepen your knowledge
+                            of Specialisation &amp; DevSecOps. These will help you master the fundamental concepts.
+                        </p>
+                        <div class="resources-list">
+                            <div class="resource-category">
+                                <h4 class="category-title">Official Documentation</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">OWASP DevSecOps Guideline</a></li>
+                                    <li><a href="#" class="resource-link">NIST Secure Software Development Framework</a></li>
+                                    <li><a href="#" class="resource-link">CISA DevSecOps Resources</a></li>
+                                    <li><a href="#" class="resource-link">GitHub Security Documentation</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Open Source Tools</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">Semgrep — SAST Rules and Documentation</a></li>
+                                    <li><a href="#" class="resource-link">Trivy — Vulnerability Scanner</a></li>
+                                    <li><a href="#" class="resource-link">Gitleaks — Secrets Detection</a></li>
+                                    <li><a href="#" class="resource-link">OWASP ZAP — DAST</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Guides &amp; Tutorials</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">OWASP Top 10 — Web Vulnerabilities</a></li>
+                                    <li><a href="#" class="resource-link">Securing GitHub Actions Workflows</a></li>
+                                    <li><a href="#" class="resource-link">HashiCorp Vault — Getting Started</a></li>
+                                    <li><a href="#" class="resource-link">Supply Chain Levels for Software Artifacts (SLSA)</a></li>
+                                </ul>
+                            </div>
+                            <div class="resource-category">
+                                <h4 class="category-title">Quick References</h4>
+                                <ul class="resource-links">
+                                    <li><a href="#" class="resource-link">CVE Database — National Vulnerability Database</a></li>
+                                    <li><a href="#" class="resource-link">CWE — Common Weakness Enumeration</a></li>
+                                    <li><a href="#" class="resource-link">Checkov IaC Security Checks</a></li>
+                                    <li><a href="#" class="resource-link">Sigstore / Cosign — Artefact Signing</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="resources-note">
+                            <p>💡 <strong>Note:</strong> You can edit this list in the future to add your own favourite resources.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- EVALUATION TAB                                                -->
+                <!-- ============================================================ -->
+                <div id="panel-evaluation" class="tab-panel" role="tabpanel">
+                    <div class="content-card">
+                        <h3 class="content-title">Evaluation Criteria</h3>
+                        <p class="content-text">
+                            Here are the criteria organised by importance level to assess your mastery
+                            of Specialisation &amp; DevSecOps.
+                        </p>
+                        <div class="evaluation-grid">
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title essential">
+                                    <span class="evaluation-icon">💠</span>
+                                    Essential
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>What DevSecOps is and why it matters</li>
+                                    <li>Difference between SAST, DAST and SCA</li>
+                                    <li>Risks of secrets in code</li>
+                                    <li>Dependency scanning</li>
+                                    <li>Security in CI/CD pipelines</li>
+                                    <li>Concept of shift left</li>
+                                </ul>
+                            </div>
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title important">
+                                    <span class="evaluation-icon">⭐</span>
+                                    Important
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>Docker image scanning</li>
+                                    <li>Pipeline protection</li>
+                                    <li>Using vaults for secrets</li>
+                                    <li>Permission control in CI</li>
+                                    <li>Automated code validation</li>
+                                    <li>Security in IaC (Infrastructure as Code)</li>
+                                </ul>
+                            </div>
+                            <div class="evaluation-column">
+                                <h4 class="evaluation-title advanced">
+                                    <span class="evaluation-icon">🚀</span>
+                                    Advanced
+                                </h4>
+                                <ul class="evaluation-list">
+                                    <li>Policy as Code (OPA, etc.)</li>
+                                    <li>Artefact signing and verification</li>
+                                    <li>Supply chain security</li>
+                                    <li>SBOM (Software Bill of Materials)</li>
+                                    <li>Protection against dependency confusion</li>
+                                    <li>Hardening CI/CD runners</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentProgress = 0;
+
+        function updateProgress(percentage) {
+            currentProgress = percentage;
+            document.getElementById('progress-text').textContent = percentage + '%';
+            document.getElementById('progress-fill').style.width = percentage + '%';
+        }
+
+        class TabSystem {
+            constructor() {
+                this.currentTab = 'learn';
+                this.tabs = ['learn', 'lab', 'quiz', 'resources', 'evaluation'];
+                this.init();
+            }
+
+            init() {
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+                });
+                window.addEventListener('hashchange', () => this.handleHashChange());
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+                this.handleHashChange();
+            }
+
+            switchTab(tabId) {
+                if (!this.tabs.includes(tabId)) return;
+                this.currentTab = tabId;
+
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    const isActive = button.dataset.tab === tabId;
+                    button.classList.toggle('active', isActive);
+                    button.setAttribute('aria-selected', isActive);
+                });
+
+                document.querySelectorAll('.tab-panel').forEach(panel => {
+                    panel.classList.toggle('active', panel.id === `panel-${tabId}`);
+                });
+
+                history.replaceState(null, null, `#${tabId}`);
+                this.updateProgressForTab(tabId);
+            }
+
+            handleHashChange() {
+                const hash = window.location.hash.slice(1);
+                if (hash && this.tabs.includes(hash)) this.switchTab(hash);
+            }
+
+            handleKeyboard(e) {
+                if (!e.target.classList.contains('tab-button')) return;
+                const currentIndex = this.tabs.indexOf(this.currentTab);
+                let newIndex = currentIndex;
+
+                switch(e.key) {
+                    case 'ArrowLeft': e.preventDefault(); newIndex = currentIndex > 0 ? currentIndex - 1 : this.tabs.length - 1; break;
+                    case 'ArrowRight': e.preventDefault(); newIndex = currentIndex < this.tabs.length - 1 ? currentIndex + 1 : 0; break;
+                    case 'Home': e.preventDefault(); newIndex = 0; break;
+                    case 'End': e.preventDefault(); newIndex = this.tabs.length - 1; break;
+                }
+
+                if (newIndex !== currentIndex) {
+                    this.switchTab(this.tabs[newIndex]);
+                    document.querySelector(`[data-tab="${this.tabs[newIndex]}"]`).focus();
+                }
+            }
+
+            updateProgressForTab(tabId) {
+                const progressMap = { 'learn': 20, 'lab': 40, 'quiz': 60, 'resources': 80, 'evaluation': 100 };
+                updateProgress(Math.max(currentProgress, progressMap[tabId] || 0));
+            }
+        }
+
+        class LabEditor {
+            constructor() {
+                this.editor = document.getElementById('code-editor');
+                this.iframe = document.getElementById('preview-iframe');
+                this.executeBtn = document.getElementById('execute-btn');
+                this.resetBtn = document.getElementById('reset-btn');
+                this.defaultCode = this.editor.value;
+                this.init();
+            }
+
+            init() {
+                this.executeBtn.addEventListener('click', () => this.executeCode());
+                this.resetBtn.addEventListener('click', () => this.resetCode());
+                this.editor.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); this.executeCode(); }
+                });
+                setTimeout(() => this.executeCode(), 500);
+            }
+
+            executeCode() {
+                const blob = new Blob([this.editor.value], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                this.iframe.src = url;
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                this.executeBtn.textContent = 'Executed!';
+                this.executeBtn.style.background = 'linear-gradient(135deg, #4caf50, #8bc34a)';
+                setTimeout(() => {
+                    this.executeBtn.textContent = 'Run';
+                    this.executeBtn.style.background = 'linear-gradient(135deg, var(--orange), var(--yellow))';
+                }, 1000);
+            }
+
+            resetCode() {
+                this.editor.value = this.defaultCode;
+                this.executeCode();
+                this.resetBtn.textContent = 'Cleared!';
+                setTimeout(() => { this.resetBtn.textContent = 'Reset'; }, 1000);
+            }
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questions = [
+                    { question: 1,  correct: 'b', explanation: 'Shift left means moving security testing earlier in the development lifecycle — into the IDE, code review and CI stage — so vulnerabilities are caught before they reach production where they are far more expensive to fix.' },
+                    { question: 2,  correct: 'b', explanation: 'npm audit reads the package-lock.json and checks all installed dependencies against a database of known vulnerabilities (CVEs), reporting severity levels and recommended fixes.' },
+                    { question: 3,  correct: 'c', explanation: 'Hardcoded secrets in source code are one of the most common and dangerous security mistakes. If the repository is public or is ever leaked, those credentials are immediately exposed and can be exploited by automated scanners within minutes.' },
+                    { question: 4,  correct: 'b', explanation: 'SAST (Static Application Security Testing) examines source code, bytecode or binaries without executing the program, identifying patterns associated with vulnerabilities like SQL injection, XSS or insecure deserialization.' },
+                    { question: 5,  correct: 'b', explanation: 'An SBOM is a formal, machine-readable inventory of all components in a software product. It enables organisations to quickly identify which products are affected when a vulnerability is disclosed in a specific library (e.g. Log4Shell).' },
+                    { question: 6,  correct: 'b', explanation: 'SAST runs on code without executing it and can be integrated into the IDE or CI. DAST runs against a live application, discovering runtime vulnerabilities like authentication flaws, session issues and server misconfigurations.' },
+                    { question: 7,  correct: 'b', explanation: 'SCA (Software Composition Analysis) specifically targets open-source and third-party components — identifying known CVEs, outdated versions and licence compliance issues. Tools include Snyk, OWASP Dependency-Check and GitHub Dependabot.' },
+                    { question: 8,  correct: 'b', explanation: 'Supply chain attacks compromise a trusted upstream component (e.g. a popular npm package or build tool) to inject malicious code that is then automatically distributed to all downstream users — as seen in the SolarWinds and XZ Utils incidents.' },
+                    { question: 9,  correct: 'b', explanation: 'Dependency confusion exploits the fact that package managers often prefer public registries over private ones. An attacker publishes a malicious package with the same name as an internal package to a public registry, causing it to be silently installed instead.' },
+                    { question: 10, correct: 'b', explanation: 'Secrets must never be stored in code or config files in a repository. The correct approach is to use a dedicated secrets manager (Vault, AWS Secrets Manager, Azure Key Vault) or the encrypted secret store built into the CI platform (GitHub Actions secrets, GitLab CI variables).' },
+                    { question: 11, correct: 'b', explanation: 'Trivy (by Aqua Security) is an open-source comprehensive scanner that detects OS vulnerabilities, application dependency CVEs, misconfigurations in Dockerfiles/IaC, and exposed secrets — making it a popular choice for CI/CD pipeline integration.' },
+                    { question: 12, correct: 'b', explanation: 'IaC security scanning tools (e.g. Checkov, tfsec, KICS) analyse Terraform, CloudFormation, Kubernetes manifests and other IaC files for security misconfigurations — such as public S3 buckets, unrestricted security groups or missing encryption — before deployment.' },
+                    { question: 13, correct: 'b', explanation: 'Policy as Code (tools like OPA — Open Policy Agent) allows security and compliance rules to be defined as code (e.g. Rego), version-controlled, reviewed and automatically enforced in pipelines, preventing non-compliant resources from being deployed.' },
+                    { question: 14, correct: 'b', explanation: 'CI/CD runners execute arbitrary code from pipeline definitions and typically have access to deployment credentials, secrets and production infrastructure. A compromised runner is equivalent to a compromised developer machine with elevated privileges.' },
+                    { question: 15, correct: 'b', explanation: 'The core shift in DevSecOps is that security becomes a shared responsibility embedded throughout the entire SDLC — not a gate at the end. Developers, operations and security teams collaborate from day one, and automated security checks are part of every build and deployment.' }
+                ];
+                this.init();
+            }
+
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0;
+                const feedback = [];
+
+                this.questions.forEach(q => {
+                    const userAnswer = formData.get(`q${q.question}`);
+                    const isCorrect = userAnswer === q.correct;
+                    if (isCorrect) score++;
+                    feedback.push({ question: q.question, correct: isCorrect, explanation: q.explanation, correctAnswer: q.correct });
+                });
+
+                this.displayResults(score, feedback);
+            }
+
+            displayResults(score, feedback) {
+                const resultsDiv = document.getElementById('quiz-results');
+                const scoreDiv = document.getElementById('quiz-score');
+                const feedbackDiv = document.getElementById('quiz-feedback');
+                const percentage = Math.round((score / this.questions.length) * 100);
+
+                let scoreClass, message;
+                if (percentage >= 90) { scoreClass = 'score-excellent'; message = 'Excellent! You have a strong grasp of DevSecOps and pipeline security!'; }
+                else if (percentage >= 70) { scoreClass = 'score-good'; message = 'Well done! You have a good understanding of DevSecOps fundamentals.'; }
+                else if (percentage >= 50) { scoreClass = 'score-fair'; message = 'Not bad, but there is room to improve. Review the concepts again.'; }
+                else { scoreClass = 'score-poor'; message = 'You need more study. Go back to the learning content.'; }
+
+                scoreDiv.innerHTML = `
+                    <div class="${scoreClass}">${score}/${this.questions.length} (${percentage}%)</div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">${message}</div>
+                `;
+
+                feedbackDiv.innerHTML = feedback.map(item => `
+                    <div class="feedback-item ${item.correct ? 'feedback-correct' : 'feedback-incorrect'}">
+                        <span class="feedback-icon">${item.correct ? '✓' : '✗'}</span>
+                        <span>
+                            <strong>Question ${item.question}:</strong> ${item.explanation}
+                            ${!item.correct ? `<br><span style="margin-top: 0.3rem; display: inline-block; font-size: 0.82rem; color: #c0392b; font-weight: 600;">Correct answer: ${item.correctAnswer.toUpperCase()}</span>` : ''}
+                        </span>
+                    </div>
+                `).join('');
+
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            clearQuiz() {
+                document.querySelectorAll('#quiz-form input[type="radio"]').forEach(i => i.checked = false);
+                document.getElementById('quiz-results').style.display = 'none';
+                const btn = document.getElementById('clear-quiz');
+                btn.textContent = 'Cleared!';
+                setTimeout(() => { btn.textContent = 'Clear'; }, 1000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new TabSystem();
+            new LabEditor();
+            new QuizManager();
+        });
+    </script>
+</body>
+</html>
+

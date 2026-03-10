@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - AI Ethics & Responsibility</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0b0d14;
+            --blue: #ff2d78;
+            --purple: #ff85c2;
+            --cyan: #e0006e;
+            --text-light: #e8ecf8;
+            --text-secondary: #b6c0de;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(91,124,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(91,124,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+
+        body::after {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255,0,191,0.168) 0%, rgba(255,0,128,0.185) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,20,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Shared new styles */
+        .info-box { background: rgba(91,124,255,0.07); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+        .info-box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--purple); }
+        .section-divider { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .concept-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .concept-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 0.35rem; }
+        .concept-title { font-weight: 600; font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.4rem; }
+        .concept-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+        .metrics-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .metrics-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; font-weight: 600; }
+        .metrics-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .metrics-table tr:hover td { background: rgba(255,255,255,0.03); color: var(--text-light); }
+        .case-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .case-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .case-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 0.3rem; }
+        .case-title { font-weight: 600; font-size: 0.88rem; color: var(--text-light); margin-bottom: 0.4rem; }
+        .case-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+        .risk-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 50px; margin-bottom: 0.5rem; }
+        .risk-high { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #ff6b6b; }
+        .risk-medium { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; }
+        .risk-low { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+        .principle-row { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 0.5rem; }
+        .principle-icon { font-size: 1.4rem; flex-shrink: 0; }
+        .principle-body { flex: 1; }
+        .principle-title { font-weight: 600; font-size: 0.88rem; color: var(--text-light); margin-bottom: 0.2rem; }
+        .principle-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Quiz */
+        .quiz-question { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05)); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255,255,255,0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .concept-grid, .case-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-ai.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: AI Ethics & Responsibility</h1>
+            <p class="course-description">
+                Understand the core ethical principles behind Artificial Intelligence. Learn about algorithmic bias, privacy, transparency, accountability, and the social impact of AI systems.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• Bias • Privacy • Transparency • Governance</span></div>
+                <div class="meta-item"><span>📌</span><span>AI Fundamentals</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size:0.8rem; margin-top:5px; color:var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event,'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event,'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event,'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event,'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- LEARN -->
+            <div id="aprender" class="tab-panel active">
+
+                <div class="content-card">
+                    <h3>Introduction: Why Ethics Matters in AI</h3>
+                    <p>AI has become a core part of modern society, influencing:</p>
+                    <ul class="styled-list">
+                        <li>Credit decisions</li>
+                        <li>Medical diagnoses</li>
+                        <li>Hiring and HR</li>
+                        <li>Law enforcement</li>
+                        <li>Education</li>
+                        <li>Social media</li>
+                        <li>Public opinion</li>
+                    </ul>
+                    <p style="margin-top:1rem;">Because AI systems affect real lives, ethical design is essential. Ethical AI aims to ensure systems that are:</p>
+                    <ul class="styled-list">
+                        <li>Fair</li>
+                        <li>Transparent</li>
+                        <li>Accountable</li>
+                        <li>Respectful of privacy</li>
+                        <li>Safe and socially beneficial</li>
+                    </ul>
+                    <p style="margin-top:1rem;">This module explains the principles and challenges behind responsible AI.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The core ethical principles — what they mean in practice:</p>
+                    <div class="principle-row">
+                        <div class="principle-icon">⚖️</div>
+                        <div class="principle-body">
+                            <div class="principle-title">Fairness</div>
+                            <div class="principle-desc">AI systems must not discriminate or disadvantage groups based on protected characteristics (race, gender, age, disability). This means equitable outcomes across populations — not just equal treatment.</div>
+                        </div>
+                    </div>
+                    <div class="principle-row">
+                        <div class="principle-icon">🔍</div>
+                        <div class="principle-body">
+                            <div class="principle-title">Transparency</div>
+                            <div class="principle-desc">Users and stakeholders should understand how AI systems work and how decisions are made. This includes model cards, datasheets, and explainability tools that make the "why" visible.</div>
+                        </div>
+                    </div>
+                    <div class="principle-row">
+                        <div class="principle-icon">🛡️</div>
+                        <div class="principle-body">
+                            <div class="principle-title">Accountability</div>
+                            <div class="principle-desc">There must always be a human or organization responsible for an AI system's actions and consequences. Algorithmic decisions should not shield institutions from responsibility.</div>
+                        </div>
+                    </div>
+                    <div class="principle-row">
+                        <div class="principle-icon">🔒</div>
+                        <div class="principle-body">
+                            <div class="principle-title">Privacy by Design</div>
+                            <div class="principle-desc">Privacy protections should be built into AI systems from the beginning — not added as an afterthought. This includes data minimization, access controls, and consent management.</div>
+                        </div>
+                    </div>
+                    <div class="principle-row">
+                        <div class="principle-icon">🌍</div>
+                        <div class="principle-body">
+                            <div class="principle-title">Beneficence & Non-Maleficence</div>
+                            <div class="principle-desc">AI should actively benefit society and avoid causing harm. This requires careful risk assessment before deployment, particularly in high-stakes domains like healthcare, justice, and finance.</div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-box-title">📌 The Stakes of Getting Ethics Wrong</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">In 2019, a healthcare AI used in US hospitals was found to systematically allocate fewer care resources to Black patients than equally sick white patients — because it used healthcare costs as a proxy for healthcare needs, reflecting existing systemic inequality. Approximately 760,000 people were affected. This is a canonical example of why intent ≠ fairness: the algorithm was not designed to be biased, but its training objective encoded existing injustice.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Algorithmic Bias – When AI Is Unfair</h3>
+                    <p>Bias occurs when AI models make decisions that systematically disadvantage certain groups.</p>
+                    <p style="margin-top:0.75rem;">Bias can emerge from:</p>
+                    <ul class="styled-list">
+                        <li>Training data</li>
+                        <li>Model architecture</li>
+                        <li>Social inequalities embedded in data</li>
+                        <li>Human annotation errors</li>
+                        <li>Lack of diversity in datasets</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>Examples of AI bias:</strong></p>
+                    <ul class="styled-list">
+                        <li>Facial recognition misidentifying people with darker skin</li>
+                        <li>Job screening algorithms favoring men</li>
+                        <li>Credit scoring systems discriminating against minority groups</li>
+                        <li>Medical tools underdiagnosing certain populations</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>Types of bias:</strong></p>
+                    <ul class="styled-list">
+                        <li>Prejudicial bias → rooted in social/institutional inequality</li>
+                        <li>Statistical bias → incorrect assumptions</li>
+                        <li>Selection bias → unrepresentative data</li>
+                        <li>Measurement bias → flawed labeling</li>
+                    </ul>
+                    <p style="margin-top:1rem;">Unbiased AI is a myth — but mitigated AI is possible.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Real-world cases and the full taxonomy of bias sources:</p>
+                    <div class="case-grid">
+                        <div class="case-card">
+                            <div class="risk-badge risk-high">HIGH IMPACT</div>
+                            <div class="case-label">Case Study</div>
+                            <div class="case-title">COMPAS Recidivism Algorithm</div>
+                            <div class="case-desc">Used in US courts to predict re-offending risk. ProPublica found it incorrectly flagged Black defendants as future criminals at nearly twice the rate of white defendants. Training data reflected policing patterns — not actual offending rates.</div>
+                        </div>
+                        <div class="case-card">
+                            <div class="risk-badge risk-high">HIGH IMPACT</div>
+                            <div class="case-label">Case Study</div>
+                            <div class="case-title">Amazon's CV Screening Tool</div>
+                            <div class="case-desc">Built to automate hiring, the model penalized CVs that included the word "women's" (e.g. women's chess club) and downgraded graduates from all-women's colleges. It learned from 10 years of historical hiring patterns dominated by male engineers.</div>
+                        </div>
+                        <div class="case-card">
+                            <div class="risk-badge risk-medium">MEDIUM IMPACT</div>
+                            <div class="case-label">Case Study</div>
+                            <div class="case-title">Face Recognition Failures</div>
+                            <div class="case-desc">MIT Media Lab's "Gender Shades" study found commercial face recognition systems had error rates of up to 35% for darker-skinned women vs 1% for lighter-skinned men. The training data was predominantly lighter-skinned faces.</div>
+                        </div>
+                        <div class="case-card">
+                            <div class="risk-badge risk-medium">MEDIUM IMPACT</div>
+                            <div class="case-label">Case Study</div>
+                            <div class="case-title">Word Embeddings & Stereotype</div>
+                            <div class="case-desc">Google's word2vec embeddings placed "man" closer to "computer programmer" and "woman" closer to "homemaker." NLP models trained on this data would reproduce these stereotypes in downstream applications — job recommendations, resume scoring, language generation.</div>
+                        </div>
+                    </div>
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The complete bias taxonomy — where bias can enter the ML pipeline:</p>
+                    <table class="metrics-table">
+                        <thead><tr><th>Bias Type</th><th>Where It Enters</th><th>Example</th><th>Mitigation</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Historical Bias</strong></td><td>The real world itself</td><td>Loan data reflects decades of discriminatory lending</td><td>Counterfactual fairness analysis; reweighting samples</td></tr>
+                            <tr><td><strong>Representation Bias</strong></td><td>Data collection</td><td>Medical imaging trained only on lighter skin tones</td><td>Deliberate data collection across demographics</td></tr>
+                            <tr><td><strong>Measurement Bias</strong></td><td>Labeling / annotation</td><td>Annotators consistently label certain accents as "unclear"</td><td>Diverse annotation teams; inter-annotator reliability checks</td></tr>
+                            <tr><td><strong>Aggregation Bias</strong></td><td>Model design</td><td>One model for all patients ignores different disease presentations by ethnicity</td><td>Stratified models; subgroup analysis</td></tr>
+                            <tr><td><strong>Evaluation Bias</strong></td><td>Benchmark choice</td><td>Testing on a non-representative benchmark gives misleading accuracy</td><td>Disaggregated evaluation by demographic subgroup</td></tr>
+                            <tr><td><strong>Deployment Bias</strong></td><td>Production context</td><td>Tool designed for doctors used by patients without context</td><td>Human oversight; use case constraints</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-card">
+                    <h3>Strategies to Reduce Bias</h3>
+                    <div class="code-explanation"><p><span class="highlight">✔ Better datasets</span><br>Diverse, representative, well-labeled data.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ Bias detection tools</span><br>Fairness metrics, distribution analysis, model audits.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ Transparent design</span><br>Explainable systems that reveal decision logic.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ Human oversight</span><br>Critical decisions must include humans-in-the-loop.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ Regular evaluation</span><br>Models must be retrained as society evolves.</p></div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The technical toolkit for bias detection and mitigation:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Pre-Processing</div>
+                            <div class="concept-title">Fix the Data Before Training</div>
+                            <div class="concept-desc">Reweighting: assign higher importance to underrepresented samples. Resampling: oversample minority groups (SMOTE). Relabeling: remove noisy labels. Disparate impact analysis: check if any feature acts as a proxy for protected attributes.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">In-Processing</div>
+                            <div class="concept-title">Build Fairness Into Training</div>
+                            <div class="concept-desc">Adversarial debiasing: train an adversary to predict protected attributes from the model's internal representations, then penalize it. Constraint-based training: add fairness constraints (demographic parity, equalized odds) directly to the loss function.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Post-Processing</div>
+                            <div class="concept-title">Adjust Outputs After Training</div>
+                            <div class="concept-desc">Threshold adjustment: set different decision thresholds per demographic group to equalize false positive rates. Calibration: ensure confidence scores are equally calibrated across groups. Reject option classification: abstain from prediction when confidence is low for certain groups.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Fairness Metrics</div>
+                            <div class="concept-title">Measuring What "Fair" Means</div>
+                            <div class="concept-desc">Demographic Parity: equal positive prediction rates across groups. Equalized Odds: equal true and false positive rates. Individual Fairness: similar individuals receive similar predictions. Counterfactual Fairness: prediction doesn't change if protected attribute changes. Note: not all metrics can be simultaneously satisfied.</div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-box-title">⚠️ The Impossibility of Perfect Fairness</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">Chouldechova (2017) proved mathematically that several common fairness criteria are mutually incompatible when base rates differ between groups. You cannot simultaneously achieve calibration (predicted scores are accurate), equal false positive rates, and equal false negative rates. This means fairness in AI is ultimately a <strong>values choice</strong>, not a purely technical problem — organizations must decide which notion of fairness is most appropriate for each context.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Privacy in AI – Protecting User Data</h3>
+                    <p>AI models often rely on large amounts of data. If not handled correctly, it leads to privacy violations.</p>
+                    <p style="margin-top:0.75rem;"><strong>Common risks:</strong></p>
+                    <ul class="styled-list">
+                        <li>Unauthorized data collection</li>
+                        <li>Leaking personal information</li>
+                        <li>Re-identification attacks</li>
+                        <li>Mishandling sensitive data (health, location, identity)</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>Key privacy principles:</strong></p>
+                    <ul class="styled-list">
+                        <li>Data minimization → collect only what is needed</li>
+                        <li>Encryption → secure storage and transmission</li>
+                        <li>Anonymization → remove personally identifiable information</li>
+                        <li>Consent → users must agree to data usage</li>
+                        <li>Right to be forgotten → delete user data on request</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>Regulations:</strong> GDPR (Europe) · CCPA (California)</p>
+                    <p style="margin-top:1rem;">Privacy is not optional — it is legally required.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Advanced privacy risks specific to AI — and technical defenses:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">AI-Specific Risk</div>
+                            <div class="concept-title">Membership Inference Attacks</div>
+                            <div class="concept-desc">An attacker can query a model to determine whether a specific individual's data was in the training set. This can reveal sensitive membership (e.g., "was this person's medical record used to train this disease model?"). Defense: differential privacy.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">AI-Specific Risk</div>
+                            <div class="concept-title">Model Inversion Attacks</div>
+                            <div class="concept-desc">By repeatedly querying a model, attackers can reconstruct training data — including faces from facial recognition models. Demonstrated successfully against commercial models. Defense: output perturbation, strict query limits.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Technical Defense</div>
+                            <div class="concept-title">Differential Privacy (DP)</div>
+                            <div class="concept-desc">Add carefully calibrated mathematical noise to training data or model outputs, so individual records can't be inferred. Used by Apple (keyboard predictions), Google (Chrome telemetry), and the US Census Bureau. Tradeoff: some accuracy is lost for privacy guarantees.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Technical Defense</div>
+                            <div class="concept-title">Federated Learning</div>
+                            <div class="concept-desc">Train models on-device across millions of phones without the raw data ever leaving the device. Only model updates (gradients) are sent to a central server and aggregated. Used by Google for Gboard, Apple for Siri. Raw data never leaves the user's device.</div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-box-title">📋 GDPR Key Rights — What Developers Must Implement</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            <strong style="color:var(--text-light);">Right to Explanation (Article 22)</strong> — Users subject to automated decisions have the right to a meaningful explanation. This directly requires explainability in AI systems.<br>
+                            <strong style="color:var(--text-light);">Right to Erasure ("Right to be Forgotten")</strong> — Users can request deletion of their data. For ML models, this may require unlearning or model retraining.<br>
+                            <strong style="color:var(--text-light);">Data Portability</strong> — Users can request their data in a machine-readable format.<br>
+                            <strong style="color:var(--text-light);">Purpose Limitation</strong> — Data collected for one purpose cannot be used for another without explicit consent. Re-using training data for new models may violate this.<br>
+                            <strong style="color:var(--text-light);">Penalties</strong> — Up to €20 million or 4% of global annual revenue, whichever is higher.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Transparency & Explainability</h3>
+                    <p>Black-box AI systems (like deep learning) are powerful but hard to understand. Explainability is crucial when:</p>
+                    <ul class="styled-list">
+                        <li>Decisions affect people (loans, jobs, healthcare)</li>
+                        <li>Regulators require justification</li>
+                        <li>Users need confidence in AI tools</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>Examples of explainability tools:</strong></p>
+                    <ul class="styled-list">
+                        <li>SHAP</li>
+                        <li>LIME</li>
+                        <li>Attention heatmaps</li>
+                        <li>Model cards</li>
+                        <li>Data provenance reports</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><span class="highlight">Explainable AI = trustworthy AI.</span></p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">How XAI tools work — and when to use each:</p>
+                    <table class="metrics-table">
+                        <thead><tr><th>Tool</th><th>How It Works</th><th>Best For</th><th>Limitation</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>SHAP</strong><br><small>(SHapley Additive exPlanations)</small></td><td>Assigns each feature a Shapley value — its contribution to a specific prediction, averaged across all possible feature orderings</td><td>Tabular data, credit scoring, feature importance</td><td>Computationally expensive for large datasets</td></tr>
+                            <tr><td><strong>LIME</strong><br><small>(Local Interpretable Model-Agnostic)</small></td><td>Fits a simple interpretable model (linear regression) to approximate the complex model's behavior locally around a single prediction</td><td>Text and image classification, any model</td><td>Explanations can be unstable; sensitive to perturbation</td></tr>
+                            <tr><td><strong>GradCAM</strong><br><small>(Gradient-weighted Class Activation)</small></td><td>Uses gradient information to highlight which image regions most influenced a CNN's prediction — produces a visual heatmap</td><td>Image classification, medical imaging</td><td>Only works for CNNs; heatmaps can be misleading</td></tr>
+                            <tr><td><strong>Counterfactual Explanations</strong></td><td>"What is the minimum change to the input that would change the output?" — e.g., "Your loan was denied; if your income were €5,000 higher, it would have been approved"</td><td>Regulatory compliance, user-facing explanations</td><td>May suggest impractical changes; multiple counterfactuals exist</td></tr>
+                            <tr><td><strong>Model Cards</strong></td><td>Standardized documentation describing a model's purpose, training data, performance metrics across subgroups, intended use, limitations, and ethical considerations</td><td>Model release, procurement, auditing</td><td>Requires organizational commitment to maintain honestly</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="info-box">
+                        <div class="info-box-title">💡 Interpretability vs Explainability vs Transparency</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            <strong style="color:var(--text-light);">Interpretability</strong> — Can a human understand the model's mechanism directly? Decision trees and linear models are inherently interpretable. Neural networks are not.<br>
+                            <strong style="color:var(--text-light);">Explainability</strong> — Can we generate post-hoc explanations for a model's specific predictions? (SHAP, LIME, GradCAM). These approximate but don't fully capture what the model actually does.<br>
+                            <strong style="color:var(--text-light);">Transparency</strong> — Is information about the model, data, training process, and limitations publicly available? (Model cards, datasheets, audit reports).<br>
+                            All three matter — and they serve different audiences: engineers, users, and regulators.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Accountability – Who Is Responsible When AI Fails?</h3>
+                    <p>If an AI causes harm, responsibility may fall on:</p>
+                    <ul class="styled-list">
+                        <li>Developers</li>
+                        <li>Companies</li>
+                        <li>Deployers</li>
+                        <li>Data providers</li>
+                        <li>Auditors</li>
+                    </ul>
+                    <div class="code-explanation" style="margin-top:1rem;">
+                        <p><strong>Key principle:</strong><br>"AI systems should never remove human accountability." This ensures humans remain responsible for decisions, not algorithms.</p>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The accountability gap — and how to close it:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Problem</div>
+                            <div class="concept-title">The Accountability Gap</div>
+                            <div class="concept-desc">When AI causes harm, responsibility is often diffused: developers claim they didn't know how the system would be used; deployers claim the developer should have prevented misuse; regulators lack technical expertise; victims lack legal standing to challenge algorithmic decisions.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Framework</div>
+                            <div class="concept-title">AI Impact Assessments</div>
+                            <div class="concept-desc">Before deploying high-risk AI, organizations should conduct structured risk assessments: Who could be harmed? What are the failure modes? What safeguards exist? Who reviews outputs? Who do affected parties contact? The EU AI Act mandates this for high-risk systems.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Tool</div>
+                            <div class="concept-title">Audit Trails & Logging</div>
+                            <div class="concept-desc">Production AI systems should log inputs, outputs, model versions, and decision timestamps. This enables post-hoc investigation when something goes wrong, supports regulatory compliance, and allows identification of systematic errors in deployed models.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Principle</div>
+                            <div class="concept-title">Human-in-the-Loop (HITL)</div>
+                            <div class="concept-desc">For high-stakes decisions (medical diagnosis, bail, benefits), a human should review AI outputs before action is taken. HITL is not just ethics — it's increasingly a regulatory requirement. The EU AI Act prohibits fully automated high-risk decisions without human oversight.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Social Impact – How AI Changes Society</h3>
+                    <p>AI brings positive impacts:</p>
+                    <ul class="styled-list">
+                        <li>Better medical diagnoses</li>
+                        <li>More efficient transportation</li>
+                        <li>Personalized learning</li>
+                        <li>Accessible digital tools</li>
+                        <li>Faster scientific research</li>
+                    </ul>
+                    <p style="margin-top:1rem;">But also negative risks:</p>
+                    <ul class="styled-list">
+                        <li>Job displacement</li>
+                        <li>Manipulation of public opinion</li>
+                        <li>Deepfakes</li>
+                        <li>Increased inequality</li>
+                        <li>Surveillance misuse</li>
+                    </ul>
+                    <p style="margin-top:1rem;">Ethical AI design must balance innovation with protection.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The structural impacts of AI on labor, power, and inequality:</p>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Labor Automation</span> — McKinsey estimates 400 million to 800 million jobs could be displaced by automation by 2030. Most at risk: routine cognitive tasks (data entry, basic customer service, paralegal work). Least at risk: creative work, complex human interaction, and skilled trades requiring dexterity. Key concern: job displacement will not be geographically or demographically even — it will hit developing economies and lower-income workers hardest.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Power Concentration</span> — The most powerful AI systems require billions of dollars in compute, vast proprietary datasets, and thousands of engineers. This creates barriers to entry that concentrate AI power in 5–10 companies globally. Small businesses, developing nations, and civil society organizations cannot build or audit these systems — they can only consume them. This raises concerns about AI sovereignty and dependency.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Environmental Cost</span> — Training a large language model produces significant CO₂ emissions. GPT-3's training was estimated to consume ~1,287 MWh of electricity and emit ~500 metric tons of CO₂. AI inference at scale (billions of daily queries) compounds this. Data centers currently use ~200 TWh/year globally — comparable to some small nations. Sustainable AI requires energy-efficient architectures, hardware advances, and renewable energy commitments.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">AI and Democracy</span> — Recommendation algorithms on social media maximize engagement — which is correlated with emotional arousal, outrage, and polarization. Studies show algorithmic amplification has deepened political polarization. AI-generated political content, synthetic media in campaigns, and microtargeted political ads raise fundamental questions about democratic discourse and informed consent in elections.</p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Deepfakes & Disinformation</h3>
+                    <p>Generative AI can create:</p>
+                    <ul class="styled-list">
+                        <li>Fake videos</li>
+                        <li>Synthetic voices</li>
+                        <li>Manipulated evidence</li>
+                        <li>Realistic fake identities</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>Threats:</strong></p>
+                    <ul class="styled-list">
+                        <li>Political misinformation</li>
+                        <li>Fraud/scams</li>
+                        <li>Reputation damage</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>Solutions:</strong></p>
+                    <ul class="styled-list">
+                        <li>Watermarking AI content</li>
+                        <li>Detection tools</li>
+                        <li>Regulations</li>
+                        <li>User education</li>
+                    </ul>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The technical arms race between deepfake creation and detection:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Attack</div>
+                            <div class="concept-title">How Deepfakes Are Made</div>
+                            <div class="concept-desc">Face-swapping models (GAN-based or diffusion-based) replace one person's face with another's in video, synchronizing lighting, skin tone, and facial motion. Voice cloning models (ElevenLabs, VALL-E) can clone a voice from 3 seconds of audio. Full synthetic video of a person speaking can now be generated from just a photo and a text script.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Defense</div>
+                            <div class="concept-title">C2PA Provenance Standards</div>
+                            <div class="concept-desc">The Coalition for Content Provenance and Authenticity (C2PA), backed by Adobe, Microsoft, and camera manufacturers, embeds cryptographic metadata into media files at creation time. This creates a verifiable chain of custody. Content Credentials show who created the media, when, and with what tool — even after the image is edited.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Defense</div>
+                            <div class="concept-title">AI Watermarking</div>
+                            <div class="concept-desc">Google DeepMind's SynthID embeds imperceptible watermarks into AI-generated images and audio. The watermark survives compression, cropping, and filters. Meta's Stable Signature embeds watermarks at the diffusion model decoder level. EU AI Act mandates disclosure labels on AI-generated synthetic media.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Risk</div>
+                            <div class="concept-title">The Liar's Dividend</div>
+                            <div class="concept-desc">As deepfakes become more prevalent, a paradox emerges: real evidence can now be dismissed as "probably AI-generated." Politicians and public figures can deny authentic videos are real. This "liar's dividend" may be more dangerous than deepfakes themselves — eroding trust in all media, including genuine evidence of wrongdoing.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>AI Governance & Regulation</h3>
+                    <p>Governments and institutions are creating frameworks to ensure safe AI.</p>
+                    <p style="margin-top:0.75rem;"><strong>Examples:</strong></p>
+                    <ul class="styled-list">
+                        <li>EU AI Act</li>
+                        <li>IEEE ethical standards</li>
+                        <li>OECD guidelines</li>
+                        <li>NIST AI risk management framework</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>Key pillars:</strong> Safety · Fairness · Transparency · Accountability · Robustness</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Global AI governance landscape — what each major framework actually requires:</p>
+                    <table class="metrics-table">
+                        <thead><tr><th>Framework</th><th>Jurisdiction</th><th>Approach</th><th>Key Requirements</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>EU AI Act</strong> (2024)</td>
+                                <td>European Union</td>
+                                <td>Risk-based classification</td>
+                                <td>Unacceptable risk: banned (social scoring, real-time biometric surveillance). High risk: conformity assessments, human oversight, audit trails. GPAI: transparency, copyright compliance. Penalties: up to €35M or 7% of revenue.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>US Executive Order on AI</strong> (2023)</td>
+                                <td>United States</td>
+                                <td>Agency-based guidance</td>
+                                <td>Mandatory safety testing for frontier AI models before release. Disclosure requirements for AI-generated content. Standards for watermarking. No single comprehensive law — sector-specific guidance.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>China AI Regulations</strong> (2023)</td>
+                                <td>China</td>
+                                <td>Service-focused rules</td>
+                                <td>Generative AI services must register with authorities, label AI content, prevent content that "undermines social stability," and use training data with lawful provenance.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NIST AI RMF</strong></td>
+                                <td>United States (voluntary)</td>
+                                <td>Risk management framework</td>
+                                <td>Four core functions: Govern, Map, Measure, Manage. Provides organizations with a structured process for identifying, evaluating, and managing AI risks throughout the system lifecycle.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>OECD AI Principles</strong></td>
+                                <td>International (38 countries)</td>
+                                <td>Soft law / principles</td>
+                                <td>Five principles: Inclusive growth, human-centered values, transparency, robustness/security, accountability. Non-binding but widely adopted as reference for national regulation.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="info-box">
+                        <div class="info-box-title">🏛️ The EU AI Act Risk Classification in Practice</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            <strong style="color:#ef4444;">Unacceptable Risk (Banned):</strong> Social credit scoring, real-time biometric surveillance in public spaces, emotional recognition at work/schools, predictive policing of individuals.<br>
+                            <strong style="color:#f59e0b;">High Risk (Strict Rules):</strong> Hiring/CV screening tools, credit scoring, educational assessment, healthcare triage, criminal justice, migration management, critical infrastructure.<br>
+                            <strong style="color:#fbbf24;">Limited Risk (Transparency Required):</strong> Chatbots (must disclose they're AI), deepfakes (must label), emotion recognition tools.<br>
+                            <strong style="color:#6ee7b7;">Minimal Risk (No Requirements):</strong> Spam filters, AI in video games, recommendation systems.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                    <h3>Section Conclusion</h3>
+                    <p>You now understand:</p>
+                    <ul class="styled-list">
+                        <li>Algorithmic bias — sources, real-world cases, and mitigation strategies</li>
+                        <li>Privacy risks specific to AI — membership inference, model inversion, and federated learning defenses</li>
+                        <li>Explainability tools — SHAP, LIME, GradCAM, counterfactuals, and when to use each</li>
+                        <li>Accountability frameworks — impact assessments, audit trails, and human-in-the-loop requirements</li>
+                        <li>Social impacts — labor displacement, power concentration, and AI's environmental cost</li>
+                        <li>Deepfakes and disinformation — the arms race between creation and detection</li>
+                        <li>Global AI governance — the EU AI Act, US EO, NIST framework, and OECD principles</li>
+                    </ul>
+                    <p style="margin-top:1rem;">These principles are essential for anyone designing, deploying, or auditing AI systems.</p>
+                </div>
+
+            </div>
+
+            <!-- LAB -->
+            <div id="laboratorio" class="tab-panel">
+                <h3 style="margin-bottom:1rem;">Bias Analysis Console</h3>
+                <p style="margin-bottom:1rem; font-size:0.9rem; color:var(--text-secondary);">Simulate a bias detection scenario. Inspect the hiring algorithm below and run the analysis to identify fairness issues.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">ALGORITHM EDITOR</div>
+                        <textarea class="lab-textarea" id="lab-input">// Bias simulation – CV screening algorithm
+
+const candidates = [
+  { name: "Ana Silva",   gender: "F", score: 92 },
+  { name: "João Costa",  gender: "M", score: 88 },
+  { name: "Maria Sousa", gender: "F", score: 95 },
+  { name: "Pedro Neves", gender: "M", score: 78 }
+];
+
+// Filter with gender bias
+const selected = candidates
+  .filter(c => c.gender === "M" || c.score >= 90);
+
+console.log("Selected:", selected);</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">ANALYSIS RESULTS</div>
+                        <div class="lab-output" id="lab-output">
+                            Click "Run Analysis" to simulate the algorithm and identify potential bias...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:1rem;" onclick="runLab()">▶ Run Analysis</button>
+            </div>
+
+            <!-- QUIZ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Quiz: AI Ethics & Responsibility</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:2rem;">Test your knowledge on ethics, bias, privacy, and AI governance. Answer all 15 questions and get instant feedback.</p>
+
+                    <form id="quiz-form">
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">1. What is algorithmic bias?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Faster computation</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Systematic unfair outcomes produced by an algorithm</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) A coding error</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) A hardware failure</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">2. Where does bias usually come from?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Hardware limitations</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) Random chance only</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Biased or incomplete training data</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Network speed</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">3. What is a fairness metric?</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) A performance benchmark</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) A measure to evaluate equitable outcomes across groups</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) A security protocol</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) A dataset format</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">4. What is data minimization?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Collecting all available data</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Deleting all user data</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) Collecting only the data necessary for a purpose</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Compressing files</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">5. Why is encryption important?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) It speeds up systems</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) It reduces storage</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) It protects data from unauthorized access</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) It improves AI accuracy</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">6. What is a black-box model?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) A broken model</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B"> B) A model whose internal decisions are hard to interpret</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) A small dataset</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) A rule-based system</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">7. Why is explainability crucial?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) It makes models faster</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) It helps users trust and understand AI decisions</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) It reduces data size</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) It removes bias automatically</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">8. What is a deepfake?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) A secure database</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) A fake website</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) AI-generated media that convincingly mimics real people</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) A compression algorithm</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">9. Name a negative social impact of AI.</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Improved productivity</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Better healthcare</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Job displacement</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Faster communication</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">10. What regulation protects European users?</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) HIPAA</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) GDPR</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) DMCA</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) ISO</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">11. What is consent in data collection?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Automatic data gathering</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) User agreement to collect and use their data</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Government approval</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Encryption</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">12. What does accountability mean in AI?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) Faster performance</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) No responsibility</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Clear responsibility for AI decisions and impacts</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Automated reporting</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">13. Give an example of an ethical risk in AI.</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Faster algorithms</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Data storage costs</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Discrimination from biased models</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Hardware overheating</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">14. What is the goal of AI governance?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) To ban AI</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B"> B) To maximize profit</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) To guide safe, ethical, and responsible AI use</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) To replace laws</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">15. Should AI replace human decision-making? Why or why not?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) Yes, humans are unnecessary</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Yes, AI is always correct</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C"> C) No, humans must remain responsible for critical decisions</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) No, AI cannot compute</label>
+                        </div>
+
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display:none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div id="recursos" class="tab-panel">
+                <h3 style="margin-bottom:1.5rem;">Support Materials</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ EU AI Act – Full Text & Summary</a>
+                    <a href="#" class="resource-link">→ GDPR – Practical Guide for Developers</a>
+                    <a href="#" class="resource-link">→ Fairness Indicators (Google) – Documentation</a>
+                    <a href="#" class="resource-link">→ SHAP – Explainability for ML Models</a>
+                    <a href="#" class="resource-link">→ AI Ethics Guidelines (IEEE)</a>
+                    <a href="#" class="resource-link">→ NIST AI Risk Management Framework</a>
+                    <a href="#" class="resource-link">→ Deepfake Detection Challenge – Dataset & Papers</a>
+                    <a href="#" class="resource-link">→ Partnership on AI – Resources & Case Studies</a>
+                    <a href="#" class="resource-link">→ Timnit Gebru: Stochastic Parrots Paper</a>
+                    <a href="#" class="resource-link">→ Model Cards for Model Reporting (Google AI)</a>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: AI Ethics & Responsibility</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:2rem;">To successfully complete this module, you should demonstrate understanding across the following competency levels:</p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>What Artificial Intelligence is and how it works</li>
+                                <li>Difference between AI, Machine Learning, and Deep Learning</li>
+                                <li>Types of learning: supervised, unsupervised, and reinforcement learning</li>
+                                <li>Basic data concepts (features, labels, datasets)</li>
+                                <li>Overfitting vs. underfitting</li>
+                                <li>Model evaluation basics (accuracy, precision, recall)</li>
+                                <li>Ethics and responsible use of AI</li>
+                                <li>Basic prompt design for language models</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Machine Learning project pipeline</li>
+                                <li>Data cleaning and preprocessing</li>
+                                <li>Basic algorithms (linear regression, decision trees, k-means)</li>
+                                <li>Training, validation, and testing models</li>
+                                <li>Basic feature engineering</li>
+                                <li>Introduction to neural networks</li>
+                                <li>Using AI APIs (language and vision models)</li>
+                                <li>Fairness metrics and bias detection tools</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Deep Learning (CNNs and RNNs)</li>
+                                <li>Transformers and foundation models</li>
+                                <li>Fine-tuning and embeddings</li>
+                                <li>Hyperparameter tuning and optimization</li>
+                                <li>MLOps and model deployment</li>
+                                <li>Generative AI (text, images, audio, code)</li>
+                                <li>Model explainability (XAI)</li>
+                                <li>Bias mitigation and AI safety</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+            document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runLab() {
+            const input = document.getElementById('lab-input').value;
+            const output = document.getElementById('lab-output');
+            if (input.includes('gender') || input.includes('genero') || input.includes('género')) {
+                output.innerHTML = `
+                    <strong style="color:#ef4444;">⚠ Bias Detected</strong><br><br>
+                    <strong style="color:#28e0ff;">Candidates evaluated:</strong> 4<br>
+                    <strong style="color:#28e0ff;">Selected:</strong> 3 (João, Maria, Ana)<br>
+                    <strong style="color:#28e0ff;">Rejected:</strong> 1 (Pedro – score 78)<br><br>
+                    <span style="color:#f59e0b;">→ Issue identified:</span> The filter uses gender as a secondary tiebreaker, which constitutes selection bias.<br><br>
+                    <span style="color:#10b981;">✔ Recommendation:</span> Use only objective metrics (score) and audit the model with fairness metrics.<br><br>
+                    <em style="color:#b6c0de;">Tip: Try removing the gender filter and see if results change.</em>
+                `;
+            } else {
+                output.innerHTML = `
+                    <strong style="color:#10b981;">✔ Analysis complete</strong><br><br>
+                    No obvious bias patterns detected in the current code.<br><br>
+                    <em style="color:#b6c0de;">Tip: Try adding filters by gender, ethnicity, or other sensitive variables to see how bias is flagged.</em>
+                `;
+            }
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questionsData = {
+                    q1:  { correct: 'B', exp: 'Algorithmic bias refers to systematic unfair outcomes produced by an algorithm.' },
+                    q2:  { correct: 'C', exp: 'Bias typically comes from biased or incomplete training data that reflects social inequalities.' },
+                    q3:  { correct: 'B', exp: 'A fairness metric is a measure used to evaluate equitable outcomes across different groups.' },
+                    q4:  { correct: 'C', exp: 'Data minimization means collecting only the data strictly necessary for a specific purpose.' },
+                    q5:  { correct: 'C', exp: 'Encryption protects data from unauthorized access during storage and transmission.' },
+                    q6:  { correct: 'B', exp: 'A black-box model is one whose internal decisions are difficult or impossible to interpret.' },
+                    q7:  { correct: 'B', exp: 'Explainability is crucial so users and regulators can trust and understand AI decisions.' },
+                    q8:  { correct: 'C', exp: 'Deepfakes are AI-generated media that convincingly mimic real people.' },
+                    q9:  { correct: 'C', exp: 'Job displacement is one of the key negative social impacts associated with AI automation.' },
+                    q10: { correct: 'B', exp: 'GDPR (General Data Protection Regulation) is the main European privacy regulation.' },
+                    q11: { correct: 'B', exp: 'Consent means the user has explicitly agreed to the collection and use of their data.' },
+                    q12: { correct: 'C', exp: 'Accountability in AI means having a clear chain of responsibility for the system\'s decisions and impacts.' },
+                    q13: { correct: 'C', exp: 'Discrimination resulting from biased models is a clear example of an ethical risk in AI.' },
+                    q14: { correct: 'C', exp: 'The goal of AI governance is to guide safe, ethical, and responsible use of AI systems.' },
+                    q15: { correct: 'C', exp: 'Humans must remain responsible for critical decisions — AI should never remove human accountability.' }
+                };
+                this.init();
+            }
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0, feedbackHTML = '';
+                Object.keys(this.questionsData).forEach((key, index) => {
+                    const userAnswer = formData.get(key);
+                    const isCorrect = userAnswer === this.questionsData[key].correct;
+                    if (isCorrect) score++;
+                    feedbackHTML += `<div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}"><span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span><div><strong>Question ${index+1}:</strong> ${this.questionsData[key].exp}${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}</div></div>`;
+                });
+                this.displayResults(score, feedbackHTML);
+            }
+            displayResults(score, feedbackHTML) {
+                const total = Object.keys(this.questionsData).length;
+                const percent = Math.round((score / total) * 100);
+                const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+                document.getElementById('quiz-score').innerHTML = `<div class="${scoreClass}">${score}/${total} (${percent}%)</div><p style="color:var(--text-secondary)">${percent >= 70 ? 'Excellent! You are ready to move on to the next module.' : 'Review the concepts on privacy, bias, and governance and try again.'}</p>`;
+                document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                const resultsDiv = document.getElementById('quiz-results');
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+            clearQuiz() {
+                document.getElementById('quiz-form').reset();
+                document.getElementById('quiz-results').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Deployment & Monitorization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+    --bg-dark: #0b0d14;
+
+    /* Nova paleta verde */
+    --green-primary: #22c55e;     /* verde principal */
+    --green-secondary: #4ade80;   /* verde claro */
+    --green-accent: #16a34a;      /* verde forte */
+    --green-cyan: #2dd4bf;        /* verde-água (mantém vibe tech) */
+    --cyan: #28e0ff;              /* ciano para detalhes e destaques */
+
+    --text-light: #e8ecf8;
+    --text-secondary: #b6c0de;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, rgba(122, 75, 255, 0.1) 0%, rgba(91, 124, 255, 0.05) 50%, transparent 100%);
+            pointer-events: none; z-index: -1;
+        }
+
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 13, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1160px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+
+        .premium-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px; font-size: 0.75rem; font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn-back { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+        .btn-primary {
+    background: linear-gradient(135deg, var(--green-primary), var(--green-cyan));
+    color: white;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+
+        .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    /* Gradiente: from-lime-500 via-green-400 to-lime-400 */
+    background: linear-gradient(to right, #84cc16, #4ade80, #a3e635);
+
+    /* Faz o gradiente aplicar apenas ao texto */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback para browsers antigos */
+}
+
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill {
+    height: 100%;background: linear-gradient(90deg, var(--green-primary), var(--green-cyan));width: 0%; transition: width 0.3s ease;
+}
+
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .tab-nav { display: flex; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255, 255, 255, 0.05); }
+        .tab-button.active {
+    background: rgba(15, 155, 67, 0.3);
+} 
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--green-primary), var(--green-cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Content Cards */
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--green-primary);; display: flex; align-items: center; gap: 10px; }
+        .content-card h4 { margin: 1.2rem 0 0.6rem; color: var(--green-cyan);; font-size: 1rem; }
+        .code-explanation { border-left: 3px solid var(--green-primary);; padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--green-cyan);; font-weight: 600; }
+
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        /* Code block */
+        .code-block {
+            background: #0a0c12;
+            border: 1px solid rgba(91,124,255,0.3);
+            border-radius: 8px; padding: 1.2rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+        }
+        .code-block pre { margin: 0; }
+        .code-block code { font-family: 'Courier New', Consolas, monospace; font-size: 0.875rem; line-height: 1.7; color: #c9d1d9; }
+        .code-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: block; }
+
+        /* Tip / Warning boxes */
+        .tip-box { background: rgba(34, 197, 94, 0.08);
+    border-left: 4px solid var(--green-primary); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .tip-box strong { color: var(--green-primary); }
+        .warning-box { background: rgba(255, 165, 0, 0.07); border-left: 4px solid #ffa500; border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .warning-box strong { color: #ffa500; }
+
+        /* Two-column grid */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+        .mini-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mini-card h5 { color: var(--cyan); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .mini-card p, .mini-card li { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+
+        /* Chapter header */
+        .chapter-header {
+            background: linear-gradient(
+                135deg,
+                rgba(34, 197, 94, 0.15),
+                rgba(45, 212, 191, 0.08)
+            );
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; margin-top: 2.5rem;
+        }
+        .chapter-header:first-child { margin-top: 0; }
+        .chapter-header h2 { font-size: 1.4rem; font-weight: 700; color: var(--text-light); margin-bottom: 0.4rem; }
+        .chapter-header p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-secondary); font-size: 0.88rem; }
+        .data-table thead tr { border-bottom: 2px solid var(--border-color); text-align: left; }
+        .data-table th { padding: 10px; font-weight: 600; color: var(--text-light); }
+        .data-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .data-table td { padding: 10px; }
+
+        /* Inline formula highlight */
+        .formula { font-family: monospace; background: rgba(40,224,255,0.1); padding: 2px 8px; border-radius: 4px; color: var(--cyan); font-size: 0.9rem; }
+
+        /* Quiz */
+        .quiz-question { font-weight: 600; margin-bottom: 1rem; color: var(--cyan); }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--blue); }
+        .option-text { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+        .quiz-option:hover .option-text { color: var(--text-light); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(40, 224, 255, 0.05)); border: 1px solid rgba(34, 197, 94, 0.08); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+        .correct-answer {
+    color: #ef4444; /* vermelho moderno */
+    font-weight: 600;
+}
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+        @media (max-width: 768px) { .evaluation-grid { grid-template-columns: 1fr; } }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 400px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #0f0; font-family: monospace; padding: 1rem; border: none; resize: none; outline: none; }
+        .lab-iframe { flex: 1; background: #0a0c12; color: #c9d1d9; padding: 1rem; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-data-science.html" class="btn btn-back">← Back</a>
+                <a href="browse.html" class="btn btn-primary">Explore</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: Deployment & Monitorization</h1>
+            <p class="course-description">
+                Take models to the real world. Learn how to deploy machine learning solutions into production, monitor performance over time, and ensure they continue to generate value in a dynamic environment.
+            </p>
+            <div class="course-meta">
+                <div class="meta-item">
+                    <span>⏱</span>
+                    <span>4–6h</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯</span>
+                    <span>• APIs • Cloud • Model Monitoring</span>
+                </div>
+                <div class="meta-item">
+                    <span>📌</span>
+                    <span>Production, Scalability, and Maintenance of Models</span>
+                </div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event, 'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event, 'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event, 'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event, 'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event, 'avaliacao')">Evaluation</button>
+            </nav>
+
+            <div id="aprender" class="tab-panel active">
+
+    <!-- 7.1 -->
+    <div class="content-card">
+        <h3>🚀 7.1 What is Deployment? — From Lab to Reality</h3>
+        <p>Deployment is the moment a Machine Learning model stops being an experiment and starts being a <strong>product</strong>. A model living only in a Jupyter Notebook generates zero business value — it must be integrated into the systems, applications, and workflows where decisions are actually made.</p>
+        <p style="margin-top:0.8rem;">Think of deployment as the bridge between the Data Science team and the real world. Everything built before this point — data collection, cleaning, feature engineering, modelling, evaluation — only pays off when the model is running live, serving real predictions to real users.</p>
+
+        <div class="code-explanation" style="margin-top:1rem;">
+            <strong>🎯 What you'll master in this module:</strong>
+            <br><br>• <span class="highlight">Deployment Patterns:</span> Batch, real-time, and edge deployment strategies.
+            <br>• <span class="highlight">REST APIs with Flask & FastAPI:</span> Serving predictions over HTTP.
+            <br>• <span class="highlight">Containerisation with Docker:</span> Making models portable and reproducible.
+            <br>• <span class="highlight">Cloud Platforms:</span> AWS, GCP, Azure — where models actually live.
+            <br>• <span class="highlight">Model Drift:</span> Why models degrade and how to detect it early.
+            <br>• <span class="highlight">Monitoring Dashboards:</span> Tracking performance, latency, and data quality in production.
+            <br>• <span class="highlight">Retraining Pipelines:</span> Closing the loop with automated retraining.
+            <br>• <span class="highlight">MLOps:</span> The discipline that makes all of this reliable, repeatable, and scalable.
+        </div>
+
+        <div style="background:rgba(91,124,255,0.08); border-radius:8px; padding:1rem; margin-top:1rem; border:1px solid rgba(91,124,255,0.2);">
+            <strong style="color:var(--cyan);">💡 The Deployment Reality Check:</strong>
+            <p style="margin-top:0.5rem; color:var(--text-secondary);">Studies consistently show that <strong>87% of ML models never make it to production</strong>. The bottleneck is rarely the model's accuracy — it's the engineering complexity of deployment and the organisational challenge of integration. This module teaches you how to be in the 13% that ships.</p>
+        </div>
+    </div>
+
+    <!-- 7.2 -->
+    <div class="content-card">
+        <h3>📦 7.2 Saving Models — The First Step to Deployment</h3>
+        <p>Before a model can be deployed anywhere, it must be serialised — converted from a live Python object into a file that can be saved, transferred, and reloaded. This is the most fundamental step.</p>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">Saving with Joblib (Scikit-Learn)</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">import joblib
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+
+# Build and train a full pipeline
+pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('model',  RandomForestClassifier(n_estimators=100, random_state=42))
+])
+pipeline.fit(X_train, y_train)
+
+# Save the complete pipeline (preprocessing + model together!)
+joblib.dump(pipeline, 'churn_model_v1.pkl')
+print("✅ Model saved successfully")
+
+# Load it anywhere, anytime
+loaded_pipeline = joblib.load('churn_model_v1.pkl')
+predictions = loaded_pipeline.predict(new_data)</pre>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">Model Versioning — Never Overwrite Production Models</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary);">Always version your saved models. If a new version degrades in production, you need to roll back instantly.</p>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">from datetime import datetime
+import json, os
+
+# Version with timestamp and metadata
+version   = datetime.now().strftime("%Y%m%d_%H%M%S")
+filename  = f"churn_model_{version}.pkl"
+joblib.dump(pipeline, f"models/{filename}")
+
+# Save model metadata alongside the file
+metadata = {
+    "version":        version,
+    "filename":       filename,
+    "train_f1":       0.871,
+    "train_samples":  45000,
+    "features":       list(X_train.columns),
+    "created_by":     "data-science-team",
+    "status":         "staging"   # staging | production | deprecated
+}
+with open(f"models/{version}_metadata.json", "w") as f:
+    json.dump(metadata, f, indent=2)
+
+print(f"✅ Model v{version} saved with metadata")</pre>
+    </div>
+
+    <!-- 7.3 -->
+    <div class="content-card">
+        <h3>📡 7.3 REST APIs — Serving Predictions Over HTTP</h3>
+        <p>The most common deployment pattern is wrapping the model in a <strong>REST API</strong>. Any application — web, mobile, internal system — can then send data to the model and receive predictions via standard HTTP requests. The model becomes a service.</p>
+
+        <div style="background:rgba(40,224,255,0.06); border:1px solid rgba(40,224,255,0.2); border-radius:8px; padding:1rem; margin-bottom:1rem; font-size:0.85rem; text-align:center;">
+            <span style="color:var(--text-secondary);">Mobile App</span>
+            <span style="color:var(--cyan); margin:0 0.5rem;">→ POST /predict →</span>
+            <span style="color:var(--text-light);">API Server</span>
+            <span style="color:var(--cyan); margin:0 0.5rem;">→ loads model →</span>
+            <span style="color:var(--text-light);">Prediction</span>
+            <span style="color:var(--cyan); margin:0 0.5rem;">→ JSON response →</span>
+            <span style="color:var(--text-secondary);">Mobile App</span>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1rem 0 0.75rem;">Flask API — Simple and Widely Used</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">from flask import Flask, request, jsonify
+import joblib, pandas as pd, logging
+
+app    = Flask(__name__)
+model  = joblib.load('models/churn_model_v1.pkl')
+logger = logging.getLogger(__name__)
+
+@app.route('/health', methods=['GET'])
+def health():
+    """Health check endpoint — used by load balancers"""
+    return jsonify({"status": "healthy", "model": "churn_v1"})
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    try:
+        # Parse incoming JSON data
+        data    = request.get_json()
+        df      = pd.DataFrame([data])
+
+        # Generate prediction + probability
+        pred    = model.predict(df)[0]
+        proba   = model.predict_proba(df)[0][1]
+
+        logger.info(f"Prediction made: {pred} ({proba:.3f})")
+
+        return jsonify({
+            "will_churn":        bool(pred),
+            "churn_probability": round(float(proba), 4),
+            "model_version":     "v1",
+            "status":            "success"
+        })
+
+    except Exception as e:
+        logger.error(f"Prediction error: {e}")
+        return jsonify({"error": str(e), "status": "failed"}), 400
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=False)</pre>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">FastAPI — The Modern Choice (Faster + Auto-Documentation)</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import joblib, pandas as pd
+
+app   = FastAPI(title="Churn Prediction API", version="1.0")
+model = joblib.load('models/churn_model_v1.pkl')
+
+# Pydantic model for request validation (auto-validates input types!)
+class CustomerData(BaseModel):
+    account_age_days:    int
+    days_since_login:    int
+    monthly_spend:       float
+    support_tickets:     int
+    plan_type:           str
+
+class PredictionResponse(BaseModel):
+    will_churn:        bool
+    churn_probability: float
+    model_version:     str
+
+@app.get("/health")
+def health(): return {"status": "ok"}
+
+@app.post("/predict", response_model=PredictionResponse)
+def predict(customer: CustomerData):
+    try:
+        df   = pd.DataFrame([customer.dict()])
+        pred = model.predict(df)[0]
+        prob = model.predict_proba(df)[0][1]
+        return PredictionResponse(
+            will_churn=bool(pred),
+            churn_probability=round(float(prob), 4),
+            model_version="v1"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# Run with: uvicorn app:app --host 0.0.0.0 --port 8000
+# Auto-generated docs at: http://localhost:8000/docs</pre>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">Testing the API</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">import requests
+
+# Simulating a client call
+payload = {
+    "account_age_days": 120,
+    "days_since_login":  45,
+    "monthly_spend":    29.99,
+    "support_tickets":   3,
+    "plan_type":        "basic"
+}
+
+response = requests.post("http://localhost:8000/predict", json=payload)
+result   = response.json()
+
+print(f"Will churn:    {result['will_churn']}")
+print(f"Probability:   {result['churn_probability']:.1%}")
+print(f"Model version: {result['model_version']}")</pre>
+    </div>
+
+    <!-- 7.4 -->
+    <div class="content-card">
+        <h3>🐳 7.4 Docker — Making Models Portable</h3>
+        <p>The classic problem: <em>"It works on my machine!"</em>. Docker solves this by packaging your model, its dependencies, and its runtime environment into a single <strong>container</strong> that runs identically on any machine — your laptop, a server, or the cloud.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+            <div style="background:rgba(40,224,255,0.05); border:1px solid rgba(40,224,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan);">Without Docker ❌</strong>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem; line-height:1.9;">
+                    <li>Works on dev machine, breaks on server</li>
+                    <li>Dependency version conflicts</li>
+                    <li>Manual setup on every new machine</li>
+                    <li>"It worked last week!" mystery bugs</li>
+                </ul>
+            </div>
+            <div style="background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:#10b981;">With Docker ✅</strong>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem; line-height:1.9;">
+                    <li>Identical environment everywhere</li>
+                    <li>Exact dependency versions locked</li>
+                    <li>One command to launch anywhere</li>
+                    <li>Scales horizontally with ease</li>
+                </ul>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1rem 0 0.5rem;">Dockerfile — The Recipe for Your Container</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;"># Dockerfile
+FROM python:3.11-slim
+
+# Set working directory inside the container
+WORKDIR /app
+
+# Copy and install dependencies FIRST (Docker caching optimisation)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy model and application files
+COPY models/ ./models/
+COPY app.py .
+
+# Expose the port the API will run on
+EXPOSE 8000
+
+# Command to start the server
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]</pre>
+
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;"># requirements.txt
+fastapi==0.104.1
+uvicorn==0.24.0
+scikit-learn==1.3.2
+pandas==2.1.3
+joblib==1.3.2
+pydantic==2.5.0</pre>
+
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;"># Build and run the container
+docker build -t churn-api:v1 .
+docker run -d -p 8000:8000 --name churn-service churn-api:v1
+
+# Test it's running
+curl http://localhost:8000/health
+# {"status": "ok"}
+
+# Push to a registry (e.g. Docker Hub or AWS ECR)
+docker tag churn-api:v1 mycompany/churn-api:v1
+docker push mycompany/churn-api:v1</pre>
+    </div>
+
+    <!-- 7.5 -->
+    <div class="content-card">
+        <h3>☁️ 7.5 Cloud Deployment — Where Models Live at Scale</h3>
+        <p>Local deployment is fine for development, but production models need cloud infrastructure to be available 24/7, handle traffic spikes, and integrate with enterprise systems. The three major cloud providers each offer dedicated ML serving platforms.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div style="background:rgba(255,153,0,0.06); border:1px solid rgba(255,153,0,0.25); border-radius:8px; padding:1rem;">
+                <strong style="color:#ff9900;">☁️ AWS (Amazon)</strong>
+                <ul style="font-size:0.78rem; color:var(--text-secondary); margin-top:0.6rem; padding-left:1rem; line-height:1.8;">
+                    <li><strong>SageMaker</strong> — full ML platform</li>
+                    <li><strong>Lambda</strong> — serverless inference</li>
+                    <li><strong>EC2</strong> — virtual machines</li>
+                    <li><strong>ECR</strong> — Docker registry</li>
+                    <li><strong>S3</strong> — model storage</li>
+                </ul>
+            </div>
+            <div style="background:rgba(66,133,244,0.06); border:1px solid rgba(66,133,244,0.25); border-radius:8px; padding:1rem;">
+                <strong style="color:#4285f4;">☁️ GCP (Google)</strong>
+                <ul style="font-size:0.78rem; color:var(--text-secondary); margin-top:0.6rem; padding-left:1rem; line-height:1.8;">
+                    <li><strong>Vertex AI</strong> — full ML platform</li>
+                    <li><strong>Cloud Run</strong> — serverless containers</li>
+                    <li><strong>GKE</strong> — Kubernetes</li>
+                    <li><strong>Artifact Registry</strong> — Docker images</li>
+                    <li><strong>GCS</strong> — model storage</li>
+                </ul>
+            </div>
+            <div style="background:rgba(0,120,212,0.06); border:1px solid rgba(0,120,212,0.25); border-radius:8px; padding:1rem;">
+                <strong style="color:#0078d4;">☁️ Azure (Microsoft)</strong>
+                <ul style="font-size:0.78rem; color:var(--text-secondary); margin-top:0.6rem; padding-left:1rem; line-height:1.8;">
+                    <li><strong>Azure ML</strong> — full ML platform</li>
+                    <li><strong>Container Instances</strong> — quick deploy</li>
+                    <li><strong>AKS</strong> — Kubernetes</li>
+                    <li><strong>ACR</strong> — Docker registry</li>
+                    <li><strong>Blob Storage</strong> — model storage</li>
+                </ul>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">Deployment Patterns — Choosing the Right Strategy</h4>
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div style="background:rgba(40,224,255,0.05); border-left:4px solid var(--cyan); border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:var(--cyan);">⚡ Real-time / Online Inference</strong>
+                <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.3rem;">Model responds to each request immediately. Best for: fraud detection during payment, product recommendations while browsing, chatbots. Requires low latency (typically &lt; 200ms).</p>
+                <p style="font-size:0.78rem; color:#ffb86c; margin-top:0.3rem;"><strong>Tools:</strong> FastAPI + Uvicorn, Flask, TorchServe, TensorFlow Serving</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.05); border-left:4px solid var(--purple); border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:var(--purple);">🗄️ Batch Inference</strong>
+                <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.3rem;">Model runs on a large dataset at scheduled intervals (hourly, daily). Results stored in a database for later use. Best for: churn scores computed overnight, monthly credit risk assessments, weekly demand forecasting.</p>
+                <p style="font-size:0.78rem; color:#ffb86c; margin-top:0.3rem;"><strong>Tools:</strong> Apache Spark, AWS Batch, Airflow, scheduled Python scripts</p>
+            </div>
+            <div style="background:rgba(255,184,108,0.05); border-left:4px solid #ffb86c; border-radius:0 8px 8px 0; padding:1rem;">
+                <strong style="color:#ffb86c;">📱 Edge Inference</strong>
+                <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.3rem;">Model runs directly on the device (smartphone, IoT sensor, camera) without internet. Best for: offline face recognition, on-device language translation, real-time image classification in manufacturing.</p>
+                <p style="font-size:0.78rem; color:#ffb86c; margin-top:0.3rem;"><strong>Tools:</strong> TensorFlow Lite, ONNX Runtime, Core ML (iOS), PyTorch Mobile</p>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">Deploying to AWS SageMaker (Example)</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">import boto3, sagemaker
+from sagemaker.sklearn import SKLearnModel
+
+# Upload model artifact to S3
+s3 = boto3.client('s3')
+s3.upload_file('models/churn_model_v1.pkl', 'my-ml-bucket', 'models/churn_model_v1.pkl')
+
+# Create SageMaker model endpoint
+model = SKLearnModel(
+    model_data   = 's3://my-ml-bucket/models/churn_model_v1.pkl',
+    role         = 'arn:aws:iam::123456:role/SageMakerRole',
+    entry_point  = 'inference.py',        # Script with predict_fn()
+    framework_version = '1.2-1',
+    py_version   = 'py3'
+)
+
+predictor = model.deploy(
+    initial_instance_count = 1,
+    instance_type          = 'ml.t2.medium'
+)
+
+# Real-time prediction via the endpoint
+result = predictor.predict([[120, 45, 29.99, 3]])
+print(f"Churn prediction: {result}")</pre>
+    </div>
+
+    <!-- 7.6 -->
+    <div class="content-card">
+        <h3>📉 7.6 Model Drift — Why Models Degrade in Production</h3>
+        <p>A model trained on last year's data may be completely wrong about this year's world. <strong>Model Drift</strong> is the inevitable degradation of model performance as the real world changes but the model stays static. Understanding and detecting drift is one of the most critical production skills.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div style="background:rgba(255,107,107,0.07); border:1px solid rgba(255,107,107,0.25); border-radius:8px; padding:1rem;">
+                <strong style="color:#ff6b6b;">📊 Data Drift (Covariate Shift)</strong>
+                <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.5rem;">The distribution of input features changes. The model was trained on data from one population but now receives data from a different one.</p>
+                <p style="font-size:0.8rem; margin-top:0.5rem;"><strong>Example:</strong> A credit risk model trained on pre-pandemic data sees very different spending patterns post-pandemic. Feature distributions have shifted.</p>
+            </div>
+            <div style="background:rgba(255,107,107,0.07); border:1px solid rgba(255,107,107,0.25); border-radius:8px; padding:1rem;">
+                <strong style="color:#ff6b6b;">🎯 Concept Drift</strong>
+                <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.5rem;">The relationship between features and the target changes. The same inputs now produce different outputs because the underlying concept has evolved.</p>
+                <p style="font-size:0.8rem; margin-top:0.5rem;"><strong>Example:</strong> A fraud detection model trained in 2021 doesn't recognise new fraud techniques developed in 2024. The input data looks similar, but fraud patterns changed.</p>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🔬 Detecting Data Drift with Statistical Tests</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">import numpy as np
+from scipy import stats
+import pandas as pd
+
+def detect_drift(reference_data: pd.Series, current_data: pd.Series,
+                 feature_name: str, threshold: float = 0.05):
+    """
+    Detect drift using the Kolmogorov-Smirnov test.
+    p-value < threshold → distributions are significantly different → drift detected.
+    """
+    stat, p_value = stats.ks_2samp(reference_data, current_data)
+
+    drift_detected = p_value < threshold
+    status = "⚠️ DRIFT DETECTED" if drift_detected else "✅ No drift"
+
+    print(f"Feature: {feature_name}")
+    print(f"  KS Statistic: {stat:.4f}")
+    print(f"  p-value:      {p_value:.4f}")
+    print(f"  Status:       {status}")
+    return drift_detected
+
+# Compare training data distributions with current production data
+training_data    = pd.read_csv('data/training_features.csv')
+production_data  = pd.read_csv('data/production_last_30d.csv')
+
+for feature in ['account_age_days', 'days_since_login', 'monthly_spend']:
+    detect_drift(training_data[feature], production_data[feature], feature)</pre>
+
+        <div style="background:rgba(255,184,108,0.08); border:1px solid rgba(255,184,108,0.25); border-radius:8px; padding:1rem; margin-top:0.75rem;">
+            <strong style="color:#ffb86c;">⚠️ Real-World Drift Examples:</strong>
+            <ul style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1.25rem; line-height:1.9;">
+                <li>E-commerce recommendation model trained in summer, deployed in winter — product preferences change seasonally</li>
+                <li>Demand forecasting model trained pre-COVID — supply chains and consumer behaviours completely disrupted</li>
+                <li>Churn prediction model — company launches new product tier, fundamentally changing the feature landscape</li>
+                <li>NLP sentiment model — new slang, cultural events, or political shifts change language patterns</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 7.7 -->
+    <div class="content-card">
+        <h3>📊 7.7 Monitoring in Production — The Model's Health Dashboard</h3>
+        <p>Once deployed, a model needs constant supervision. Monitoring falls into two categories: <strong>model performance monitoring</strong> (is the model making good predictions?) and <strong>system health monitoring</strong> (is the infrastructure running correctly?).</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div>
+                <h4 style="color:var(--cyan); margin-bottom:0.75rem;">📈 Model Performance Metrics</h4>
+                <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem; font-size:0.82rem;">
+                        <strong style="color:var(--cyan);">Prediction Accuracy (Classification)</strong>
+                        <p style="color:var(--text-secondary); margin-top:0.25rem;">Track F1, Precision, Recall on a rolling window of labelled data</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem; font-size:0.82rem;">
+                        <strong style="color:var(--cyan);">Prediction Error (Regression)</strong>
+                        <p style="color:var(--text-secondary); margin-top:0.25rem;">Track rolling RMSE, MAE — alert if they exceed baseline thresholds</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem; font-size:0.82rem;">
+                        <strong style="color:var(--cyan);">Prediction Distribution</strong>
+                        <p style="color:var(--text-secondary); margin-top:0.25rem;">Track the distribution of model outputs. Sudden shifts in average prediction score signal drift</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem; font-size:0.82rem;">
+                        <strong style="color:var(--cyan);">Feature Distribution</strong>
+                        <p style="color:var(--text-secondary); margin-top:0.25rem;">Monitor means, std dev, null rates of input features vs. training baseline</p>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h4 style="color:var(--purple); margin-bottom:0.75rem;">⚙️ System Health Metrics</h4>
+                <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem; font-size:0.82rem;">
+                        <strong style="color:var(--purple);">Latency (Response Time)</strong>
+                        <p style="color:var(--text-secondary); margin-top:0.25rem;">P50, P95, P99 latency. Alert if P99 exceeds SLA (e.g., 500ms)</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem; font-size:0.82rem;">
+                        <strong style="color:var(--purple);">Throughput (Requests/sec)</strong>
+                        <p style="color:var(--text-secondary); margin-top:0.25rem;">Track requests per second. Sudden drops or spikes indicate issues</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem; font-size:0.82rem;">
+                        <strong style="color:var(--purple);">Error Rate</strong>
+                        <p style="color:var(--text-secondary); margin-top:0.25rem;">% of failed predictions (exceptions, timeouts, schema errors)</p>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem; font-size:0.82rem;">
+                        <strong style="color:var(--purple);">Resource Usage</strong>
+                        <p style="color:var(--text-secondary); margin-top:0.25rem;">CPU, RAM, GPU usage. Spot memory leaks before they cause outages</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🐍 Building a Simple Monitoring System</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">import time, logging, json
+from datetime import datetime
+from collections import defaultdict
+import numpy as np
+
+class ModelMonitor:
+    def __init__(self, model_name: str, alert_threshold: float = 0.05):
+        self.model_name        = model_name
+        self.alert_threshold   = alert_threshold
+        self.predictions       = []
+        self.latencies         = []
+        self.errors            = 0
+        self.requests          = 0
+        self.logger            = logging.getLogger(model_name)
+
+    def log_prediction(self, features: dict, prediction, probability: float, latency_ms: float):
+        self.requests   += 1
+        self.predictions.append(probability)
+        self.latencies.append(latency_ms)
+
+        # Alert if average prediction shifts significantly
+        if len(self.predictions) > 100:
+            recent_avg    = np.mean(self.predictions[-100:])
+            baseline_avg  = 0.15   # Expected churn rate from training
+            if abs(recent_avg - baseline_avg) > self.alert_threshold:
+                self.logger.warning(
+                    f"⚠️ DRIFT ALERT: avg prediction {recent_avg:.3f} "
+                    f"vs baseline {baseline_avg:.3f}"
+                )
+
+    def log_error(self, error: str):
+        self.errors += 1
+        self.logger.error(f"Prediction error: {error}")
+
+    def get_stats(self) -> dict:
+        return {
+            "model":          self.model_name,
+            "total_requests": self.requests,
+            "error_rate":     self.errors / max(self.requests, 1),
+            "avg_latency_ms": np.mean(self.latencies) if self.latencies else 0,
+            "p99_latency_ms": np.percentile(self.latencies, 99) if self.latencies else 0,
+            "avg_prediction": np.mean(self.predictions) if self.predictions else 0,
+            "timestamp":      datetime.now().isoformat()
+        }
+
+# Use in your API
+monitor = ModelMonitor("churn_model_v1")
+
+def predict_with_monitoring(features: dict):
+    start = time.time()
+    try:
+        df   = pd.DataFrame([features])
+        pred = model.predict(df)[0]
+        prob = model.predict_proba(df)[0][1]
+        monitor.log_prediction(features, pred, prob, (time.time()-start)*1000)
+        return pred, prob
+    except Exception as e:
+        monitor.log_error(str(e))
+        raise</pre>
+    </div>
+
+    <!-- 7.8 -->
+    <div class="content-card">
+        <h3>🔁 7.8 Retraining Pipelines — Keeping Models Current</h3>
+        <p>Monitoring detects when performance degrades — retraining fixes it. The goal is to close the feedback loop: automatically collect new data, retrain the model, evaluate it, and — if it passes quality gates — replace the production model with zero downtime.</p>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">The Complete Model Lifecycle</h4>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:1.25rem; text-align:center; font-size:0.85rem;">
+            <div style="display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:0.5rem;">
+                <span style="background:rgba(40,224,255,0.15); border:1px solid var(--cyan); border-radius:6px; padding:0.4rem 0.8rem; color:var(--cyan);">📊 Collect New Data</span>
+                <span style="color:var(--text-secondary);">→</span>
+                <span style="background:rgba(40,224,255,0.15); border:1px solid var(--cyan); border-radius:6px; padding:0.4rem 0.8rem; color:var(--cyan);">🛠️ Feature Engineering</span>
+                <span style="color:var(--text-secondary);">→</span>
+                <span style="background:rgba(40,224,255,0.15); border:1px solid var(--cyan); border-radius:6px; padding:0.4rem 0.8rem; color:var(--cyan);">🏋️ Retrain Model</span>
+                <span style="color:var(--text-secondary);">→</span>
+                <span style="background:rgba(40,224,255,0.15); border:1px solid var(--cyan); border-radius:6px; padding:0.4rem 0.8rem; color:var(--cyan);">✅ Evaluate vs Champion</span>
+                <span style="color:var(--text-secondary);">→</span>
+                <span style="background:rgba(16,185,129,0.15); border:1px solid #10b981; border-radius:6px; padding:0.4rem 0.8rem; color:#10b981;">🚀 Deploy if Better</span>
+                <span style="color:var(--text-secondary);">→</span>
+                <span style="background:rgba(122,75,255,0.15); border:1px solid var(--purple); border-radius:6px; padding:0.4rem 0.8rem; color:var(--purple);">📊 Monitor Production</span>
+            </div>
+            <p style="color:var(--text-secondary); font-size:0.78rem; margin-top:0.75rem;">↑ Loop repeats automatically when drift is detected ↑</p>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">Automated Retraining Script</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">import joblib, pandas as pd, logging
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+from datetime import datetime
+
+def retrain_model(new_data_path: str, champion_path: str, threshold: float = 0.02):
+    """
+    Retrain and promote model only if it beats the current champion.
+    """
+    logger = logging.getLogger("retraining")
+    logger.info(f"Starting retraining pipeline at {datetime.now()}")
+
+    # 1. Load new data
+    df       = pd.read_csv(new_data_path)
+    X, y     = df.drop('churned', axis=1), df['churned']
+
+    # 2. Train challenger model
+    challenger = RandomForestClassifier(n_estimators=200, random_state=42, n_jobs=-1)
+    challenger_scores = cross_val_score(challenger, X, y, cv=5, scoring='f1')
+    challenger_f1     = challenger_scores.mean()
+    challenger.fit(X, y)
+
+    # 3. Load champion and evaluate
+    champion       = joblib.load(champion_path)
+    champion_scores= cross_val_score(champion, X, y, cv=5, scoring='f1')
+    champion_f1    = champion_scores.mean()
+
+    logger.info(f"Champion F1:    {champion_f1:.4f}")
+    logger.info(f"Challenger F1:  {challenger_f1:.4f}")
+
+    # 4. Promote challenger only if meaningfully better
+    if challenger_f1 > champion_f1 + threshold:
+        version  = datetime.now().strftime("%Y%m%d_%H%M%S")
+        new_path = f"models/churn_model_{version}.pkl"
+        joblib.dump(challenger, new_path)
+        logger.info(f"✅ Challenger promoted! Saved to {new_path}")
+        return new_path, challenger_f1
+    else:
+        logger.info("⏸️ Champion retained — challenger did not improve sufficiently")
+        return champion_path, champion_f1
+
+# Run manually or via scheduler (Airflow, cron, etc.)
+retrain_model("data/new_30d_data.csv", "models/churn_model_current.pkl")</pre>
+
+        <h4 style="color:var(--cyan); margin:1.25rem 0 0.75rem;">When to Retrain?</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div style="background:rgba(40,224,255,0.05); border:1px solid rgba(40,224,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--cyan);">Schedule-based</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">Retrain every week/month regardless of performance. Simple, predictable. Best for: slowly changing domains, regulatory compliance needs.</p>
+            </div>
+            <div style="background:rgba(122,75,255,0.05); border:1px solid rgba(122,75,255,0.15); border-radius:8px; padding:1rem;">
+                <strong style="color:var(--purple);">Trigger-based (Event-driven)</strong>
+                <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.4rem;">Retrain only when drift or performance degradation is detected. More efficient — avoids unnecessary retraining. Best for: stable domains with occasional disruptions.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7.9 -->
+    <div class="content-card">
+        <h3>⚙️ 7.9 MLOps — Industrialising Machine Learning</h3>
+        <p><strong>MLOps</strong> (Machine Learning Operations) applies the principles of DevOps — automation, reproducibility, continuous integration — to the full ML lifecycle. It is the discipline that transforms ad-hoc model projects into reliable, scalable, production-grade systems.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            <div style="background:rgba(255,107,107,0.06); border:1px solid rgba(255,107,107,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:#ff6b6b;">❌ Without MLOps (Ad-hoc)</strong>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem; line-height:1.8;">
+                    <li>Models trained manually in notebooks</li>
+                    <li>No version control for models or data</li>
+                    <li>Manual deployment — error-prone</li>
+                    <li>No monitoring — silent failures</li>
+                    <li>"The guy who built it left" problem</li>
+                    <li>Impossible to reproduce experiments</li>
+                </ul>
+            </div>
+            <div style="background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2); border-radius:8px; padding:1rem;">
+                <strong style="color:#10b981;">✅ With MLOps</strong>
+                <ul style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem; padding-left:1rem; line-height:1.8;">
+                    <li>Automated training pipelines</li>
+                    <li>Full versioning of code, data, and models</li>
+                    <li>CI/CD for automatic safe deployments</li>
+                    <li>Monitoring dashboards + automatic alerts</li>
+                    <li>Documented, reproducible experiments</li>
+                    <li>Any team member can run or modify pipelines</li>
+                </ul>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">Key MLOps Tools Ecosystem</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem; margin-top:0.5rem;">
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; font-size:0.8rem;">
+                <strong style="color:var(--cyan);">🧪 Experiment Tracking</strong>
+                <ul style="color:var(--text-secondary); margin-top:0.4rem; padding-left:1rem; line-height:1.7;">
+                    <li>MLflow</li>
+                    <li>Weights & Biases</li>
+                    <li>Neptune.ai</li>
+                    <li>Comet ML</li>
+                </ul>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; font-size:0.8rem;">
+                <strong style="color:var(--purple);">🔄 Pipeline Orchestration</strong>
+                <ul style="color:var(--text-secondary); margin-top:0.4rem; padding-left:1rem; line-height:1.7;">
+                    <li>Apache Airflow</li>
+                    <li>Prefect</li>
+                    <li>Kubeflow Pipelines</li>
+                    <li>ZenML</li>
+                </ul>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; font-size:0.8rem;">
+                <strong style="color:#ffb86c;">📊 Model Monitoring</strong>
+                <ul style="color:var(--text-secondary); margin-top:0.4rem; padding-left:1rem; line-height:1.7;">
+                    <li>Evidently AI</li>
+                    <li>WhyLabs</li>
+                    <li>Arize AI</li>
+                    <li>Grafana + Prometheus</li>
+                </ul>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; font-size:0.8rem;">
+                <strong style="color:#10b981;">📦 Model Registry</strong>
+                <ul style="color:var(--text-secondary); margin-top:0.4rem; padding-left:1rem; line-height:1.7;">
+                    <li>MLflow Model Registry</li>
+                    <li>AWS SageMaker Model Registry</li>
+                    <li>Vertex AI Model Registry</li>
+                    <li>Hugging Face Hub</li>
+                </ul>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; font-size:0.8rem;">
+                <strong style="color:#ff6b6b;">🚀 Model Serving</strong>
+                <ul style="color:var(--text-secondary); margin-top:0.4rem; padding-left:1rem; line-height:1.7;">
+                    <li>BentoML</li>
+                    <li>Seldon Core</li>
+                    <li>TorchServe</li>
+                    <li>FastAPI + Docker</li>
+                </ul>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; font-size:0.8rem;">
+                <strong style="color:var(--blue);">🔧 Feature Store</strong>
+                <ul style="color:var(--text-secondary); margin-top:0.4rem; padding-left:1rem; line-height:1.7;">
+                    <li>Feast</li>
+                    <li>Tecton</li>
+                    <li>Hopsworks</li>
+                    <li>AWS Feature Store</li>
+                </ul>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">Experiment Tracking with MLflow</h4>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">import mlflow
+import mlflow.sklearn
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import f1_score, roc_auc_score
+
+mlflow.set_experiment("churn-prediction-v2")
+
+with mlflow.start_run(run_name="random_forest_baseline"):
+    # Log hyperparameters
+    params = {"n_estimators": 200, "max_depth": 8, "min_samples_split": 5}
+    mlflow.log_params(params)
+
+    # Train model
+    model = RandomForestClassifier(**params, random_state=42, n_jobs=-1)
+    model.fit(X_train, y_train)
+
+    # Log metrics
+    y_pred  = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)[:, 1]
+    mlflow.log_metric("f1_score",  f1_score(y_test, y_pred))
+    mlflow.log_metric("auc_roc",   roc_auc_score(y_test, y_proba))
+    mlflow.log_metric("train_size", len(X_train))
+
+    # Log the model itself (with signature for validation)
+    mlflow.sklearn.log_model(model, "churn_model")
+    print(f"Run ID: {mlflow.active_run().info.run_id}")
+
+# View all experiments at: mlflow ui  (runs on localhost:5000)</pre>
+    </div>
+
+    <!-- 7.10 -->
+    <div class="content-card">
+        <h3>🔐 7.10 Security, Scalability & A/B Testing</h3>
+
+        <h4 style="color:var(--cyan); margin:0 0 0.75rem;">🔐 Security in Production</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary);">A deployed model is an exposed surface. Security must be baked in from the start, not added as an afterthought.</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:0.75rem; font-size:0.82rem;">
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem;">
+                <strong style="color:var(--cyan);">Authentication</strong>
+                <p style="color:var(--text-secondary); margin-top:0.3rem;">API keys or OAuth 2.0 tokens on every request. Never expose a model endpoint publicly without auth.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem;">
+                <strong style="color:var(--cyan);">Input Validation</strong>
+                <p style="color:var(--text-secondary); margin-top:0.3rem;">Validate and sanitise all inputs before feeding to the model. Reject unexpected schemas or values.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem;">
+                <strong style="color:var(--cyan);">Rate Limiting</strong>
+                <p style="color:var(--text-secondary); margin-top:0.3rem;">Prevent abuse with request throttling. Protect against model inversion and data extraction attacks.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:6px; padding:0.75rem;">
+                <strong style="color:var(--cyan);">Audit Logging</strong>
+                <p style="color:var(--text-secondary); margin-top:0.3rem;">Log every prediction with timestamp, user ID, inputs, and output for traceability and compliance (GDPR).</p>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">📈 Scalability Strategies</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; font-size:0.82rem;">
+            <div style="background:rgba(40,224,255,0.04); border:1px solid rgba(40,224,255,0.15); border-radius:6px; padding:0.75rem;">
+                <strong style="color:var(--cyan);">Horizontal Scaling</strong>
+                <p style="color:var(--text-secondary); margin-top:0.3rem;">Run multiple identical API containers behind a load balancer. Traffic spikes handled by spinning up more instances automatically (auto-scaling groups).</p>
+            </div>
+            <div style="background:rgba(40,224,255,0.04); border:1px solid rgba(40,224,255,0.15); border-radius:6px; padding:0.75rem;">
+                <strong style="color:var(--cyan);">Caching</strong>
+                <p style="color:var(--text-secondary); margin-top:0.3rem;">Cache predictions for identical or near-identical inputs using Redis. A product recommendation for a repeat visitor doesn't need a fresh inference every time.</p>
+            </div>
+            <div style="background:rgba(40,224,255,0.04); border:1px solid rgba(40,224,255,0.15); border-radius:6px; padding:0.75rem;">
+                <strong style="color:var(--cyan);">Model Optimisation</strong>
+                <p style="color:var(--text-secondary); margin-top:0.3rem;">Use ONNX to convert models to an optimised inference format. Quantise Neural Networks (INT8) to reduce size and latency by 4x with minimal accuracy loss.</p>
+            </div>
+            <div style="background:rgba(40,224,255,0.04); border:1px solid rgba(40,224,255,0.15); border-radius:6px; padding:0.75rem;">
+                <strong style="color:var(--cyan);">Async Processing</strong>
+                <p style="color:var(--text-secondary); margin-top:0.3rem;">For non-urgent predictions, use message queues (Kafka, RabbitMQ, SQS). Client posts request, gets a job ID, polls for result — decouples traffic peaks from inference.</p>
+            </div>
+        </div>
+
+        <h4 style="color:var(--cyan); margin:1.5rem 0 0.75rem;">🧪 A/B Testing Models in Production</h4>
+        <p style="font-size:0.85rem; color:var(--text-secondary);">Before fully replacing the champion model, route a fraction of traffic to the challenger and compare real-world performance — not just offline metrics.</p>
+        <pre style="background:#000; color:#0f0; padding:1rem; border-radius:8px; font-size:0.78rem;">import random
+
+# Traffic splitting: 90% champion, 10% challenger
+def predict_with_ab_test(features: dict, challenger_pct: float = 0.10):
+    use_challenger = random.random() < challenger_pct
+
+    if use_challenger:
+        model    = challenger_model
+        version  = "challenger_v2"
+    else:
+        model    = champion_model
+        version  = "champion_v1"
+
+    df   = pd.DataFrame([features])
+    pred = model.predict(df)[0]
+    prob = model.predict_proba(df)[0][1]
+
+    # Log which model was used — essential for analysis
+    log_prediction(version=version, features=features, prediction=pred, probability=prob)
+
+    return {"prediction": bool(pred), "probability": float(prob), "model": version}
+
+# After sufficient data (e.g., 2 weeks), compare:
+# - Business outcomes per version (click-through, conversion, churn prevented)
+# - Statistical significance (t-test or chi-squared on outcome rates)
+# - Latency and error rate per version</pre>
+    </div>
+
+    <!-- Conclusion -->
+    <div class="content-card" style="border-color: var(--cyan);">
+        <h3>✅ Conclusion of Module 7 — Your Model is Now Live</h3>
+        <p>Deployment is not the end of the journey — it's the beginning of the operational phase where your model generates real value and faces real challenges. Here is everything you have mastered:</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+            <ul class="styled-list">
+                <li>Saving models with versioning and metadata</li>
+                <li>Building REST APIs with Flask and FastAPI</li>
+                <li>Containerising models with Docker</li>
+                <li>Cloud deployment on AWS, GCP, and Azure</li>
+                <li>Batch vs. real-time vs. edge inference patterns</li>
+                <li>Data drift and concept drift — detection and diagnosis</li>
+            </ul>
+            <ul class="styled-list">
+                <li>Production monitoring: performance and system health</li>
+                <li>Automated retraining pipelines with quality gates</li>
+                <li>Champion/Challenger model promotion strategy</li>
+                <li>MLOps tools ecosystem (MLflow, Airflow, Evidently...)</li>
+                <li>API security, rate limiting, and audit logging</li>
+                <li>A/B testing models safely in production</li>
+            </ul>
+        </div>
+        <div style="background:rgba(40,224,255,0.07); border-radius:8px; padding:1rem; margin-top:1rem; text-align:center;">
+            <p style="font-size:1.05rem; color:var(--cyan); font-weight:600;">A model only generates value when it's in production and monitored.</p>
+            <p style="color:var(--text-secondary); margin-top:0.4rem;">Train → Evaluate → Deploy → Monitor → Retrain. This is the loop that never ends — and that's exactly the point.</p>
+        </div>
+    </div>
+
+        </div>
+
+            <div id="laboratorio" class="tab-panel">
+                <h3>Quiz de Deployment & Monitorização</h3>
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">Pratica a extração de dados. Tenta filtrar clientes com gastos elevados.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">EDITOR SQL</div>
+                        <textarea class="lab-textarea" id="sql-input">SELECT cliente_nome, total_gasto 
+FROM vendas 
+WHERE total_gasto > 1500
+ORDER BY total_gasto DESC;</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">RESULTADO DA QUERY</div>
+                        <div class="lab-iframe" id="sql-output">
+                            Clique em "Executar" para simular a consulta na base de dados...
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="runSql()">Executar Query</button>
+            </div>
+
+            <div id="quiz" class="tab-panel">
+    <div class="content-card">
+        <h3>Model Deployment & MLOps Quiz</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Test your knowledge on Model Deployment and MLOps. Answer the 15 questions for immediate feedback.</p>
+        
+        <form id="quiz-form">
+            <div class="content-card quiz-item">
+                <p class="quiz-question">1. What does it mean to "deploy" a model?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Creating new variables for the dataset.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Re-training the model with old data.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C" data-correct="true"> C) Placing the model in a production environment for real-world use.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Simply visualizing data on a dashboard.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">2. What is the most common way to make a model available to other applications?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Sending an Excel file.</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B" data-correct="true"> B) Through an API (Application Programming Interface).</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C"> C) Exporting a PDF with the results.</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Creating a PowerPoint presentation.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">3. What is the "Inference" process?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) The process of cleaning and organizing raw data.</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B"> B) The hyperparameter tuning phase.</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C" data-correct="true"> C) The process of generating predictions using a pre-trained model.</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Choosing the best clustering algorithm.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">4. What characterizes the phenomenon of "Model Drift"?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) When the model executes code too fast.</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B" data-correct="true"> B) When production data changes and the model loses performance.</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C"> C) When the model is moved from one server to another.</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) When the developer changes the model's language.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">5. Why is it vital to monitor a model after deployment?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) To change the colors of the user interface.</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B" data-correct="true"> B) To ensure performance remains stable over time.</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C"> C) To automatically reduce the dataset size.</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) To eliminate the use of APIs.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">6. Which of these infrastructures is frequently used to host models (Cloud)?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A"> A) Canva or Photoshop.</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B" data-correct="true"> B) AWS, Google Cloud, or Azure.</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C"> C) Figma.</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Slack.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">7. What can cause a model to degrade in production?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) Data that is too clean.</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B" data-correct="true"> B) Sudden changes in user behavior or market conditions.</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C"> C) Upgrading the server hardware.</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) A decrease in the number of users.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">8. What does "Scalability" mean in production?</p>
+                
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Increasing the number of columns in a CSV file.</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B" data-correct="true"> B) The ability to handle an increase in requests without failing.</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C"> C) Reducing the model training time.</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Switching the model from Python to Java.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">9. Which metrics should be tracked during monitoring?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Accuracy and Precision (Classification).</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B"> B) RMSE and MAE (Regression).</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Latency and API response time.</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D" data-correct="true"> D) All of the above.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">10. What is "Retraining"?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) Deleting the model and giving up on the project.</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B" data-correct="true"> B) Updating the existing model with more recent data.</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C"> C) Only changing the names of the variables.</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) Reformatting the database.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">11. What is the ultimate goal of deployment?</p>
+                <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Writing the most complex code possible.</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="B" data-correct="true"> B) Turning the model into a product that generates real business value.</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Creating pretty charts for the report.</label>
+                <label class="quiz-option"><input type="radio" name="q11" value="D"> D) Saving the model on a personal hard drive.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">12. In the context of ML, an API acts as:</p>
+                <label class="quiz-option"><input type="radio" name="q12" value="A"> A) A static database.</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="B"> B) A type of Deep Learning algorithm.</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="C" data-correct="true"> C) A bridge that receives data and returns real-time predictions.</label>
+                <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Image editing software.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">13. What is the danger of not monitoring a model?</p>
+                <label class="quiz-option"><input type="radio" name="q13" value="A"> A) The model becoming "too intelligent."</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="B" data-correct="true"> B) The model providing wrong predictions without anyone noticing.</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Training data duplicating itself.</label>
+                <label class="quiz-option"><input type="radio" name="q13" value="D"> D) There is no danger; the model is static.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">14. The professional lifecycle of a model is:</p>
+                
+                <label class="quiz-option"><input type="radio" name="q14" value="A"> A) Train -> Deploy -> Forget.</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="B" data-correct="true"> B) Train -> Evaluate -> Deploy -> Monitor -> Retrain.</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="C"> C) Deploy -> Train -> Evaluate.</label>
+                <label class="quiz-option"><input type="radio" name="q14" value="D"> D) Evaluate -> Deploy -> Train.</label>
+            </div>
+
+            <div class="content-card quiz-item">
+                <p class="quiz-question">15. What defines the concept of MLOps?</p>
+                <label class="quiz-option"><input type="radio" name="q15" value="A"> A) A new type of SQL database.</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="B" data-correct="true"> B) The union of Machine Learning and Operations to automate the model lifecycle.</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="C"> C) A Python library solely for charts.</label>
+                <label class="quiz-option"><input type="radio" name="q15" value="D"> D) An operating system for Data Scientists.</label>
+            </div>
+        </form>
+
+        <div class="quiz-controls" style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button id="submit-quiz" class="btn btn-primary">Submit Evaluation</button>
+            <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+        </div>
+
+        <div id="quiz-results" class="quiz-results" style="display: none;">
+            <div class="results-title">Quiz Results</div>
+            <div id="quiz-score" class="quiz-score"></div>
+            <div id="quiz-feedback" class="quiz-feedback"></div>
+        </div>
+    </div>
+</div>
+
+            <div id="recursos" class="tab-panel">
+                <h3>Materiais de Apoio</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ Guia Definitivo: Python para Análise de Dados</a>
+                    <a href="#" class="resource-link">→ Cheat Sheet: Comandos SQL Essenciais</a>
+                    <a href="#" class="resource-link">→ Documentação Scikit-Learn: Escolhendo o Algoritmo Certo</a>
+                    <a href="#" class="resource-link">→ Workshop: Storytelling com Dados</a>
+                </div>
+            </div>
+
+            <div id="avaliacao" class="tab-panel">
+    <div class="content-card">
+        <h3>🎯 Domain Criteria: Deployment & Monitoring</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            To successfully complete this module, you must demonstrate competence in deploying models to production and continuously monitoring their performance.
+        </p>
+        
+        <div class="evaluation-grid">
+            <div class="evaluation-column">
+                <h4 class="evaluation-title essential">
+                    <span>💠</span> Essential
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Understanding of deployment concepts</li>
+                    <li>Knowledge of APIs for serving models</li>
+                    <li>Basics of cloud computing</li>
+                    <li>Recognizing what model drift is.</li>
+                    <li>Importance of continuous monitoring</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title important">
+                    <span>⭐</span> Important
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Integrating models into real-world systems</li>
+                    <li>Monitoring metrics in production.</li>
+                    <li>Identifying performance degradation</li>
+                    <li>Understanding of retraining cycles</li>
+                    <li>Versioning of models</li>
+                </ul>
+            </div>
+
+            <div class="evaluation-column">
+                <h4 class="evaluation-title advanced">
+                    <span>🚀</span> Advanced
+                </h4>
+                <ul class="evaluation-list">
+                    <li>Implementation of automated pipelines (MLOps)</li>
+                    <li>Creation of intelligent performance alerts</li>
+                    <li>Scalability and inference optimization</li>
+                    <li>Security and access control management</li>
+                    <li>Operational alignment between model and business strategy</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+        </div><!-- end tabs-container -->
+    </main>
+
+    <script>
+    // Quiz functionality
+    class QuizManager {
+        constructor() {
+            this.questionsData = {
+                q1: { correct: 'C', exp: 'Deployment is the moment the model leaves the "lab" (Jupyter Notebook) and enters the real world.' },
+                q2: { correct: 'B', exp: 'APIs allow a website, app, or system to send data to the model and receive an answer instantly.' },
+                q3: { correct: 'C', exp: 'Inference is the technical term for "asking the model to predict something" using new data.' },
+                q4: { correct: 'B', exp: 'The world changes (e.g., inflation, new habits). If the model is not updated, its rules become obsolete.' },
+                q5: { correct: 'B', exp: 'Monitoring is like having a dashboard; it warns us if accuracy drops or if the server fails.' },
+                q6: { correct: 'B', exp: 'Cloud platforms provide the infrastructure needed to scale models for millions of users.' },
+                q7: { correct: 'B', exp: 'A model trained with 2020 data may not work in 2024 due to real-world external changes.' },
+                q8: { correct: 'B', exp: 'Scalability ensures that whether 1 or 10,000 people use the app at once, the model responds quickly.' },
+                q9: { correct: 'D', exp: 'We monitor both statistical quality (error metrics) and system health (response time).' },
+                q10: { correct: 'B', exp: 'Retraining closes the loop, ensuring the model learns from recent mistakes and new data.' },
+                q11: { correct: 'B', exp: 'A model that isn’t used generates no profit or savings; deployment is what brings the ROI.' },
+                q12: { correct: 'C', exp: 'Think of an API as a "waiter": it takes the order (data) to the kitchen (model) and brings back the dish (prediction).' },
+                q13: { correct: 'B', exp: 'Without monitoring, we face "silent failure": the system looks fine, but the decisions are wrong.' },
+                q14: { correct: 'B', exp: 'This iterative cycle ensures that the AI solution remains relevant and reliable forever.' },
+                q15: { correct: 'B', exp: 'MLOps applies DevOps principles to Machine Learning to make deployment secure and repeatable.' }
+            };
+            this.init();
+        }
+
+        init() {
+            document.getElementById('submit-quiz').addEventListener('click', () => {
+                this.submitQuiz();
+            });
+
+            document.getElementById('clear-quiz').addEventListener('click', () => {
+                this.clearQuiz();
+            });
+        }
+
+        submitQuiz() {
+                    const form = document.getElementById('quiz-form');
+                    const formData = new FormData(form);
+                    let score = 0;
+                    let feedbackHTML = '';
+                    Object.keys(this.questionsData).forEach((key, index) => {
+                        const userAnswer = formData.get(key);
+                        const isCorrect = userAnswer === this.questionsData[key].correct;
+                        if (isCorrect) score++;
+                        feedbackHTML += `
+                            <div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                                <span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span>
+                                <div>
+                                    <strong>Question ${index + 1}:</strong> ${this.questionsData[key].exp}
+                                    ${!isCorrect ? `<br><small class="correct-answer">
+                                            Correct answer: Option ${this.questionsData[key].correct}
+                                        </small>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    this.displayResults(score, feedbackHTML);
+                }
+
+        displayResults(score, feedbackHTML) {
+            const total = Object.keys(this.questionsData).length;
+            const percent = Math.round((score / total) * 100);
+            const resultsDiv = document.getElementById('quiz-results');
+            
+            let scoreClass = percent >= 80 ? 'score-excellent' : (percent >= 50 ? 'score-good' : 'score-poor');
+
+            document.getElementById('quiz-score').innerHTML = `
+                <div class="${scoreClass}">${score}/${total} (${percent}%)</div>
+                <p style="color: var(--text-secondary)">${percent >= 70 ? 'Amazing! You have mastered the fundamentals.' : 'Keep practicing to improve.'}</p>
+            `;
+
+            document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        clearQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-results').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    // Initialize when the document loads
+    document.addEventListener('DOMContentLoaded', () => {
+        new QuizManager();
+    });
+</script>
+
+    <script>
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-panel");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            let progressMap = { 'aprender': 25, 'laboratorio': 50, 'quiz': 75, 'recursos': 90, 'avaliacao': 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + "%";
+            document.getElementById('progress-text').innerText = progressMap[tabName] + "%";
+            
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runSql() {
+            const output = document.getElementById('sql-output');
+            output.innerHTML = "<strong>Query executada com sucesso.</strong><br><br>Resultados (Top 3):<br>-----------------------<br>1. Carlos Alberto | 4.250,00€<br>2. Beatriz Ramos | 2.100,50€<br>3. Ricardo Jorge | 1.880,00€<br><br><em>Dica: O filtro WHERE funcionou corretamente eliminando registos abaixo de 1500€.</em>";
+        }
+    </script>
+</body>
+</html>

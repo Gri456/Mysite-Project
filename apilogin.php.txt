@@ -1,0 +1,42 @@
+<?php
+require __DIR__ . '/db.php';
+cors();
+$conn = db();
+
+$raw = file_get_contents("php://input");
+$data = json_decode($raw, true);
+
+$uuid = $data['uuid'] ?? '';
+$password = $data['password'] ?? '';
+
+if (!$uuid || !$password) {
+  http_response_code(400);
+  echo json_encode(["ok" => false, "error" => "uuid e password são obrigatórios."]);
+  exit;
+}
+
+// Buscar hash
+$stmt = $conn->prepare("SELECT password_hash, premium FROM contas WHERE uuid = ?");
+$stmt->bind_param("s", $uuid);
+$stmt->execute();
+$stmt->store_result();
+
+if ($stmt->num_rows !== 1) {
+  http_response_code(404);
+  echo json_encode(["ok" => false, "error" => "UUID não encontrado."]);
+  $stmt->close();
+  exit;
+}
+
+$stmt->bind_result($hash, $premium);
+$stmt->fetch();
+
+if (password_verify($password, $hash)) {
+  echo json_encode(["ok" => true, "uuid" => $uuid, "premium" => (bool)$premium]);
+} else {
+  http_response_code(401);
+  echo json_encode(["ok" => false, "error" => "Password incorreta."]);
+}
+
+$stmt->close();
+$conn->close();

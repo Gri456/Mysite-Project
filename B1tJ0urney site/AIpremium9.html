@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitJourney - Model Context Protocol (MCP)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0b0d14; --blue: #ff2d78; --purple: #ff85c2; --cyan: #e0006e;
+            --text-light: #e8ecf8; --text-secondary: #b6c0de;
+            --card-bg: rgba(255,255,255,0.05); --border-color: rgba(255,255,255,0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-light); min-height: 100vh; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(91,124,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(91,124,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: gridMove 20s linear infinite; pointer-events: none; z-index: -1; }
+        @keyframes gridMove { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(255,0,191,0.168) 0%, rgba(255,0,128,0.185) 50%, transparent 100%); pointer-events: none; z-index: -1; }
+
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(11,13,20,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-content { max-width: 1160px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo-section { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-light); }
+        .premium-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+        .btn { padding: 0.5rem 1.25rem; border-radius: 50px; font-size: 0.875rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .btn-back { background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-light); }
+        .btn-back:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; box-shadow: 0 4px 15px rgba(91,124,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,124,255,0.4); }
+
+        .main-content { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+        .course-header { margin-bottom: 2rem; }
+        .course-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--blue), var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-description { font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 0%; transition: width 0.3s ease; }
+
+        .tabs-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .tab-nav { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-button { flex: 1; min-width: 120px; padding: 1rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; position: relative; white-space: nowrap; }
+        .tab-button:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .tab-button.active { color: var(--text-light); background: rgba(91,124,255,0.1); }
+        .tab-button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+        .tab-panel { display: none; padding: 2rem; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .content-card h3 { margin-bottom: 1rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        .code-explanation { border-left: 3px solid var(--blue); padding-left: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .styled-list { list-style: none; margin: 1rem 0; }
+        .styled-list li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .styled-list li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+
+        .code-block { background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto; }
+        .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.6; color: #a8ff78; }
+
+        /* New styles */
+        .info-box { background: rgba(91,124,255,0.07); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+        .info-box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--purple); }
+        .section-divider { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .concept-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .concept-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 0.35rem; }
+        .concept-title { font-weight: 600; font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.4rem; }
+        .concept-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+        .metrics-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .metrics-table th { background: rgba(91,124,255,0.15); color: var(--cyan); padding: 0.75rem 1rem; text-align: left; font-weight: 600; }
+        .metrics-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); vertical-align: top; }
+        .metrics-table tr:hover td { background: rgba(255,255,255,0.03); color: var(--text-light); }
+        .steps-flow { display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0; }
+        .step-item { display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; }
+        .step-num { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: white; font-weight: 700; font-size: 0.8rem; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .step-content { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4; }
+        .step-content strong { color: var(--text-light); }
+        .arch-flow { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; }
+        .arch-box { background: rgba(91,124,255,0.12); border: 1px solid rgba(91,124,255,0.3); border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 0.78rem; font-weight: 600; color: var(--text-light); text-align: center; white-space: nowrap; }
+        .arch-arrow { color: var(--cyan); font-weight: 700; font-size: 1rem; }
+
+        /* Lab */
+        .lab-container { display: flex; gap: 1rem; height: 420px; margin-top: 1rem; }
+        .lab-editor, .lab-preview { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-header { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .lab-textarea { flex: 1; background: #000; color: #a8ff78; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: none; resize: none; outline: none; border-radius: 0 0 8px 8px; line-height: 1.5; }
+        .lab-output { flex: 1; background: #0b0d14; color: var(--text-secondary); padding: 1rem; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; border-radius: 0 0 8px 8px; }
+
+        .resource-link { color: var(--cyan); text-decoration: none; display: block; margin: 0.5rem 0; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Quiz */
+        .quiz-question { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .quiz-option { display: flex; align-items: center; gap: 10px; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem; transition: 0.2s; border: 1px solid transparent; }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--blue); }
+        .quiz-option input { accent-color: var(--cyan); }
+        .quiz-controls { display: flex; gap: 1rem; margin: 2rem 0; justify-content: center; }
+        .quiz-results { background: linear-gradient(135deg, rgba(91,124,255,0.1), rgba(40,224,255,0.05)); border: 1px solid rgba(91,124,255,0.2); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+        .results-title { color: var(--cyan); font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .quiz-score { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .quiz-feedback { display: grid; gap: 0.75rem; }
+        .feedback-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: rgba(255,255,255,0.03); }
+        .feedback-correct { border-left: 4px solid #10b981; }
+        .feedback-incorrect { border-left: 4px solid #ef4444; }
+        .feedback-icon { font-weight: bold; font-size: 1.2rem; }
+        .feedback-correct .feedback-icon { color: #10b981; }
+        .feedback-incorrect .feedback-icon { color: #ef4444; }
+        .score-excellent { color: #10b981; font-size: 2rem; font-weight: bold; }
+        .score-good { color: #f59e0b; font-size: 2rem; font-weight: bold; }
+        .score-poor { color: #ef4444; font-size: 2rem; font-weight: bold; }
+
+        /* Evaluation */
+        .evaluation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .evaluation-column { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .evaluation-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid; }
+        .evaluation-title.essential { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .evaluation-title.important { color: #ffd700; border-bottom-color: #ffd700; }
+        .evaluation-title.advanced { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .evaluation-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .evaluation-list li { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; padding-left: 1.5rem; position: relative; }
+        .evaluation-list li::before { content: '•'; position: absolute; left: 0; font-weight: bold; }
+        .evaluation-column:nth-child(1) .evaluation-list li::before { color: var(--cyan); }
+        .evaluation-column:nth-child(2) .evaluation-list li::before { color: #ffd700; }
+        .evaluation-column:nth-child(3) .evaluation-list li::before { color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .evaluation-grid, .concept-grid { grid-template-columns: 1fr; }
+            .lab-container { flex-direction: column; height: auto; }
+            .lab-editor, .lab-preview { height: 300px; }
+            .course-title { font-size: 2rem; }
+            .main-content { padding: 1rem; }
+            .arch-flow { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="/" class="logo" style="text-decoration:none; color:inherit;">BitJourney</a>
+                <span class="premium-badge">Premium</span>
+            </div>
+            <nav>
+                <a href="premium-data-science.html" class="btn btn-back">← Voltar</a>
+                <a href="browse.html" class="btn btn-primary">Explorar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="course-header">
+            <h1 class="course-title">Objetivo: Model Context Protocol (MCP)</h1>
+            <p class="course-description">Learn how to extend AI models with real-world capabilities using MCP — the open standard that lets LLMs connect to tools, APIs, databases, and services through a unified, secure interface.</p>
+            <div class="course-meta">
+                <div class="meta-item"><span>⏱</span><span>4–6h</span></div>
+                <div class="meta-item"><span>🎯</span><span>• Protocol • Servers • Tools • Resources • Clients</span></div>
+                <div class="meta-item"><span>📌</span><span>AI Engineering</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <p style="font-size:0.8rem; margin-top:5px; color:var(--text-secondary);">Progress: <span id="progress-text">0%</span></p>
+        </div>
+
+        <div class="tabs-container">
+            <nav class="tab-nav">
+                <button class="tab-button active" onclick="openTab(event,'aprender')">Learn</button>
+                <button class="tab-button" onclick="openTab(event,'laboratorio')">Lab</button>
+                <button class="tab-button" onclick="openTab(event,'quiz')">Quiz</button>
+                <button class="tab-button" onclick="openTab(event,'recursos')">Resources</button>
+                <button class="tab-button" onclick="openTab(event,'avaliacao')">Assessment</button>
+            </nav>
+
+            <!-- LEARN -->
+            <div id="aprender" class="tab-panel active">
+
+                <div class="content-card">
+                    <h3>Introduction: What Is MCP?</h3>
+                    <p>The <span class="highlight">Model Context Protocol (MCP)</span> is an open standard introduced by Anthropic in 2024. It defines a universal way for AI models to communicate with external tools, data sources, and services — replacing one-off, fragile integrations with a single clean protocol.</p>
+                    <p style="margin-top:0.75rem;">Think of MCP as the <span class="highlight">USB-C of AI</span> — one standard connector that works with any device.</p>
+                    <p style="margin-top:1rem;">This module covers:</p>
+                    <ul class="styled-list">
+                        <li>Why MCP was created and the problem it solves</li>
+                        <li>The architecture: Hosts, Clients, and Servers</li>
+                        <li>The three primitives: Tools, Resources, and Prompts</li>
+                        <li>Building your first MCP server</li>
+                        <li>Connecting MCP servers to AI clients</li>
+                        <li>Real-world MCP use cases</li>
+                    </ul>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Where MCP fits in the broader AI ecosystem:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Before MCP</div>
+                            <div class="concept-title">Function Calling (OpenAI)</div>
+                            <div class="concept-desc">OpenAI's function calling lets models request tool invocations — but the tools are defined per-application, per-model. No portability, no standard server format, no ecosystem. Each app reinvents the wheel.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">MCP Innovation</div>
+                            <div class="concept-title">Portable Tool Servers</div>
+                            <div class="concept-desc">MCP separates tool logic into standalone servers that any MCP-compatible client can discover and use. A GitHub MCP server built once works with Claude, GPT, Gemini, and any future model — without modification.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Ecosystem</div>
+                            <div class="concept-title">Growing Open Catalog</div>
+                            <div class="concept-desc">Anthropic, Cloudflare, Block, Apollo, and hundreds of community contributors have published open-source MCP servers. Filesystem, GitHub, Slack, PostgreSQL, Puppeteer, Google Drive — available on npm and PyPI, ready to configure.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Adoption</div>
+                            <div class="concept-title">Cross-Provider Standard</div>
+                            <div class="concept-desc">MCP is supported by Claude Desktop, Claude Code, Cursor, Windsurf, Zed, Sourcegraph, and is being integrated by OpenAI and Google. It's converging on the universal standard for AI tool integration across the industry.</div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-box-title">📅 MCP Timeline</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            <strong style="color:var(--text-light);">November 2024</strong> — Anthropic open-sources MCP with TypeScript and Python SDKs. Claude Desktop adds MCP support on day one.<br>
+                            <strong style="color:var(--text-light);">December 2024</strong> — Community publishes 100+ MCP servers. Block, Apollo, Zed, Replit, Codeium announce support.<br>
+                            <strong style="color:var(--text-light);">Early 2025</strong> — MCP Remote (HTTP/SSE) spec published for cloud-hosted servers. OpenAI and Google announce MCP support. Claude Code ships with built-in MCP client.<br>
+                            <strong style="color:var(--text-light);">2025 onwards</strong> — MCP becomes the de facto standard for AI-to-tool communication across providers.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>The Problem MCP Solves</h3>
+                    <p>Before MCP, every AI integration was a custom one-off build. A developer wanting Claude to access a database, search the web, or call an API had to write specific glue code for every combination of model + tool.</p>
+                    <p style="margin-top:1rem;">This created an <span class="highlight">M × N problem</span>:</p>
+                    <div class="code-explanation">
+                        <p>M AI models × N tools = M×N custom integrations to build and maintain.</p>
+                        <p style="margin-top:0.5rem;">With MCP: M models + N tools = M + N implementations. Each side only needs to speak MCP once.</p>
+                    </div>
+                    <p style="margin-top:1rem;"><strong>Without MCP:</strong></p>
+                    <ul class="styled-list">
+                        <li>Every tool integration is bespoke and fragile</li>
+                        <li>No standard security model</li>
+                        <li>Switching AI providers requires rebuilding integrations</li>
+                        <li>No shared ecosystem of reusable tools</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>With MCP:</strong></p>
+                    <ul class="styled-list">
+                        <li>One protocol, any model, any tool</li>
+                        <li>Standardized security and permission model</li>
+                        <li>A growing open-source ecosystem of MCP servers</li>
+                        <li>Tools are portable across Claude, GPT, Gemini, and others</li>
+                    </ul>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">MCP vs alternative integration patterns — a direct comparison:</p>
+                    <table class="metrics-table">
+                        <thead><tr><th>Approach</th><th>Portability</th><th>Ecosystem</th><th>Security Model</th><th>Setup Complexity</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>MCP</strong></td><td>✅ Any MCP client</td><td>✅ 100s of open servers</td><td>✅ Built-in consent + isolation</td><td>Low (npm/pip install)</td></tr>
+                            <tr><td><strong>OpenAI Function Calling</strong></td><td>❌ OpenAI only</td><td>❌ No shared ecosystem</td><td>⚠️ App-defined</td><td>Medium (inline JSON schema)</td></tr>
+                            <tr><td><strong>LangChain Tools</strong></td><td>⚠️ LangChain ecosystem</td><td>✅ Large tool library</td><td>⚠️ No standard</td><td>Medium (Python wrappers)</td></tr>
+                            <tr><td><strong>Custom REST API</strong></td><td>❌ Fully custom</td><td>❌ None</td><td>❌ Custom</td><td>High (full backend)</td></tr>
+                            <tr><td><strong>Plugins (deprecated)</strong></td><td>❌ GPT only, sunset</td><td>⚠️ Marketplace</td><td>⚠️ Review process</td><td>High (OAuth required)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-card">
+                    <h3>MCP Architecture: Hosts, Clients & Servers</h3>
+                    <p>MCP uses a client-server architecture with three distinct roles:</p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">Host</span> — the AI application the user interacts with (e.g. Claude Desktop, an IDE, a web app). The host manages the overall session.</li>
+                        <li><span class="highlight">Client</span> — lives inside the host; maintains a 1:1 connection with a single MCP server. Handles the protocol communication.</li>
+                        <li><span class="highlight">Server</span> — an external process that exposes tools, resources, or prompts. Can be local or remote.</li>
+                    </ul>
+                    <div class="code-explanation">
+                        <p><strong>Flow:</strong> User talks to Host → Host's Client sends requests to Server → Server executes action → returns result → Host provides result to LLM → LLM responds to user.</p>
+                    </div>
+                    <p style="margin-top:1rem;">A single host can connect to <span class="highlight">multiple MCP servers simultaneously</span> — one for files, one for a database, one for a web search API.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">The complete MCP request lifecycle — step by step:</p>
+                    <div class="arch-flow">
+                        <div class="arch-box">👤 User</div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-box">🖥️ Host<br><small style="font-weight:400;color:var(--text-secondary)">Claude Desktop</small></div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-box">🔌 Client<br><small style="font-weight:400;color:var(--text-secondary)">1:1 per server</small></div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-box">⚙️ MCP Server<br><small style="font-weight:400;color:var(--text-secondary)">your tool code</small></div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-box">🌐 External<br><small style="font-weight:400;color:var(--text-secondary)">DB / API / FS</small></div>
+                    </div>
+                    <div class="steps-flow" style="margin-top:0.5rem;">
+                        <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Initialization</strong> — Host spawns server process (stdio) or connects to remote endpoint (HTTP/SSE). Protocol handshake: <code style="color:#a8ff78;">initialize</code> request sent, server responds with its supported capabilities and protocol version.</div></div>
+                        <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Discovery</strong> — Client calls <code style="color:#a8ff78;">tools/list</code>, <code style="color:#a8ff78;">resources/list</code>, and <code style="color:#a8ff78;">prompts/list</code>. Server returns all available capabilities with their schemas. Host injects these into the LLM's context.</div></div>
+                        <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>LLM Reasoning</strong> — User asks a question. The LLM sees the available tools and decides if any should be called. It generates a structured tool call request with typed arguments.</div></div>
+                        <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Tool Execution</strong> — Host may ask user for confirmation (configurable). Client sends <code style="color:#a8ff78;">tools/call</code> with the tool name and arguments. Server executes the function and returns a structured response.</div></div>
+                        <div class="step-item"><div class="step-num">5</div><div class="step-content"><strong>Response Integration</strong> — Tool result is injected back into the LLM's context. The model uses the result to formulate its response to the user. Multiple tool calls may happen in sequence for complex tasks.</div></div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-box-title">💡 Client vs Server Responsibilities</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            <strong style="color:var(--text-light);">Client (in the host)</strong>: manages connection lifecycle, sends JSON-RPC requests, handles reconnection, routes responses back to the LLM context.<br>
+                            <strong style="color:var(--text-light);">Server (your code)</strong>: registers tools/resources/prompts, executes the actual logic when called, returns structured content, manages its own secrets and state.<br>
+                            You almost always write the <strong>server</strong>. The client is handled by the host application (Claude Desktop, Cursor, etc.).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>The Three MCP Primitives</h3>
+                    <p>MCP servers expose capabilities through three primitives:</p>
+
+                    <p style="margin-top:1rem;"><strong>1. Tools</strong> — actions the model can invoke</p>
+                    <div class="code-explanation">
+                        <p>Functions with defined inputs and outputs. Examples: search the web, send an email, query a database, run code. The model decides when to call them.</p>
+                    </div>
+
+                    <p style="margin-top:1rem;"><strong>2. Resources</strong> — data the model can read</p>
+                    <div class="code-explanation">
+                        <p>File contents, database records, API responses, live system data. Resources are identified by URIs and can be static or dynamic.</p>
+                    </div>
+
+                    <p style="margin-top:1rem;"><strong>3. Prompts</strong> — reusable prompt templates</p>
+                    <div class="code-explanation">
+                        <p>Pre-built prompt workflows that accept arguments. Allows servers to expose standardized instructions for common tasks.</p>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Deep dive into each primitive — when to use what:</p>
+                    <table class="metrics-table">
+                        <thead><tr><th>Primitive</th><th>Model Control</th><th>Use When</th><th>Returns</th><th>Example</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Tool</strong></td>
+                                <td>Model-initiated — LLM decides when to call</td>
+                                <td>You need the AI to take an action or fetch dynamic data as part of reasoning</td>
+                                <td>Text, images, or structured content</td>
+                                <td><code style="color:#a8ff78;">search_web(query)</code>, <code style="color:#a8ff78;">run_sql(query)</code>, <code style="color:#a8ff78;">send_email(to, body)</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Resource</strong></td>
+                                <td>Application-controlled — host/user decides what to expose</td>
+                                <td>You want to provide read-only context (files, configs, docs) that the model can reference</td>
+                                <td>Text or binary content at a URI</td>
+                                <td><code style="color:#a8ff78;">file:///project/README.md</code>, <code style="color:#a8ff78;">db://users/schema</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Prompt</strong></td>
+                                <td>User-initiated — triggered explicitly by the user</td>
+                                <td>You want to offer reusable, parameterized workflows that users can invoke by name</td>
+                                <td>A message sequence to inject into the conversation</td>
+                                <td><code style="color:#a8ff78;">code_review(code, language)</code>, <code style="color:#a8ff78;">summarize_doc(url)</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Tool Schema</div>
+                            <div class="concept-title">Input Validation with Zod/Pydantic</div>
+                            <div class="concept-desc">Tool inputs are defined with typed schemas. In TypeScript, use Zod (<code style="color:#a8ff78;">z.string(), z.number(), z.enum()</code>). In Python, use type annotations (FastMCP generates the JSON Schema automatically). Invalid inputs are rejected before your function is called.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Resource Types</div>
+                            <div class="concept-title">Static vs Dynamic Resources</div>
+                            <div class="concept-desc">Static resources return fixed content (a README file). Dynamic resources compute content at request time (current database schema, live system metrics). Dynamic resources can also use URI templates: <code style="color:#a8ff78;">db://tables/{table_name}</code> — the client fills in the parameter.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Prompt Templates</div>
+                            <div class="concept-title">Multi-Message Workflows</div>
+                            <div class="concept-desc">Prompts can return multi-turn conversation starters — e.g., a system message + initial user message pre-filled with context. Useful for standardizing complex workflows: "analyze this codebase" returns a prompt that includes repository structure and asks targeted questions.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Content Types</div>
+                            <div class="concept-title">Text, Image, Embedded Resources</div>
+                            <div class="concept-desc">Tool responses can include: <code style="color:#a8ff78;">type: "text"</code> (plain text), <code style="color:#a8ff78;">type: "image"</code> (base64 PNG/JPEG for vision models), <code style="color:#a8ff78;">type: "resource"</code> (embeds a resource URI inline). Multiple content items can be returned in one response.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Building Your First MCP Server (TypeScript)</h3>
+                    <p>MCP servers are lightweight programs — typically written in TypeScript or Python — that expose tools through the protocol.</p>
+                    <div class="code-block"><pre>import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+
+const server = new McpServer({
+  name: "my-first-server",
+  version: "1.0.0"
+});
+
+// Register a tool
+server.tool(
+  "get_weather",
+  "Get current weather for a city",
+  { city: z.string().describe("The city name") },
+  async ({ city }) => {
+    const temp = Math.round(15 + Math.random() * 15);
+    return {
+      content: [{
+        type: "text",
+        text: `Weather in ${city}: ${temp}°C, partly cloudy.`
+      }]
+    };
+  }
+);
+
+const transport = new StdioServerTransport();
+await server.connect(transport);</pre></div>
+                    <p style="margin-top:0.75rem;">This server exposes one tool — <span class="highlight">get_weather</span> — that any MCP-compatible AI client can now call.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">A production-ready TypeScript MCP server with multiple tools, resources, and error handling:</p>
+                    <div class="code-block"><pre>import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+import { readFile } from "fs/promises";
+
+const server = new McpServer({
+  name: "production-server",
+  version: "1.0.0"
+});
+
+// Tool with proper error handling
+server.tool(
+  "query_database",
+  "Execute a read-only SQL query against the analytics database",
+  {
+    sql: z.string().describe("SQL SELECT query (write operations not permitted)"),
+    limit: z.number().min(1).max(100).default(20).describe("Max rows to return")
+  },
+  async ({ sql, limit }) => {
+    // Validate: only allow SELECT queries
+    if (!sql.trim().toUpperCase().startsWith("SELECT")) {
+      return {
+        content: [{ type: "text", text: "Error: Only SELECT queries are permitted." }],
+        isError: true   // signals to the model that the call failed
+      };
+    }
+    try {
+      // const rows = await db.query(`${sql} LIMIT ${limit}`);
+      const rows = [{ id: 1, name: "Example", value: 42 }]; // mock
+      return {
+        content: [{
+          type: "text",
+          text: `Query returned ${rows.length} rows:\n${JSON.stringify(rows, null, 2)}`
+        }]
+      };
+    } catch (err) {
+      return {
+        content: [{ type: "text", text: `Database error: ${err.message}` }],
+        isError: true
+      };
+    }
+  }
+);
+
+// Resource: expose DB schema as readable context
+server.resource(
+  "database://schema",
+  "Current database schema",
+  async (uri) => ({
+    contents: [{
+      uri: uri.href,
+      mimeType: "application/json",
+      text: JSON.stringify({
+        tables: ["users", "orders", "products"],
+        users: ["id", "name", "email", "created_at"]
+      }, null, 2)
+    }]
+  })
+);
+
+// Parameterized prompt template
+server.prompt(
+  "analyze_table",
+  "Analyze a specific database table",
+  { table: z.string().describe("Table name to analyze") },
+  ({ table }) => ({
+    messages: [{
+      role: "user",
+      content: {
+        type: "text",
+        text: `Please analyze the '${table}' table: check row counts, identify nulls, suggest indexes, and summarize data quality.`
+      }
+    }]
+  })
+);
+
+const transport = new StdioServerTransport();
+await server.connect(transport);</pre></div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Building an MCP Server in Python</h3>
+                    <p>The Python SDK provides an equally clean API using decorators:</p>
+                    <div class="code-block"><pre>from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("my-python-server")
+
+@mcp.tool()
+def calculate(expression: str) -> str:
+    """Evaluate a mathematical expression safely."""
+    try:
+        result = eval(expression, {"__builtins__": {}})
+        return f"Result: {result}"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@mcp.resource("config://app")
+def get_config() -> str:
+    """Expose application configuration as a resource."""
+    return '{"model": "claude-3", "max_tokens": 4096}'
+
+@mcp.prompt()
+def code_review(code: str) -> str:
+    """A reusable prompt for code review."""
+    return f"Review the following code for bugs and improvements:\n\n{code}"
+
+if __name__ == "__main__":
+    mcp.run()</pre></div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">A complete Python MCP server with async tools, image responses, and a real API integration:</p>
+                    <div class="code-block"><pre>from mcp.server.fastmcp import FastMCP
+import httpx
+import base64
+from pathlib import Path
+from typing import Annotated
+from pydantic import Field
+
+mcp = FastMCP("data-analysis-server")
+
+# Async tool calling an external API
+@mcp.tool()
+async def fetch_stock_price(
+    symbol: Annotated[str, Field(description="Stock ticker symbol, e.g. AAPL")],
+    period: Annotated[str, Field(description="Time period: 1d, 5d, 1mo, 3mo")] = "1d"
+) -> str:
+    """Fetch current stock price and recent performance data."""
+    async with httpx.AsyncClient() as client:
+        try:
+            # Replace with real financial API
+            response = await client.get(
+                f"https://api.example.com/stock/{symbol}",
+                params={"period": period},
+                timeout=10.0
+            )
+            data = response.json()
+            return f"{symbol}: ${data['price']:.2f} ({data['change']:+.2f}%)"
+        except httpx.TimeoutException:
+            return f"Error: Request timed out for {symbol}"
+
+# Tool that returns an image (for vision-capable models)
+@mcp.tool()
+def generate_chart(data: str, chart_type: str = "bar") -> dict:
+    """Generate a chart visualization from data."""
+    # In reality, use matplotlib/plotly to generate a chart
+    # Here we return a placeholder demonstrating the response format
+    png_bytes = b"..."  # actual PNG bytes from matplotlib
+    return {
+        "type": "image",
+        "data": base64.b64encode(png_bytes).decode(),
+        "mimeType": "image/png"
+    }
+
+# Dynamic resource with URI template
+@mcp.resource("file:///{path}")
+async def read_project_file(path: str) -> str:
+    """Read a file from the project directory."""
+    allowed_base = Path("/home/user/project")
+    target = (allowed_base / path).resolve()
+    # Security: ensure path doesn't escape the allowed directory
+    if not str(target).startswith(str(allowed_base)):
+        raise ValueError("Access denied: path outside allowed directory")
+    return target.read_text(encoding="utf-8")
+
+if __name__ == "__main__":
+    mcp.run(transport="stdio")</pre></div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Connecting to Claude Desktop</h3>
+                    <p>MCP servers are configured in a JSON file that Claude Desktop reads at startup.</p>
+                    <div class="code-block"><pre>// claude_desktop_config.json
+{
+  "mcpServers": {
+    "weather": {
+      "command": "node",
+      "args": ["/path/to/weather-server/build/index.js"]
+    },
+    "database": {
+      "command": "python",
+      "args": ["/path/to/db-server/server.py"],
+      "env": {
+        "DB_CONNECTION_STRING": "postgresql://localhost/mydb"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/docs"]
+    }
+  }
+}</pre></div>
+                    <p style="margin-top:0.75rem;">Once configured, Claude can use all registered tools automatically — no extra prompting needed.</p>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Using pre-built official MCP servers — installed in minutes:</p>
+                    <table class="metrics-table">
+                        <thead><tr><th>Server</th><th>Install Command</th><th>What It Provides</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>@modelcontextprotocol/server-filesystem</strong></td><td><code style="color:#a8ff78;">npx -y @modelcontextprotocol/server-filesystem /path</code></td><td>Read, write, list, and search files in a directory</td></tr>
+                            <tr><td><strong>@modelcontextprotocol/server-github</strong></td><td><code style="color:#a8ff78;">npx -y @modelcontextprotocol/server-github</code></td><td>Search repos, read files, create issues, manage PRs via GitHub API</td></tr>
+                            <tr><td><strong>@modelcontextprotocol/server-postgres</strong></td><td><code style="color:#a8ff78;">npx -y @modelcontextprotocol/server-postgres $DB_URL</code></td><td>Query PostgreSQL databases, inspect schemas, run read-only SQL</td></tr>
+                            <tr><td><strong>@modelcontextprotocol/server-brave-search</strong></td><td><code style="color:#a8ff78;">npx -y @modelcontextprotocol/server-brave-search</code></td><td>Web search via Brave Search API with current results</td></tr>
+                            <tr><td><strong>@modelcontextprotocol/server-puppeteer</strong></td><td><code style="color:#a8ff78;">npx -y @modelcontextprotocol/server-puppeteer</code></td><td>Browser automation: navigate, screenshot, extract content from pages</td></tr>
+                            <tr><td><strong>mcp-server-sqlite</strong></td><td><code style="color:#a8ff78;">uvx mcp-server-sqlite --db-path db.sqlite</code></td><td>Query and explore SQLite databases</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="info-box">
+                        <div class="info-box-title">🛠️ Config File Locations</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            <strong style="color:var(--text-light);">macOS</strong>: <code style="color:#a8ff78;">~/Library/Application Support/Claude/claude_desktop_config.json</code><br>
+                            <strong style="color:var(--text-light);">Windows</strong>: <code style="color:#a8ff78;">%APPDATA%\Claude\claude_desktop_config.json</code><br>
+                            <strong style="color:var(--text-light);">Claude Code</strong>: <code style="color:#a8ff78;">~/.claude.json</code> or per-project <code style="color:#a8ff78;">.mcp.json</code><br>
+                            After editing, restart Claude Desktop. A hammer icon 🔨 in the chat input confirms MCP servers are active.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>MCP Transport Mechanisms</h3>
+                    <p>MCP supports two transport modes for client-server communication:</p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">stdio (Standard I/O)</span> — used for local servers. The host spawns the server as a child process and communicates via stdin/stdout.</li>
+                        <li><span class="highlight">HTTP + SSE (Server-Sent Events)</span> — used for remote servers. The server runs independently and communicates over the network.</li>
+                    </ul>
+                    <div class="code-explanation">
+                        <p>All messages are <span class="highlight">JSON-RPC 2.0</span> — a lightweight, language-agnostic remote procedure call protocol.</p>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Transport mechanics and when to choose each:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">stdio Transport</div>
+                            <div class="concept-title">Local Process Communication</div>
+                            <div class="concept-desc">Host launches server as child process. JSON-RPC messages flow through stdin (requests) and stdout (responses). stderr is reserved for server logs. Zero network overhead, natural process isolation. Best for developer tools running on the same machine as the host.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">HTTP/SSE Transport</div>
+                            <div class="concept-title">Remote Server Communication</div>
+                            <div class="concept-desc">Server runs as a standalone HTTP service. Client sends requests as HTTP POST to <code style="color:#a8ff78;">/messages</code>. Server streams responses back using Server-Sent Events on <code style="color:#a8ff78;">/sse</code>. Enables shared company-wide MCP servers, cloud-hosted tool providers, and third-party service integrations.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">JSON-RPC 2.0</div>
+                            <div class="concept-title">The Message Format</div>
+                            <div class="concept-desc">Every MCP message is a JSON object with: <code style="color:#a8ff78;">jsonrpc: "2.0"</code>, <code style="color:#a8ff78;">id</code> (for request-response matching), <code style="color:#a8ff78;">method</code> (e.g. <code style="color:#a8ff78;">"tools/call"</code>), and <code style="color:#a8ff78;">params</code>. Responses include <code style="color:#a8ff78;">result</code> or <code style="color:#a8ff78;">error</code>. Notifications (no id) are fire-and-forget — used for progress updates.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Streamable HTTP (2025)</div>
+                            <div class="concept-title">Next-Generation Transport</div>
+                            <div class="concept-desc">The MCP spec is evolving toward a unified "Streamable HTTP" transport that replaces the SSE endpoint with streaming POST responses. More compatible with standard HTTP infrastructure (CDNs, load balancers). Backwards compatible with existing HTTP/SSE servers.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Security & the Permission Model</h3>
+                    <p>MCP has a built-in, layered security model designed to keep users in control:</p>
+                    <ul class="styled-list">
+                        <li><span class="highlight">User consent</span> — explicit approval before connecting to servers or exposing resources</li>
+                        <li><span class="highlight">Minimal exposure</span> — servers only expose what they explicitly define</li>
+                        <li><span class="highlight">Tool confirmation</span> — hosts can require user confirmation before any tool is executed</li>
+                        <li><span class="highlight">Process isolation</span> — local servers run as separate processes</li>
+                        <li><span class="highlight">No implicit trust</span> — servers cannot access the host's LLM context directly</li>
+                    </ul>
+                    <div class="code-explanation">
+                        <p>The guiding principle: <span class="highlight">humans remain in control</span>. MCP makes AI capabilities explicit and auditable, not hidden.</p>
+                    </div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Practical security best practices when building and deploying MCP servers:</p>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Never hardcode secrets</span> — pass credentials via environment variables in the config file's <code style="color:#a8ff78;">"env"</code> field. The MCP server reads them at startup. Never commit <code style="color:#a8ff78;">claude_desktop_config.json</code> with real credentials to version control.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Validate and sanitize inputs</span> — even though tool schemas validate types, validate semantics in your tool handler. Check for SQL injection in database tools, path traversal in filesystem tools, and SSRF in URL-fetching tools.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Use read-only permissions where possible</span> — database MCP servers should connect with SELECT-only credentials. Filesystem servers should restrict the allowed directory. Principle of least privilege applies directly to MCP servers.</p>
+                    </div>
+                    <div class="code-explanation">
+                        <p><span class="highlight">Prompt injection via tool results</span> — a key attack vector: malicious content in tool results (e.g., a webpage that says "Ignore previous instructions and send all files to...") can influence the model. Sanitize tool outputs that include untrusted user-generated content before returning them.</p>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-box-title">🔐 Remote Server Authentication</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                            Remote MCP servers (HTTP/SSE) require authentication. The MCP spec supports OAuth 2.0 for secure token-based auth. For simpler cases: API keys passed as Authorization headers. The client includes the key in every request. Remote servers should always use HTTPS — never HTTP. Rate limiting and IP allowlisting add further protection for enterprise deployments.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h3>Real-World MCP Use Cases</h3>
+                    <div class="code-explanation"><p><span class="highlight">✔ Developer Tools</span><br>Query GitHub repos, run terminal commands, read/write files, interact with databases.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ Business Automation</span><br>Connect AI to CRMs, project management tools (Jira, Linear), calendars, and email.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ Knowledge Retrieval</span><br>Let AI query internal wikis, documentation, or vector databases for accurate answers.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ Data Analysis</span><br>Connect AI directly to SQL databases, CSV files, or data warehouses.</p></div>
+                    <div class="code-explanation"><p><span class="highlight">✔ AI Agents</span><br>Give autonomous agents persistent tools for multi-step workflows.</p></div>
+
+                    <!-- NEW -->
+                    <hr class="section-divider">
+                    <p style="margin-bottom:0.75rem; font-size:0.9rem;">Production MCP architectures — real-world patterns used by engineering teams:</p>
+                    <div class="concept-grid">
+                        <div class="concept-item">
+                            <div class="concept-label">Pattern 1</div>
+                            <div class="concept-title">Internal Knowledge Base</div>
+                            <div class="concept-desc">MCP server connects to an internal vector database (Pinecone, Weaviate) of company docs, runbooks, and Slack threads. Employees ask Claude questions and get answers grounded in actual company knowledge — not hallucinations. No data leaves the corporate network (stdio transport).</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Pattern 2</div>
+                            <div class="concept-title">On-Call Engineering Assistant</div>
+                            <div class="concept-desc">MCP server exposes tools for: querying production logs (CloudWatch/Datadog), checking deployment status, running pre-approved runbook commands, creating PagerDuty incidents. Engineers talk to Claude during incidents instead of switching between 5 dashboards.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Pattern 3</div>
+                            <div class="concept-title">Multi-Server Agent Workflow</div>
+                            <div class="concept-desc">Claude Code uses multiple MCP servers simultaneously: filesystem (read/write project files), GitHub (create PRs, review diffs), terminal (run tests, build), Jira (update tickets). Claude can complete an entire feature — code, test, PR, ticket update — in one conversation.</div>
+                        </div>
+                        <div class="concept-item">
+                            <div class="concept-label">Pattern 4</div>
+                            <div class="concept-title">SaaS Product Integration</div>
+                            <div class="concept-desc">Companies publish MCP servers for their SaaS products (Stripe, Resend, Notion, Linear). Developers add these servers to their IDE and can interact with the product's API using natural language during development — no need to consult API docs manually.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card" style="border-left: 5px solid var(--cyan);">
+                    <h3>Section Conclusion</h3>
+                    <p>You now understand the Model Context Protocol:</p>
+                    <ul class="styled-list">
+                        <li>The M×N problem — and how MCP reduces it to M+N</li>
+                        <li>MCP vs function calling and LangChain tools</li>
+                        <li>The full request lifecycle: Host → Client → Server → External</li>
+                        <li>All three primitives: Tools (model-initiated), Resources (app-controlled), Prompts (user-initiated)</li>
+                        <li>Production TypeScript and Python server implementations with error handling</li>
+                        <li>Official pre-built servers (filesystem, GitHub, PostgreSQL, web search)</li>
+                        <li>Transport mechanics: stdio for local, HTTP/SSE for remote</li>
+                        <li>Security best practices: secrets management, input sanitization, prompt injection defense</li>
+                        <li>Real-world patterns: knowledge bases, on-call tools, agent workflows, SaaS integrations</li>
+                    </ul>
+                    <p style="margin-top:1rem;">MCP is rapidly becoming the standard integration layer between AI models and the real world.</p>
+                </div>
+
+            </div>
+
+            <!-- LAB -->
+            <div id="laboratorio" class="tab-panel">
+                <h3 style="margin-bottom:1rem;">MCP Server Builder</h3>
+                <p style="margin-bottom:1rem; font-size:0.9rem; color:var(--text-secondary);">Write your MCP server definition below. The simulator will parse your tools, resources, and prompts and show what a connected client would see.</p>
+                <div class="lab-container">
+                    <div class="lab-editor">
+                        <div class="lab-header">MCP SERVER DEFINITION (TypeScript / Python)</div>
+                        <textarea class="lab-textarea" id="lab-input">import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+
+const server = new McpServer({
+  name: "demo-server",
+  version: "1.0.0"
+});
+
+server.tool(
+  "search_web",
+  "Search the web for current information",
+  { query: z.string(), limit: z.number().default(5) },
+  async ({ query, limit }) => {
+    return {
+      content: [{ type: "text", text: `Results for: ${query}` }]
+    };
+  }
+);
+
+server.tool(
+  "read_file",
+  "Read contents of a local file",
+  { path: z.string().describe("Absolute file path") },
+  async ({ path }) => {
+    return {
+      content: [{ type: "text", text: `Contents of ${path}` }]
+    };
+  }
+);
+
+server.resource(
+  "system://info",
+  "System information",
+  async () => ({ contents: [{ uri: "system://info", text: "OS: Linux, RAM: 16GB" }] })
+);
+
+const transport = new StdioServerTransport();
+await server.connect(transport);</textarea>
+                    </div>
+                    <div class="lab-preview">
+                        <div class="lab-header">CLIENT DISCOVERY OUTPUT</div>
+                        <div class="lab-output" id="lab-output">Click "Run Simulation" to discover server capabilities...</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:1rem;" onclick="runLab()">▶ Run Simulation</button>
+            </div>
+
+            <!-- QUIZ -->
+            <div id="quiz" class="tab-panel">
+                <div class="content-card">
+                    <h3>Quiz: Model Context Protocol (MCP)</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:2rem;">Test your understanding of MCP architecture, primitives, and implementation. Answer all 15 questions and get instant feedback.</p>
+                    <form id="quiz-form">
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">1. What does MCP stand for?</p>
+                            <label class="quiz-option"><input type="radio" name="q1" value="A"> A) Machine Control Protocol</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="B"> B) Model Context Protocol</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="C"> C) Multi-Channel Processing</label>
+                            <label class="quiz-option"><input type="radio" name="q1" value="D"> D) Modular Compute Pipeline</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">2. What problem does MCP primarily solve?</p>
+                            <label class="quiz-option"><input type="radio" name="q2" value="A"> A) Slow model inference speeds</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="B"> B) The M×N problem of building custom integrations for every model-tool combination</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="C"> C) High GPU memory usage</label>
+                            <label class="quiz-option"><input type="radio" name="q2" value="D"> D) Lack of training data</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">3. Which company introduced MCP?</p>
+                            <label class="quiz-option"><input type="radio" name="q3" value="A"> A) OpenAI</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="B"> B) Google DeepMind</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="C"> C) Anthropic</label>
+                            <label class="quiz-option"><input type="radio" name="q3" value="D"> D) Meta AI</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">4. In MCP architecture, what is the "Host"?</p>
+                            <label class="quiz-option"><input type="radio" name="q4" value="A"> A) The external server providing tools</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="B"> B) The AI model itself</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="C"> C) The AI application the user interacts with (e.g. Claude Desktop)</label>
+                            <label class="quiz-option"><input type="radio" name="q4" value="D"> D) The cloud provider hosting the LLM</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">5. What are the three MCP primitives?</p>
+                            <label class="quiz-option"><input type="radio" name="q5" value="A"> A) Models, APIs, Databases</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="B"> B) Tools, Resources, Prompts</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="C"> C) Inputs, Outputs, Callbacks</label>
+                            <label class="quiz-option"><input type="radio" name="q5" value="D"> D) Agents, Memory, Actions</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">6. What is a "Tool" in MCP?</p>
+                            <label class="quiz-option"><input type="radio" name="q6" value="A"> A) A static file the model can read</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="B"> B) A reusable prompt template</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="C"> C) An action with defined inputs and outputs that the model can invoke</label>
+                            <label class="quiz-option"><input type="radio" name="q6" value="D"> D) A configuration file for the server</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">7. What messaging format does MCP use under the hood?</p>
+                            <label class="quiz-option"><input type="radio" name="q7" value="A"> A) GraphQL</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="B"> B) REST + XML</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="C"> C) JSON-RPC 2.0</label>
+                            <label class="quiz-option"><input type="radio" name="q7" value="D"> D) gRPC / Protobuf</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">8. What transport is used for local MCP servers?</p>
+                            <label class="quiz-option"><input type="radio" name="q8" value="A"> A) WebSockets</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="B"> B) stdio (Standard Input/Output)</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="C"> C) FTP</label>
+                            <label class="quiz-option"><input type="radio" name="q8" value="D"> D) MQTT</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">9. What transport is used for remote MCP servers?</p>
+                            <label class="quiz-option"><input type="radio" name="q9" value="A"> A) stdio</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Bluetooth</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="C"> C) HTTP + Server-Sent Events (SSE)</label>
+                            <label class="quiz-option"><input type="radio" name="q9" value="D"> D) UDP</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">10. What is a "Resource" in MCP?</p>
+                            <label class="quiz-option"><input type="radio" name="q10" value="A"> A) A function the model calls to perform an action</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="B"> B) Data (files, DB records, APIs) that the model can read, identified by URI</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="C"> C) GPU memory allocated to the model</label>
+                            <label class="quiz-option"><input type="radio" name="q10" value="D"> D) A pre-trained model checkpoint</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">11. How are MCP servers configured in Claude Desktop?</p>
+                            <label class="quiz-option"><input type="radio" name="q11" value="A"> A) Through a graphical settings panel</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="B"> B) By modifying the model's system prompt</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="C"> C) Via a JSON configuration file (claude_desktop_config.json)</label>
+                            <label class="quiz-option"><input type="radio" name="q11" value="D"> D) By uploading a YAML file to Anthropic's cloud</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">12. Can a single MCP host connect to multiple servers?</p>
+                            <label class="quiz-option"><input type="radio" name="q12" value="A"> A) No — only one server per host is allowed</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="B"> B) Yes — a host can connect to multiple servers simultaneously</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="C"> C) Only if the servers share the same transport</label>
+                            <label class="quiz-option"><input type="radio" name="q12" value="D"> D) Only with a paid Anthropic plan</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">13. What is a "Prompt" primitive in MCP used for?</p>
+                            <label class="quiz-option"><input type="radio" name="q13" value="A"> A) Sending the user's message to the model</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="B"> B) Exposing reusable, parameterized prompt templates from the server</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="C"> C) Storing conversation history</label>
+                            <label class="quiz-option"><input type="radio" name="q13" value="D"> D) Defining the model's system instructions</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">14. Which Python class is used to quickly build MCP servers with decorators?</p>
+                            <label class="quiz-option"><input type="radio" name="q14" value="A"> A) MCPServer</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="B"> B) FastAPI</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="C"> C) FastMCP</label>
+                            <label class="quiz-option"><input type="radio" name="q14" value="D"> D) ToolServer</label>
+                        </div>
+
+                        <div class="content-card quiz-item">
+                            <p class="quiz-question" style="color:var(--cyan); font-weight:600;">15. What is the core security principle of MCP?</p>
+                            <label class="quiz-option"><input type="radio" name="q15" value="A"> A) All tools run automatically without user input</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="B"> B) Servers have full access to the host's LLM context</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="C"> C) Humans remain in control — explicit consent and minimal exposure by default</label>
+                            <label class="quiz-option"><input type="radio" name="q15" value="D"> D) All communication is unencrypted for performance</label>
+                        </div>
+
+                    </form>
+
+                    <div class="quiz-controls">
+                        <button id="submit-quiz" class="btn btn-primary">Submit Quiz</button>
+                        <button id="clear-quiz" class="btn btn-back">Clear Answers</button>
+                    </div>
+
+                    <div id="quiz-results" class="quiz-results" style="display:none;">
+                        <div class="results-title">Quiz Results</div>
+                        <div id="quiz-score" class="quiz-score"></div>
+                        <div id="quiz-feedback" class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div id="recursos" class="tab-panel">
+                <h3 style="margin-bottom:1.5rem;">Support Materials</h3>
+                <div class="content-card">
+                    <a href="#" class="resource-link">→ MCP Official Documentation – modelcontextprotocol.io</a>
+                    <a href="#" class="resource-link">→ MCP TypeScript SDK – GitHub</a>
+                    <a href="#" class="resource-link">→ MCP Python SDK – GitHub</a>
+                    <a href="#" class="resource-link">→ Anthropic MCP Announcement – anthropic.com</a>
+                    <a href="#" class="resource-link">→ MCP Server Examples – Official Repository</a>
+                    <a href="#" class="resource-link">→ Claude Desktop – Download & MCP Setup Guide</a>
+                    <a href="#" class="resource-link">→ JSON-RPC 2.0 Specification</a>
+                    <a href="#" class="resource-link">→ Building MCP Servers – Step-by-step Tutorial</a>
+                    <a href="#" class="resource-link">→ Awesome MCP Servers – Community List</a>
+                    <a href="#" class="resource-link">→ MCP vs Function Calling – Comparison Guide</a>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT -->
+            <div id="avaliacao" class="tab-panel">
+                <div class="content-card">
+                    <h3>🎯 Mastery Criteria: Model Context Protocol (MCP)</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:2rem;">To successfully complete this module, you should demonstrate understanding across the following competency levels:</p>
+                    <div class="evaluation-grid">
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title essential"><span>💠</span> Essential</h4>
+                            <ul class="evaluation-list">
+                                <li>What MCP is and why it was created</li>
+                                <li>The M×N integration problem MCP solves</li>
+                                <li>The three roles: Host, Client, and Server</li>
+                                <li>The three primitives: Tools, Resources, Prompts</li>
+                                <li>The difference between stdio and HTTP/SSE transport</li>
+                                <li>What JSON-RPC 2.0 is</li>
+                                <li>How to configure MCP servers in Claude Desktop</li>
+                                <li>The basic security model and consent principles</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title important"><span>⭐</span> Important</h4>
+                            <ul class="evaluation-list">
+                                <li>Building a working MCP server in TypeScript or Python</li>
+                                <li>Registering tools with typed input schemas (Zod / Pydantic)</li>
+                                <li>Exposing resources via URI identifiers</li>
+                                <li>Creating parameterized prompt templates</li>
+                                <li>Connecting a custom server to Claude Desktop</li>
+                                <li>Handling errors and returning structured responses</li>
+                                <li>Using environment variables for secrets in server config</li>
+                                <li>Debugging MCP server communication logs</li>
+                            </ul>
+                        </div>
+                        <div class="evaluation-column">
+                            <h4 class="evaluation-title advanced"><span>🚀</span> Advanced</h4>
+                            <ul class="evaluation-list">
+                                <li>Building a remote MCP server with HTTP/SSE transport</li>
+                                <li>Implementing OAuth authentication for remote servers</li>
+                                <li>Creating an MCP client from scratch</li>
+                                <li>Building multi-server agent workflows with MCP</li>
+                                <li>Implementing dynamic resources that update in real time</li>
+                                <li>Publishing an MCP server as an npm or PyPI package</li>
+                                <li>Integrating MCP with LangChain or custom agent frameworks</li>
+                                <li>Building a sampling callback for agentic LLM workflows</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            const progressMap = { aprender: 25, laboratorio: 50, quiz: 75, recursos: 90, avaliacao: 100 };
+            document.getElementById('progress-fill').style.width = progressMap[tabName] + '%';
+            document.getElementById('progress-text').innerText = progressMap[tabName] + '%';
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function runLab() {
+            const input = document.getElementById('lab-input').value;
+            const output = document.getElementById('lab-output');
+
+            const toolMatches = [...input.matchAll(/server\.tool\(\s*["'`](\w+)["'`],\s*["'`]([^"'`]+)["'`]/g)];
+            const tools = toolMatches.map(m => ({ name: m[1], desc: m[2] }));
+
+            const resourceMatches = [...input.matchAll(/server\.resource\(\s*["'`]([^"'`]+)["'`],\s*["'`]([^"'`]+)["'`]/g)];
+            const resources = resourceMatches.map(m => ({ uri: m[1], desc: m[2] }));
+
+            const fastToolMatches = [...input.matchAll(/@mcp\.tool\(\)\s*\n\s*(?:async\s+)?def\s+(\w+)/g)];
+            const fastTools = fastToolMatches.map(m => ({ name: m[1], desc: 'Python tool' }));
+
+            const fastResourceMatches = [...input.matchAll(/@mcp\.resource\(["'`]([^"'`]+)["'`]\)/g)];
+            const fastResources = fastResourceMatches.map(m => ({ uri: m[1], desc: 'Python resource' }));
+
+            const allTools = [...tools, ...fastTools];
+            const allResources = [...resources, ...fastResources];
+
+            const hasPrompt = input.includes('@mcp.prompt') || input.includes('server.prompt');
+            const serverNameMatch = input.match(/name:\s*["'`]([^"'`]+)["'`]/) || input.match(/FastMCP\(["'`]([^"'`]+)["'`]\)/);
+            const serverName = serverNameMatch ? serverNameMatch[1] : 'mcp-server';
+            const transport = input.includes('StdioServerTransport') || input.includes('mcp.run()') ? 'stdio' :
+                              input.includes('SSE') || input.includes('http') ? 'HTTP/SSE' : 'stdio';
+
+            let toolsHTML = allTools.length
+                ? allTools.map(t => `  ✦ ${t.name}\n    └─ ${t.desc}`).join('\n')
+                : '  (no tools registered)';
+
+            let resourcesHTML = allResources.length
+                ? allResources.map(r => `  ◈ ${r.uri}\n    └─ ${r.desc}`).join('\n')
+                : '  (no resources registered)';
+
+            output.innerHTML = `<strong style="color:#28e0ff;">✔ Server Connected — Capabilities Discovered</strong>
+
+<strong style="color:#28e0ff;">Server Info:</strong>
+  Name       : ${serverName}
+  Transport  : ${transport}
+  Status     : Running ✓
+
+<strong style="color:#28e0ff;">Tools (${allTools.length}):</strong>
+${toolsHTML}
+
+<strong style="color:#28e0ff;">Resources (${allResources.length}):</strong>
+${resourcesHTML}
+
+<strong style="color:#28e0ff;">Prompts:</strong>
+${hasPrompt ? '  ✦ 1 prompt template registered' : '  (no prompts registered)'}
+
+<strong style="color:#28e0ff;">Client handshake:</strong>
+  → initialize       ✓
+  → tools/list       ✓  (${allTools.length} tools)
+  → resources/list   ✓  (${allResources.length} resources)
+  → Ready for calls  ✓
+
+<em style="color:#b6c0de;">Tip: The model can now call your tools automatically when relevant to the conversation.</em>`;
+        }
+
+        class QuizManager {
+            constructor() {
+                this.questionsData = {
+                    q1:  { correct: 'B', exp: 'MCP stands for Model Context Protocol — an open standard for connecting AI models to external tools, data, and services.' },
+                    q2:  { correct: 'B', exp: 'Without MCP, every combination of AI model and tool required a custom integration (M×N problem). MCP reduces this to M + N.' },
+                    q3:  { correct: 'C', exp: 'Anthropic introduced MCP in late 2024. It is open-source and designed to work across all AI providers, not just Claude.' },
+                    q4:  { correct: 'C', exp: 'The Host is the AI application the user interacts with — e.g. Claude Desktop, a custom web app, or an IDE plugin.' },
+                    q5:  { correct: 'B', exp: 'The three MCP primitives are Tools (actions), Resources (readable data), and Prompts (reusable templates).' },
+                    q6:  { correct: 'C', exp: 'A Tool is a function with defined input schema and output that the AI model can decide to invoke.' },
+                    q7:  { correct: 'C', exp: 'MCP uses JSON-RPC 2.0 as its messaging format — a lightweight, language-agnostic protocol for remote procedure calls over any transport.' },
+                    q8:  { correct: 'B', exp: 'Local MCP servers use stdio — the host spawns the server as a child process and communicates via standard input/output streams.' },
+                    q9:  { correct: 'C', exp: 'Remote MCP servers use HTTP with Server-Sent Events (SSE) — enabling cloud-hosted tool providers accessible over the network.' },
+                    q10: { correct: 'B', exp: 'A Resource is data exposed by the server — files, database records, API responses — identified by a URI.' },
+                    q11: { correct: 'C', exp: 'Claude Desktop reads a JSON config file (claude_desktop_config.json) at startup to know which MCP servers to launch and connect to.' },
+                    q12: { correct: 'B', exp: 'Yes — a single host can connect to multiple MCP servers simultaneously, each via its own Client instance.' },
+                    q13: { correct: 'B', exp: 'Prompts are reusable, parameterized prompt templates exposed by the server that can be invoked with arguments.' },
+                    q14: { correct: 'C', exp: "FastMCP is the Python SDK's high-level class for registering tools, resources, and prompts using simple decorators." },
+                    q15: { correct: 'C', exp: "MCP's core security principle is that humans remain in control. Servers require explicit consent and expose only what they define." }
+                };
+                this.init();
+            }
+            init() {
+                document.getElementById('submit-quiz').addEventListener('click', () => this.submitQuiz());
+                document.getElementById('clear-quiz').addEventListener('click', () => this.clearQuiz());
+            }
+            submitQuiz() {
+                const formData = new FormData(document.getElementById('quiz-form'));
+                let score = 0, feedbackHTML = '';
+                Object.keys(this.questionsData).forEach((key, index) => {
+                    const userAnswer = formData.get(key);
+                    const isCorrect = userAnswer === this.questionsData[key].correct;
+                    if (isCorrect) score++;
+                    feedbackHTML += `<div class="feedback-item ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}"><span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span><div><strong>Question ${index+1}:</strong> ${this.questionsData[key].exp}${!isCorrect ? `<br><small style="color:var(--text-secondary)">Correct answer: Option ${this.questionsData[key].correct}</small>` : ''}</div></div>`;
+                });
+                this.displayResults(score, feedbackHTML);
+            }
+            displayResults(score, feedbackHTML) {
+                const total = Object.keys(this.questionsData).length;
+                const percent = Math.round((score / total) * 100);
+                const scoreClass = percent >= 80 ? 'score-excellent' : percent >= 50 ? 'score-good' : 'score-poor';
+                document.getElementById('quiz-score').innerHTML = `<div class="${scoreClass}">${score}/${total} (${percent}%)</div><p style="color:var(--text-secondary)">${percent >= 70 ? 'Excellent! You are ready to build and integrate MCP servers.' : 'Review the architecture, primitives, and transport mechanisms — then try again.'}</p>`;
+                document.getElementById('quiz-feedback').innerHTML = feedbackHTML;
+                const resultsDiv = document.getElementById('quiz-results');
+                resultsDiv.style.display = 'block';
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+            clearQuiz() {
+                document.getElementById('quiz-form').reset();
+                document.getElementById('quiz-results').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new QuizManager());
+    </script>
+</body>
+</html>
+
