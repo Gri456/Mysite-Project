@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B1tJ0urney | Descobre a tua área</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 10% 20%, #0a1f3b, #030614);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .digital-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00aaff, #6a0dad, #00ffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .btn-wrapper {
+            position: relative;
+            padding: 3px;
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            border-radius: 0.9em;
+            transition: all 0.4s ease;
+            display: inline-block;
+        }
+
+        .btn-wrapper:hover::before {
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            filter: blur(1.2em);
+        }
+
+        .btn-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            border-radius: 0.9em;
+            z-index: -10;
+            filter: blur(0);
+            transition: filter 0.4s ease;
+        }
+
+        .btn-wrapper .nav-btn {
+            font-size: 1.1em;
+            padding: 0.6em 1.2em;
+            border-radius: 0.7em;
+            border: none;
+            background-color: #000;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 2px 2px 3px #000000b4;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Quiz container */
+        .quiz-container {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 40px;
+            padding: 2.5rem;
+            margin: 3rem 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            color: #00ffff;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            margin: 0 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00aaff, #00ffff);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .question-counter {
+            font-weight: 600;
+        }
+
+        .question-text {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            line-height: 1.3;
+            background: linear-gradient(135deg, #fff, #aaccff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .option-card.selected {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .option-letter {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: 700;
+            margin-right: 0.8rem;
+        }
+
+        .option-text {
+            font-size: 1.1rem;
+            color: #e0e0e0;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .nav-btn-quiz {
+            background: transparent;
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            padding: 0.8rem 2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn-quiz:hover:not(:disabled) {
+            background: #00ffff;
+            color: #030614;
+            box-shadow: 0 0 20px #00ffff;
+        }
+
+        .nav-btn-quiz:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: #808080;
+        }
+
+        /* Resultados */
+        .results-container {
+            background: rgba(10, 20, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 40px;
+            padding: 2.5rem;
+            margin: 3rem 0;
+        }
+
+        .results-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, gold, orange);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+        }
+
+        .chart-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: rgba(0,0,0,0.3);
+            border-radius: 30px;
+            padding: 1.5rem;
+        }
+
+        .area-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .area-item {
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .area-name {
+            font-weight: 600;
+            color: #00ffff;
+        }
+
+        .area-percent {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #00aaff, #6a0dad);
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: block;
+            margin: 2rem auto 0;
+            border: 2px solid transparent;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 170, 255, 0.5);
+            border-color: #00ffff;
+        }
+
+        footer {
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .question-text { font-size: 1.5rem; }
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="digital-bg"></div>
+
+    <nav class="navbar">
+        <div class="logo">B1tJ0urney</div>
+        <div class="nav-links">
+            <div class="btn-wrapper"><a href="index.html" class="nav-btn">Início</a></div>
+            <div class="btn-wrapper"><a href="cursos.html" class="nav-btn">Cursos</a></div>
+            <div class="btn-wrapper"><a href="comprar.html" class="nav-btn">Comprar</a></div>
+            <div class="btn-wrapper"><a href="equipa.html" class="nav-btn">Equipa</a></div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div id="quizContainer" class="quiz-container">
+            <div class="progress">
+                <span class="question-counter" id="questionCounter">Pergunta 1/15</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div id="questionText" class="question-text">Carregando...</div>
+            <div class="options-grid" id="optionsContainer"></div>
+            <div class="navigation">
+                <button class="nav-btn-quiz" id="prevBtn" disabled><i class="fas fa-arrow-left"></i> Anterior</button>
+                <button class="nav-btn-quiz" id="nextBtn">Próximo <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div id="resultsContainer" class="results-container" style="display: none;">
+            <h2 class="results-title">A tua área ideal</h2>
+            <div class="chart-container">
+                <canvas id="resultChart"></canvas>
+            </div>
+            <div class="area-list" id="areaList"></div>
+            <button class="restart-btn" id="restartBtn"><i class="fas fa-redo-alt"></i> Recomeçar</button>
+        </div>
+    </main>
+
+    <footer>
+        <div class="logo">B1tJ0urney</div>
+        <p style="margin-top: 2rem;">© 2025 B1tJ0urney. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        // Dados das perguntas (conforme fornecidas)
+        const questions = [
+            {
+                text: "1- Quando enfrentas um desafio, preferes:",
+                options: [
+                    "Tornar a solução clara e fácil de visualizar.",
+                    "Identificar pontos fracos antes que causem problemas.",
+                    "Procurar padrões escondidos para entender melhor.",
+                    "Imaginar uma solução totalmente nova.",
+                    "Criar algo simples e prático que qualquer pessoa use.",
+                    "Organizar tudo para funcionar de forma estável."
+                ]
+            },
+            {
+                text: "2- Numa equipa, tu costumas ser...",
+                options: [
+                    "O que dá forma e estética ao projeto.",
+                    "O que encontra problemas e vulnerabilidades.",
+                    "O que trás factos e dados para apoiar.",
+                    "O que sugere ideias fora da caixa.",
+                    "O que pensa na experiência do utilizador.",
+                    "O que garante que nada falhe e tem plano B."
+                ]
+            },
+            {
+                text: "3- No teu tempo livre, o que mais te atrai?",
+                options: [
+                    "Criar algo artístico ou visual.",
+                    "Resolver enigmas ou puzzles lógicos.",
+                    "Explorar números, estatísticas ou gráficos.",
+                    "Imaginar invenções futuristas.",
+                    "Testar gadgets e ferramentas novas.",
+                    "Montar/organizar sistemas complexos."
+                ]
+            },
+            {
+                text: "4- O que te dá mais satisfação num projeto?",
+                options: [
+                    "Saber que realizaste as tuas expectativas.",
+                    "Saber que preveniste falhas sérias.",
+                    "Resolver algo que não esperavas conseguir resolver.",
+                    "Criar algo que melhore e facilite o dia a dia.",
+                    "Ver pessoas a usarem sem dificuldade.",
+                    "Garantir que funcione totalmente sem falhas."
+                ]
+            },
+            {
+                text: "5- Se pudesses escolher uma atividade, seria...",
+                options: [
+                    "Construir algo prático e criativo.",
+                    "Resolver um caso como um detetive.",
+                    "Analisar resultados e relatórios.",
+                    "Inventar algo fora da realidade atual.",
+                    "Construir algo pequeno e útil.",
+                    "Montar uma rede/estrutura em grupo."
+                ]
+            },
+            {
+                text: "6- Que frase mais combina contigo?",
+                options: [
+                    "\"Adoro dar forma às ideias.\"",
+                    "\"Mais vale prevenir do que remediar.\"",
+                    "\"Tudo tem um padrão, basta procurar.\"",
+                    "\"O que posso fazer para otimizar isto?\"",
+                    "\"Quanto mais simples, melhor.\"",
+                    "\"Tudo organizado traz bons resultados.\""
+                ]
+            },
+            {
+                text: "7- Quando jogas, preferes...",
+                options: [
+                    "Criar cenários ou personagens.",
+                    "Descobrir falhas e explorar bugs.",
+                    "Analisar estatísticas para vencer.",
+                    "Criar rotinas/automação para evoluir mais rápido.",
+                    "Usar ferramentas rápidas e úteis para evoluir.",
+                    "Gerir recursos/materiais para a equipa toda."
+                ]
+            },
+            {
+                text: "8- Quais destes ambientes te atrai mais?",
+                options: [
+                    "Um estúdio criativo.",
+                    "Um centro de investigação criminal.",
+                    "Um laboratório cheio de dados.",
+                    "Um espaço futurista com protótipos.",
+                    "Uma startup ágil e prática.",
+                    "Um centro de operações global."
+                ]
+            },
+            {
+                text: "9- Quando alguém te pede ajuda, tu...",
+                options: [
+                    "Mostras de forma visual e prática.",
+                    "Apontas riscos escondidos.",
+                    "Usas provas e exemplos simples.",
+                    "Dás uma ideia inesperada.",
+                    "Ensinas de forma simples e prática.",
+                    "Pensas em algo que não vá falhar."
+                ]
+            },
+            {
+                text: "10- O que mais te irrita?",
+                options: [
+                    "Algo mal feito e feio.",
+                    "Ser despreocupado.",
+                    "Decisões sem bases em factos.",
+                    "Falta de abertura para inovação.",
+                    "Ferramentas difíceis de usar.",
+                    "Desorganização em sistemas grandes."
+                ]
+            },
+            {
+                text: "11- Que papel terias num filme de aventura?",
+                options: [
+                    "O inventor criativo.",
+                    "O guardião.",
+                    "O investigador.",
+                    "O cientista visionário.",
+                    "O engenheiro de gadgets portáteis.",
+                    "O estratega que organiza tudo."
+                ]
+            },
+            {
+                text: "12- O que mais te entusiasma no futuro?",
+                options: [
+                    "Novas formas de expressão criativa.",
+                    "Sistemas cada vez mais seguros.",
+                    "Informação precisa para decisões melhores.",
+                    "Máquinas que aprendem e ajudam.",
+                    "Tecnologia acessível no dia a dia.",
+                    "Serviços digitais que nunca falham."
+                ]
+            },
+            {
+                text: "13- Se pudesses escolher um passatempo, seria:",
+                options: [
+                    "Desenhar ou criar algo visual.",
+                    "Resolver desafios lógicos.",
+                    "Explorar relatórios e gráficos.",
+                    "Imaginar invenções futuristas.",
+                    "Testar novas apps ou gadgets.",
+                    "Organizar coleções ou sistemas."
+                ]
+            },
+            {
+                text: "14- Qual destas qualidades combina mais contigo?",
+                options: [
+                    "Criatividade.",
+                    "Segurança.",
+                    "Precisão (ir direto ao ponto).",
+                    "Inovação.",
+                    "Simplicidade.",
+                    "Organização."
+                ]
+            },
+            {
+                text: "15- Se tivesses que escolher uma frase final:",
+                options: [
+                    "\"Gosto de dar forma a ideias.\"",
+                    "\"Prefiro estar preparado para tudo.\"",
+                    "\"Os números falam por si.\"",
+                    "\"O futuro pode ser diferente e inovador.\"",
+                    "\"Tudo deve ser simples, prático e útil.\"",
+                    "\"O todo é maior que as partes.\""
+                ]
+            }
+        ];
+
+        // Mapeamento das opções (índice 0 = a, 1 = b, etc.) para as áreas
+        const areaMapping = [
+            "Web Development",      // a
+            "Cyber Security",       // b
+            "Data Science",         // c
+            "Artificial Intelligence", // d
+            "Mobile Development",   // e
+            "Cloud Computing"       // f
+        ];
+
+        // Cores para cada área (em rgba para o gráfico)
+        const areaColors = [
+            'rgba(0, 170, 255, 0.8)',   // Web - azul elétrico
+            'rgba(255, 75, 75, 0.8)',   // Security - vermelho
+            'rgba(255, 215, 0, 0.8)',   // Data - dourado
+            'rgba(170, 0, 255, 0.8)',   // AI - roxo
+            'rgba(0, 255, 170, 0.8)',   // Mobile - verde água
+            'rgba(255, 140, 0, 0.8)'    // Cloud - laranja
+        ];
+
+        // Estado do quiz
+        let currentQuestion = 0;
+        let answers = new Array(questions.length).fill(null); // armazena o índice da opção (0-5)
+        let chartInstance = null;
+
+        // Elementos DOM
+        const quizContainer = document.getElementById('quizContainer');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const questionCounter = document.getElementById('questionCounter');
+        const progressFill = document.getElementById('progressFill');
+        const restartBtn = document.getElementById('restartBtn');
+        const areaList = document.getElementById('areaList');
+        const ctx = document.getElementById('resultChart').getContext('2d');
+
+        // Função para renderizar a pergunta atual
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            questionText.innerText = q.text;
+            questionCounter.innerText = `Pergunta ${currentQuestion+1}/${questions.length}`;
+            progressFill.style.width = `${((currentQuestion+1)/questions.length)*100}%`;
+
+            // Gerar opções
+            let html = '';
+            q.options.forEach((opt, idx) => {
+                const letter = String.fromCharCode(97 + idx); // a, b, c, ...
+                const selectedClass = answers[currentQuestion] === idx ? 'selected' : '';
+                html += `
+                    <div class="option-card ${selectedClass}" data-option-index="${idx}" onclick="selectOption(${idx})">
+                        <span class="option-letter">${letter}</span>
+                        <span class="option-text">${opt}</span>
+                    </div>
+                `;
+            });
+            optionsContainer.innerHTML = html;
+
+            // Atualizar botões
+            prevBtn.disabled = currentQuestion === 0;
+            if (currentQuestion === questions.length - 1) {
+                nextBtn.innerHTML = 'Ver resultado <i class="fas fa-chart-pie"></i>';
+            } else {
+                nextBtn.innerHTML = 'Próximo <i class="fas fa-arrow-right"></i>';
+            }
+        }
+
+        // Função para selecionar uma opção (chamada pelo onclick)
+        window.selectOption = function(optionIndex) {
+            answers[currentQuestion] = optionIndex;
+            // Remover selected de todas e adicionar à escolhida
+            const cards = document.querySelectorAll('.option-card');
+            cards.forEach(card => card.classList.remove('selected'));
+            cards[optionIndex].classList.add('selected');
+        };
+
+        // Navegação
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            // Se for a última pergunta, ir para resultados
+            if (currentQuestion === questions.length - 1) {
+                // Verificar se todas foram respondidas
+                if (answers.includes(null)) {
+                    alert('Por favor, responde a todas as perguntas antes de ver o resultado.');
+                    return;
+                }
+                showResults();
+            } else {
+                // Avançar para a próxima pergunta
+                if (answers[currentQuestion] === null) {
+                    alert('Seleciona uma opção para continuar.');
+                    return;
+                }
+                currentQuestion++;
+                renderQuestion();
+            }
+        });
+
+        // Função para calcular percentagens por área
+        function calculateScores() {
+            const scores = new Array(6).fill(0); // [web, security, data, ai, mobile, cloud]
+            answers.forEach(ans => {
+                if (ans !== null) scores[ans]++;
+            });
+            const total = answers.length;
+            return scores.map(s => (s / total) * 100);
+        }
+
+        // Exibir resultados
+        function showResults() {
+            quizContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
+
+            const scores = calculateScores();
+            const percentages = scores;
+
+            // Criar gráfico de radar
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: areaMapping,
+                    datasets: [{
+                        label: 'Afinidade (%)',
+                        data: percentages,
+                        backgroundColor: 'rgba(0, 255, 255, 0.2)',
+                        borderColor: '#00ffff',
+                        borderWidth: 2,
+                        pointBackgroundColor: areaColors,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#00ffff'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { stepSize: 20, color: '#e0e0e0' },
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            pointLabels: { color: '#00ffff', font: { size: 12, weight: 'bold' } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // Lista de áreas com percentagens
+            let listHtml = '';
+            areaMapping.forEach((area, i) => {
+                listHtml += `
+                    <div class="area-item">
+                        <div class="area-name">${area}</div>
+                        <div class="area-percent">${Math.round(percentages[i])}%</div>
+                    </div>
+                `;
+            });
+            areaList.innerHTML = listHtml;
+        }
+
+        // Recomeçar quiz
+        restartBtn.addEventListener('click', () => {
+            answers = new Array(questions.length).fill(null);
+            currentQuestion = 0;
+            quizContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            renderQuestion();
+        });
+
+        // Inicializar
+        renderQuestion();
+    </script>
+</body>
+</html>

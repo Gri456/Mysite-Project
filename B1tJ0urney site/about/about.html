@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B1tJ0urney | Sobre Nós</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 10% 20%, #0a1f3b, #030614);
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== VARIÁVEIS ===== */
+        :root {
+            --electric-blue: #00aaff;
+            --deep-purple: #6a0dad;
+            --cyan: #00ffff;
+            --glow: 0 0 15px rgba(0, 255, 255, 0.5);
+            --card-bg: rgba(10, 20, 30, 0.6);
+            --gradient: linear-gradient(135deg, var(--electric-blue), var(--deep-purple), var(--cyan));
+        }
+
+        /* ===== ELEMENTOS DIGITAIS DE FUNDO ===== */
+        .digital-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.2;
+            pointer-events: none;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.1) 2px, rgba(0, 255, 255, 0.1) 4px);
+        }
+
+        /* ===== LAYOUT ===== */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ===== NAVBAR COM BOTÕES UIVERSE ===== */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Botões estilo Uiverse */
+        .btn-wrapper {
+            position: relative;
+            padding: 3px;
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            border-radius: 0.9em;
+            transition: all 0.4s ease;
+            display: inline-block;
+        }
+
+        .btn-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            border-radius: 0.9em;
+            z-index: -10;
+            filter: blur(0);
+            transition: filter 0.4s ease;
+        }
+
+        .btn-wrapper:hover::before {
+            background: linear-gradient(90deg, #03a9f4, #f441a5);
+            filter: blur(1.2em);
+        }
+
+        .btn-wrapper:active::before {
+            filter: blur(0.2em);
+        }
+
+        .btn-wrapper .nav-btn {
+            font-size: 1.1em;
+            padding: 0.6em 1.2em;
+            border-radius: 0.7em;
+            border: none;
+            background-color: #000;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 2px 2px 3px #000000b4;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        .btn-wrapper .nav-btn:hover {
+            background-color: #111;
+        }
+
+        /* ===== TÍTULOS ===== */
+        h1, h2, h3 {
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+            color: #fff;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        /* ===== SEÇÕES ===== */
+        section {
+            padding: 5rem 0;
+        }
+
+        /* ===== ABOUT TEXT ===== */
+        .about-text {
+            max-width: 800px;
+            margin-bottom: 4rem;
+        }
+
+        .about-text p {
+            font-size: 1.2rem;
+            color: #d0d0ff;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 5px rgba(0, 170, 255, 0.3);
+        }
+
+        .values {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .value-item {
+            flex: 1 1 200px;
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 4px solid var(--cyan);
+            padding: 1.5rem;
+            border-radius: 16px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .value-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .value-item h3 {
+            color: var(--cyan);
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        /* ===== TEAM GRID - CARDS MAIS VIVOS ===== */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .team-card {
+            background: rgba(10, 20, 40, 0.5);
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+            border-radius: 30px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .team-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00aaff, #6a0dad, #00ffff, #f441a5);
+            border-radius: 30px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .team-card:hover::before {
+            opacity: 1;
+        }
+
+        .team-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.4);
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00aaff, #6a0dad, #00ffff);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
+            border: 3px solid rgba(255,255,255,0.2);
+        }
+
+        .team-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff, #aaccff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .team-card .role {
+            color: var(--cyan);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            text-shadow: 0 0 8px var(--cyan);
+        }
+
+        .team-card .bio {
+            font-size: 0.95rem;
+            color: #c0d0ff;
+            margin-bottom: 1.5rem;
+            flex: 1;
+        }
+
+        .btn-profile {
+            background: transparent;
+            border: 2px solid var(--cyan);
+            color: var(--cyan);
+            padding: 0.6rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-profile:hover {
+            background: var(--cyan);
+            color: #0a0c10;
+            box-shadow: 0 0 20px var(--cyan);
+            transform: scale(1.05);
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 3rem 2rem;
+            text-align: center;
+            color: #a0b0d0;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #c0d0ff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--cyan);
+            text-shadow: 0 0 8px var(--cyan);
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 2rem; }
+            .navbar { flex-direction: column; align-items: stretch; }
+            .nav-links { justify-content: center; }
+            .team-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fundo digital animado (linhas) -->
+    <div class="digital-bg"></div>
+
+    <!-- Navbar com botões Uiverse -->
+    <nav class="navbar">
+        <div class="logo">B1tJ0urney</div>
+        <div class="nav-links">
+            <div class="btn-wrapper">
+                <a href="#" class="nav-btn">Início</a>
+            </div>
+            <div class="btn-wrapper">
+                <a href="#" class="nav-btn active">Sobre</a>
+            </div>
+            <div class="btn-wrapper">
+                <a href="#" class="nav-btn">Cursos</a>
+            </div>
+            <div class="btn-wrapper">
+                <a href="#" class="nav-btn">Equipa</a>
+            </div>
+            <div class="btn-wrapper">
+                <a href="#" class="nav-btn">Contacto</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Secção About -->
+        <section>
+            <div class="container">
+                <h1>Sobre Nós</h1>
+                <div class="about-text">
+                    <p>Na <strong>B1tJ0urney</strong>, acreditamos que a tecnologia é a chave para desbloquear o futuro. Nascemos em 2023 com a missão de tornar a educação em programação, cibersegurança e IA acessível, prática e inspiradora.</p>
+                    <p>Não somos apenas mais uma escola online — somos uma comunidade de exploradores digitais, mentores apaixonados e alunos que ousam construir o amanhã. Através de jornadas gamificadas, projetos reais e mentoria personalizada, guiamos cada pessoa desde os primeiros "Hello World" até à certificação profissional.</p>
+                </div>
+
+                <div class="values">
+                    <div class="value-item">
+                        <h3>⚡ Inovação</h3>
+                        <p>Estamos sempre na fronteira do que é novo em tech, adaptando os nossos currículos às necessidades do mercado.</p>
+                    </div>
+                    <div class="value-item">
+                        <h3>🤝 Comunidade</h3>
+                        <p>Acreditamos no poder da colaboração: aprendemos juntos, crescemos juntos.</p>
+                    </div>
+                    <div class="value-item">
+                        <h3>🌱 Crescimento</h3>
+                        <p>Mentalidade de crescimento é o nosso motor. Errar faz parte, evoluir é o objetivo.</p>
+                    </div>
+                    <div class="value-item">
+                        <h3>🔮 Futuro</h3>
+                        <p>Preparamos os nossos alunos não apenas para o primeiro emprego, mas para uma carreira inteira de reinvenção.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Secção Equipa com cards coloridos -->
+        <section>
+            <div class="container">
+                <h2>Quem faz a Jornada</h2>
+                <p style="font-size: 1.2rem; color: #b0d0ff; margin-bottom: 2rem;">Conhece os mentores, criadores e sonhadores por trás da B1tJ0urney.</p>
+
+                <div class="team-grid">
+                    <!-- Card 1 -->
+                    <a href="team/ana-silva.html" class="team-card" target="_blank">
+                        <div class="avatar">AS</div>
+                        <h3>Ana Silva</h3>
+                        <div class="role">Fundadora & Head of Education</div>
+                        <p class="bio">Engenheira informática com 10 anos de experiência em ensino tecnológico. Acredita que programar é para todos.</p>
+                        <span class="btn-profile">Ver perfil</span>
+                    </a>
+
+                    <!-- Card 2 -->
+                    <a href="team/bruno-santos.html" class="team-card" target="_blank">
+                        <div class="avatar">BS</div>
+                        <h3>Bruno Santos</h3>
+                        <div class="role">Lead Mentor & Cybersecurity Expert</div>
+                        <p class="bio">Hacker ético e apaixonado por segurança. Adora descomplicar conceitos complexos.</p>
+                        <span class="btn-profile">Ver perfil</span>
+                    </a>
+
+                    <!-- Card 3 -->
+                    <a href="team/carla-mendes.html" class="team-card" target="_blank">
+                        <div class="avatar">CM</div>
+                        <h3>Carla Mendes</h3>
+                        <div class="role">UX/UI Designer & Front-end Mentor</div>
+                        <p class="bio">Designer que respira código. Cria experiências digitais que encantam e ensinam.</p>
+                        <span class="btn-profile">Ver perfil</span>
+                    </a>
+
+                    <!-- Card 4 -->
+                    <a href="team/diogo-ramos.html" class="team-card" target="_blank">
+                        <div class="avatar">DR</div>
+                        <h3>Diogo Ramos</h3>
+                        <div class="role">Data Science Lead</div>
+                        <p class="bio">Matemático de formação, cientista de dados por paixão. Transforma números em conhecimento.</p>
+                        <span class="btn-profile">Ver perfil</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="logo" style="font-size: 2rem; margin-bottom: 1rem;">B1tJ0urney</div>
+        <div class="footer-links">
+            <a href="#">Sobre</a>
+            <a href="#">Cursos</a>
+            <a href="#">Equipa</a>
+            <a href="#">Blog</a>
+            <a href="#">Contacto</a>
+        </div>
+        <p style="margin-top: 2rem;">© 2025 B1tJ0urney. Todos os direitos reservados.</p>
+        <p style="font-size: 0.9rem;">Construído com 💙 e código</p>
+    </footer>
+</body>
+</html>
